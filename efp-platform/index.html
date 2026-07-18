@@ -57,7 +57,10 @@ body {
   flex-shrink: 0;
   height: 100vh;
   overflow-y: auto;
+  scrollbar-width: none;
 }
+
+.sidebar::-webkit-scrollbar { display: none; }
 
 .sidebar-brand {
   padding: 22px 20px 18px;
@@ -544,6 +547,7 @@ body {
   display: flex; gap: 14px;
   overflow-x: auto; padding-bottom: 16px;
   height: calc(100vh - var(--topbar-h) - 100px);
+  -webkit-overflow-scrolling: touch;
 }
 .kanban-col { width: 230px; flex-shrink: 0; }
 .kanban-header {
@@ -701,6 +705,7 @@ body {
 .drawer-close:hover { background: var(--border); color: var(--text); }
 .drawer-body {
   flex: 1; overflow-y: auto; padding: 22px 24px;
+  -webkit-overflow-scrolling: touch;
 }
 .drawer-foot {
   padding: 16px 24px;
@@ -1277,6 +1282,9 @@ body {
   .drawer-head { padding: 16px; }
   .drawer-foot { padding: 12px 16px calc(env(safe-area-inset-bottom, 0px) + 68px); }
 
+  /* ── PREVENT iOS AUTO-ZOOM ON INPUT FOCUS ────────────────────────────── */
+  input, select, textarea { font-size: 16px !important; }
+
   /* ── TOUCH TARGETS ────────────────────────────────────────────────────── */
   /* All interactive elements: min 44px tap target */
   .nav-item      { min-height: 44px; display: flex; align-items: center; padding: 0 16px; }
@@ -1312,6 +1320,7 @@ body {
     border-radius: 16px 16px 0 0;
     max-height: 88vh;
     overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
     /* Extra bottom padding so buttons clear the fixed bottom nav (≈60px) */
     padding: 20px 16px calc(env(safe-area-inset-bottom, 0px) + 72px);
     margin: 0;
@@ -1323,9 +1332,11 @@ body {
     max-width: 100vw;
     border-radius: 16px 16px 0 0;
     max-height: 90vh;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
   }
   .apm-form { padding: 12px 16px; }
-  .apm-footer { padding: 10px 16px 20px; }
+  .apm-footer { padding: 10px 16px calc(env(safe-area-inset-bottom, 0px) + 72px); }
 
   /* ── NEEDS BAR ────────────────────────────────────────────────────────── */
   .needs-bar { overflow-x: auto; -webkit-overflow-scrolling: touch; }
@@ -1458,7 +1469,7 @@ body {
   .data-table td:last-child { min-width: 110px; }
 
   /* ── CONTACTS PAGE SEARCH: full width below header ─────────────────────── */
-  #contacts-search { order: 10; width: 100% !important; }
+  #contacts-search { order: 10; width: 100% !important; font-size: 16px !important; }
 
   /* ── FIELD ROW in drawers: keep side-by-side if wide enough ───────────── */
   .field-row { gap: 10px; }
@@ -1582,7 +1593,25 @@ body {
   #view-clubs .data-table td:nth-child(7) button { display:none !important; }
 
   /* ── KANBAN (Pitches, Relationships, Club Pitches): snappable columns ──── */
-  .kanban-col { min-width: 78vw !important; max-width: 82vw !important; }
+  .kanban {
+    scroll-snap-type: x mandatory;
+    height: calc(100dvh - var(--topbar-h) - 130px);
+    padding-bottom: 80px;
+    gap: 10px;
+    overflow-y: hidden;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  .kanban-col {
+    min-width: 82vw !important;
+    max-width: 86vw !important;
+    scroll-snap-align: start;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+  }
   .k-card { padding: 10px 12px !important; }
   .kanban-header {
     padding: 10px 12px !important;
@@ -1590,6 +1619,7 @@ body {
     background: var(--surface2);
     z-index: 2;
     border-radius: 8px 8px 0 0;
+    flex-shrink: 0;
   }
 
   /* ── NEEDS TABLE → CARD LIST ─────────────────────────────────────────────
@@ -4296,7 +4326,7 @@ tr:hover .pdr-btn     { opacity: 1; }
       </select>
     </div>
     <div class="field">
-      <label class="field-label">Club <span class="req">*</span></label>
+      <label class="field-label">Club</label>
       <input class="field-input" id="c-club" list="efp-club-datalist" placeholder="Type to search clubs…" autocomplete="off">
     </div>
     <div class="field-row field">
@@ -7517,10 +7547,10 @@ function submitContact() {
   const last  = document.getElementById('c-last').value.trim();
   const pos   = document.getElementById('c-position').value;
   const club  = document.getElementById('c-club').value;
-  [['c-first',first],['c-last',last],['c-position',pos],['c-club',club]].forEach(([id,val]) => {
+  [['c-first',first],['c-last',last],['c-position',pos]].forEach(([id,val]) => {
     document.getElementById(id).style.borderColor = val ? '' : 'var(--red)';
   });
-  if (!first || !last || !pos || !club) return;
+  if (!first || !last || !pos) return;
   const email = document.getElementById('c-email').value.trim();
   const phone = document.getElementById('c-phone').value.trim();
   const notes = document.getElementById('c-notes').value.trim();
@@ -8596,8 +8626,8 @@ function _renderRelatedActivity(entries, emptyMsg) {
     return `<div class="profile-act-row">
       <div class="profile-act-icon">${icon}</div>
       <div style="flex:1;min-width:0">
-        <div class="profile-act-notes">${l.notes || ''}</div>
-        ${l.outcome ? `<div class="profile-act-notes" style="color:var(--text3);font-style:italic;margin-top:1px">${l.outcome}</div>` : ''}
+        <div class="profile-act-notes">${_linkifyText(l.notes || '')}</div>
+        ${l.outcome ? `<div class="profile-act-notes" style="color:var(--text3);font-style:italic;margin-top:1px">${_linkifyText(l.outcome)}</div>` : ''}
         <div class="profile-act-meta">${meta}</div>
       </div>
     </div>`;
@@ -8606,6 +8636,68 @@ function _renderRelatedActivity(entries, emptyMsg) {
 
 // Build a safe onclick string for feed-link clicks (handles apostrophes)
 function _esc(s) { return (s||'').replace(/\\/g,'\\\\').replace(/'/g,"\\'"); }
+
+// Auto-link player/mandate names, contact names, and club names found in free text
+function _linkifyText(text) {
+  if (!text) return text || '';
+
+  // Collect player names (mandates + pitches)
+  const players = new Map();
+  (mandatesAdded || []).forEach(m => { if (m.name && m.name.length > 2) players.set(m.name, m); });
+  (pitches || []).forEach(p => { if (p.player && p.player.length > 2) players.set(p.player, {}); });
+
+  // Collect contact names (full names only — min 4 chars to avoid false matches)
+  const contacts = new Set();
+  // Static contacts from CONTACTS_DB (all clubs)
+  Object.values(CONTACTS_DB || {}).forEach(arr => {
+    (arr || []).forEach(c => { if (c.name && c.name.length > 3) contacts.add(c.name); });
+  });
+  // Dynamic contacts added via CRM
+  (contactsAdded || []).forEach(c => { if (c.name && c.name.length > 3) contacts.add(c.name); });
+
+  // Collect club names
+  const clubs = new Set();
+  Object.keys(clubData || {}).forEach(k => clubs.add(k));
+  document.querySelectorAll('#clubs-tbody tr td:first-child strong').forEach(el => {
+    if (el.textContent.trim().length > 2) clubs.add(el.textContent.trim());
+  });
+
+  // Sort longest first to avoid partial substitutions
+  const playerNames  = [...players.keys()].sort((a, b) => b.length - a.length);
+  const contactNames = [...contacts].sort((a, b) => b.length - a.length);
+  const clubNames    = [...clubs].sort((a, b) => b.length - a.length);
+
+  let result = text;
+
+  // Replace player names → openPlayerProfile
+  playerNames.forEach(name => {
+    const safe = name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    result = result.replace(
+      new RegExp('(?<![\\w-])' + safe + '(?![\\w-])', 'g'),
+      `<span class="feed-link" onclick="openPlayerProfile('${_esc(name)}',{});event.stopPropagation();">${name}</span>`
+    );
+  });
+
+  // Replace contact names → _openContactByName (skip if already inside a span)
+  contactNames.forEach(name => {
+    const safe = name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    result = result.replace(
+      new RegExp('(?<!["=>\\w-])' + safe + '(?![\\w-])', 'g'),
+      `<span class="feed-link" onclick="_openContactByName('${_esc(name)}');event.stopPropagation();">${name}</span>`
+    );
+  });
+
+  // Replace club names → openClubEdit (skip if already inside a span)
+  clubNames.forEach(name => {
+    const safe = name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    result = result.replace(
+      new RegExp('(?<!["=>\\w-])' + safe + '(?![\\w-])', 'g'),
+      `<span class="feed-link" onclick="openClubEdit('${_esc(name)}');event.stopPropagation();">${name}</span>`
+    );
+  });
+
+  return result;
+}
 
 function _renderContactFeed(feedEl, contactName) {
   const entries = logsAdded.filter(l => l.contact === contactName);
@@ -8642,7 +8734,7 @@ function _renderGlobalFeed(feedEl, filteredList) {
     return `<div class="act-row" style="position:relative;padding-right:40px;">
       <div class="act-icon">${_LOG_ICONS[l.type]||'📋'}</div>
       <div style="flex:1;min-width:0;">
-        <div class="act-text"><strong>${_LOG_LABELS[l.type]||'Activity'}</strong>${contactStr} — ${l.notes}</div>
+        <div class="act-text"><strong>${_LOG_LABELS[l.type]||'Activity'}</strong>${contactStr} — ${_linkifyText(l.notes)}</div>
         <div class="act-time">${l.date}${src}</div>
       </div>
       <button onclick="deleteLog(${l.id});event.stopPropagation();" title="Delete entry"
@@ -8671,7 +8763,7 @@ function _renderDashFeed() {
     return `<div class="act-row" onclick="go('activity')" style="cursor:pointer">
       <div class="act-icon">${_LOG_ICONS[l.type]||'📋'}</div>
       <div>
-        <div class="act-text"><strong>${_LOG_LABELS[l.type]||'Activity'}</strong>${contactStr} — ${l.notes}</div>
+        <div class="act-text"><strong>${_LOG_LABELS[l.type]||'Activity'}</strong>${contactStr} — ${_linkifyText(l.notes)}</div>
         <div class="act-time">${l.date}</div>
       </div>
     </div>`;
