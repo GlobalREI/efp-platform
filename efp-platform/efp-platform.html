@@ -4552,6 +4552,11 @@ tr:hover .pdr-btn     { opacity: 1; }
     </div>
 
     <button class="btn btn-primary" onclick="saveClubEdit()" style="width:100%;margin-top:4px">Save Changes</button>
+
+    <div class="profile-activity-section">
+      <div class="sec-label">RELATED ACTIVITY</div>
+      <div id="ce-activity"></div>
+    </div>
   </div>
 </div>
 
@@ -4657,6 +4662,11 @@ tr:hover .pdr-btn     { opacity: 1; }
         <button class="btn btn-outline btn-xs" onclick="addPitchForMandate()" title="Log a new pitch">+ Add Pitch</button>
       </div>
       <div id="pp-pitch-history" style="display:flex;flex-direction:column;gap:8px"></div>
+    </div>
+
+    <div class="profile-activity-section">
+      <div class="sec-label">RELATED ACTIVITY</div>
+      <div id="pp-activity"></div>
     </div>
 
   </div>
@@ -7741,6 +7751,18 @@ function openPlayerProfile(playerName, data) {
     phEl.innerHTML = '<div style="color:var(--text3);font-size:12px;padding:8px 0">No pitches logged yet for this player.</div>';
   }
 
+  // Related activity
+  const ppActEl = document.getElementById('pp-activity');
+  if (ppActEl) {
+    const pName = playerName.toLowerCase();
+    const related = logsAdded.filter(l =>
+      (l.notes && l.notes.toLowerCase().includes(pName)) ||
+      (l.contact && l.contact.toLowerCase() === pName) ||
+      (l.outcome && l.outcome.toLowerCase().includes(pName))
+    );
+    ppActEl.innerHTML = _renderRelatedActivity(related);
+  }
+
   // Open drawer
   document.getElementById('pp-overlay').style.display = 'block';
   document.getElementById('pp-drawer').classList.add('open');
@@ -7943,6 +7965,18 @@ function openClubEdit(clubName) {
   // Clear search
   document.getElementById('ce-contact-search').value = '';
   ceCloseDropdown();
+
+  // Related activity
+  const ceActEl = document.getElementById('ce-activity');
+  if (ceActEl) {
+    const cName = clubName.toLowerCase();
+    const related = logsAdded.filter(l =>
+      (l.club && l.club.toLowerCase() === cName) ||
+      (l.notes && l.notes.toLowerCase().includes(cName)) ||
+      (l.outcome && l.outcome.toLowerCase().includes(cName))
+    );
+    ceActEl.innerHTML = _renderRelatedActivity(related);
+  }
 
   document.getElementById('club-edit-overlay').style.display = 'block';
   document.getElementById('club-edit-drawer').classList.add('open');
@@ -8631,7 +8665,9 @@ function _renderDashFeed() {
   const recent = logsAdded.slice(0, 6);
   if (!recent.length) { el.innerHTML = '<div style="padding:16px;color:var(--text3);font-size:13px;">No activity yet.</div>'; return; }
   el.innerHTML = recent.map(l => {
-    const contactStr = l.contact ? ` <strong>${l.contact}</strong>${l.club ? ' · ' + l.club : ''}` : '';
+    const cLink = l.contact ? `<span class="feed-link" onclick="_openContactByName('${_esc(l.contact)}');event.stopPropagation();">${l.contact}</span>` : '';
+    const clLink = l.club ? `<span class="feed-link" onclick="openClubEdit('${_esc(l.club)}');event.stopPropagation();">${l.club}</span>` : '';
+    const contactStr = cLink ? ` <strong>${cLink}</strong>${clLink ? ' · ' + clLink : ''}` : (clLink ? ` <strong>${clLink}</strong>` : '');
     return `<div class="act-row" onclick="go('activity')" style="cursor:pointer">
       <div class="act-icon">${_LOG_ICONS[l.type]||'📋'}</div>
       <div>
@@ -12088,6 +12124,18 @@ function openMandateDetail(name, pos, age, club, val, source, status) {
     }
   }
 
+  // Related activity
+  const mdActEl = document.getElementById('md-activity');
+  if (mdActEl) {
+    const nameLow = name.toLowerCase();
+    const related = logsAdded.filter(l =>
+      (l.notes && l.notes.toLowerCase().includes(nameLow)) ||
+      (l.contact && l.contact.toLowerCase() === nameLow) ||
+      (l.outcome && l.outcome.toLowerCase().includes(nameLow))
+    );
+    mdActEl.innerHTML = _renderRelatedActivity(related);
+  }
+
   openDrawer('mandate-detail');
 }
 
@@ -12401,6 +12449,11 @@ function saveMandateDetail() {
       <div id="md-pitch-history" style="display:flex;flex-direction:column;gap:8px">
         <div style="color:var(--text3);font-size:12px;padding:8px 0">No pitches logged yet for this player.</div>
       </div>
+    </div>
+
+    <div class="profile-activity-section" style="padding:0 20px 20px">
+      <div class="sec-label">RELATED ACTIVITY</div>
+      <div id="md-activity"></div>
     </div>
   </div>
 </div>
