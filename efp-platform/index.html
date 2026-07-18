@@ -40,6 +40,8 @@ body {
   font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', sans-serif;
   background: var(--bg);
   color: var(--text);
+  width: 100%;
+  min-width: 100vw;
   height: 100vh;
   overflow: hidden;
   display: flex;
@@ -147,7 +149,7 @@ body {
 .user-role { font-size: 10px; color: var(--text3); }
 
 /* ─── MAIN ─── */
-.main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+.main { flex: 1; min-width: 0; display: flex; flex-direction: column; overflow: hidden; }
 
 .topbar {
   height: var(--topbar-h);
@@ -173,6 +175,21 @@ body {
   border-color: var(--accent);
   box-shadow: 0 0 0 2px rgba(59,130,246,.15);
 }
+/* ── Per-view inline search inputs ── */
+.view-search {
+  padding: 6px 12px; border: 1px solid var(--border); border-radius: 6px;
+  background: var(--surface); color: var(--text1); font-size: 13px;
+  width: 210px; outline: none;
+  transition: border-color .15s, box-shadow .15s;
+}
+.view-search:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px rgba(59,130,246,.15);
+}
+.view-search::placeholder { color: var(--text3); }
+/* Hide kanban card when filtered out */
+.k-hidden { display: none !important; }
+
 #global-search-results { min-width: 300px; }
 .gs-section { padding: 6px 10px 2px; font-size: 10px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--text3); }
 .gs-item { display: flex; align-items: center; gap: 10px; padding: 8px 12px; cursor: pointer; border-radius: 0; transition: background .1s; }
@@ -1071,16 +1088,14 @@ body {
 /* ─── HAMBURGER (hidden on desktop) ─────────────────────────────────────── */
 #mob-ham {
   display: none;
-  flex-direction: column; justify-content: center; gap: 5px;
+  align-items: center; justify-content: center;
   width: 44px; height: 44px; flex-shrink: 0;
-  background: none; border: none; cursor: pointer; padding: 12px;
+  background: none; border: none; cursor: pointer; padding: 10px;
   border-radius: 6px; transition: background .15s; margin-right: 4px;
+  font-size: 22px; line-height: 1; color: var(--text2);
+  -webkit-tap-highlight-color: transparent;
 }
 #mob-ham:hover { background: var(--bg); }
-#mob-ham span {
-  display: block; width: 18px; height: 2px;
-  background: var(--text2); border-radius: 1px;
-}
 /* Sidebar overlay */
 #mob-overlay {
   display: none; position: fixed; inset: 0;
@@ -1164,6 +1179,7 @@ body {
   /* Hide header quick-action buttons — accessible inside each view */
   .topbar > .btn { display: none !important; }
   .topbar-title { font-size: 14px; min-width: 0; }
+  .view-search { width: 100%; max-width: 100%; font-size: 14px; padding: 8px 12px; }
 
   /* ── MOBILE SEARCH OVERLAY ──────────────────────────────────────────────── */
   /* When mob-search-open is on body, slide the search bar down below topbar */
@@ -2076,9 +2092,7 @@ tr:hover .pdr-btn     { opacity: 1; }
 <div class="main">
   <div class="topbar">
     <!-- Mobile hamburger — hidden on desktop via CSS -->
-    <button id="mob-ham" onclick="mobToggleNav()" aria-label="Open menu">
-      <span></span><span></span><span></span>
-    </button>
+    <button id="mob-ham" onclick="mobToggleNav()" aria-label="Open menu">☰</button>
     <div class="topbar-title" id="topbar-title">Dashboard</div>
     <!-- Mobile search icon — hidden on desktop via CSS -->
     <button id="mob-search-btn" onclick="mobToggleSearch()" aria-label="Search" title="Search"
@@ -2270,7 +2284,7 @@ tr:hover .pdr-btn     { opacity: 1; }
           <div class="page-title">Contacts</div>
           <div class="page-subtitle" id="contacts-subtitle">155 contacts with email · DACH, Benelux, UK &amp; more</div>
         </div>
-        <input id="contacts-search" type="text" placeholder="🔍  Search name, club, email…" oninput="filterContacts()" style="padding:6px 12px;border:1px solid var(--border);border-radius:6px;background:var(--surface);color:var(--text1);font-size:13px;width:240px;outline:none">
+        <input id="contacts-search" type="text" class="view-search" placeholder="🔍  Search name, club, email…" oninput="filterContacts()" style="width:240px">
         <button class="btn btn-outline btn-sm" onclick="exportContacts()">⬇ Export</button>
         <button class="btn btn-primary btn-sm" onclick="openDrawer('contact')">+ Add Contact</button>
       </div>
@@ -3508,7 +3522,7 @@ tr:hover .pdr-btn     { opacity: 1; }
           <div class="page-title">Clubs</div>
           <div class="page-subtitle" id="clubs-subtitle">European leagues · 129 clubs tracked</div>
         </div>
-        <button class="btn btn-outline btn-sm" onclick="promptFilter('#clubs-tbody','tr','clubs')">Filter</button>
+        <input type="text" id="clubs-search" class="view-search" placeholder="🔍  Search clubs…" oninput="filterClubs(this.value)">
         <button class="btn btn-primary btn-sm" onclick="openDrawer('club')">+ Add Club</button>
       </div>
       <div class="panel">
@@ -3667,6 +3681,7 @@ tr:hover .pdr-btn     { opacity: 1; }
           <div class="page-title">Player Mandates</div>
           <div class="page-subtitle" id="mandates-subtitle">29 active mandates · Summer 2026 window</div>
         </div>
+        <input type="text" id="mandates-search" class="view-search" placeholder="🔍  Search mandates…" oninput="filterMandates(this.value)">
         <button class="btn btn-primary btn-sm" onclick="openMandateMethodPicker()">+ Add Mandate</button>
       </div>
       <div class="panel">
@@ -3981,7 +3996,7 @@ tr:hover .pdr-btn     { opacity: 1; }
           <div class="page-title">Relationship Pipeline</div>
           <div class="page-subtitle" id="rel-subtitle">114 contacts tracked across all stages</div>
         </div>
-        <button class="btn btn-outline btn-sm" onclick="promptFilter('#rel-kanban','.k-card','relationships')">Filter</button>
+        <input type="text" id="rel-search" class="view-search" placeholder="🔍  Search relationships…" oninput="filterRel(this.value)">
         <button class="btn btn-primary btn-sm" onclick="openRelDrawer()">+ Add Relationship</button>
       </div>
       <div class="kanban" id="rel-kanban"></div>
@@ -3994,7 +4009,7 @@ tr:hover .pdr-btn     { opacity: 1; }
           <div class="page-title">Player Pitch Pipeline</div>
           <div class="page-subtitle">17 active pitches this window · 2 in active negotiation</div>
         </div>
-        <button class="btn btn-outline btn-sm" onclick="promptFilter('#pitch-kanban','.k-card','pitches')">Filter</button>
+        <input type="text" id="pitches-search" class="view-search" placeholder="🔍  Search pitches…" oninput="filterPitches(this.value)">
         <button class="btn btn-primary btn-sm" onclick="openPitchDrawer()">+ New Pitch</button>
       </div>
       <div class="kanban" id="pitch-kanban">
@@ -4037,7 +4052,7 @@ tr:hover .pdr-btn     { opacity: 1; }
           <div class="page-title">Club Mandate Pipeline</div>
           <div class="page-subtitle">Pitches of EFP's service to selling clubs · tracking mandate acquisition</div>
         </div>
-        <button class="btn btn-outline btn-sm" onclick="promptFilter('#club-pitch-kanban','.k-card','club pitches')">Filter</button>
+        <input type="text" id="clubpitches-search" class="view-search" placeholder="🔍  Search club mandates…" oninput="filterClubPitches(this.value)">
         <button class="btn btn-primary btn-sm" onclick="apmOpen('club')">+ New Club Pitch</button>
       </div>
       <div class="kanban" id="club-pitch-kanban">
@@ -8540,6 +8555,56 @@ function clearNeedsFilter() {
   document.querySelectorAll('#view-needs .data-table tbody tr').forEach(tr => {
     tr.classList.remove('mob-hidden');
     _mobShowRow(tr, 'view-needs');
+  });
+}
+
+// ── Inline search filters for all views ──────────────────────────────────────
+
+function filterClubs(q) {
+  q = (q || '').toLowerCase();
+  let vis = 0;
+  document.querySelectorAll('#clubs-tbody tr').forEach(tr => {
+    const show = !q || tr.textContent.toLowerCase().includes(q);
+    tr.classList.toggle('mob-hidden', !show);
+    if (show) { _mobShowRow(tr, 'view-clubs'); vis++; }
+  });
+  const sub = document.getElementById('clubs-subtitle');
+  if (sub) sub.textContent = q
+    ? `${vis} club${vis !== 1 ? 's' : ''} matching "${document.getElementById('clubs-search').value}"`
+    : 'European leagues · 129 clubs tracked';
+}
+
+function filterMandates(q) {
+  q = (q || '').toLowerCase();
+  let vis = 0;
+  document.querySelectorAll('#view-mandates .data-table tbody tr').forEach(tr => {
+    const show = !q || tr.textContent.toLowerCase().includes(q);
+    tr.classList.toggle('mob-hidden', !show);
+    if (show) { _mobShowRow(tr, 'view-mandates'); vis++; }
+  });
+  const sub = document.getElementById('mandates-subtitle');
+  if (sub && q) sub.textContent = `${vis} mandate${vis !== 1 ? 's' : ''} matching "${document.getElementById('mandates-search').value}"`;
+  else if (sub) sub.textContent = allMandates.length + ' active mandates · Summer 2026 window';
+}
+
+function filterRel(q) {
+  q = (q || '').toLowerCase();
+  document.querySelectorAll('#rel-kanban .k-card').forEach(card => {
+    card.classList.toggle('k-hidden', !(!q || card.textContent.toLowerCase().includes(q)));
+  });
+}
+
+function filterPitches(q) {
+  q = (q || '').toLowerCase();
+  document.querySelectorAll('#pitch-kanban .k-card').forEach(card => {
+    card.classList.toggle('k-hidden', !(!q || card.textContent.toLowerCase().includes(q)));
+  });
+}
+
+function filterClubPitches(q) {
+  q = (q || '').toLowerCase();
+  document.querySelectorAll('#club-pitch-kanban .k-card').forEach(card => {
+    card.classList.toggle('k-hidden', !(!q || card.textContent.toLowerCase().includes(q)));
   });
 }
 
