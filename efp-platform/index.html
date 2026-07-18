@@ -408,6 +408,14 @@ body {
 .act-time { font-size: 11px; color: var(--text3); margin-top: 2px; }
 .feed-link { color: var(--accent); cursor: pointer; text-decoration: underline; text-decoration-style: dotted; text-underline-offset: 2px; font-weight: 600; }
 .feed-link:hover { text-decoration-style: solid; }
+/* Position chip buttons in Add Requirement drawer */
+.pos-chip-btn {
+  padding: 4px 10px; border-radius: 20px; border: 1px solid var(--border);
+  background: var(--surface2); color: var(--text2); font-size: 12px; font-weight: 600;
+  cursor: pointer; transition: all .12s;
+}
+.pos-chip-btn:hover { border-color: var(--navy); color: var(--navy); }
+.pos-chip-btn.pos-selected { background: var(--navy); color: #fff; border-color: var(--navy); }
 .profile-activity-section { border-top: 1px solid var(--border); padding-top: 14px; margin-top: 18px; }
 .profile-activity-section .sec-label { font-size: 12px; font-weight: 700; color: var(--text2); letter-spacing: .04em; margin-bottom: 10px; }
 .profile-act-row { display:flex; gap:8px; padding:7px 0; border-bottom: 1px solid var(--border); }
@@ -1097,16 +1105,24 @@ body {
 /* ─── MOBILE <768px ──────────────────────────────────────────────────────── */
 @media (max-width: 767px) {
 
-  /* ROOT: prevent any horizontal overflow */
-  html, body {
+  /* ROOT: prevent any horizontal overflow — also fills full viewport width to kill grey right-edge */
+  html {
     overflow-x: hidden;
     max-width: 100vw;
+    width: 100%;
   }
   body {
+    overflow-x: hidden;
+    max-width: 100vw;
+    width: 100% !important;          /* PERMANENTLY fills viewport — no grey strip on right */
     overflow-y: auto;
     height: auto;
     min-height: 100vh;
+    overscroll-behavior-x: none;     /* suppress iOS rubber-band horizontal bounce */
   }
+
+  /* Utility: reliably hide a row even when _applyMobCardRow has set display:grid */
+  .mob-hidden { display: none !important; }
 
   /* ── SIDEBAR: fixed slide-out drawer, z-index above everything ─────────── */
   .sidebar {
@@ -1970,9 +1986,9 @@ tr:hover .pdr-btn     { opacity: 1; }
     <span class="mbn-icon">⚽</span>
     <span>Mandates</span>
   </button>
-  <button class="mob-nav-btn" id="mbn-pitches" onclick="go('pitches');mobBottomActive('pitches')">
-    <span class="mbn-icon">📋</span>
-    <span>Pitches</span>
+  <button class="mob-nav-btn" id="mbn-needs" onclick="go('needs');mobBottomActive('needs')">
+    <span class="mbn-icon">🎯</span>
+    <span>Club Needs</span>
   </button>
   <button class="mob-nav-btn" id="mbn-more" onclick="mobToggleNav()">
     <span class="mbn-icon">☰</span>
@@ -3702,8 +3718,49 @@ tr:hover .pdr-btn     { opacity: 1; }
           <div class="page-title">Club Needs</div>
           <div class="page-subtitle" id="needs-subtitle">23 open requirements across 18 clubs — Summer 2026 window</div>
         </div>
-        <button class="btn btn-outline btn-sm" onclick="promptFilter('#view-needs .data-table tbody','tr','requirements')">Filter</button>
+        <button class="btn btn-outline btn-sm" id="needs-filter-toggle" onclick="toggleNeedsFilter()">⚙ Filter</button>
         <button class="btn btn-primary btn-sm" onclick="openDrawer('req')">+ Add Requirement</button>
+      </div>
+
+      <!-- ── STRUCTURED NEEDS FILTER PANEL ── -->
+      <div id="needs-filter-panel" style="display:none;background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:14px 16px;margin-bottom:14px">
+        <div style="display:flex;flex-wrap:wrap;gap:12px;align-items:flex-end">
+          <div style="flex:1;min-width:160px">
+            <label style="font-size:10.5px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:.05em;display:block;margin-bottom:5px">Position</label>
+            <select id="nf-pos" style="width:100%;padding:6px 10px;border:1px solid var(--border);border-radius:6px;background:var(--surface2);font-size:13px;color:var(--text)">
+              <option value="">All positions</option>
+              <option>GK</option><option>RB</option><option>CB</option><option>LB</option>
+              <option>CDM</option><option>CM</option><option>CAM</option>
+              <option>RW</option><option>LW</option><option>SS</option><option>ST</option>
+            </select>
+          </div>
+          <div style="flex:1;min-width:130px">
+            <label style="font-size:10.5px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:.05em;display:block;margin-bottom:5px">Priority</label>
+            <select id="nf-prio" style="width:100%;padding:6px 10px;border:1px solid var(--border);border-radius:6px;background:var(--surface2);font-size:13px;color:var(--text)">
+              <option value="">All</option><option>Urgent</option><option>High</option><option>Medium</option><option>Low</option>
+            </select>
+          </div>
+          <div style="flex:1;min-width:130px">
+            <label style="font-size:10.5px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:.05em;display:block;margin-bottom:5px">Max Budget</label>
+            <select id="nf-budget" style="width:100%;padding:6px 10px;border:1px solid var(--border);border-radius:6px;background:var(--surface2);font-size:13px;color:var(--text)">
+              <option value="">Any budget</option>
+              <option value="1000000">≤ €1M</option>
+              <option value="3000000">≤ €3M</option>
+              <option value="5000000">≤ €5M</option>
+              <option value="10000000">≤ €10M</option>
+            </select>
+          </div>
+          <div style="flex:1;min-width:110px">
+            <label style="font-size:10.5px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:.05em;display:block;margin-bottom:5px">Max Age</label>
+            <input id="nf-age" type="number" placeholder="e.g. 26" min="15" max="40"
+              style="width:100%;padding:6px 10px;border:1px solid var(--border);border-radius:6px;background:var(--surface2);font-size:13px;color:var(--text)">
+          </div>
+          <div style="display:flex;gap:6px">
+            <button class="btn btn-primary btn-sm" onclick="applyNeedsFilter()">Apply</button>
+            <button class="btn btn-outline btn-sm" onclick="clearNeedsFilter()">Clear</button>
+          </div>
+        </div>
+        <div id="nf-active-chips" style="margin-top:10px;display:flex;flex-wrap:wrap;gap:6px"></div>
       </div>
 
       <div class="ai-note">
@@ -4569,22 +4626,9 @@ tr:hover .pdr-btn     { opacity: 1; }
         <input class="field-input" id="ce-country" placeholder="e.g. Germany" style="width:100%;margin-top:4px">
       </div>
     </div>
-    <div style="display:flex;gap:10px;margin-bottom:12px">
-      <div style="width:90px">
-        <label class="form-label">Flag</label>
-        <input class="field-input" id="ce-flag" placeholder="🇩🇪" style="width:100%;margin-top:4px;font-size:18px;text-align:center">
-      </div>
-      <div style="flex:1">
-        <label class="form-label">Relationship Status</label>
-        <select class="field-input" id="ce-status" style="width:100%;margin-top:4px">
-          <option value="Not Started">Not Started</option>
-          <option value="Building">Building</option>
-          <option value="Active">Active</option>
-          <option value="Strong">Strong</option>
-          <option value="Needs Attention">Needs Attention</option>
-          <option value="Needs Follow-up">Needs Follow-up</option>
-        </select>
-      </div>
+    <div class="form-group" style="margin-bottom:12px">
+      <label class="form-label">Flag Emoji</label>
+      <input class="field-input" id="ce-flag" placeholder="🇩🇪" style="width:80px;margin-top:4px;font-size:18px;text-align:center">
     </div>
     <div class="form-group" style="margin-bottom:16px">
       <label class="form-label">Internal Notes</label>
@@ -4797,20 +4841,37 @@ tr:hover .pdr-btn     { opacity: 1; }
       <label class="field-label">Club <span class="req">*</span></label>
       <input class="field-input" id="r-club" list="efp-club-datalist" placeholder="Type to search clubs…" autocomplete="off">
     </div>
-    <div class="field-row field">
-      <div>
-        <label class="field-label">Position <span class="req">*</span></label>
-        <select class="field-select" id="r-pos">
-          <option value="">Select…</option>
-          <option>Goalkeeper</option><option>Right Back</option><option>Centre Back</option><option>Left Back</option>
-          <option>Defensive Mid</option><option>Central Mid</option><option>Attacking Mid</option>
-          <option>Right Winger</option><option>Left Winger</option><option>Second Striker</option><option>Centre Forward</option>
-        </select>
+    <div class="field">
+      <label class="field-label">Positions <span class="req">*</span> <span style="font-weight:400;color:var(--text3)">(select one or more)</span></label>
+      <div id="r-pos-chips" style="display:flex;flex-wrap:wrap;gap:5px;margin-bottom:6px"></div>
+      <div style="display:flex;flex-wrap:wrap;gap:5px">
+        <span style="font-size:11px;color:var(--text3);width:100%;margin-bottom:2px">GK · Defenders</span>
+        <button type="button" class="pos-chip-btn" onclick="rTogglePos('GK')">GK</button>
+        <button type="button" class="pos-chip-btn" onclick="rTogglePos('RB')">RB</button>
+        <button type="button" class="pos-chip-btn" onclick="rTogglePos('CB')">CB</button>
+        <button type="button" class="pos-chip-btn" onclick="rTogglePos('LB')">LB</button>
+        <span style="font-size:11px;color:var(--text3);width:100%;margin-bottom:2px">Midfielders</span>
+        <button type="button" class="pos-chip-btn" onclick="rTogglePos('CDM')">CDM</button>
+        <button type="button" class="pos-chip-btn" onclick="rTogglePos('CM')">CM</button>
+        <button type="button" class="pos-chip-btn" onclick="rTogglePos('CAM')">CAM</button>
+        <span style="font-size:11px;color:var(--text3);width:100%;margin-bottom:2px">Attackers</span>
+        <button type="button" class="pos-chip-btn" onclick="rTogglePos('RW')">RW</button>
+        <button type="button" class="pos-chip-btn" onclick="rTogglePos('LW')">LW</button>
+        <button type="button" class="pos-chip-btn" onclick="rTogglePos('SS')">SS</button>
+        <button type="button" class="pos-chip-btn" onclick="rTogglePos('ST')">ST</button>
       </div>
+    </div>
+    <div class="field-row field">
       <div>
         <label class="field-label">Priority</label>
         <select class="field-select" id="r-prio">
           <option>Urgent</option><option>High</option><option>Medium</option><option>Low</option>
+        </select>
+      </div>
+      <div>
+        <label class="field-label">Transfer Window</label>
+        <select class="field-select" id="r-window">
+          <option>Summer 2026</option><option>Winter 2027</option><option>Summer 2027</option><option>Ongoing</option>
         </select>
       </div>
     </div>
@@ -4830,21 +4891,13 @@ tr:hover .pdr-btn     { opacity: 1; }
         </select>
       </div>
       <div>
-        <label class="field-label">Transfer Window</label>
-        <select class="field-select" id="r-window">
-          <option>Summer 2026</option><option>Winter 2027</option><option>Summer 2027</option><option>Ongoing</option>
-        </select>
-      </div>
-    </div>
-    <div class="field-row field">
-      <div>
         <label class="field-label">Preferred Foot</label>
         <select class="field-select" id="r-foot">
           <option>Either</option><option>Right</option><option>Left</option>
         </select>
       </div>
-      <div><label class="field-label">Nationality / Passport</label><input class="field-input" id="r-nat" placeholder="e.g. EU passport preferred"></div>
     </div>
+    <div class="field"><label class="field-label">Nationality / Passport</label><input class="field-input" id="r-nat" placeholder="e.g. EU passport preferred"></div>
     <div class="field"><label class="field-label">Contact at Club</label><input class="field-input" id="r-contact" placeholder="Name and role"></div>
     <div class="field"><label class="field-label">Profile Notes</label><textarea class="field-textarea" id="r-notes" placeholder="Playing style, physical attributes, league experience required…" rows="3"></textarea></div>
   </div>
@@ -5189,6 +5242,8 @@ function efpInitFirebase() {
       // ── Unified mandates (post-migration) ──
       if (d.allMandates) {
         allMandates = Array.isArray(d.allMandates) ? d.allMandates : Object.values(d.allMandates);
+        // Strip any " X pitched" suffix accidentally baked into stored names
+        allMandates.forEach(m => { if (m.name) m.name = m.name.replace(/\s+\d+\s+pitched.*$/i, '').trim(); });
         _renderMandatesTable();
         _efpMigrated = true;
       }
@@ -5293,6 +5348,8 @@ function efpInitFirebase() {
       // ── User-added Mandates ──
       if (d.mandatesAdded) {
         mandatesAdded = Array.isArray(d.mandatesAdded) ? d.mandatesAdded : Object.values(d.mandatesAdded);
+        // Strip any " X pitched" suffix accidentally baked into stored names
+        mandatesAdded.forEach(m => { if (m.name) m.name = m.name.replace(/\s+\d+\s+pitched.*$/i, '').trim(); });
         mandatesAdded.forEach(m => {
           if (!document.querySelector(`[data-mandate-id="${m.id}"]`)) addMandateRow(m);
         });
@@ -7016,8 +7073,9 @@ function matchPitch(id) {
   // Pre-fill the Add Pitch modal
   apmOpen('player');
   setTimeout(() => {
-    const pn = document.getElementById('apm-player-name'); if(pn) pn.value = m.playerName;
-    const pc = document.getElementById('apm-club');        if(pc) pc.value = m.clubName;
+    const pn = document.getElementById('apm-player'); if(pn) { pn.value = m.playerName; pn.dispatchEvent(new Event('input')); }
+    const pc = document.getElementById('apm-club');   if(pc) pc.value = m.clubName;
+    const pp = document.getElementById('apm-pos');    if(pp) pp.value = m.playerPos || '';
     showSnack(`⚽ Pitching ${m.playerName} → ${m.clubName}`, false);
   }, 200);
 }
@@ -7209,13 +7267,14 @@ function filterContacts() {
   rows.forEach(r => {
     const text = r.textContent.toLowerCase();
     const show = !q || text.includes(q);
-    if (show) _mobShowRow(r, 'view-contacts'); else r.style.display = 'none';
+    r.classList.toggle('mob-hidden', !show);   // works even when _applyMobCardRow set display:grid
+    if (show) _mobShowRow(r, 'view-contacts');
     if (show) visible++;
   });
   const sub = document.getElementById('contacts-subtitle');
   if (sub) sub.textContent = q
     ? `${visible} result${visible !== 1 ? 's' : ''} for "${document.getElementById('contacts-search').value}"`
-    : '155 contacts with email · DACH, Benelux, UK & more';
+    : (allContacts.length ? allContacts.length + ' contacts' : '155 contacts') + ' with email · DACH, Benelux, UK & more';
 }
 function openDrawer(key) {
   document.getElementById(key + '-overlay').classList.add('open');
@@ -7226,6 +7285,7 @@ function closeDrawer(key) {
   document.getElementById(key + '-overlay').classList.remove('open');
   document.getElementById(key + '-drawer').classList.remove('open');
   document.body.style.overflow = '';
+  if (key === 'req') _resetReqDrawer();
 }
 
 // ─── MODAL HELPERS ───
@@ -8010,11 +8070,20 @@ function openClubEdit(clubName) {
   document.getElementById('ce-league').value      = saved.league  || cells[1]?.textContent?.trim() || '';
   document.getElementById('ce-country').value     = saved.country || (cells[2]?.textContent?.trim().replace(/^[^\s]+\s/, '') || '');
   document.getElementById('ce-flag').value        = saved.flag    || cells[2]?.textContent?.trim().split(' ')[0] || '';
-  document.getElementById('ce-status').value      = saved.status  || 'Not Started';
   document.getElementById('ce-notes').value       = saved.notes   || '';
 
-  // Load linked contacts
+  // Load linked contacts — from saved data first, then fall back to allContacts match
   _ceTempContacts = (saved.linkedContacts || []).slice();
+  if (!_ceTempContacts.length) {
+    // Pre-populate from allContacts / CONTACTS_DB so existing relationships are visible
+    const lowerName = clubName.toLowerCase();
+    const autoLinks = _getAllContactsList().filter(c =>
+      (c.club || '').toLowerCase() === lowerName ||
+      (c.club || '').toLowerCase().includes(lowerName) ||
+      lowerName.includes((c.club || '').toLowerCase().replace(/^(fc|sc|sv|vfb|vfl|bsc|asc|ac|ss|as|rc|rb|rsc|psv|afc|bv)\s+/i, ''))
+    );
+    _ceTempContacts = autoLinks.map(c => ({ name: c.name, role: c.role || '', club: c.club || '' }));
+  }
   _ceRenderChips();
 
   // Clear search
@@ -8051,7 +8120,7 @@ function saveClubEdit() {
   const league   = document.getElementById('ce-league').value.trim();
   const country  = document.getElementById('ce-country').value.trim();
   const flag     = document.getElementById('ce-flag').value.trim();
-  const status   = document.getElementById('ce-status').value;
+  const status   = (clubData[_ceCurrentName] || {}).status || 'Not Started'; // preserve existing
   const notes    = document.getElementById('ce-notes').value.trim();
 
   // If name changed, migrate key
@@ -8333,33 +8402,145 @@ function deleteMandate(key, btn) {
 }
 
 // ─── ADD REQUIREMENT (Club Need) ───
-function submitRequirement() {
-  const club = document.getElementById('r-club').value;
-  const pos  = document.getElementById('r-pos').value;
-  [['r-club',club],['r-pos',pos]].forEach(([id,val]) => {
-    document.getElementById(id).style.borderColor = val ? '' : 'var(--red)';
+// ── Position chip state for Add Requirement drawer ──
+let _rSelectedPos = [];
+
+function rTogglePos(pos) {
+  const idx = _rSelectedPos.indexOf(pos);
+  if (idx > -1) _rSelectedPos.splice(idx, 1);
+  else _rSelectedPos.push(pos);
+  // Update button styles
+  document.querySelectorAll('.pos-chip-btn').forEach(btn => {
+    const p = btn.textContent.trim();
+    btn.classList.toggle('pos-selected', _rSelectedPos.includes(p));
   });
-  if (!club || !pos) return;
+  // Update chips display
+  const chipsEl = document.getElementById('r-pos-chips');
+  if (chipsEl) {
+    chipsEl.innerHTML = _rSelectedPos.length
+      ? _rSelectedPos.map(p => `<span style="background:var(--navy);color:#fff;border-radius:20px;padding:2px 10px;font-size:12px;font-weight:600">${p}</span>`).join('')
+      : '';
+  }
+}
+
+function _resetReqDrawer() {
+  _rSelectedPos = [];
+  document.querySelectorAll('.pos-chip-btn').forEach(b => b.classList.remove('pos-selected'));
+  const chipsEl = document.getElementById('r-pos-chips'); if(chipsEl) chipsEl.innerHTML = '';
+  ['r-club','r-agemin','r-agemax','r-budmin','r-budmax','r-contact','r-notes','r-nat'].forEach(id => {
+    const el = document.getElementById(id); if(el) el.value='';
+  });
+}
+
+function submitRequirement() {
+  const club = document.getElementById('r-club').value.trim();
+  const positions = _rSelectedPos.slice();
+  if (!club) { document.getElementById('r-club').style.borderColor = 'var(--red)'; return; }
+  if (!positions.length) { showSnack('⚠ Select at least one position', true); return; }
+  document.getElementById('r-club').style.borderColor = '';
   const prio   = document.getElementById('r-prio')?.value   || 'Medium';
+  const window_= document.getElementById('r-window')?.value  || 'Summer 2026';
   const ageMin = document.getElementById('r-agemin')?.value || '';
   const ageMax = document.getElementById('r-agemax')?.value || '';
   const budMin = _normVal(document.getElementById('r-budmin')?.value || '');
   const budMax = _normVal(document.getElementById('r-budmax')?.value || '');
   const contact= document.getElementById('r-contact')?.value?.trim() || '';
   const notes  = document.getElementById('r-notes')?.value?.trim()   || '';
-  const need = { id:'n_'+Date.now(), club, pos, positions:[pos], ageMin, ageMax, budMin, budMax, prio,
-                  urgency: prio === 'Urgent' ? 'urgent' : 'open', contact, notes };
+  const pos    = positions.join(' · ');
+  const need = { id:'n_'+Date.now(), club, pos, positions, ageMin, ageMax, budMin, budMax, prio,
+                  window: window_, urgency: prio === 'Urgent' ? 'urgent' : 'open', contact, notes };
   allNeeds.push(need);
   needsAdded.push(need); // legacy sync
   _renderNeedsTable();
   closeDrawer('req');
-  ['r-agemin','r-agemax','r-budmin','r-budmax','r-contact','r-notes'].forEach(id => { const el=document.getElementById(id); if(el) el.value=''; });
-  document.getElementById('r-club').value=''; document.getElementById('r-pos').value='';
-  showSnack(`✓ Requirement added for ${club}`, false);
+  _resetReqDrawer();
+  showSnack(`✓ Requirement added for ${club} (${pos})`, false);
   fbSave();
-  _refreshAllInterconnections(); // update Clubs "Open Needs" count + Match Alerts instantly
+  _refreshAllInterconnections();
   renderDashboard();
   _updateNeedsSubtitle();
+}
+
+// ── Club Needs structured filter ──
+function toggleNeedsFilter() {
+  const panel = document.getElementById('needs-filter-panel');
+  const btn   = document.getElementById('needs-filter-toggle');
+  if (!panel) return;
+  const open = panel.style.display !== 'none';
+  panel.style.display = open ? 'none' : 'block';
+  if (btn) btn.classList.toggle('btn-primary', !open);
+  if (btn) btn.classList.toggle('btn-outline', open);
+}
+
+function applyNeedsFilter() {
+  const posQ    = (document.getElementById('nf-pos')?.value || '').toLowerCase();
+  const prioQ   = (document.getElementById('nf-prio')?.value || '').toLowerCase();
+  const budgetQ = parseInt(document.getElementById('nf-budget')?.value || '0') || 0;
+  const ageQ    = parseInt(document.getElementById('nf-age')?.value || '0') || 0;
+
+  const rows = document.querySelectorAll('#view-needs .data-table tbody tr');
+  let vis = 0;
+  rows.forEach(tr => {
+    const text = tr.textContent.toLowerCase();
+    let show = true;
+    if (posQ   && !text.includes(posQ))  show = false;
+    if (prioQ  && !text.includes(prioQ)) show = false;
+    if (budgetQ) {
+      // Try to extract budget number from row
+      const needId = tr.dataset.needId;
+      const need   = allNeeds.find(n => n.id === needId);
+      if (need) {
+        const budMax = parseInt((need.budMax || '').replace(/[^0-9]/g,'')) || 0;
+        const budMin = parseInt((need.budMin || '').replace(/[^0-9]/g,'')) || 0;
+        const bud    = budMax || budMin;
+        if (bud && bud > budgetQ) show = false;
+      }
+    }
+    if (ageQ) {
+      const needId = tr.dataset.needId;
+      const need   = allNeeds.find(n => n.id === needId);
+      if (need) {
+        const ageMax = parseInt(need.ageMax || '0') || 0;
+        if (ageMax && ageMax > ageQ) show = false;
+      }
+    }
+    tr.classList.toggle('mob-hidden', !show);
+    if (show) _mobShowRow(tr, 'view-needs');
+    if (show) vis++;
+  });
+
+  // Show active filter chips
+  const chips = document.getElementById('nf-active-chips');
+  if (chips) {
+    const active = [];
+    if (posQ)    active.push(`Position: ${posQ.toUpperCase()}`);
+    if (prioQ)   active.push(`Priority: ${prioQ}`);
+    if (budgetQ) active.push(`Budget ≤ €${(budgetQ/1000000).toFixed(1)}M`);
+    if (ageQ)    active.push(`Age ≤ ${ageQ}`);
+    chips.innerHTML = active.map(l =>
+      `<span style="background:var(--navy);color:#fff;border-radius:20px;padding:3px 10px;font-size:11px;font-weight:600">${l}</span>`
+    ).join('');
+  }
+
+  const btn = document.getElementById('needs-filter-toggle');
+  if (btn && (posQ || prioQ || budgetQ || ageQ)) {
+    btn.textContent = `⚙ Filter (${[posQ,prioQ,budgetQ,ageQ].filter(Boolean).length})`;
+  }
+  showSnack(`Showing ${vis} requirement${vis !== 1 ? 's' : ''}`, false);
+}
+
+function clearNeedsFilter() {
+  ['nf-pos','nf-prio','nf-budget','nf-age'].forEach(id => {
+    const el = document.getElementById(id); if(el) el.value='';
+  });
+  const chips = document.getElementById('nf-active-chips');
+  if (chips) chips.innerHTML = '';
+  const btn = document.getElementById('needs-filter-toggle');
+  if (btn) btn.textContent = '⚙ Filter';
+  document.querySelectorAll('#view-needs .data-table tbody tr').forEach(tr => {
+    tr.classList.remove('mob-hidden');
+    _mobShowRow(tr, 'view-needs');
+  });
 }
 
 function _appendNeedRow(n) {
@@ -9864,6 +10045,11 @@ function apmOpen(mode) {
    'apm-player-s','apm-club-s','apm-contact-s','apm-flag-s','apm-pos-s'].forEach(id => {
     const el = _g(id); if(el) el.value='';
   });
+  // Reset PDF field
+  const pdfFile = _g('apm-pdf-file'); if(pdfFile) pdfFile.value='';
+  const pdfName = _g('apm-pdf-name'); if(pdfName) pdfName.textContent='No file chosen';
+  const pdfIcon = _g('apm-pdf-icon'); if(pdfIcon) pdfIcon.textContent='📎';
+  apmContactClose();
 
   // Reset screenshot tab
   _g('apm-preview').style.display = 'none';
@@ -9878,6 +10064,29 @@ function apmOpen(mode) {
 }
 
 function apmClose() { _g('apm-overlay').style.display='none'; }
+
+function apmContactSearch(q) {
+  const drop = _g('apm-contact-drop');
+  if (!drop) return;
+  if (!q || q.length < 2) { drop.style.display='none'; drop.innerHTML=''; return; }
+  const lq = q.toLowerCase();
+  const all = _getAllContactsList()
+    .filter(c => c.name.toLowerCase().includes(lq) || (c.role||'').toLowerCase().includes(lq) || (c.club||'').toLowerCase().includes(lq))
+    .slice(0, 8);
+  if (!all.length) { drop.style.display='none'; return; }
+  drop.innerHTML = all.map(c =>
+    `<div style="padding:8px 12px;cursor:pointer;border-bottom:1px solid var(--border);font-size:12px"
+      onmousedown="document.getElementById('apm-contact').value='${c.name.replace(/'/g,"\\'")}';apmContactClose()"
+      onmouseover="this.style.background='var(--surface)'" onmouseout="this.style.background=''">
+      <strong>${c.name}</strong><span style="color:var(--text3);margin-left:6px">${c.role}${c.club?' · '+c.club:''}</span>
+    </div>`
+  ).join('');
+  drop.style.display = 'block';
+}
+function apmContactClose() {
+  const d = _g('apm-contact-drop');
+  if (d) { d.style.display='none'; d.innerHTML=''; }
+}
 
 function apmSwitch(tab) {
   _apmTab = tab;
@@ -9901,6 +10110,7 @@ function apmSubmit() {
   const posVal     = (_g('apm-pos'     +sfx)?.value||'').trim() || '—';
   const stageVal   = _g('apm-stage'   +sfx)?.value || 'sent';
   const noteVal    = (_g('apm-note')?.value||'').trim() || 'Just added';
+  const pdfVal     = (_g('apm-pdf-file')?.files?.[0]?.name || '').trim();
 
   if (_apmMode === 'player') {
     if (!playerVal) { showSnack('⚠ Player name is required', true); return; }
@@ -9908,7 +10118,9 @@ function apmSubmit() {
     const newId = Math.max(...pitches.map(p=>p.id), 0) + 1;
     pitches.push({
       id:newId, player:playerVal, club:clubVal, contact:contactVal||'—',
-      flag:flagVal, pos:posVal, stage:stageVal, note:noteVal,
+      flag:flagVal, pos:posVal, stage:stageVal,
+      note: pdfVal ? `${noteVal} · PDF: ${pdfVal}` : noteVal,
+      pdfName: pdfVal || null,
       noteColor:'var(--text3)', hot:false
     });
     renderPitches(); fbSave();
@@ -10799,29 +11011,10 @@ function _refreshClubTableCounts() {
   });
 }
 
-// ── Add/update "X pitched" badge on mandate rows — always re-computes ──
+// ── _refreshMandatePitchBadges: pitch count belongs in Pitch History only, not on mandate cards ──
 function _refreshMandatePitchBadges() {
-  if (typeof pitches === 'undefined') return;
-  document.querySelectorAll('#view-mandates .data-table tbody tr').forEach(tr => {
-    const nameEl = tr.querySelector('td:first-child strong');
-    if (!nameEl) return;
-    // Strip the name cleanly (remove any existing badge text)
-    const name = (nameEl.firstChild?.nodeValue || nameEl.textContent).trim().replace(/\s+\d+\s+pitched.*$/i, '');
-    const nameLow = name.toLowerCase();
-    const count = pitches.filter(p => {
-      const pl = (p.player || '').toLowerCase();
-      return pl === nameLow || pl.includes(nameLow) || nameLow.includes(pl);
-    }).filter(p => p.stage !== 'rejected').length;
-
-    // Remove any existing badge before re-inserting
-    nameEl.querySelectorAll('.pitch-count-badge').forEach(el => el.remove());
-
-    if (count > 0) {
-      nameEl.insertAdjacentHTML('beforeend',
-        ` <span class="pitch-count-badge" style="font-size:10px;font-weight:500;color:var(--amber);background:rgba(217,119,6,.1);border:1px solid rgba(217,119,6,.25);border-radius:10px;padding:1px 6px;margin-left:4px;vertical-align:middle">${count} pitched</span>`
-      );
-    }
-  });
+  // Remove any stale badges that may exist from previous renders
+  document.querySelectorAll('.pitch-count-badge').forEach(el => el.remove());
 }
 
 // ── Compute Match Alerts in Club Needs from live mandates vs needs ──
@@ -11490,7 +11683,8 @@ function filterContactsTab(el, category) {
       const staffRoles = ['director','sporting','head of','manager','ceo','president','coach','scout','analyst','recruitment','technical'];
       show = staffRoles.some(r => role.includes(r));
     }
-    if (show) _mobShowRow(tr, 'view-contacts'); else tr.style.display = 'none';
+    tr.classList.toggle('mob-hidden', !show);
+    if (show) _mobShowRow(tr, 'view-contacts');
     if (show) visible++;
   });
   const sub = document.getElementById('contacts-subtitle');
@@ -12260,12 +12454,12 @@ function addPitchForMandate() {
   const name = _ppCurrentPlayer || document.getElementById('pp-edit-name')?.value.trim() || '';
   const pos  = document.getElementById('pp-edit-pos')?.value.trim() || '';
   closePlayerProfile();
-  // Open the pitch modal pre-filled with this player
+  // Open the pitch modal pre-filled with this player's name and position
   setTimeout(() => {
     apmOpen('player');
     setTimeout(() => {
-      const pn = document.getElementById('apm-player-name');
-      if (pn) { pn.value = name; pn.dispatchEvent(new Event('input')); }
+      const pn = document.getElementById('apm-player'); if(pn) { pn.value = name; pn.dispatchEvent(new Event('input')); }
+      const pp = document.getElementById('apm-pos');    if(pp) pp.value = pos;
     }, 200);
   }, 150);
 }
@@ -12306,9 +12500,12 @@ function saveMandateDetail() {
             <label id="apm-lbl-club">Club <span style="color:var(--red)">*</span></label>
             <input id="apm-club" type="text" placeholder="e.g. Eintracht Frankfurt">
           </div>
-          <div class="apm-f">
-            <label>Contact</label>
-            <input id="apm-contact" type="text" placeholder="e.g. Thomas Richter">
+          <div class="apm-f" style="position:relative">
+            <label>Contact <span style="color:var(--text3);font-weight:400;text-transform:none;font-size:10px">— select from contacts DB</span></label>
+            <input id="apm-contact" type="text" placeholder="Type to search contacts…" autocomplete="off"
+              oninput="apmContactSearch(this.value)" onblur="setTimeout(()=>apmContactClose(),200)"
+              onkeydown="if(event.key==='Escape')apmContactClose()">
+            <div id="apm-contact-drop" style="display:none;position:absolute;top:100%;left:0;right:0;background:var(--surface2);border:1px solid var(--border);border-radius:8px;box-shadow:0 4px 16px rgba(0,0,0,.18);max-height:180px;overflow-y:auto;z-index:1100;margin-top:2px"></div>
           </div>
           <div class="apm-f apm-row2">
             <div class="apm-f narrow">
@@ -12327,6 +12524,16 @@ function saveMandateDetail() {
           <div class="apm-f">
             <label>Note <span style="color:var(--text3);font-weight:400">(optional)</span></label>
             <input id="apm-note" type="text" placeholder="e.g. PDF sent today">
+          </div>
+          <div class="apm-f">
+            <label>PDF Report <span style="color:var(--text3);font-weight:400">(optional — attach the report you sent)</span></label>
+            <label style="display:flex;align-items:center;gap:8px;background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:7px 10px;cursor:pointer;font-size:12px;color:var(--text2)">
+              <span id="apm-pdf-icon">📎</span>
+              <span id="apm-pdf-name" style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">No file chosen</span>
+              <input id="apm-pdf-file" type="file" accept=".pdf,application/pdf" style="display:none"
+                onchange="const f=this.files[0];document.getElementById('apm-pdf-name').textContent=f?f.name:'No file chosen';document.getElementById('apm-pdf-icon').textContent=f?'✅':'📎'">
+              <span style="color:var(--navy);font-weight:600;font-size:11px">Browse</span>
+            </label>
           </div>
         </div>
       </div>
