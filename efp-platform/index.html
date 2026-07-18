@@ -49,6 +49,9 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
+/* Global filter utility — works on ALL screen sizes */
+.mob-hidden { display: none !important; }
+
 /* ─── SIDEBAR ─── */
 .sidebar {
   width: var(--sidebar-w);
@@ -166,14 +169,16 @@ body {
 .search {
   display: flex; align-items: center; gap: 7px;
   background: var(--bg); border: 1px solid var(--border);
-  border-radius: 7px; padding: 6px 12px;
-  font-size: 12.5px; color: var(--text3);
-  width: 220px; cursor: text;
+  border-radius: 8px; padding: 7px 14px;
+  font-size: 13px; color: var(--text3);
+  width: 260px; cursor: text;
   position: relative;
+  transition: border-color .15s, box-shadow .15s;
 }
 .search:focus-within {
   border-color: var(--accent);
-  box-shadow: 0 0 0 2px rgba(59,130,246,.15);
+  box-shadow: 0 0 0 3px rgba(59,130,246,.12);
+  background: var(--surface);
 }
 /* ── Per-view inline search inputs ── */
 .view-search {
@@ -190,15 +195,40 @@ body {
 /* Hide kanban card when filtered out */
 .k-hidden { display: none !important; }
 
-#global-search-results { min-width: 300px; }
-.gs-section { padding: 6px 10px 2px; font-size: 10px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--text3); }
-.gs-item { display: flex; align-items: center; gap: 10px; padding: 8px 12px; cursor: pointer; border-radius: 0; transition: background .1s; }
-.gs-item:hover, .gs-item.gs-active { background: var(--surface2); }
-.gs-icon { font-size: 14px; flex-shrink: 0; width: 20px; text-align: center; }
-.gs-main { font-size: 13px; font-weight: 600; color: var(--text1); flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.gs-sub  { font-size: 11px; color: var(--text3); flex-shrink: 0; }
-.gs-tag  { font-size: 10px; background: var(--surface2); color: var(--text3); border-radius: 3px; padding: 1px 5px; flex-shrink: 0; }
-.gs-empty { padding: 16px; text-align: center; font-size: 13px; color: var(--text3); }
+/* ── Global search dropdown ── */
+#global-search-results {
+  width: 480px;
+  max-width: calc(100vw - 24px);
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 8px 32px rgba(0,0,0,.18);
+  border: 1px solid var(--border);
+  background: var(--surface);
+}
+.gs-section {
+  padding: 8px 14px 5px;
+  font-size: 10px; font-weight: 700; letter-spacing: .1em;
+  text-transform: uppercase; color: var(--text3);
+  background: var(--surface2);
+  border-top: 1px solid var(--border);
+}
+.gs-section:first-child { border-top: none; }
+.gs-item {
+  display: flex; align-items: center; gap: 10px;
+  padding: 9px 14px; cursor: pointer;
+  transition: background .08s;
+}
+.gs-item:hover, .gs-item.gs-active { background: var(--navy-dim); }
+.gs-icon {
+  width: 30px; height: 30px; border-radius: 7px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 11px; font-weight: 700; flex-shrink: 0;
+}
+.gs-body { flex: 1; min-width: 0; }
+.gs-main { font-size: 13px; font-weight: 600; color: var(--text1); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.gs-sub  { font-size: 11px; color: var(--text3); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-top: 1px; }
+.gs-tag  { font-size: 10px; font-weight: 600; background: var(--navy-dim); color: var(--navy); border-radius: 4px; padding: 2px 7px; flex-shrink: 0; letter-spacing: .02em; }
+.gs-empty { padding: 20px; text-align: center; font-size: 13px; color: var(--text3); }
 .gs-divider { border: none; border-top: 1px solid var(--border); margin: 3px 0; }
 
 .btn {
@@ -1137,7 +1167,7 @@ body {
   }
 
   /* Utility: reliably hide a row even when _applyMobCardRow has set display:grid */
-  .mob-hidden { display: none !important; }
+  /* mob-hidden moved to global scope — see below */
 
   /* ── SIDEBAR: fixed slide-out drawer, z-index above everything ─────────── */
   .sidebar {
@@ -7198,16 +7228,31 @@ function globalSearch(q) {
   const grouped = {};
   results.slice(0,20).forEach(r => { if (!grouped[r.type]) grouped[r.type] = []; grouped[r.type].push(r); });
   const typeLabel = { contact:'Contacts', mandate:'Player Mandates', pitch:'Player Pitches', clubpitch:'Club Mandates', need:'Club Needs', rel:'Relationships', task:'Tasks' };
+  // Colored letter badges — reliable across all platforms, no emoji rendering issues
+  const iconStyle = {
+    contact:   'background:#EFF6FF;color:#2563EB',
+    mandate:   'background:#F0FDF4;color:#16A34A',
+    pitch:     'background:#F5F3FF;color:#7C3AED',
+    clubpitch: 'background:#FFFBEB;color:#D97706',
+    need:      'background:#FEF2F2;color:#DC2626',
+    rel:       'background:#ECFEFF;color:#0891B2',
+    task:      'background:#F9FAFB;color:#6B7280',
+  };
+  const iconLabel = { contact:'CT', mandate:'PM', pitch:'PP', clubpitch:'CM', need:'CN', rel:'RE', task:'TS' };
 
   let html = '';
   let itemIdx = 0;
   Object.keys(grouped).forEach(type => {
     html += `<div class="gs-section">${typeLabel[type] || type}</div>`;
     grouped[type].forEach(r => {
+      const iStyle = iconStyle[r.type] || 'background:var(--surface2);color:var(--text3)';
+      const iLabel = iconLabel[r.type] || '?';
       html += `<div class="gs-item" data-idx="${itemIdx}" onmousedown="gsSelect(${itemIdx})">
-        <span class="gs-icon">${r.icon}</span>
-        <span class="gs-main">${r.main}</span>
-        <span class="gs-sub">${r.sub}</span>
+        <div class="gs-icon" style="${iStyle}">${iLabel}</div>
+        <div class="gs-body">
+          <div class="gs-main">${r.main}</div>
+          <div class="gs-sub">${r.sub}</div>
+        </div>
         <span class="gs-tag">${r.tag}</span>
       </div>`;
       itemIdx++;
