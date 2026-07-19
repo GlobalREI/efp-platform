@@ -681,6 +681,33 @@ body {
   padding: 2px 7px; cursor: pointer; line-height: 1.4;
 }
 .k-del-btn:hover { border-color: var(--red); color: var(--red); background: rgba(239,68,68,.07); }
+.k-edit-btn {
+  flex-shrink: 0; background: none; border: 1px solid var(--border);
+  border-radius: 4px; color: var(--text3); font-size: 11px;
+  padding: 2px 7px; cursor: pointer; line-height: 1.4;
+}
+.k-edit-btn:hover { border-color: var(--navy); color: var(--navy); background: var(--navy-dim); }
+/* Inline edit panel inside kanban card */
+.k-edit-panel {
+  display: none; border-top: 1px solid var(--border); margin-top: 8px; padding-top: 8px;
+}
+.k-edit-panel.open { display: block; }
+.k-edit-panel input, .k-edit-panel textarea {
+  width: 100%; font-size: 11.5px; padding: 4px 7px; margin-bottom: 5px;
+  border: 1px solid var(--border); border-radius: 4px; background: var(--surface);
+  color: var(--text1); outline: none; font-family: inherit; resize: vertical;
+  box-sizing: border-box;
+}
+.k-edit-panel input:focus, .k-edit-panel textarea:focus { border-color: var(--navy); }
+.k-edit-panel label { font-size: 10px; font-weight: 700; color: var(--text3); text-transform: uppercase; letter-spacing: .06em; display: block; margin-bottom: 2px; }
+.k-edit-panel-row { display: flex; gap: 5px; margin-bottom: 5px; }
+.k-edit-panel-row > div { flex: 1; }
+.k-edit-save { font-size: 11px; font-weight: 600; padding: 4px 10px; border-radius: 4px; border: none; background: var(--navy); color: #fff; cursor: pointer; }
+.k-edit-save:hover { background: var(--navy-mid); }
+.k-edit-cancel { font-size: 11px; padding: 4px 8px; border-radius: 4px; border: 1px solid var(--border); background: none; color: var(--text3); cursor: pointer; }
+/* Note text: click to edit */
+.k-days-editable { cursor: text; border-radius: 3px; padding: 1px 3px; margin: -1px -3px; }
+.k-days-editable:hover { background: var(--surface2); }
 
 /* ─── PROFILE ─── */
 .profile-card {
@@ -3506,7 +3533,10 @@ tr:hover .pdr-btn     { opacity: 1; }
       <div class="profile-grid">
         <div style="display:flex;flex-direction:column;gap:14px">
           <div class="detail-panel">
-            <div class="detail-panel-title">Contact Details</div>
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+              <div class="detail-panel-title" style="margin-bottom:0">Contact Details</div>
+              <button class="btn btn-outline btn-sm" onclick="_editContact(window._currentContactId||'')" style="font-size:11px;padding:3px 10px">✎ Edit</button>
+            </div>
             <div class="dl"><div class="dl-label">Email</div><div class="dl-value" id="cd-email"><a>m.ciria@valenciacf.es</a></div></div>
             <div class="dl"><div class="dl-label">Phone</div><div class="dl-value" id="cd-phone">+34 96 123 4567</div></div>
             <div class="dl"><div class="dl-label">WhatsApp</div><div class="dl-value" id="cd-wa">+34 96 123 4567</div></div>
@@ -6854,7 +6884,8 @@ function openContact(clubKey, contactId) {
   // AI insight
   document.getElementById('cd-insight-text').innerHTML = c.insight + ' <strong>Draft a reconnection message →</strong>';
 
-  // Track current contact context for activity logging
+  // Track current contact context for activity logging and editing
+  window._currentContactId   = c.id;
   window._currentContactName = c.name;
   window._currentContactClub = c.club;
 
@@ -9925,23 +9956,42 @@ const STAGE_OPTIONS = [
 ];
 
 function renderPitchCard(p) {
-  const hot   = p.hot ? ' hot' : (p.stage === 'done' ? ' done' : '');
-  const dim   = p.stage === 'rejected' ? ' style="opacity:0.65"' : '';
-  const opts  = STAGE_OPTIONS.map(s =>
+  const hot  = p.hot ? ' hot' : (p.stage === 'done' ? ' done' : '');
+  const dim  = p.stage === 'rejected' ? ' style="opacity:0.65"' : '';
+  const opts = STAGE_OPTIONS.map(s =>
     `<option value="${s.id}"${s.id===p.stage?' selected':''}>${s.label}</option>`
   ).join('');
+  const eid = 'pep-' + p.id;
   return `<div class="k-card${hot}"${dim} id="pcard-${p.id}">
   <div class="k-name">${p.player}</div>
   <div class="k-sub">→ ${p.club} · ${p.contact}</div>
   <div class="k-footer">
-    <div class="k-tag">${p.flag} ${p.pos}</div>
-    <div class="k-days" style="color:${p.noteColor}">${p.note}</div>
+    <div class="k-tag">${p.flag||'🌍'} ${p.pos}</div>
+    <div class="k-days k-days-editable" style="color:${p.noteColor}" onclick="kNoteEdit(event,'pitch',${p.id})" title="Click to edit note">${p.note}</div>
   </div>
   <div class="k-card-actions">
     <select class="k-stage-select" onchange="movePitch(${p.id},this.value)" onclick="event.stopPropagation()">
       ${opts}
     </select>
+    <button class="k-edit-btn" onclick="kToggleEdit(event,'${eid}')" title="Edit card">✎</button>
     <button class="k-del-btn" onclick="deletePitch(${p.id})" title="Remove pitch">✕</button>
+  </div>
+  <div class="k-edit-panel" id="${eid}">
+    <div class="k-edit-panel-row">
+      <div><label>Player</label><input id="${eid}-player" value="${_escAttr(p.player)}" placeholder="Player name"></div>
+      <div><label>Pos</label><input id="${eid}-pos" value="${_escAttr(p.pos||'')}" placeholder="CM" style="max-width:60px"></div>
+    </div>
+    <div class="k-edit-panel-row">
+      <div><label>Club</label><input id="${eid}-club" value="${_escAttr(p.club)}" placeholder="Club"></div>
+    </div>
+    <div class="k-edit-panel-row">
+      <div><label>Contact</label><input id="${eid}-contact" value="${_escAttr(p.contact)}" placeholder="Contact name"></div>
+    </div>
+    <div><label>Note / Status update</label><textarea id="${eid}-note" rows="2" placeholder="Latest update…">${p.note||''}</textarea></div>
+    <div style="display:flex;gap:6px;margin-top:2px">
+      <button class="k-edit-save" onclick="kSavePitch(event,${p.id},'${eid}')">Save</button>
+      <button class="k-edit-cancel" onclick="kToggleEdit(event,'${eid}')">Cancel</button>
+    </div>
   </div>
 </div>`;
 }
@@ -9994,6 +10044,76 @@ function addNewPitch(player, club, contact, flag, pos) {
   showSnack(`✓ New pitch added: ${player} → ${club}`, false);
   _refreshClubTableCounts();   // update clubs "Active Pitches" column instantly
   _refreshMandatePitchBadges(); // update mandate pitch badges
+}
+
+// ─── KANBAN CARD INLINE EDIT HELPERS ──────────────────────────────────────────
+
+// Escape for HTML attribute values
+function _escAttr(s) { return (s||'').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;'); }
+
+// Toggle the inline edit panel open/closed
+function kToggleEdit(e, eid) {
+  e.stopPropagation();
+  const panel = document.getElementById(eid);
+  if (!panel) return;
+  panel.classList.toggle('open');
+}
+
+// Click-to-edit note text inline
+function kNoteEdit(e, type, id) {
+  e.stopPropagation();
+  const el = e.currentTarget;
+  const cur = el.textContent;
+  const inp = document.createElement('input');
+  inp.value = cur;
+  inp.style.cssText = 'font-size:11.5px;padding:2px 5px;border:1px solid var(--navy);border-radius:3px;outline:none;width:100%;color:var(--text1);background:var(--surface);font-family:inherit';
+  el.replaceWith(inp);
+  inp.focus();
+  inp.select();
+  const save = () => {
+    const newNote = inp.value.trim() || cur;
+    if (type === 'pitch') {
+      const p = pitches.find(x => x.id === id);
+      if (p) { p.note = newNote; renderPitches(); fbSave(); }
+    } else {
+      const p = clubPitches.find(x => x.id === id);
+      if (p) { p.note = newNote; renderClubPitches(); fbSave(); }
+    }
+  };
+  inp.addEventListener('blur', save);
+  inp.addEventListener('keydown', ev => { if (ev.key === 'Enter') { ev.preventDefault(); save(); } if (ev.key === 'Escape') { inp.replaceWith(el); } });
+}
+
+// Save all fields from the inline edit panel for a player pitch
+function kSavePitch(e, id, eid) {
+  e.stopPropagation();
+  const p = pitches.find(x => x.id === id);
+  if (!p) return;
+  const g = s => (document.getElementById(eid + '-' + s)?.value || '').trim();
+  p.player  = g('player') || p.player;
+  p.club    = g('club')   || p.club;
+  p.contact = g('contact')|| p.contact;
+  p.pos     = g('pos')    || p.pos;
+  const newNote = g('note');
+  if (newNote) p.note = newNote;
+  renderPitches(); fbSave();
+  showSnack(`✓ ${p.player} updated`, false);
+}
+
+// Save all fields from the inline edit panel for a club mandate
+function kSaveCPitch(e, id, eid) {
+  e.stopPropagation();
+  const p = clubPitches.find(x => x.id === id);
+  if (!p) return;
+  const g = s => (document.getElementById(eid + '-' + s)?.value || '').trim();
+  p.club    = g('club')    || p.club;
+  p.contact = g('contact') || p.contact;
+  p.player  = g('player')  || p.player;
+  p.country = g('country') || p.country;
+  const newNote = g('note');
+  if (newNote) p.note = newNote;
+  renderClubPitches(); fbSave();
+  showSnack(`✓ ${p.club} updated`, false);
 }
 
 // Render on load
@@ -10053,23 +10173,40 @@ let clubPitches = [
 ];
 
 function renderCPCard(p) {
-  const hot   = p.hot ? ' hot' : (p.stage === 'signed' ? ' done' : '');
-  const dim   = p.stage === 'rejected' ? ' style="opacity:0.65"' : '';
-  const opts  = CP_STAGES.map(s =>
+  const hot  = p.hot ? ' hot' : (p.stage === 'signed' ? ' done' : '');
+  const dim  = p.stage === 'rejected' ? ' style="opacity:0.65"' : '';
+  const opts = CP_STAGES.map(s =>
     `<option value="${s.id}"${s.id===p.stage?' selected':''}>${s.label}</option>`
   ).join('');
+  const eid = 'cep-' + p.id;
   return `<div class="k-card${hot}"${dim} id="cpcard-${p.id}">
   <div class="k-name">${p.club}</div>
   <div class="k-sub">${p.contact}${p.player ? ' · <em style="color:var(--text3)">' + p.player + '</em>' : ''}</div>
   <div class="k-footer">
-    <div class="k-tag">${p.country}</div>
-    <div class="k-days" style="color:${p.noteColor}">${p.note}</div>
+    <div class="k-tag">${p.country||'🌍'}</div>
+    <div class="k-days k-days-editable" style="color:${p.noteColor}" onclick="kNoteEdit(event,'club',${p.id})" title="Click to edit note">${p.note}</div>
   </div>
   <div class="k-card-actions">
     <select class="k-stage-select" onchange="moveCPitch(${p.id},this.value)" onclick="event.stopPropagation()">
       ${opts}
     </select>
+    <button class="k-edit-btn" onclick="kToggleEdit(event,'${eid}')" title="Edit card">✎</button>
     <button class="k-del-btn" onclick="deleteCPitch(${p.id})" title="Remove">✕</button>
+  </div>
+  <div class="k-edit-panel" id="${eid}">
+    <div class="k-edit-panel-row">
+      <div><label>Club</label><input id="${eid}-club" value="${_escAttr(p.club)}" placeholder="Club name"></div>
+      <div><label>Flag</label><input id="${eid}-country" value="${_escAttr(p.country||'')}" placeholder="🇩🇪" style="max-width:50px"></div>
+    </div>
+    <div class="k-edit-panel-row">
+      <div><label>Contact</label><input id="${eid}-contact" value="${_escAttr(p.contact)}" placeholder="Contact name"></div>
+    </div>
+    <div><label>Player / Context</label><input id="${eid}-player" value="${_escAttr(p.player||'')}" placeholder="Player or service description"></div>
+    <div style="margin-top:5px"><label>Note / Status update</label><textarea id="${eid}-note" rows="2" placeholder="Latest update…">${p.note||''}</textarea></div>
+    <div style="display:flex;gap:6px;margin-top:2px">
+      <button class="k-edit-save" onclick="kSaveCPitch(event,${p.id},'${eid}')">Save</button>
+      <button class="k-edit-cancel" onclick="kToggleEdit(event,'${eid}')">Cancel</button>
+    </div>
   </div>
 </div>`;
 }
