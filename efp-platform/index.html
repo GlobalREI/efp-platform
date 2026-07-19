@@ -7425,9 +7425,14 @@ function filterContacts() {
   rows.forEach(r => {
     const text = r.textContent.toLowerCase();
     const show = !q || text.includes(q);
-    r.classList.toggle('mob-hidden', !show);   // works even when _applyMobCardRow set display:grid
-    if (show) _mobShowRow(r, 'view-contacts');
-    if (show) visible++;
+    if (show) {
+      r.classList.remove('mob-hidden');
+      _mobShowRow(r, 'view-contacts');
+      visible++;
+    } else {
+      r.classList.add('mob-hidden');
+      r.style.display = 'none';
+    }
   });
   const sub = document.getElementById('contacts-subtitle');
   if (sub) sub.textContent = q
@@ -8688,9 +8693,8 @@ function applyNeedsFilter() {
         if (ageMax && ageMax > ageQ) show = false;
       }
     }
-    tr.classList.toggle('mob-hidden', !show);
-    if (show) _mobShowRow(tr, 'view-needs');
-    if (show) vis++;
+    if (show) { tr.classList.remove('mob-hidden'); _mobShowRow(tr, 'view-needs'); vis++; }
+    else { tr.classList.add('mob-hidden'); tr.style.display = 'none'; }
   });
 
   // Show active filter chips
@@ -8734,8 +8738,8 @@ function filterClubs(q) {
   let vis = 0;
   document.querySelectorAll('#clubs-tbody tr').forEach(tr => {
     const show = !q || tr.textContent.toLowerCase().includes(q);
-    tr.classList.toggle('mob-hidden', !show);
-    if (show) { _mobShowRow(tr, 'view-clubs'); vis++; }
+    if (show) { tr.classList.remove('mob-hidden'); _mobShowRow(tr, 'view-clubs'); vis++; }
+    else { tr.classList.add('mob-hidden'); tr.style.display = 'none'; }
   });
   const sub = document.getElementById('clubs-subtitle');
   if (sub) sub.textContent = q
@@ -8748,8 +8752,8 @@ function filterMandates(q) {
   let vis = 0;
   document.querySelectorAll('#view-mandates .data-table tbody tr').forEach(tr => {
     const show = !q || tr.textContent.toLowerCase().includes(q);
-    tr.classList.toggle('mob-hidden', !show);
-    if (show) { _mobShowRow(tr, 'view-mandates'); vis++; }
+    if (show) { tr.classList.remove('mob-hidden'); _mobShowRow(tr, 'view-mandates'); vis++; }
+    else { tr.classList.add('mob-hidden'); tr.style.display = 'none'; }
   });
   const sub = document.getElementById('mandates-subtitle');
   if (sub && q) sub.textContent = `${vis} mandate${vis !== 1 ? 's' : ''} matching "${document.getElementById('mandates-search').value}"`;
@@ -12052,9 +12056,14 @@ function filterContactsTab(el, category) {
       const staffRoles = ['director','sporting','head of','manager','ceo','president','coach','scout','analyst','recruitment','technical'];
       show = staffRoles.some(r => role.includes(r));
     }
-    tr.classList.toggle('mob-hidden', !show);
-    if (show) _mobShowRow(tr, 'view-contacts');
-    if (show) visible++;
+    if (show) {
+      tr.classList.remove('mob-hidden');
+      _mobShowRow(tr, 'view-contacts');
+      visible++;
+    } else {
+      tr.classList.add('mob-hidden');
+      tr.style.display = 'none';
+    }
   });
   const sub = document.getElementById('contacts-subtitle');
   if (sub) sub.textContent = visible + ' contacts' + (category !== 'all' ? ' · filtered' : ' with email · DACH, Benelux, UK & more');
