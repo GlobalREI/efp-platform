@@ -7360,6 +7360,19 @@ function globalSearch(q) {
   panel._results = results.slice(0, 20);
   panel.innerHTML = html;
   panel.style.display = 'block';
+  // On mobile, also filter the active view list in real-time
+  if (window.innerWidth < 768) {
+    var _av = document.querySelector('.view.active');
+    if (_av) {
+      var _avId = _av.id;
+      if (_avId === 'view-contacts') { var _cs = document.getElementById('contacts-search'); if (_cs) _cs.value = q; filterContacts(); }
+      else if (_avId === 'view-clubs') filterClubs(q);
+      else if (_avId === 'view-mandates') filterMandates(q);
+      else if (_avId === 'view-relationships') filterRel(q);
+      else if (_avId === 'view-pitches') filterPitches(q);
+      else if (_avId === 'view-needs') filterClubPitches(q);
+    }
+  }
 }
 
 function gsSelect(idx) {
@@ -11890,6 +11903,8 @@ function closeNeed(e) {
       var inp = document.getElementById('global-search-input');
       if (inp) inp.value = '';
       if (typeof hideGlobalSearch === 'function') hideGlobalSearch();
+      // Also clear active view filter when mobile search closes
+      (function() { var _av = document.querySelector('.view.active'); if (!_av) return; var _id = _av.id; if (_id === 'view-contacts') { var _c = document.getElementById('contacts-search'); if (_c) _c.value = ''; filterContacts(); } else if (_id === 'view-clubs') filterClubs(''); else if (_id === 'view-mandates') filterMandates(''); else if (_id === 'view-relationships') filterRel(''); else if (_id === 'view-pitches') filterPitches(''); else if (_id === 'view-needs') filterClubPitches(''); })();
     }
   };
   // Close mobile search when a result is clicked
