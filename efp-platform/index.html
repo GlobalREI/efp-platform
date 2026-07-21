@@ -5917,6 +5917,7 @@ function _renderContactsTable() {
     const ini = c.initials || _initials(c.name);
     const tr  = document.createElement('tr');
     tr.dataset.contactId = c.id;
+    tr.dataset.search = [c.name, c.role, c.club, c.country, c.email].filter(Boolean).join(' ').toLowerCase();
     tr.style.cursor = 'pointer';
     tr.innerHTML = `
       <td><div style="display:flex;align-items:center;gap:10px">
@@ -7436,15 +7437,16 @@ function filterContacts() {
   const rows = document.querySelectorAll('#contacts-table-body tr');
   let visible = 0;
   rows.forEach(r => {
-    const text = r.textContent.toLowerCase();
+    const text = (r.dataset.search || r.textContent).toLowerCase();
     const show = !q || text.includes(q);
     if (show) {
       r.classList.remove('mob-hidden');
+      r.style.removeProperty('display');
       _mobShowRow(r, 'view-contacts');
       visible++;
     } else {
       r.classList.add('mob-hidden');
-      r.style.display = 'none';
+      r.style.setProperty('display', 'none', 'important');
     }
   });
   const sub = document.getElementById('contacts-subtitle');
@@ -8751,8 +8753,8 @@ function filterClubs(q) {
   let vis = 0;
   document.querySelectorAll('#clubs-tbody tr').forEach(tr => {
     const show = !q || tr.textContent.toLowerCase().includes(q);
-    if (show) { tr.classList.remove('mob-hidden'); _mobShowRow(tr, 'view-clubs'); vis++; }
-    else { tr.classList.add('mob-hidden'); tr.style.display = 'none'; }
+    if (show) { tr.classList.remove('mob-hidden'); tr.style.removeProperty('display'); _mobShowRow(tr, 'view-clubs'); vis++; }
+    else { tr.classList.add('mob-hidden'); tr.style.setProperty('display', 'none', 'important'); }
   });
   const sub = document.getElementById('clubs-subtitle');
   if (sub) sub.textContent = q
@@ -8765,8 +8767,8 @@ function filterMandates(q) {
   let vis = 0;
   document.querySelectorAll('#view-mandates .data-table tbody tr').forEach(tr => {
     const show = !q || tr.textContent.toLowerCase().includes(q);
-    if (show) { tr.classList.remove('mob-hidden'); _mobShowRow(tr, 'view-mandates'); vis++; }
-    else { tr.classList.add('mob-hidden'); tr.style.display = 'none'; }
+    if (show) { tr.classList.remove('mob-hidden'); tr.style.removeProperty('display'); _mobShowRow(tr, 'view-mandates'); vis++; }
+    else { tr.classList.add('mob-hidden'); tr.style.setProperty('display', 'none', 'important'); }
   });
   const sub = document.getElementById('mandates-subtitle');
   if (sub && q) sub.textContent = `${vis} mandate${vis !== 1 ? 's' : ''} matching "${document.getElementById('mandates-search').value}"`;
