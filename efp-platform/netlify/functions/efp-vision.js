@@ -36,17 +36,24 @@ exports.handler = async (event) => {
     prompt = customPrompt;
   } else if (mode === 'bulk-extract') {
     const doc = textContent ? `DOCUMENT:\n${textContent}\n\n` : '';
-    prompt = `${doc}Extract ALL players mentioned as available for transfer in this document/screenshot.
-Return ONLY a JSON array (no markdown):
+    prompt = `${doc}Extract ALL football players visible in this image or document. This could be a player profile page (Transfermarkt, Sofascore, Wyscout, etc.), an agent shortlist, a WhatsApp/email message, or any other source.
+
+Return ONLY a JSON array (no markdown, no explanation):
 [{
   "name": "Full player name",
-  "club": "Their current club (infer from context if not stated)",
-  "availability": "Free to leave|Permanent preferred|Loan preferred|Open to offer",
-  "deal_type": "Permanent|Loan|Flexible",
-  "price_indication": "e.g. Free, €3M, TBD or null",
-  "notes": "Any conditions, salary caps, loan-with-option details etc"
+  "club": "Current club — read directly from image/text; infer from context if not shown",
+  "position": "Position if visible (e.g. CDM, ST, CB) — use standard abbreviations, or null",
+  "age": "Age as integer if visible, or null",
+  "nationality": "Primary nationality if visible, or null",
+  "market_value": "Market value if shown (e.g. €1.2M, €500k), or null",
+  "contract_expiry": "Contract end date if shown (e.g. Jun 2028), or null",
+  "availability": "Free to leave|Permanent preferred|Loan preferred|Open to offer|Unknown",
+  "deal_type": "Permanent|Loan|Flexible|Unknown",
+  "price_indication": "Transfer fee/price if explicitly mentioned, or null",
+  "notes": "Any other useful info: stats, conditions, loan terms, etc"
 }]
-Only include players explicitly mentioned as available. If the message is from a specific club, use that as the club.`;
+
+For a single player profile page, return an array with just that one player. Include every piece of data you can read from the image. Extract ALL players you can identify.`;
   } else if (mode === 'player-research') {
     const player = textContent || '';
     prompt = `You are a professional football data analyst. Research this player and return a complete profile as JSON only (no markdown):
@@ -81,7 +88,7 @@ Valid positions: GK RB CB LB CDM CM CAM RW LW SS ST. striker=ST, winger=RW/LW, d
 
   const payload = {
     model: 'claude-haiku-4-5-20251001',
-    max_tokens: mode === 'player-research' ? 600 : mode === 'bulk-extract' ? 1200 : 800,
+    max_tokens: mode === 'player-research' ? 600 : mode === 'bulk-extract' ? 1600 : 800,
     messages: [{ role: 'user', content }]
   };
 
