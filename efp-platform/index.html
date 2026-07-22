@@ -4760,8 +4760,7 @@ tr:hover .pdr-btn     { opacity: 1; }
 
       <div id="bulk-input-image" style="display:none">
         <div id="bulk-img-zone"
-          style="border:2px dashed var(--border);border-radius:10px;padding:32px 16px;text-align:center;cursor:pointer"
-          onclick="document.getElementById('bulk-file-input').click()"
+          style="border:2px dashed var(--border);border-radius:10px;padding:32px 16px;text-align:center;cursor:pointer;position:relative;overflow:hidden"
           ondragover="event.preventDefault();this.style.borderColor='var(--navy)'"
           ondragleave="this.style.borderColor='var(--border)'"
           ondrop="event.preventDefault();this.style.borderColor='var(--border)';bulkHandleFile(event.dataTransfer.files[0])">
@@ -4769,8 +4768,10 @@ tr:hover .pdr-btn     { opacity: 1; }
           <div style="font-size:13px;font-weight:600;color:var(--navy)">Click or drag a screenshot here</div>
           <div style="font-size:11px;color:var(--text3);margin-top:4px">WhatsApp, email, PDF screenshot, any source</div>
           <div id="bulk-img-name" style="margin-top:8px;font-size:12px;color:var(--green);font-weight:600"></div>
+          <input type="file" id="bulk-file-input" accept="image/*"
+            onchange="bulkHandleFile(this.files[0])"
+            style="position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:pointer;z-index:2">
         </div>
-        <input type="file" id="bulk-file-input" accept="image/*" style="display:none" onchange="bulkHandleFile(this.files[0])">
       </div>
 
       <div style="display:flex;gap:8px;margin-top:14px">
@@ -10347,6 +10348,11 @@ async function runBulkExtraction() {
     const txt = document.getElementById('bulk-text-input').value.trim();
     if (!txt) { errEl.textContent = 'Please paste some text first.'; errEl.style.display = ''; return; }
   } else {
+    // Fallback: read directly from file input in case onchange didn't fire (common on mobile)
+    if (!_bulkImageFile) {
+      const fi = document.getElementById('bulk-file-input');
+      if (fi && fi.files && fi.files[0]) _bulkImageFile = fi.files[0];
+    }
     if (!_bulkImageFile) { errEl.textContent = 'Please upload an image first.'; errEl.style.display = ''; return; }
   }
 
@@ -10390,14 +10396,14 @@ async function runBulkExtraction() {
           _id: 'b_' + Date.now() + '_' + i,
           name:           research.name          || p.name,
           club:           research.club          || p.club || '',
-          position:       research.position      || '',
-          age:            research.age           ? String(research.age) : '',
-          value:          research.market_value  || p.price_indication || '',
+          position:       research.position      || p.position || '',
+          age:            research.age           ? String(research.age) : (p.age ? String(p.age) : ''),
+          value:          research.market_value  || p.market_value || p.price_indication || '',
           availability:   p.availability        || '',
           deal_type:      p.deal_type            || '',
           notes:          p.notes               || '',
-          nationality:    research.nationality   || '',
-          contract_expiry:research.contract_expiry || '',
+          nationality:    research.nationality   || p.nationality || '',
+          contract_expiry:research.contract_expiry || p.contract_expiry || '',
           eu_passport:    research.eu_passport,
           strengths:      research.strengths     || '',
           _approved: false
@@ -10406,7 +10412,9 @@ async function runBulkExtraction() {
       } catch (e) {
         _bulkPlayers.push({
           _id: 'b_' + Date.now() + '_' + i,
-          name: p.name, club: p.club || '', position: '', age: '', value: p.price_indication || '',
+          name: p.name, club: p.club || '', position: p.position || '', age: p.age ? String(p.age) : '',
+          value: p.market_value || p.price_indication || '', nationality: p.nationality || '',
+          contract_expiry: p.contract_expiry || '',
           availability: p.availability || '', deal_type: p.deal_type || '', notes: p.notes || '',
           _approved: false
         });
