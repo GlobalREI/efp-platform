@@ -4632,6 +4632,12 @@ tr:hover .pdr-btn     { opacity: 1; }
         <div class="method-card-desc">Enter the player's name and club, or paste a Transfermarkt link — we pull all data automatically.</div>
         <div class="method-card-badge badge-green">Recommended</div>
       </div>
+      <div class="method-card" onclick="openBulkImport()" style="border-color:var(--gold);background:var(--gold-bg);grid-column:1/-1">
+        <div class="method-card-icon">📋</div>
+        <div class="method-card-title">Bulk Import from Document</div>
+        <div class="method-card-desc">Upload a screenshot, paste a WhatsApp message or email — AI extracts all players at once, researches missing data, and shows you a preview to approve before saving.</div>
+        <div class="method-card-badge" style="background:var(--gold);color:#fff">New · Multi-player</div>
+      </div>
     </div>
   </div>
 </div>
@@ -4713,6 +4719,79 @@ tr:hover .pdr-btn     { opacity: 1; }
       <div style="display:flex;gap:8px;margin-top:14px">
         <button class="btn btn-primary" onclick="confirmImport()" style="flex:1">Add to Mandates →</button>
         <button class="btn btn-outline" onclick="editImportedData()">Edit Before Adding</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ BULK MANDATE IMPORT MODAL ══ -->
+<div class="modal-bg" id="bulk-import-modal" onclick="closeModal('bulk-import-modal',event)" style="display:none;align-items:flex-start;padding-top:40px">
+  <div class="modal" style="width:640px;max-height:85vh;overflow-y:auto">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;padding-bottom:14px;border-bottom:1px solid var(--border)">
+      <div>
+        <div style="font-size:17px;font-weight:700;color:var(--text);letter-spacing:-0.02em">📋 Bulk Player Import</div>
+        <div id="bulk-modal-subtitle" style="font-size:12px;color:var(--text3);margin-top:2px">Paste a message or upload a screenshot — AI extracts all players</div>
+      </div>
+      <button class="drawer-close" onclick="closeBulkImport()">✕</button>
+    </div>
+
+    <!-- STEP 1: Input -->
+    <div id="bulk-step-input">
+      <div style="display:flex;gap:8px;margin-bottom:12px">
+        <button id="bulk-tab-text" class="btn btn-primary btn-sm" onclick="bulkSwitchTab('text')" style="flex:1">✉️ Paste text</button>
+        <button id="bulk-tab-image" class="btn btn-outline btn-sm" onclick="bulkSwitchTab('image')" style="flex:1">📷 Upload image</button>
+      </div>
+
+      <div id="bulk-input-text">
+        <textarea id="bulk-text-input" rows="10" style="width:100%;padding:12px;border:1px solid var(--border);border-radius:8px;font-size:13px;resize:vertical;font-family:inherit;color:var(--text);background:var(--surface2);box-sizing:border-box" placeholder="Paste WhatsApp message, email, or any text listing players for sale or loan…"></textarea>
+        <div style="display:flex;gap:8px;align-items:center;margin-top:6px">
+          <input class="field-input" id="bulk-source-club" placeholder="Source club (optional, e.g. RSC Anderlecht)" style="flex:1">
+        </div>
+      </div>
+
+      <div id="bulk-input-image" style="display:none">
+        <div id="bulk-img-zone"
+          style="border:2px dashed var(--border);border-radius:10px;padding:32px 16px;text-align:center;cursor:pointer"
+          onclick="document.getElementById('bulk-file-input').click()"
+          ondragover="event.preventDefault();this.style.borderColor='var(--navy)'"
+          ondragleave="this.style.borderColor='var(--border)'"
+          ondrop="event.preventDefault();this.style.borderColor='var(--border)';bulkHandleFile(event.dataTransfer.files[0])">
+          <div style="font-size:28px;margin-bottom:6px">📸</div>
+          <div style="font-size:13px;font-weight:600;color:var(--navy)">Click or drag a screenshot here</div>
+          <div style="font-size:11px;color:var(--text3);margin-top:4px">WhatsApp, email, PDF screenshot, any source</div>
+          <div id="bulk-img-name" style="margin-top:8px;font-size:12px;color:var(--green);font-weight:600"></div>
+        </div>
+        <input type="file" id="bulk-file-input" accept="image/*" style="display:none" onchange="bulkHandleFile(this.files[0])">
+      </div>
+
+      <div style="display:flex;gap:8px;margin-top:14px">
+        <button class="btn btn-primary" onclick="runBulkExtraction()" style="flex:1">⚡ Extract Players</button>
+        <button class="btn btn-outline" onclick="closeBulkImport()">Cancel</button>
+      </div>
+      <div id="bulk-input-error" style="display:none;font-size:12px;color:var(--red);margin-top:6px;text-align:center"></div>
+    </div>
+
+    <!-- STEP 2: Loading -->
+    <div id="bulk-step-loading" style="display:none;text-align:center;padding:32px 0">
+      <div style="font-size:36px;margin-bottom:16px">🔄</div>
+      <div style="font-size:15px;font-weight:700;color:var(--navy)" id="bulk-loading-title">Extracting players…</div>
+      <div style="font-size:12px;color:var(--text3);margin-top:6px" id="bulk-loading-sub">Reading document and identifying players for transfer</div>
+      <div id="bulk-progress-list" style="text-align:left;margin-top:20px;max-height:200px;overflow-y:auto;border:1px solid var(--border);border-radius:8px;padding:10px 14px;font-size:12px;color:var(--text2)"></div>
+    </div>
+
+    <!-- STEP 3: Preview cards -->
+    <div id="bulk-step-preview" style="display:none">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+        <div>
+          <div style="font-size:14px;font-weight:700;color:var(--text)" id="bulk-preview-title">Players ready to add</div>
+          <div style="font-size:11px;color:var(--text3);margin-top:2px">Review each player — edit if needed, then approve to save</div>
+        </div>
+        <button class="btn btn-primary btn-sm" onclick="approveAllBulkPlayers()" id="bulk-approve-all-btn">✓ Add All</button>
+      </div>
+      <div id="bulk-player-cards" style="display:flex;flex-direction:column;gap:10px"></div>
+      <div style="margin-top:16px;padding-top:14px;border-top:1px solid var(--border);display:flex;gap:8px">
+        <button class="btn btn-outline btn-sm" onclick="closeBulkImport()">Done</button>
+        <button class="btn btn-outline btn-sm" onclick="bulkGoBack()">← Import Another</button>
       </div>
     </div>
   </div>
@@ -9982,6 +10061,340 @@ function confirmImport() {
   _refreshAllInterconnections(); // update Match Alerts + mandate badges instantly
 }
 
+// ══════════════════════════════════════════════════════════════════════════════
+// BULK IMPORT — Smart multi-player intake
+// ══════════════════════════════════════════════════════════════════════════════
+
+let _bulkTab = 'text';        // 'text' | 'image'
+let _bulkImageFile = null;    // File object if image chosen
+let _bulkPlayers = [];        // Enriched player objects from extraction + research
+
+function openBulkImport() {
+  document.getElementById('mandate-method-modal').style.display = 'none';
+  _bulkTab = 'text';
+  _bulkImageFile = null;
+  _bulkPlayers = [];
+  document.getElementById('bulk-text-input').value = '';
+  document.getElementById('bulk-source-club').value = '';
+  document.getElementById('bulk-img-name').textContent = '';
+  document.getElementById('bulk-file-input').value = '';
+  document.getElementById('bulk-input-error').style.display = 'none';
+  _bulkShowStep('input');
+  bulkSwitchTab('text');
+  document.getElementById('bulk-import-modal').style.display = 'flex';
+}
+
+function closeBulkImport() {
+  document.getElementById('bulk-import-modal').style.display = 'none';
+}
+
+function bulkSwitchTab(tab) {
+  _bulkTab = tab;
+  const txtBtn  = document.getElementById('bulk-tab-text');
+  const imgBtn  = document.getElementById('bulk-tab-image');
+  const txtArea = document.getElementById('bulk-input-text');
+  const imgArea = document.getElementById('bulk-input-image');
+  if (tab === 'text') {
+    txtBtn.className  = 'btn btn-primary btn-sm';
+    imgBtn.className  = 'btn btn-outline btn-sm';
+    txtArea.style.display = '';
+    imgArea.style.display = 'none';
+  } else {
+    imgBtn.className  = 'btn btn-primary btn-sm';
+    txtBtn.className  = 'btn btn-outline btn-sm';
+    imgArea.style.display = '';
+    txtArea.style.display = 'none';
+  }
+}
+
+function bulkHandleFile(file) {
+  if (!file) return;
+  _bulkImageFile = file;
+  document.getElementById('bulk-img-name').textContent = '✓ ' + file.name;
+}
+
+function _bulkShowStep(step) {
+  ['input','loading','preview'].forEach(s => {
+    document.getElementById('bulk-step-' + s).style.display = s === step ? '' : 'none';
+  });
+}
+
+function _bulkLog(msg) {
+  const el = document.getElementById('bulk-progress-list');
+  if (!el) return;
+  const line = document.createElement('div');
+  line.style.padding = '3px 0';
+  line.textContent = msg;
+  el.appendChild(line);
+  el.scrollTop = el.scrollHeight;
+}
+
+async function runBulkExtraction() {
+  const key = localStorage.getItem('efp_anthropic_key') || '';
+  if (!key) {
+    const k = prompt('Enter your Anthropic API key to use AI extraction:');
+    if (!k) return;
+    localStorage.setItem('efp_anthropic_key', k.trim());
+  }
+
+  const apiKey = localStorage.getItem('efp_anthropic_key');
+  const errEl  = document.getElementById('bulk-input-error');
+  errEl.style.display = 'none';
+
+  // Validate input
+  if (_bulkTab === 'text') {
+    const txt = document.getElementById('bulk-text-input').value.trim();
+    if (!txt) { errEl.textContent = 'Please paste some text first.'; errEl.style.display = ''; return; }
+  } else {
+    if (!_bulkImageFile) { errEl.textContent = 'Please upload an image first.'; errEl.style.display = ''; return; }
+  }
+
+  // Go to loading
+  _bulkShowStep('loading');
+  document.getElementById('bulk-loading-title').textContent = 'Extracting players…';
+  document.getElementById('bulk-loading-sub').textContent   = 'Reading document and identifying players available for transfer';
+  document.getElementById('bulk-progress-list').innerHTML   = '';
+
+  try {
+    // Step 1: Extract players from document
+    _bulkLog('📄 Analysing document…');
+    let raw;
+    if (_bulkTab === 'text') {
+      const txt = document.getElementById('bulk-text-input').value.trim();
+      const src = document.getElementById('bulk-source-club').value.trim();
+      raw = await _bulkExtractFromText(apiKey, txt, src);
+    } else {
+      raw = await _bulkExtractFromImage(apiKey, _bulkImageFile);
+    }
+
+    if (!raw || !raw.length) {
+      _bulkLog('⚠️ No players found in document.');
+      document.getElementById('bulk-loading-title').textContent = 'No players found';
+      document.getElementById('bulk-loading-sub').textContent   = 'Try pasting the text directly or use a clearer screenshot.';
+      return;
+    }
+
+    _bulkLog('✓ Found ' + raw.length + ' player' + (raw.length > 1 ? 's' : '') + ': ' + raw.map(p => p.name).join(', '));
+    document.getElementById('bulk-loading-title').textContent = 'Researching ' + raw.length + ' players…';
+    document.getElementById('bulk-loading-sub').textContent   = 'Fetching positions, ages, and market values via AI';
+
+    // Step 2: Research each player
+    _bulkPlayers = [];
+    for (let i = 0; i < raw.length; i++) {
+      const p = raw[i];
+      _bulkLog('🔍 [' + (i+1) + '/' + raw.length + '] Researching ' + p.name + '…');
+      try {
+        const research = await _researchBulkPlayer(apiKey, p.name, p.club);
+        _bulkPlayers.push({
+          _id: 'b_' + Date.now() + '_' + i,
+          name:           research.name          || p.name,
+          club:           research.club          || p.club || '',
+          position:       research.position      || '',
+          age:            research.age           ? String(research.age) : '',
+          value:          research.market_value  || p.price_indication || '',
+          availability:   p.availability        || '',
+          deal_type:      p.deal_type            || '',
+          notes:          p.notes               || '',
+          nationality:    research.nationality   || '',
+          contract_expiry:research.contract_expiry || '',
+          eu_passport:    research.eu_passport,
+          strengths:      research.strengths     || '',
+          _approved: false
+        });
+        _bulkLog('  ✓ ' + (research.name || p.name) + ' — ' + (research.position || '?') + ', ' + (research.age || '?') + 'y, ' + (research.market_value || p.price_indication || 'TBD'));
+      } catch (e) {
+        _bulkPlayers.push({
+          _id: 'b_' + Date.now() + '_' + i,
+          name: p.name, club: p.club || '', position: '', age: '', value: p.price_indication || '',
+          availability: p.availability || '', deal_type: p.deal_type || '', notes: p.notes || '',
+          _approved: false
+        });
+        _bulkLog('  ⚠️ Could not research ' + p.name + ' — using extracted data only');
+      }
+    }
+
+    // Step 3: Render preview cards
+    renderBulkPreviewCards();
+    _bulkShowStep('preview');
+    document.getElementById('bulk-preview-title').textContent = _bulkPlayers.length + ' player' + (_bulkPlayers.length > 1 ? 's' : '') + ' ready to add';
+
+  } catch (e) {
+    document.getElementById('bulk-loading-title').textContent = '⚠️ Error';
+    document.getElementById('bulk-loading-sub').textContent   = e.message || 'Extraction failed. Check your API key and try again.';
+    _bulkLog('Error: ' + e.message);
+  }
+}
+
+async function _bulkExtractFromText(apiKey, text, sourceClub) {
+  const clubCtx = sourceClub ? ` The source club is ${sourceClub}.` : '';
+  const body = {
+    apiKey,
+    textContent: text + (clubCtx ? '\n\nContext:' + clubCtx : ''),
+    mode: 'bulk-extract'
+  };
+  const resp = await fetch('/.netlify/functions/efp-vision', {
+    method: 'POST',
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify(body)
+  });
+  const data = await resp.json();
+  const raw  = data?.content?.[0]?.text || '';
+  const json = raw.match(/\[[\s\S]*\]/)?.[0];
+  return JSON.parse(json || '[]');
+}
+
+async function _bulkExtractFromImage(apiKey, file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = async (e) => {
+      try {
+        const b64 = e.target.result.split(',')[1];
+        const body = { apiKey, imageBase64: b64, mediaType: file.type || 'image/png', mode: 'bulk-extract' };
+        const resp = await fetch('/.netlify/functions/efp-vision', {
+          method: 'POST',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify(body)
+        });
+        const data = await resp.json();
+        const raw  = data?.content?.[0]?.text || '';
+        const json = raw.match(/\[[\s\S]*\]/)?.[0];
+        resolve(JSON.parse(json || '[]'));
+      } catch (err) { reject(err); }
+    };
+    reader.onerror = () => reject(new Error('File read failed'));
+    reader.readAsDataURL(file);
+  });
+}
+
+async function _researchBulkPlayer(apiKey, name, club) {
+  const query = club ? name + ' at ' + club : name;
+  const resp  = await fetch('/.netlify/functions/efp-vision', {
+    method: 'POST',
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify({ apiKey, textContent: query, mode: 'player-research' })
+  });
+  const data = await resp.json();
+  const raw  = data?.content?.[0]?.text || '';
+  const json = raw.match(/\{[\s\S]*\}/)?.[0];
+  return JSON.parse(json || '{}');
+}
+
+function renderBulkPreviewCards() {
+  const container = document.getElementById('bulk-player-cards');
+  if (!container) return;
+  container.innerHTML = '';
+  _bulkPlayers.forEach(p => {
+    const card = document.createElement('div');
+    card.id = 'bulk-card-' + p._id;
+    card.style.cssText = 'border:1px solid var(--border);border-radius:10px;padding:14px 16px;background:var(--surface2);transition:background 0.2s';
+    const tmUrl = _tmSearchUrl(p.name);
+    const tmLink = tmUrl ? `<a href="${tmUrl}" target="_blank" rel="noopener" style="font-size:11px;color:#1d6f42;text-decoration:none;font-weight:600">⚽ Transfermarkt</a>` : '';
+    card.innerHTML = `
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:10px">
+        <div>
+          <div style="font-size:14px;font-weight:700;color:var(--text)">${p.name}</div>
+          <div style="font-size:11px;color:var(--text3);margin-top:2px">${[p.club, p.nationality].filter(Boolean).join(' · ')}${p.eu_passport ? ' 🇪🇺' : ''}</div>
+        </div>
+        <div style="display:flex;gap:8px;align-items:center">
+          ${tmLink}
+          <button class="btn btn-outline btn-xs" id="bulk-approve-btn-${p._id}" onclick="approveBulkPlayer('${p._id}')">+ Add</button>
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-bottom:8px">
+        <div>
+          <div style="font-size:10px;color:var(--text3);font-weight:600;letter-spacing:.05em;margin-bottom:3px">POSITION</div>
+          <input class="field-input" id="bcard-pos-${p._id}" value="${p.position||''}" placeholder="e.g. CM" style="font-size:12px;padding:5px 8px">
+        </div>
+        <div>
+          <div style="font-size:10px;color:var(--text3);font-weight:600;letter-spacing:.05em;margin-bottom:3px">AGE</div>
+          <input class="field-input" id="bcard-age-${p._id}" value="${p.age||''}" placeholder="e.g. 23" style="font-size:12px;padding:5px 8px">
+        </div>
+        <div>
+          <div style="font-size:10px;color:var(--text3);font-weight:600;letter-spacing:.05em;margin-bottom:3px">VALUE</div>
+          <input class="field-input" id="bcard-val-${p._id}" value="${p.value||''}" placeholder="e.g. €3M" style="font-size:12px;padding:5px 8px">
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:8px">
+        <div>
+          <div style="font-size:10px;color:var(--text3);font-weight:600;letter-spacing:.05em;margin-bottom:3px">CURRENT CLUB</div>
+          <input class="field-input" id="bcard-club-${p._id}" value="${p.club||''}" placeholder="e.g. Club Brugge" style="font-size:12px;padding:5px 8px">
+        </div>
+        <div>
+          <div style="font-size:10px;color:var(--text3);font-weight:600;letter-spacing:.05em;margin-bottom:3px">DEAL TYPE</div>
+          <input class="field-input" id="bcard-deal-${p._id}" value="${p.deal_type||p.availability||''}" placeholder="Permanent / Loan / Flexible" style="font-size:12px;padding:5px 8px">
+        </div>
+      </div>
+      <div>
+        <div style="font-size:10px;color:var(--text3);font-weight:600;letter-spacing:.05em;margin-bottom:3px">NOTES</div>
+        <textarea id="bcard-notes-${p._id}" rows="2" style="width:100%;padding:5px 8px;border:1px solid var(--border);border-radius:6px;font-size:12px;font-family:inherit;resize:vertical;background:var(--surface);color:var(--text);box-sizing:border-box" placeholder="Conditions, salary cap, loan-with-option details…">${[p.notes, p.strengths ? 'Profile: '+p.strengths : ''].filter(Boolean).join('\n')}</textarea>
+      </div>
+    `;
+    container.appendChild(card);
+  });
+}
+
+function approveBulkPlayer(id) {
+  const p = _bulkPlayers.find(x => x._id === id);
+  if (!p || p._approved) return;
+
+  // Read live edits from card inputs
+  const pos   = (document.getElementById('bcard-pos-'  + id)?.value || '').trim();
+  const age   = (document.getElementById('bcard-age-'  + id)?.value || '').trim();
+  const val   = (document.getElementById('bcard-val-'  + id)?.value || '').trim();
+  const club  = (document.getElementById('bcard-club-' + id)?.value || '').trim();
+  const deal  = (document.getElementById('bcard-deal-' + id)?.value || '').trim();
+  const notes = (document.getElementById('bcard-notes-'+ id)?.value || '').trim();
+
+  const contact = document.getElementById('bulk-source-club').value.trim() || '';
+  const mandate = {
+    id: 'm_' + Date.now(),
+    name:     p.name,
+    position: pos   || p.position || '',
+    age:      age   || p.age      || '',
+    club:     club  || p.club     || '',
+    value:    _normVal(val) || val || p.value || '',
+    notes:    notes,
+    contact:  contact,
+    availability: deal || p.availability || ''
+  };
+
+  mandatesAdded.push(mandate);
+  addMandateRow(mandate);
+  fbSave();
+  showSnack('✓ ' + p.name + ' added', false);
+
+  p._approved = true;
+  const card = document.getElementById('bulk-card-' + id);
+  if (card) {
+    card.style.opacity  = '0.45';
+    card.style.background = 'var(--surface)';
+  }
+  const btn = document.getElementById('bulk-approve-btn-' + id);
+  if (btn) { btn.textContent = '✓ Added'; btn.disabled = true; }
+
+  // Update "Add All" button label
+  const remaining = _bulkPlayers.filter(x => !x._approved).length;
+  const allBtn = document.getElementById('bulk-approve-all-btn');
+  if (allBtn) allBtn.textContent = remaining ? '✓ Add Remaining (' + remaining + ')' : '✓ All Added';
+}
+
+function approveAllBulkPlayers() {
+  _bulkPlayers.filter(p => !p._approved).forEach(p => approveBulkPlayer(p._id));
+}
+
+function bulkGoBack() {
+  _bulkPlayers = [];
+  _bulkImageFile = null;
+  document.getElementById('bulk-text-input').value = '';
+  document.getElementById('bulk-img-name').textContent = '';
+  document.getElementById('bulk-file-input').value = '';
+  document.getElementById('bulk-input-error').style.display = 'none';
+  _bulkShowStep('input');
+  bulkSwitchTab(_bulkTab);
+}
+
+// ══════════════════════════════════════════════════════════════════════════════
+
 function addMandateRow(d) {
   // 1. Add row to mandates table
   const tbody = document.querySelector('#view-mandates .data-table tbody');
@@ -12925,6 +13338,24 @@ function initMandateRows() {
 const _PITCH_DOT   = { sent:'amber', awaiting:'amber', feedback:'amber', interest:'green', negotiations:'green', done:'green', placed:'green', rejected:'red' };
 const _PITCH_LABEL = { sent:'Sent', awaiting:'Awaiting Reply', feedback:'Feedback Received', interest:'Club Interested', negotiations:'In Negotiations', done:'Done', placed:'Placed', rejected:'Declined' };
 
+function _tmSearchUrl(name) {
+  if (!name || name === '—') return null;
+  return 'https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=' + encodeURIComponent(name) + '&Spieler_page=0';
+}
+
+function _setMandateTmLink(name, club) {
+  const wrap = document.getElementById('md-tm-link-wrap');
+  const link = document.getElementById('md-tm-link');
+  if (!wrap || !link) return;
+  const url = _tmSearchUrl(name);
+  if (url) {
+    link.href = url;
+    wrap.style.display = '';
+  } else {
+    wrap.style.display = 'none';
+  }
+}
+
 function openMandateDetail(name, pos, age, club, val, source, status) {
   document.getElementById('md-name').value    = name;
   document.getElementById('md-pos').value     = pos;
@@ -12934,6 +13365,9 @@ function openMandateDetail(name, pos, age, club, val, source, status) {
   document.getElementById('md-source').value  = source !== '—' ? source : '';
   document.getElementById('md-status-label').textContent = status || 'Active Mandate';
   document.getElementById('mandate-detail-drawer-title').textContent = name;
+
+  // ── Transfermarkt link ────────────────────────────────────────────────────
+  _setMandateTmLink(name, club);
 
   // ── Pitch history panel ───────────────────────────────────────────────────
   const histEl = document.getElementById('md-pitch-history');
@@ -13264,6 +13698,14 @@ function saveMandateDetail() {
     <div class="drawer-close" onclick="closeDrawer('mandate-detail')">✕</div>
   </div>
   <div class="drawer-body">
+    <!-- Transfermarkt link -->
+    <div id="md-tm-link-wrap" style="margin-bottom:14px;display:none">
+      <a id="md-tm-link" href="#" target="_blank" rel="noopener"
+        style="display:inline-flex;align-items:center;gap:6px;padding:6px 12px;background:#1d6f42;color:#fff;border-radius:6px;font-size:12px;font-weight:600;text-decoration:none;letter-spacing:0.01em">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" style="flex-shrink:0"><circle cx="12" cy="12" r="10" stroke="#fff" stroke-width="2"/><path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" stroke="#fff" stroke-width="2"/></svg>
+        View on Transfermarkt
+      </a>
+    </div>
     <div class="field">
       <label class="field-label">Player Name</label>
       <input class="field-input" id="md-name" placeholder="Full name">
