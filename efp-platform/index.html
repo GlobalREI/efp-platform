@@ -1960,6 +1960,7 @@ tr:hover .pdr-btn     { opacity: 1; }
 .match-card.match-new { border-left:3px solid var(--accent); }
 .match-card.match-interested { border-left:3px solid var(--green); }
 .match-card.match-rejected { opacity:.55; }
+.match-card.match-not-relevant { opacity:.35; filter:grayscale(.6); }
 .match-score-badge { display:inline-flex;align-items:center;justify-content:center;width:52px;height:52px;border-radius:50%;font-size:15px;font-weight:800;flex-shrink:0; }
 .match-score-high  { background:rgba(22,163,74,.12);color:#16a34a; }
 .match-score-mid   { background:rgba(180,83,9,.1);color:var(--accent); }
@@ -4246,6 +4247,7 @@ tr:hover .pdr-btn     { opacity: 1; }
           <option value="">All statuses</option>
           <option>New</option><option>Scheduled</option><option>Pitched</option>
           <option>Contacted</option><option>Interested</option><option>Rejected</option><option>Closed</option>
+          <option>Not Relevant</option>
         </select>
         <div style="display:flex;align-items:center;gap:8px;margin-left:auto">
           <span style="font-size:12px;color:var(--text3)">Min score</span>
@@ -4514,11 +4516,11 @@ tr:hover .pdr-btn     { opacity: 1; }
 </div>
 
 <!-- ══ ADD CONTACT DRAWER ══ -->
-<div class="drawer-overlay" id="contact-overlay" onclick="closeDrawer('contact')"></div>
+<div class="drawer-overlay" id="contact-overlay" onclick="closeDrawer('contact');_resetContactDrawer()"></div>
 <div class="drawer" id="contact-drawer">
   <div class="drawer-head">
     <div><div class="drawer-title">Add Contact</div><div class="drawer-sub">Add a new contact to the CRM</div></div>
-    <div class="drawer-close" onclick="closeDrawer('contact')">✕</div>
+    <div class="drawer-close" onclick="closeDrawer('contact');_resetContactDrawer()">✕</div>
   </div>
   <div class="drawer-body">
     <div class="field-row field">
@@ -4566,7 +4568,7 @@ tr:hover .pdr-btn     { opacity: 1; }
   </div>
   <div class="drawer-foot">
     <button class="btn btn-primary" onclick="submitContact()" style="flex:1">Add Contact</button>
-    <button class="btn btn-outline" onclick="closeDrawer('contact')">Cancel</button>
+    <button class="btn btn-outline" onclick="closeDrawer('contact');_resetContactDrawer()">Cancel</button>
   </div>
 </div>
 
@@ -5171,10 +5173,10 @@ European Football Partners</textarea>
       <button class="drawer-close" onclick="document.getElementById('wa-modal').style.display='none'">✕</button>
     </div>
     <div style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:14px;margin-bottom:16px">
-      <div style="font-size:11px;color:var(--text3);margin-bottom:6px">To: Marc Ciria · +34 96 123 4567</div>
-      <div style="font-size:13px;line-height:1.6;color:var(--text)">Hi Marc, hope you're doing well! Transfer window is just around the corner — would love to reconnect and share a couple of profiles I think could interest you. Do you have a few minutes for a call this week? 👋</div>
+      <div id="wa-modal-to" style="font-size:11px;color:var(--text3);margin-bottom:6px">To: —</div>
+      <div id="wa-modal-preview" style="font-size:13px;line-height:1.6;color:var(--text)"></div>
     </div>
-    <div class="field"><label class="field-label">Edit Message</label><textarea class="field-textarea" id="wa-body" rows="5">Hi Marc, hope you're doing well! Transfer window is just around the corner — would love to reconnect and share a couple of profiles I think could interest you. Do you have a few minutes for a call this week? 👋</textarea></div>
+    <div class="field"><label class="field-label">Edit Message</label><textarea class="field-textarea" id="wa-body" rows="5" oninput="const p=document.getElementById('wa-modal-preview');if(p)p.textContent=this.value"></textarea></div>
     <div style="background:var(--navy-dim);border:1px solid var(--navy-mid);border-radius:6px;padding:10px 14px;margin-bottom:16px">
       <div style="font-size:10px;font-weight:700;color:var(--navy);text-transform:uppercase;letter-spacing:.08em;margin-bottom:4px">AI Note</div>
       <div style="font-size:12px;color:var(--text2)">Kept short and casual — appropriate for WhatsApp. Avoids being pushy. Drafted for a 94-day gap with a warm, existing relationship.</div>
@@ -5323,7 +5325,7 @@ European Football Partners</textarea>
 // Each user has their own PIN. Change these before sharing.
 const EFP_USERS = {
   timo: { id:'timo', name:'Timo', initials:'T', color:'#1B3A6B', email:'timo@euro-fp.com', pin:'efp2026'  },
-  fynn: { id:'fynn', name:'Fynn', initials:'F', color:'#5B21B6', email:'fynn@euro-fp.com', pin:'fynn2026' },
+  fynn: { id:'fynn', name:'Fynn', initials:'F', color:'#5B21B6', email:'fynn@euro-fp.com', pin:'efp2026' },
 };
 let   _efpSelectedUserId = null;
 window._efpUser = null;  // set after login — use window._efpUser.name anywhere
@@ -5404,7 +5406,7 @@ function efpAuthSubmit() {
   }
 }
 
-// Apply logged-in user: update sidebar + task modal default
+// Apply logged-in user: update sidebar + task modal default + task filter
 function _efpApplyUser(u) {
   const av = document.querySelector('.user-avatar');
   const nm = document.querySelector('.user-name');
@@ -5412,8 +5414,18 @@ function _efpApplyUser(u) {
   if (av) { av.textContent = u.initials; av.style.background = u.color; }
   if (nm) nm.textContent = u.name;
   if (rl) rl.textContent = u.email;
+  // Default "Assigned to" in Add Task modal = logged-in user
   const nt = document.getElementById('nt-assignee');
   if (nt) nt.value = u.id;
+  // Task visibility: Fynn sees only his tasks + "both"; Timo sees all
+  _taskPersonFilter = u.id === 'fynn' ? 'fynn' : 'all';
+  // Sync filter button UI (runs after DOM ready)
+  requestAnimationFrame(() => {
+    ['all','timo','fynn'].forEach(p => {
+      const btn = document.getElementById('tpf-' + p);
+      if (btn) btn.classList.toggle('active', p === _taskPersonFilter);
+    });
+  });
 }
 
 // ─── FIREBASE REALTIME SYNC ───────────────────────────────────────────────────
@@ -6184,8 +6196,8 @@ function _editContact(id) {
   if (!c) return;
   const parts = (c.name||'').split(' ');
   const setF = (fid, val) => { const el = document.getElementById(fid); if (el) el.value = val||''; };
-  setF('c-first', parts[0]||'');
-  setF('c-last',  parts.slice(1).join(' ')||'');
+  setF('c-first',    parts[0]||'');
+  setF('c-last',     parts.slice(1).join(' ')||'');
   setF('c-position', c.role||'');
   setF('c-club',     c.club||'');
   setF('c-email',    c.email||'');
@@ -6195,8 +6207,15 @@ function _editContact(id) {
   setF('c-notes',    c.notes||'');
   setF('c-stage',    c.stage||'');
   // Tag the drawer so submit knows this is an edit
-  const drawer = document.getElementById('contact-form');
+  const drawer = document.getElementById('contact-drawer');
   if (drawer) drawer.dataset.editId = id;
+  // Switch title + button to edit mode
+  const titleEl = document.querySelector('#contact-drawer .drawer-title');
+  const subEl   = document.querySelector('#contact-drawer .drawer-sub');
+  const btnEl   = document.querySelector('#contact-drawer .drawer-foot .btn-primary');
+  if (titleEl) titleEl.textContent = 'Edit Contact';
+  if (subEl)   subEl.textContent   = 'Update contact details';
+  if (btnEl)   btnEl.textContent   = 'Save Changes';
   openDrawer('contact');
 }
 
@@ -7029,7 +7048,7 @@ document.addEventListener('click', () => { if (popoverOpen) closeContactsPopover
 // ─── AI MATCH ENGINE ──────────────────────────────────────────────────────────
 let matchesData = [];   // persisted to Firebase
 
-const MATCH_STATUSES = ['New','Scheduled','Pitched','Contacted','Interested','Rejected','Closed'];
+const MATCH_STATUSES = ['New','Scheduled','Pitched','Contacted','Interested','Rejected','Closed','Not Relevant'];
 
 // Parse a value string like "€3M", "€1.5M", "€500k", "€13–15M" → number in millions
 // Parse value string → millions (float) for match scoring; delegates to _parseValToNum
@@ -7208,6 +7227,8 @@ function renderMatches() {
     if (fPlayer && !m.playerName.toLowerCase().includes(fPlayer)) return false;
     if (fClub   && !m.clubName.toLowerCase().includes(fClub)) return false;
     if (fPos    && !getPositionTags(m.playerPos).has(fPos)) return false;
+    // Hide "Not Relevant" by default — only show when explicitly filtering for it
+    if (!fStatus && m.status === 'Not Relevant') return false;
     if (fStatus && m.status !== fStatus) return false;
     return true;
   });
@@ -7297,7 +7318,23 @@ function matchSetStatus(id, status) {
   m.status = status;
   const card = document.getElementById('mc-' + id);
   if (card) {
-    card.className = 'match-card' + (status==='New'?' match-new':status==='Interested'?' match-interested':status==='Rejected'?' match-rejected':'');
+    const cls = status === 'New'          ? 'match-new'
+              : status === 'Interested'   ? 'match-interested'
+              : status === 'Rejected'     ? 'match-rejected'
+              : status === 'Not Relevant' ? 'match-not-relevant'
+              : '';
+    card.className = 'match-card' + (cls ? ' ' + cls : '');
+    // Hide "Not Relevant" cards after a short fade — they disappear from default view
+    if (status === 'Not Relevant') {
+      card.style.transition = 'opacity .4s, max-height .4s .3s, margin .4s .3s, padding .4s .3s';
+      setTimeout(() => {
+        card.style.opacity = '0';
+        card.style.maxHeight = '0';
+        card.style.overflow = 'hidden';
+        card.style.margin = '0';
+        card.style.padding = '0';
+      }, 200);
+    }
   }
   fbSave();
 }
@@ -7922,17 +7959,26 @@ function submitContact() {
   const notes = document.getElementById('c-notes').value.trim();
   const stage = document.getElementById('c-stage').value;
   // Check if this is an edit (tagged by _editContact)
-  const form   = document.getElementById('contact-form');
-  const editId = form ? form.dataset.editId : null;
+  const drawer = document.getElementById('contact-drawer');
+  const editId = drawer ? drawer.dataset.editId : null;
   if (editId) {
     const idx = allContacts.findIndex(x => x.id === editId);
+    const wa  = (document.getElementById('c-wa')?.value||'').trim();
+    const li  = (document.getElementById('c-li')?.value||'').trim();
     if (idx !== -1) {
-      allContacts[idx] = { ...allContacts[idx], name:`${first} ${last}`, role:pos, club, email, phone, notes, stage };
+      allContacts[idx] = { ...allContacts[idx], name:`${first} ${last}`, role:pos, club, email, phone, wa, linkedin:li, notes, stage };
     }
-    if (form) delete form.dataset.editId;
+    if (drawer) delete drawer.dataset.editId;
+    // Reset drawer title/button to "Add" mode
+    const titleEl = document.querySelector('#contact-drawer .drawer-title');
+    const subEl   = document.querySelector('#contact-drawer .drawer-sub');
+    const btnEl   = document.querySelector('#contact-drawer .drawer-foot .btn-primary');
+    if (titleEl) titleEl.textContent = 'Add Contact';
+    if (subEl)   subEl.textContent   = 'Add a new contact to the CRM';
+    if (btnEl)   btnEl.textContent   = 'Add Contact';
     _renderContactsTable();
     closeDrawer('contact');
-    showSnack('Contact updated', false);
+    showSnack('✓ Contact updated', false);
     fbSave(); renderDashboard(); _refreshAllInterconnections();
     return;
   }
@@ -7953,6 +7999,17 @@ function submitContact() {
   _refreshAllInterconnections();  // propagate new contact across Clubs view, Needs links, etc.
 }
 
+function _resetContactDrawer() {
+  const drawer = document.getElementById('contact-drawer');
+  if (drawer) delete drawer.dataset.editId;
+  const titleEl = document.querySelector('#contact-drawer .drawer-title');
+  const subEl   = document.querySelector('#contact-drawer .drawer-sub');
+  const btnEl   = document.querySelector('#contact-drawer .drawer-foot .btn-primary');
+  if (titleEl) titleEl.textContent = 'Add Contact';
+  if (subEl)   subEl.textContent   = 'Add a new contact to the CRM';
+  if (btnEl)   btnEl.textContent   = 'Add Contact';
+}
+
 function _appendContactRow(c, highlight) {
   const col = _avCol(c.name);
   const ini = _initials(c.name);
@@ -7968,7 +8025,11 @@ function _appendContactRow(c, highlight) {
     <td>${c.role}</td>
     <td>${c.club}</td>
     <td></td>
-    <td style="font-size:12px;color:var(--text2)">${c.email||''}</td>
+    <td style="font-size:12px;color:var(--text2)">
+      ${c.email ? `<div>${c.email}</div>` : ''}
+      ${c.phone ? `<div style="font-size:11px;color:var(--text3);margin-top:2px">📞 ${c.phone}</div>` : ''}
+      ${c.wa && c.wa !== c.phone ? `<div style="font-size:11px;color:var(--text3);margin-top:1px">💬 ${c.wa}</div>` : ''}
+    </td>
     <td style="font-size:11px;color:var(--text3)">${c.notes||''}</td>
     <td><div style="display:flex;align-items:center;gap:6px">
       <div class="status"><span class="dot dot-navy"></span> ${c.status||'New'}</div>
@@ -9238,6 +9299,33 @@ function _refreshNeedDetailIfOpen() {
 
 // ─── DRAFT EMAIL ───
 function openEmailModal() {
+  // Personalise with current contact
+  const name    = window._currentContactName || '';
+  const club    = window._currentContactClub || '';
+  const emailEl = document.getElementById('cd-email');
+  const email   = emailEl ? (emailEl.querySelector('a')?.textContent || emailEl.textContent || '').trim() : '';
+  const firstName = name.split(' ')[0] || 'there';
+
+  const toEl = document.getElementById('em-to');
+  if (toEl) toEl.value = email || '';
+
+  const subjEl = document.getElementById('em-subject');
+  if (subjEl && name) subjEl.value = 'Reconnecting ahead of the transfer window';
+
+  const bodyEl = document.getElementById('em-body');
+  if (bodyEl && name) bodyEl.value =
+`Dear ${firstName},
+
+I hope you're well. It's been a while since we last spoke, and with the current transfer window in full swing, I wanted to reach out and reconnect.
+
+We've been working on some interesting profiles that I believe could be relevant for ${club || 'your club'} — I'd love to schedule a quick call to walk you through them.
+
+Would you have 15–20 minutes this week or next?
+
+Best regards,
+Timo Braasch
+European Football Partners`;
+
   document.getElementById('email-modal').style.display = 'flex';
 }
 function copyEmail() {
@@ -9261,6 +9349,33 @@ function openInOutlook() {
 
 // ─── DRAFT WHATSAPP ───
 function openWAModal() {
+  const name      = window._currentContactName || '';
+  const club      = window._currentContactClub || '';
+  const waEl      = document.getElementById('cd-wa');
+  const phoneEl   = document.getElementById('cd-phone');
+  const wa        = waEl    ? waEl.textContent.trim()    : '';
+  const phone     = phoneEl ? phoneEl.textContent.trim() : '';
+  const number    = (wa && wa !== 'Not recorded') ? wa : (phone && phone !== 'Not recorded') ? phone : '';
+  const firstName = name.split(' ')[0] || 'there';
+
+  // Update "To:" header and preview in modal
+  const toHeaderEl = document.getElementById('wa-modal-to');
+  if (toHeaderEl) toHeaderEl.textContent = 'To: ' + (name || '—') + (number ? ' · ' + number : '');
+
+  const bodyEl = document.getElementById('wa-body');
+  if (bodyEl && name) bodyEl.value =
+`Hi ${firstName},
+
+Hope you're well! I wanted to reach out — we're currently working on some interesting profiles that might fit ${club || 'your club'} well.
+
+Would you have time for a quick call this week?
+
+Best,
+Timo`;
+
+  // Sync body → preview
+  const previewEl = document.getElementById('wa-modal-preview');
+  if (previewEl && bodyEl) previewEl.textContent = bodyEl.value;
   document.getElementById('wa-modal').style.display = 'flex';
 }
 function copyWA() {
@@ -13363,6 +13478,47 @@ function _setMandateTmLink(name, club) {
   }
 }
 
+function _updateValLookupBtn() {
+  const val = (document.getElementById('md-val')?.value || '').trim();
+  const btn = document.getElementById('md-val-lookup-btn');
+  if (!btn) return;
+  const isEmpty = !val || val === '—' || val.toLowerCase() === 'tbd' || val.toLowerCase() === 'free';
+  btn.style.display = isEmpty ? '' : 'none';
+}
+
+async function lookupMandateMarketValue() {
+  const name  = (document.getElementById('md-name')?.value || '').trim();
+  const club  = (document.getElementById('md-club')?.value || '').trim();
+  if (!name) return;
+  const key = localStorage.getItem('efp_anthropic_key');
+  if (!key) { showSnack('Enter your Anthropic API key first (Settings → API Key)', true); return; }
+  const btn = document.getElementById('md-val-lookup-btn');
+  if (btn) { btn.textContent = '⏳ Looking up…'; btn.disabled = true; }
+  try {
+    const resp = await fetch('/.netlify/functions/efp-vision', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ apiKey: key, textContent: club ? name + ' at ' + club : name, mode: 'player-research' })
+    });
+    const data = await resp.json();
+    const raw  = data?.content?.[0]?.text || '';
+    const json = raw.match(/\{[\s\S]*\}/)?.[0];
+    const res  = JSON.parse(json || '{}');
+    const val  = res.market_value || null;
+    if (val) {
+      document.getElementById('md-val').value = val;
+      _updateValLookupBtn();
+      showSnack('✓ Market value from Transfermarkt: ' + val, false);
+    } else {
+      showSnack('No market value found for ' + name, true);
+    }
+  } catch(e) {
+    showSnack('Lookup failed: ' + e.message, true);
+  } finally {
+    if (btn) { btn.textContent = '⚡ Lookup TM'; btn.disabled = false; }
+  }
+}
+
 function openMandateDetail(name, pos, age, club, val, source, status) {
   document.getElementById('md-name').value    = name;
   document.getElementById('md-pos').value     = pos;
@@ -13375,6 +13531,8 @@ function openMandateDetail(name, pos, age, club, val, source, status) {
 
   // ── Transfermarkt link ────────────────────────────────────────────────────
   _setMandateTmLink(name, club);
+  // ── Market value lookup button (shows when value is missing/TBD) ─────────
+  _updateValLookupBtn();
 
   // ── Pitch history panel ───────────────────────────────────────────────────
   const histEl = document.getElementById('md-pitch-history');
@@ -13733,8 +13891,11 @@ function saveMandateDetail() {
         <input class="field-input" id="md-club" placeholder="e.g. FC Twente">
       </div>
       <div>
-        <label class="field-label">Market Value</label>
-        <input class="field-input" id="md-val" placeholder="e.g. €3.5M">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">
+          <label class="field-label" style="margin:0">Market Value</label>
+          <button id="md-val-lookup-btn" class="btn btn-outline btn-xs" onclick="lookupMandateMarketValue()" style="display:none;font-size:10px;padding:2px 7px">⚡ Lookup TM</button>
+        </div>
+        <input class="field-input" id="md-val" placeholder="e.g. €3.5M" oninput="_updateValLookupBtn()">
       </div>
     </div>
     <div class="field">
