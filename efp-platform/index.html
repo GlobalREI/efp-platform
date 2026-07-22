@@ -5958,8 +5958,11 @@ function _renderContactsTable() {
       setEl('cd-last-contact', '—');
       const feed = document.getElementById('cd-feed');
       if (feed) _renderContactFeed(feed, c.name);
-      const drawer = document.getElementById('contact-drawer');
-      if (drawer) drawer.classList.add('open');
+      window._currentContactId   = c.id;
+      window._currentContactName = c.name;
+      window._currentContactClub = c.club || '';
+      go('contact-detail');
+      document.getElementById('topbar-title').textContent = c.name + (c.club ? ' · ' + c.club : '');
     });
     tbody.appendChild(tr);
   });
