@@ -4956,6 +4956,20 @@ tr:hover .pdr-btn     { opacity: 1; }
     <div class="drawer-close" onclick="closeDrawer('req')">✕</div>
   </div>
   <div class="drawer-body">
+    <!-- ── SCREENSHOT SCAN ── -->
+    <div id="r-scan-zone"
+      style="border:2px dashed var(--border);border-radius:10px;padding:14px 16px;margin-bottom:14px;text-align:center;cursor:pointer;transition:border-color .15s,background .15s"
+      onclick="triggerNeedScan()"
+      ondragover="event.preventDefault();this.style.borderColor='var(--navy)';this.style.background='var(--navy-dim)'"
+      ondragleave="this.style.borderColor='var(--border)';this.style.background=''"
+      ondrop="event.preventDefault();this.style.borderColor='var(--border)';this.style.background='';handleNeedScanFile(event.dataTransfer.files[0])">
+      <div style="font-size:22px;margin-bottom:4px">📷</div>
+      <div style="font-size:13px;font-weight:600;color:var(--navy)">Scan screenshot to auto-fill</div>
+      <div style="font-size:11px;color:var(--text3);margin-top:2px">Click or drag a screenshot — WhatsApp, email, notes, anything</div>
+      <div id="r-scan-status" style="margin-top:8px;font-size:12px;font-weight:600;min-height:16px"></div>
+    </div>
+    <input type="file" id="r-scan-input" accept="image/*" style="display:none" onchange="handleNeedScanFile(this.files[0])">
+
     <div class="field">
       <label class="field-label">Club <span class="req">*</span></label>
       <input class="field-input" id="r-club" list="efp-club-datalist" placeholder="Type to search clubs…" autocomplete="off">
@@ -8637,6 +8651,154 @@ function _resetReqDrawer() {
   ['r-club','r-agemin','r-agemax','r-budmin','r-budmax','r-contact','r-notes','r-nat'].forEach(id => {
     const el = document.getElementById(id); if(el) el.value='';
   });
+  const scanStatus = document.getElementById('r-scan-status');
+  if (scanStatus) scanStatus.innerHTML = '';
+  const scanInput = document.getElementById('r-scan-input');
+  if (scanInput) scanInput.value = '';
+}
+
+// ─── SCREENSHOT AUTO-FILL ───
+function triggerNeedScan() {
+  // Ensure API key is set
+  let key = localStorage.getItem('efp_anthropic_key');
+  if (!key) {
+    key = prompt('Enter your Anthropic API key to enable screenshot scanning:\n(Stored in your browser only — never shared)');
+    if (!key) return;
+    localStorage.setItem('efp_anthropic_key', key.trim());
+  }
+  document.getElementById('r-scan-input').click();
+}
+
+async function handleNeedScanFile(file) {
+  if (!file) return;
+
+  const statusEl = document.getElementById('r-scan-status');
+  const zoneEl   = document.getElementById('r-scan-zone');
+  const setStatus = (html) => { if (statusEl) statusEl.innerHTML = html; };
+
+  // Ensure API key
+  let key = localStorage.getItem('efp_anthropic_key');
+  if (!key) {
+    key = prompt('Enter your Anthropic API key:\n(Stored in your browser only)');
+    if (!key) return;
+    localStorage.setItem('efp_anthropic_key', key.trim());
+  }
+
+  setStatus('<span style="color:var(--text2)">⏳ Analysing screenshot…</span>');
+  if (zoneEl) zoneEl.style.pointerEvents = 'none';
+
+  try {
+    // Read file as base64
+    const base64 = await new Promise((res, rej) => {
+      const reader = new FileReader();
+      reader.onload  = e => res(e.target.result.split(',')[1]);
+      reader.onerror = rej;
+      reader.readAsDataURL(file);
+    });
+
+    const resp = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'x-api-key': key,
+        'anthropic-version': '2023-06-01',
+        'anthropic-dangerous-allow-browser': 'true',
+        'content-type': 'application/json'
+      },
+      body: JSON.stringify({
+        model: 'claude-haiku-4-5-20251001',
+        max_tokens: 800,
+        messages: [{
+          role: 'user',
+          content: [
+            { type: 'image', source: { type: 'base64', media_type: file.type || 'image/png', data: base64 } },
+            { type: 'text', text: `Extract football club recruitment info from this screenshot. Return ONLY a JSON object (no markdown, no explanation):
+{
+  "club": "club name or null",
+  "positions": ["array of positions — ONLY from: GK RB CB LB CDM CM CAM RW LW SS ST"],
+  "age_min": null_or_number,
+  "age_max": null_or_number,
+  "budget_min": null_or_number_in_euros,
+  "budget_max": null_or_number_in_euros,
+  "deal_type": "Permanent|Loan|Loan with Option|Loan with Obligation|Flexible|null",
+  "preferred_foot": "Either|Right|Left",
+  "nationality": "any passport/nationality requirements or null",
+  "contact": "contact name and role or null",
+  "priority": "Urgent|High|Medium|Low",
+  "notes": "any other relevant details or null"
+}
+Map position names: striker→ST, winger→RW or LW, defensive midfielder/6→CDM, central midfielder/8→CM, attacking midfielder/10→CAM, right back→RB, left back→LB, centre back→CB, goalkeeper→GK, second striker→SS.
+For budgets, extract the number only (e.g. "€3M" → 3000000, "1.5M" → 1500000, "600k" → 600000).` }
+          ]
+        }]
+      })
+    });
+
+    if (!resp.ok) {
+      const err = await resp.json().catch(() => ({}));
+      if (resp.status === 401) {
+        localStorage.removeItem('efp_anthropic_key');
+        throw new Error('Invalid API key — please try again');
+      }
+      throw new Error(err.error?.message || 'API error ' + resp.status);
+    }
+
+    const data = await resp.json();
+    let raw = (data.content?.[0]?.text || '').trim();
+    // Strip any accidental markdown fences
+    raw = raw.replace(/^```[a-z]*\n?/i, '').replace(/```\s*$/, '').trim();
+    const j = JSON.parse(raw);
+
+    // ── Fill form fields ──
+    let filled = 0;
+
+    if (j.club) {
+      document.getElementById('r-club').value = j.club; filled++;
+    }
+    if (Array.isArray(j.positions) && j.positions.length) {
+      // Reset current selection first
+      _rSelectedPos = [];
+      document.querySelectorAll('.pos-chip-btn').forEach(b => b.classList.remove('pos-selected'));
+      const chipsEl = document.getElementById('r-pos-chips');
+      if (chipsEl) chipsEl.innerHTML = '';
+      j.positions.forEach(p => rTogglePos(p.toUpperCase().trim()));
+      filled++;
+    }
+    if (j.age_min) { document.getElementById('r-agemin').value = j.age_min; filled++; }
+    if (j.age_max) { document.getElementById('r-agemax').value = j.age_max; filled++; }
+    if (j.budget_min) {
+      const el = document.getElementById('r-budmin');
+      if (el) { el.value = Number(j.budget_min).toLocaleString('de-DE'); _valBlur(el); filled++; }
+    }
+    if (j.budget_max) {
+      const el = document.getElementById('r-budmax');
+      if (el) { el.value = Number(j.budget_max).toLocaleString('de-DE'); _valBlur(el); filled++; }
+    }
+    if (j.deal_type && j.deal_type !== 'null') {
+      const el = document.getElementById('r-deal');
+      if (el) { el.value = j.deal_type; filled++; }
+    }
+    if (j.preferred_foot && j.preferred_foot !== 'Either') {
+      const el = document.getElementById('r-foot');
+      if (el) { el.value = j.preferred_foot; filled++; }
+    }
+    if (j.nationality) { document.getElementById('r-nat').value = j.nationality; filled++; }
+    if (j.contact)     { document.getElementById('r-contact').value = j.contact; filled++; }
+    if (j.priority) {
+      const el = document.getElementById('r-prio');
+      if (el) { el.value = j.priority; filled++; }
+    }
+    if (j.notes) { document.getElementById('r-notes').value = j.notes; filled++; }
+
+    setStatus(`<span style="color:var(--green)">✓ ${filled} field${filled !== 1 ? 's' : ''} filled — review &amp; adjust below</span>`);
+
+  } catch(e) {
+    console.error('Scan error:', e);
+    setStatus(`<span style="color:var(--red)">✗ ${e.message}</span>`);
+  }
+
+  if (zoneEl) zoneEl.style.pointerEvents = '';
+  const scanInput = document.getElementById('r-scan-input');
+  if (scanInput) scanInput.value = ''; // allow re-scan of same file
 }
 
 function submitRequirement() {
