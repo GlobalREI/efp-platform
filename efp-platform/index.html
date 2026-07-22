@@ -6041,10 +6041,14 @@ function _renderContactsTable() {
       <td>${c.role||''}</td>
       <td>${c.club||''}</td>
       <td style="font-size:11px;color:var(--text3)">${c.country||''}</td>
-      <td style="font-size:12px;color:var(--text2)">${c.email||''}</td>
-      <td style="font-size:11px;color:var(--text3)">${c.notes||''}</td>
+      <td style="font-size:12px;color:var(--text2)">
+        ${c.email ? `<div>${c.email}</div>` : ''}
+        ${c.phone ? `<div style="font-size:11px;color:var(--text3);margin-top:2px">📞 ${c.phone}</div>` : ''}
+        ${c.wa && c.wa !== c.phone ? `<div style="font-size:11px;color:var(--text3);margin-top:1px">💬 ${c.wa}</div>` : ''}
+      </td>
+      <td style="font-size:11px;color:var(--text3)">${c.notes || c.insight || ''}</td>
       <td><div style="display:flex;align-items:center;gap:6px">
-        <div class="status"><span class="dot ${c.isRich?'dot-green':'dot-navy'}"></span> ${c.status||'New'}</div>
+        <div class="status"><span class="dot ${c.stageColor ? 'dot-'+c.stageColor : (c.isRich?'dot-green':'dot-navy')}"></span> ${c.stage || c.status || 'New'}</div>
         <button onclick="deleteContact('${c.id}',this)" title="Delete"
           style="background:none;border:none;color:var(--red);cursor:pointer;font-size:13px;padding:2px 4px;opacity:.55">✕</button>
         <button onclick="_editContact('${c.id}')" title="Edit"
@@ -6105,8 +6109,10 @@ function _renderMandatesTable() {
     const mContactHtml = mContact !== '—'
       ? `<span class="feed-link" onclick="event.stopPropagation();_openContactByName('${mContact.replace(/'/g,"\\'")}')">${mContact}</span>`
       : '—';
+    const mNotes = m.notes || '';
+    const mNotesSub = mNotes ? `<div style="font-size:11px;color:var(--text3);margin-top:2px;max-width:220px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${mNotes}</div>` : '';
     tr.innerHTML = `
-      <td><strong>${m.name}</strong></td>
+      <td><strong>${m.name}</strong>${mNotesSub}</td>
       <td>${posStr}</td>
       <td>${m.age||'—'}</td>
       <td>${mClubHtml}</td>
@@ -7151,9 +7157,12 @@ function runMatchEngine() {
   const existing = {};
   matchesData.forEach(m => { existing[m.id] = m; });
 
-  const allPlayers = allMandates.length
-    ? allMandates.map(m => ({ name:m.name, pos:m.position||m.pos, age:parseInt(m.age)||null, club:m.club, val:m.value||m.val }))
-    : [...MANDATES_DB, ...mandatesAdded.map(m => ({ name:m.name, pos:m.position||m.pos, age:parseInt(m.age)||null, club:m.club, val:m.value||m.val }))];
+  // Merge allMandates + mandatesAdded (deduplicate by lowercase name)
+  const _toPlayer = m => ({ name:m.name, pos:m.position||m.pos||'', age:parseInt(m.age)||null, club:m.club, val:m.value||m.val });
+  const _basePool = allMandates.length ? allMandates.map(_toPlayer) : MANDATES_DB.map(_toPlayer);
+  const _addedPool = mandatesAdded.map(_toPlayer);
+  const _seen = new Set(_basePool.map(p => (p.name||'').toLowerCase()));
+  const allPlayers = [..._basePool, ..._addedPool.filter(p => !_seen.has((p.name||'').toLowerCase()))];
   // Normalise a need record to match engine format regardless of source
   const _normaliseNeed = n => ({
     club:      n.club,
@@ -8051,9 +8060,9 @@ function _appendContactRow(c, highlight) {
       ${c.phone ? `<div style="font-size:11px;color:var(--text3);margin-top:2px">📞 ${c.phone}</div>` : ''}
       ${c.wa && c.wa !== c.phone ? `<div style="font-size:11px;color:var(--text3);margin-top:1px">💬 ${c.wa}</div>` : ''}
     </td>
-    <td style="font-size:11px;color:var(--text3)">${c.notes||''}</td>
+    <td style="font-size:11px;color:var(--text3)">${c.notes || c.insight || ''}</td>
     <td><div style="display:flex;align-items:center;gap:6px">
-      <div class="status"><span class="dot dot-navy"></span> ${c.status||'New'}</div>
+      <div class="status"><span class="dot ${c.stageColor ? 'dot-'+c.stageColor : (c.isRich?'dot-green':'dot-navy')}"></span> ${c.stage || c.status || 'New'}</div>
       <button onclick="deleteContact('${c.id}',this)" title="Delete contact"
         style="background:none;border:none;color:var(--red);cursor:pointer;font-size:13px;padding:2px 4px;opacity:.55;line-height:1">✕</button>
     </div></td>`;
@@ -9107,29 +9116,43 @@ function filterClubPitches(q) {
 function _appendNeedRow(n) {
   const tbody = document.querySelector('#view-needs .data-table tbody');
   if (!tbody) return;
-  const age = (n.ageMin||n.ageMax) ? `${n.ageMin||''}–${n.ageMax||''}` : '—';
   const _b = (v) => _normVal(v) || v || '';
-  const bud = (n.budMin||n.budMax) ? `${_b(n.budMin)||''}–${_b(n.budMax)||''}`.replace(/^–/,'–').replace(/–$/,'') : '—';
-  const tr  = document.createElement('tr');
+  const budStr = (n.budMin || n.budMax)
+    ? [_b(n.budMin), _b(n.budMax)].filter(Boolean).join('–')
+    : (n.budget && n.budget !== '—' ? _b(n.budget) : '—');
+  const posStr = Array.isArray(n.positions) ? n.positions.join(' · ') : (n.pos || '—');
+  const urgStr = n.urgency || n.prio || 'open';
+  const isUrgent = urgStr === 'urgent' || urgStr === 'Urgent';
+  const dotCls = isUrgent ? 'dot-red' : 'dot-amber';
+  const statusTxt = isUrgent ? 'Urgent' : (n.prio || 'Open');
+  const contactStr = n.contact || '—';
+  const clubMeta = _allClubs().find(c => c.name === n.club || c.key === n.club);
+  const flag   = n.flag   || clubMeta?.flag   || '';
+  const league = n.league || clubMeta?.league || '';
+  const leagueSub = (flag || league) ? `<div style="font-size:11px;color:var(--text3)">${flag}${flag && league ? ' ' : ''}${league}</div>` : '';
+  const nClubHtml = `<span class="feed-link" onclick="event.stopPropagation();openClubEdit('${n.club.replace(/'/g,"\\'")}')">${n.club}</span>`;
+  const nContactHtml = (contactStr && contactStr !== '—')
+    ? `<span class="feed-link" onclick="event.stopPropagation();_openContactByName('${contactStr.replace(/'/g,"\\'")}')">${contactStr}</span>`
+    : '—';
+  const tr = document.createElement('tr');
   tr.dataset.needId = n.id;
   tr.style.cursor = 'pointer';
   tr.innerHTML = `
-    <td><strong>${n.club}</strong></td>
-    <td>${n.pos}</td>
-    <td>${age}</td>
-    <td>${bud}</td>
-    <td><span class="badge ${n.prio==='Urgent'?'badge-urgent':n.prio==='High'?'badge-high':'badge-med'}">${n.prio}</span></td>
-    <td style="font-size:12px">${n.contact||'—'}</td>
+    <td><strong>${nClubHtml}</strong>${leagueSub}</td>
+    <td><strong>${posStr}</strong></td>
+    <td style="font-size:12px">${n.notes || ''}</td>
+    <td><strong style="color:var(--green)">${budStr}</strong></td>
+    <td><strong>Summer 2026</strong></td>
+    <td><div style="font-size:12px">${nContactHtml}</div></td>
     <td><div style="display:flex;align-items:center;gap:6px">
-      <div class="status"><span class="dot dot-amber"></span> Open</div>
+      <div class="status"><span class="dot ${dotCls}"></span> ${statusTxt}</div>
       <button onclick="deleteNeed('${n.id}',this)" title="Delete"
         style="background:none;border:none;color:var(--red);cursor:pointer;font-size:13px;padding:2px 4px;opacity:.55">✕</button>
     </div></td>`;
   tbody.appendChild(tr);
-  // Wire the click → detail drawer immediately (initNeedsRows will skip if pdrInit already set)
   tr.addEventListener('click', function(e) {
     if (e.target.closest('button')) return;
-    openNeedDetail(n.club, n.pos, n.budMin||'', n.budMax||'', n.contact||'', n.prio||'Medium', n.notes||'', n.id);
+    openNeedDetail(n.club, posStr, n.budMin||'', n.budMax||'', contactStr, statusTxt, n.notes||'', n.id);
   });
 }
 
@@ -9274,9 +9297,9 @@ function initNeedRows() {
     // Infer status/prio from status cell
     const statusText = cells[6]?.textContent?.trim() || '';
     const prio = statusText.toLowerCase().includes('urgent') ? 'Urgent' : statusText.toLowerCase().includes('high') ? 'High' : 'Medium';
-    // Notes from profile cell
+    // Notes from notes cell (may be plain text or wrapped in a div)
     const noteDiv = cells[2]?.querySelector('div');
-    const notes   = noteDiv?.textContent?.trim() || '';
+    const notes   = noteDiv?.textContent?.trim() || cells[2]?.textContent?.trim() || '';
     const needId  = tr.dataset.needId || null;
 
     tr.addEventListener('click', function(e) {
@@ -10553,8 +10576,9 @@ function addMandateRow(d) {
         val: _normVal(d.value)||d.value||'', contact: d.contact||'', statusText: 'New Mandate', _tr: tr
       });
     };
+    const dNotesSub = d.notes ? `<div style="font-size:11px;color:var(--text3);margin-top:2px;max-width:220px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${d.notes}</div>` : '';
     tr.innerHTML = `
-      <td><strong>${d.name}</strong></td>
+      <td><strong>${d.name}</strong>${dNotesSub}</td>
       <td>${d.position||'—'}</td>
       <td>${d.age||'—'}</td>
       <td>${d.club||'—'}</td>
@@ -12912,7 +12936,7 @@ const CLUB_NEEDS_DB = [
 
 // Maps a position string (e.g. "CM/CDM/CAM", "Left Winger", "ST/SS") → canonical tags
 function getPositionTags(posStr) {
-  const p = posStr.toUpperCase();
+  const p = (posStr || '').toUpperCase();
   const tags = new Set();
   if (/GK|GOAL/.test(p))                             tags.add('GK');
   if (/\bCB\b|CENTRE.?BACK|CENTER.?BACK/.test(p))   tags.add('CB');
@@ -13401,7 +13425,7 @@ function initNeedsRows() {
     const budget = rawBudget === '—' ? '—' : rawBudget.split(/–/).map(p => _normVal(p.trim()) || p.trim()).join('–');
     if (cells[3] && budget !== rawBudget) cells[3].textContent = budget;
     const contact  = cells[5]?.textContent?.trim().replace(/\s+/g,' ') || '—';
-    const notes    = cells[2]?.querySelector('div')?.textContent?.trim() || '';
+    const notes    = cells[2]?.querySelector('div')?.textContent?.trim() || cells[2]?.textContent?.trim() || '';
     const statusEl = cells[cells.length-1]?.querySelector('.status');
     const status   = statusEl ? statusEl.textContent.trim() : '';
     const prio     = status.toLowerCase().includes('urgent') ? 'Urgent' : status.toLowerCase().includes('high') ? 'High' : 'Medium';
