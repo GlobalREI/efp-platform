@@ -9346,7 +9346,10 @@ function _refreshNeedDetailIfOpen() {
 function openEmailModal() {
   // Personalise with current contact
   const name    = window._currentContactName || '';
-  const club    = window._currentContactClub || '';
+  // Club: use stored value, fall back to parsing the cd-role display line
+  const roleText = document.getElementById('cd-role')?.textContent || '';
+  const clubFromRole = roleText.split('·').slice(1).map(s => s.trim()).find(s => s && s !== 'undefined') || '';
+  const club    = window._currentContactClub || clubFromRole || '';
   const emailEl = document.getElementById('cd-email');
   const email   = emailEl ? (emailEl.querySelector('a')?.textContent || emailEl.textContent || '').trim() : '';
   const firstName = name.split(' ')[0] || 'there';
@@ -9395,7 +9398,10 @@ function openInOutlook() {
 // ─── DRAFT WHATSAPP ───
 function openWAModal() {
   const name      = window._currentContactName || '';
-  const club      = window._currentContactClub || '';
+  // Club: use stored value, fall back to parsing the cd-role display line
+  const roleTextWA = document.getElementById('cd-role')?.textContent || '';
+  const clubFromRoleWA = roleTextWA.split('·').slice(1).map(s => s.trim()).find(s => s && s !== 'undefined') || '';
+  const club      = window._currentContactClub || clubFromRoleWA || '';
   const waEl      = document.getElementById('cd-wa');
   const phoneEl   = document.getElementById('cd-phone');
   const wa        = waEl    ? waEl.textContent.trim()    : '';
@@ -9807,38 +9813,66 @@ function _setOcrStatus(msg, show) {
 
 async function _processImportImage(file) {
   // Show thumbnail
-  const reader = new FileReader();
-  reader.onload = (ev) => {
+  const reader2 = new FileReader();
+  reader2.onload = (ev) => {
     const img = document.getElementById('imp-preview-img');
     const zone = document.getElementById('imp-zone-placeholder');
     img.src = ev.target.result;
     img.style.display = '';
     if (zone) zone.style.display = 'none';
   };
-  reader.readAsDataURL(file);
+  reader2.readAsDataURL(file);
 
-  _setOcrStatus('Loading OCR engine…', true);
+  _setOcrStatus('Analysing image with AI…', true);
 
   try {
-    await _loadTesseract();
-    _setOcrStatus('Reading screenshot…', true);
+    // Get or prompt for API key
+    let apiKey = localStorage.getItem('efp_anthropic_key') || '';
+    if (!apiKey) {
+      apiKey = prompt('Enter your Anthropic API key to use AI image analysis:');
+      if (!apiKey) { _setOcrStatus('API key required', true); return; }
+      localStorage.setItem('efp_anthropic_key', apiKey.trim());
+    }
+    apiKey = apiKey.trim();
 
-    // Run Tesseract OCR
-    const result = await Tesseract.recognize(file, 'eng', {
-      logger: m => { if (m.status === 'recognizing text') _setOcrStatus(`Reading… ${Math.round(m.progress * 100)}%`, true); }
+    // Convert file to base64
+    const b64 = await new Promise((res, rej) => {
+      const r = new FileReader();
+      r.onload = e => res(e.target.result.split(',')[1]);
+      r.onerror = () => rej(new Error('File read failed'));
+      r.readAsDataURL(file);
     });
-    const text = result.data.text;
-    _setOcrStatus('Parsing player data…', true);
 
-    const parsed = _parseTMOcr(text);
+    _setOcrStatus('Extracting player from screenshot…', true);
+
+    const resp = await fetch('/.netlify/functions/efp-vision', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ apiKey, imageBase64: b64, mediaType: file.type || 'image/png', mode: 'bulk-extract' })
+    });
+    const data = await resp.json();
+    const raw  = data?.content?.[0]?.text || '';
+    const json = raw.match(/\[[\s\S]*\]/)?.[0];
+    const players = JSON.parse(json || '[]');
+
     _setOcrStatus('', false);
 
-    // Show result (use local DB to fill gaps if name matches)
-    showImportResult(parsed.name, parsed.club, '', parsed._asImport ? parsed : null);
+    if (players.length > 0) {
+      const p = players[0];
+      // Map bulk-extract fields to import result format
+      const asImport = {
+        name: p.name || '', club: p.club || '', position: p.position || '',
+        age: p.age || '', value: p.value || '', nationality: p.nationality || '',
+        contract: p.contract || '', notes: p.notes || '', _asImport: true
+      };
+      showImportResult(asImport.name, asImport.club, '', asImport);
+    } else {
+      _setOcrStatus('No player found — please type the name below', true);
+    }
 
   } catch(err) {
-    _setOcrStatus('OCR failed — please type player name below', true);
-    console.warn('OCR error:', err);
+    _setOcrStatus('AI analysis failed — please type player name below', true);
+    console.warn('Vision error:', err);
   }
 }
 
