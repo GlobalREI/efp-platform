@@ -5477,6 +5477,7 @@ function efpInitFirebase() {
         allMandates.forEach(m => { if (m.name) m.name = m.name.replace(/\s+\d+\s+pitched.*$/i, '').trim(); });
         _renderMandatesTable();
         _efpMigrated = true;
+        if (typeof runMatchEngine === 'function') setTimeout(runMatchEngine, 300);
       }
 
       // ── Unified needs (post-migration) — allClubs already loaded above so flag/league lookup works ──
@@ -5484,6 +5485,7 @@ function efpInitFirebase() {
         allNeeds = Array.isArray(d.allNeeds) ? d.allNeeds : Object.values(d.allNeeds);
         _renderNeedsTable();
         _efpMigrated = true;
+        if (typeof runMatchEngine === 'function') setTimeout(runMatchEngine, 300);
       }
 
       // ── Unified tasks (post-migration) ──
@@ -7152,9 +7154,20 @@ function runMatchEngine() {
   const allPlayers = allMandates.length
     ? allMandates.map(m => ({ name:m.name, pos:m.position||m.pos, age:parseInt(m.age)||null, club:m.club, val:m.value||m.val }))
     : [...MANDATES_DB, ...mandatesAdded.map(m => ({ name:m.name, pos:m.position||m.pos, age:parseInt(m.age)||null, club:m.club, val:m.value||m.val }))];
+  // Normalise a need record to match engine format regardless of source
+  const _normaliseNeed = n => ({
+    club:      n.club,
+    flag:      n.flag  || '🌍',
+    league:    n.league|| '',
+    positions: n.positions && n.positions.length ? n.positions : (n.pos ? n.pos.split(/[\s·,]+/).filter(Boolean) : []),
+    budget:    n.budget || n.budMax || n.budMin || '—',
+    contact:   n.contact || '',
+    urgency:   n.urgency || (n.prio === 'Urgent' ? 'urgent' : 'open'),
+    notes:     n.notes || ''
+  });
   const _runNeeds = allNeeds.length
-    ? allNeeds
-    : [...CLUB_NEEDS_DB, ...needsAdded.map(n => ({ club:n.club, flag:'🌍', league:'', positions: n.pos ? [n.pos] : [], budget: n.budMax||n.budMin||'—', contact:n.contact, urgency:n.prio==='Urgent'?'urgent':'open', notes:'' }))];
+    ? allNeeds.map(_normaliseNeed)
+    : [...CLUB_NEEDS_DB, ...needsAdded].map(_normaliseNeed);
 
   const newMatches = [];
   const seen = new Set();
@@ -7231,6 +7244,14 @@ function renderMatches() {
     if (!fStatus && m.status === 'Not Relevant') return false;
     if (fStatus && m.status !== fStatus) return false;
     return true;
+  });
+
+  // Sort: Closed always goes to the very end, then by score descending
+  filtered.sort((a, b) => {
+    const aClosed = a.status === 'Closed' ? 1 : 0;
+    const bClosed = b.status === 'Closed' ? 1 : 0;
+    if (aClosed !== bClosed) return aClosed - bClosed;
+    return b.score - a.score;
   });
 
   // KPIs
@@ -8946,6 +8967,7 @@ function submitRequirement() {
   _resetReqDrawer();
   showSnack(`✓ Requirement added for ${club} (${pos})`, false);
   fbSave();
+  setTimeout(runMatchEngine, 400); // auto-update AI Matches
   _refreshAllInterconnections();
   renderDashboard();
   _updateNeedsSubtitle();
@@ -10546,6 +10568,8 @@ function addMandateRow(d) {
   }
   // Update subtitle count accurately
   _updateMandateSubtitle();
+  // Auto-update AI Matches with the new mandate
+  setTimeout(runMatchEngine, 400);
 
   // 2. Add player to the New Pitch dropdown
   const sel = document.getElementById('fp-player');
