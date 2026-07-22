@@ -8696,40 +8696,14 @@ async function handleNeedScanFile(file) {
       reader.readAsDataURL(file);
     });
 
-    const resp = await fetch('https://api.anthropic.com/v1/messages', {
+    // Route through Netlify function to avoid mobile CORS restrictions
+    const resp = await fetch('/.netlify/functions/efp-vision', {
       method: 'POST',
-      headers: {
-        'x-api-key': key,
-        'anthropic-version': '2023-06-01',
-        'anthropic-dangerous-allow-browser': 'true',
-        'content-type': 'application/json'
-      },
+      headers: { 'content-type': 'application/json' },
       body: JSON.stringify({
-        model: 'claude-haiku-4-5-20251001',
-        max_tokens: 800,
-        messages: [{
-          role: 'user',
-          content: [
-            { type: 'image', source: { type: 'base64', media_type: file.type || 'image/png', data: base64 } },
-            { type: 'text', text: `Extract football club recruitment info from this screenshot. Return ONLY a JSON object (no markdown, no explanation):
-{
-  "club": "club name or null",
-  "positions": ["array of positions — ONLY from: GK RB CB LB CDM CM CAM RW LW SS ST"],
-  "age_min": null_or_number,
-  "age_max": null_or_number,
-  "budget_min": null_or_number_in_euros,
-  "budget_max": null_or_number_in_euros,
-  "deal_type": "Permanent|Loan|Loan with Option|Loan with Obligation|Flexible|null",
-  "preferred_foot": "Either|Right|Left",
-  "nationality": "any passport/nationality requirements or null",
-  "contact": "contact name and role or null",
-  "priority": "Urgent|High|Medium|Low",
-  "notes": "any other relevant details or null"
-}
-Map position names: striker→ST, winger→RW or LW, defensive midfielder/6→CDM, central midfielder/8→CM, attacking midfielder/10→CAM, right back→RB, left back→LB, centre back→CB, goalkeeper→GK, second striker→SS.
-For budgets, extract the number only (e.g. "€3M" → 3000000, "1.5M" → 1500000, "600k" → 600000).` }
-          ]
-        }]
+        apiKey: key,
+        imageBase64: base64,
+        mediaType: file.type || 'image/png'
       })
     });
 
