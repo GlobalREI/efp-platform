@@ -1478,6 +1478,13 @@ body {
     padding: 20px 16px calc(env(safe-area-inset-bottom, 0px) + 20px);
     margin: 0;
   }
+  /* ── BULK IMPORT MODAL — mobile fixes ─────────────────────────────────── */
+  #bulk-import-modal { padding-top: 0 !important; }
+  .bcard-grid3 { grid-template-columns: 1fr 1fr !important; }
+  .bcard-grid2 { grid-template-columns: 1fr !important; }
+  #bulk-tab-text, #bulk-tab-image { font-size: 13px; }
+  #md-tm-link { font-size: 11px; padding: 5px 10px; }
+
   /* Add pitch modal — bottom sheet */
   #apm-overlay { align-items: flex-end; }
   #apm-box {
@@ -10300,7 +10307,7 @@ function renderBulkPreviewCards() {
           <button class="btn btn-outline btn-xs" id="bulk-approve-btn-${p._id}" onclick="approveBulkPlayer('${p._id}')">+ Add</button>
         </div>
       </div>
-      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-bottom:8px">
+      <div class="bcard-grid3" style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-bottom:8px">
         <div>
           <div style="font-size:10px;color:var(--text3);font-weight:600;letter-spacing:.05em;margin-bottom:3px">POSITION</div>
           <input class="field-input" id="bcard-pos-${p._id}" value="${p.position||''}" placeholder="e.g. CM" style="font-size:12px;padding:5px 8px">
@@ -10314,7 +10321,7 @@ function renderBulkPreviewCards() {
           <input class="field-input" id="bcard-val-${p._id}" value="${p.value||''}" placeholder="e.g. €3M" style="font-size:12px;padding:5px 8px">
         </div>
       </div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:8px">
+      <div class="bcard-grid2" style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:8px">
         <div>
           <div style="font-size:10px;color:var(--text3);font-weight:600;letter-spacing:.05em;margin-bottom:3px">CURRENT CLUB</div>
           <input class="field-input" id="bcard-club-${p._id}" value="${p.club||''}" placeholder="e.g. Club Brugge" style="font-size:12px;padding:5px 8px">
