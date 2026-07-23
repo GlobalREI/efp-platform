@@ -6051,7 +6051,7 @@ function _renderContactsTable() {
         ${c.phone ? `<div style="font-size:11px;color:var(--text3);margin-top:2px">📞 ${c.phone}</div>` : ''}
         ${c.wa && c.wa !== c.phone ? `<div style="font-size:11px;color:var(--text3);margin-top:1px">💬 ${c.wa}</div>` : ''}
       </td>
-      <td style="font-size:11px;color:var(--text3)">${c.notes || c.insight || ''}</td>
+      <td style="font-size:11px;color:var(--text3)">${(c.notes||'').length > 60 ? c.notes.slice(0,58)+'…' : (c.notes||'')}</td>
       <td><div style="display:flex;align-items:center;gap:6px">
         <div class="status"><span class="dot ${c.stageColor ? 'dot-'+c.stageColor : (c.isRich?'dot-green':'dot-navy')}"></span> ${c.stage || c.status || 'New'}</div>
         <button onclick="deleteContact('${c.id}',this)" title="Delete"
@@ -6059,34 +6059,6 @@ function _renderContactsTable() {
         <button onclick="_editContact('${c.id}')" title="Edit"
           style="background:none;border:none;color:var(--text2);cursor:pointer;font-size:13px;padding:2px 4px;opacity:.65">✎</button>
       </div></td>`;
-    tr.addEventListener('click', e => {
-      if (e.target.closest('button')) return;
-      if (c.isRich) { openContact(null, c.id); return; }
-      // For simple contacts: show basic detail panel
-      const setEl = (id, v) => { const el = document.getElementById(id); if (el) el.textContent = v; };
-      const av = document.getElementById('cd-avatar');
-      if (av) { av.textContent = ini; av.style.background = col; }
-      setEl('cd-name', c.name);
-      setEl('cd-role', (c.role||'') + (c.club ? ' · ' + c.club : ''));
-      const em = document.getElementById('cd-email');
-      if (em) em.innerHTML = c.email ? '<a>' + c.email + '</a>' : '—';
-      setEl('cd-phone', c.phone || '—');
-      setEl('cd-wa', c.wa || '—');
-      setEl('cd-linkedin', c.linkedin || '—');
-      setEl('cd-location-tag', c.club ? '🏟 ' + c.club : '—');
-      const bar = document.getElementById('cd-score-bar');
-      if (bar) bar.innerHTML = Array(10).fill('<div class="score-seg"></div>').join('');
-      setEl('cd-score-text', '— / 10 · New Contact');
-      setEl('cd-score-tag', 'Relationship — / 10');
-      setEl('cd-last-contact', '—');
-      const feed = document.getElementById('cd-feed');
-      if (feed) _renderContactFeed(feed, c.name);
-      window._currentContactId   = c.id;
-      window._currentContactName = c.name;
-      window._currentContactClub = c.club || '';
-      go('contact-detail');
-      document.getElementById('topbar-title').textContent = c.name + (c.club ? ' · ' + c.club : '');
-    });
     tbody.appendChild(tr);
   });
   // Update subtitle
@@ -8090,7 +8062,7 @@ function _appendContactRow(c, highlight) {
       ${c.phone ? `<div style="font-size:11px;color:var(--text3);margin-top:2px">📞 ${c.phone}</div>` : ''}
       ${c.wa && c.wa !== c.phone ? `<div style="font-size:11px;color:var(--text3);margin-top:1px">💬 ${c.wa}</div>` : ''}
     </td>
-    <td style="font-size:11px;color:var(--text3)">${c.notes || c.insight || ''}</td>
+    <td style="font-size:11px;color:var(--text3)">${(c.notes||'').length > 60 ? c.notes.slice(0,58)+'…' : (c.notes||'')}</td>
     <td><div style="display:flex;align-items:center;gap:6px">
       <div class="status"><span class="dot ${c.stageColor ? 'dot-'+c.stageColor : (c.isRich?'dot-green':'dot-navy')}"></span> ${c.stage || c.status || 'New'}</div>
       <button onclick="deleteContact('${c.id}',this)" title="Delete contact"
@@ -12884,95 +12856,86 @@ function initContactTableClicks() {
   if (!tbody || tbody.dataset.delegated) return;
   tbody.dataset.delegated = '1';
 
-  // Build name → contact lookup — prefer allContacts (post-migration), fall back to CONTACTS_DB
-  const lookup = {};
-  if (allContacts.length) {
-    allContacts.filter(c => c.isRich).forEach(c => {
-      // Find which clubKey this rich contact belongs to
+  // Single delegated listener — handles ALL rows (rich + non-rich), including dynamically added ones.
+  // Looks up the contact from allContacts by data-contact-id at click-time (no pre-built name lookup,
+  // no DOM scraping) so newly added contacts always work and data is always correct.
+  tbody.addEventListener('click', function(e) {
+    if (e.target.closest('button')) return;
+    const tr = e.target.closest('tr');
+    if (!tr) return;
+
+    // Find contact in allContacts by ID stored in data attribute
+    const cid = tr.dataset.contactId;
+    const c   = cid ? allContacts.find(x => x.id === cid) : null;
+
+    if (c && c.isRich) {
+      // Rich contact: open full profile with relationship intel
       let clubKey = null;
       Object.entries(CONTACTS_DB).forEach(([k, arr]) => {
         if (arr.find(x => x.id === c.id)) clubKey = k;
       });
-      lookup[c.name.toLowerCase()] = { clubKey, id: c.id };
-    });
-  } else {
-    Object.entries(CONTACTS_DB).forEach(([clubKey, contacts]) => {
-      contacts.forEach(c => { lookup[c.name.toLowerCase()] = { clubKey, id: c.id }; });
-    });
-  }
-
-  // Single delegated listener — handles all rows, including dynamically added ones
-  tbody.addEventListener('click', function(e) {
-    // Ignore clicks on action buttons (delete, etc.)
-    if (e.target.closest('button')) return;
-    const tr = e.target.closest('tr');
-    if (!tr) return;
-    const nameEl = tr.querySelector('strong');
-    if (!nameEl) return;
-
-    const key   = nameEl.textContent.trim().toLowerCase();
-    const match = lookup[key];
-    if (match) {
-      openContact(match.clubKey, match.id);
+      openContact(clubKey, c.id);
       return;
     }
 
-    // Fallback: show basic info for contacts not in CONTACTS_DB
-    const cells   = tr.querySelectorAll('td');
-    const name    = nameEl.textContent.trim();
-    const role    = cells[1] ? cells[1].textContent.trim() : '';
-    const club    = cells[2] ? cells[2].textContent.trim() : '';
-    const region  = cells[3] ? cells[3].textContent.trim() : '';
-    const email   = cells[4] ? cells[4].textContent.trim() : '';
-    const initials = name.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase();
-
-    const setEl     = (id, val) => { const e = document.getElementById(id); if (e) e.textContent = val; };
-    const setElHTML = (id, val) => { const e = document.getElementById(id); if (e) e.innerHTML   = val; };
-    const av = document.getElementById('cd-avatar');
-    if (av) { av.textContent = initials; av.style.background = '#374151'; }
-    setEl('cd-name', name);
-    setEl('cd-role', role + (club ? ' · ' + club : ''));
-    if (email) {
-      const em = document.getElementById('cd-email');
-      if (em) em.innerHTML = '<a>' + email + '</a>';
-    } else { setEl('cd-email', '—'); }
-    setEl('cd-phone', '—');
-    setEl('cd-wa', '—');
-    setEl('cd-linkedin', '—');
-    setEl('cd-location-tag', club ? '🏟 ' + club : '—');
-    // Score bar — blank for new contacts
-    const bar = document.getElementById('cd-score-bar');
-    if (bar) bar.innerHTML = Array(10).fill('<div class="score-seg"></div>').join('');
-    setEl('cd-score-text', '— / 10 · New Contact');
-    setEl('cd-score-tag', 'Relationship — / 10');
-    setEl('cd-last-contact', '—');
-    setEl('cd-next-followup', 'Reach out and build the relationship');
-    const dt2 = document.getElementById('cd-days-tag');
-    if (dt2) { dt2.textContent = '⏰ No contact yet'; dt2.style.color = 'var(--text3)'; dt2.style.borderColor = ''; }
-    setElHTML('cd-stage', '<div class="status"><span class="dot dot-navy"></span> New Contact</div>');
-    setElHTML('cd-insight-text', 'Full relationship profile not yet available for <strong>' + name + '</strong>. Contact them via Beeper or email to begin tracking activity.');
-    // Pitches panel
-    const ptitle = document.getElementById('cd-pitches-title');
-    const plist  = document.getElementById('cd-pitches-list');
-    if (ptitle) ptitle.textContent = 'Active Pitches' + (club ? ' to ' + club : '');
-    if (plist) {
-      const cp = pitches.filter(p => club && (p.club.toLowerCase().includes(club.toLowerCase()) || club.toLowerCase().includes(p.club.toLowerCase())));
-      const dotMap = { sent:'amber', awaiting:'amber', feedback:'amber', interest:'green', negotiations:'green', done:'green', rejected:'red' };
-      const labelMap = { sent:'Sent', awaiting:'Awaiting Reply', feedback:'Feedback', interest:'Active Interest', negotiations:'Negotiating', done:'Done', rejected:'Not Interested' };
-      plist.innerHTML = cp.length
-        ? cp.map(p => `<div class="dl"><div class="dl-label">${p.player}</div><div class="dl-value"><div class="status"><span class="dot dot-${dotMap[p.stage]||'amber'}"></span> ${labelMap[p.stage]||p.stage}</div></div></div>`).join('')
-        : '<div style="color:var(--text3);font-size:13px;padding:4px 0">No active pitches to this club yet.</div>';
+    if (c) {
+      // Non-rich (user-added) contact: fill basic profile from allContacts object — never from DOM
+      const col = c.color || _avCol(c.name);
+      const ini = c.initials || _initials(c.name);
+      const av  = document.getElementById('cd-avatar');
+      if (av) { av.textContent = ini; av.style.background = col; }
+      const setEl     = (id, v) => { const el = document.getElementById(id); if (el) el.textContent = v; };
+      const setElHTML = (id, v) => { const el = document.getElementById(id); if (el) el.innerHTML   = v; };
+      setEl('cd-name', c.name);
+      setEl('cd-role', (c.role||'') + (c.club ? ' · ' + c.club : ''));
+      setElHTML('cd-email', c.email ? '<a>' + c.email + '</a>' : '—');
+      setEl('cd-phone', c.phone || '—');
+      setEl('cd-wa', c.wa || '—');
+      setEl('cd-linkedin', c.linkedin || '—');
+      setEl('cd-location-tag', c.club ? '🏟 ' + c.club : '—');
+      const bar = document.getElementById('cd-score-bar');
+      if (bar) bar.innerHTML = Array(10).fill('<div class="score-seg"></div>').join('');
+      setEl('cd-score-text', '— / 10 · New Contact');
+      setEl('cd-score-tag', 'Relationship — / 10');
+      setEl('cd-last-contact', '—');
+      setEl('cd-next-followup', 'Reach out and build the relationship');
+      const dt2 = document.getElementById('cd-days-tag');
+      if (dt2) { dt2.textContent = '⏰ No contact yet'; dt2.style.color = 'var(--text3)'; dt2.style.borderColor = ''; }
+      setElHTML('cd-stage', '<div class="status"><span class="dot ' + (c.stageColor ? 'dot-'+c.stageColor : 'dot-navy') + '"></span> ' + (c.stage || 'New Contact') + '</div>');
+      // Show user-typed notes in insight area; fall back to generic message
+      setElHTML('cd-insight-text', c.notes
+        ? c.notes
+        : 'User-added contact — full profile not yet available for <strong>' + c.name + '</strong>.');
+      // Pitches panel
+      const ptitle = document.getElementById('cd-pitches-title');
+      const plist  = document.getElementById('cd-pitches-list');
+      if (ptitle) ptitle.textContent = 'Active Pitches' + (c.club ? ' to ' + c.club : '');
+      if (plist) {
+        const cp = pitches.filter(p => c.club && (
+          p.club.toLowerCase().includes(c.club.toLowerCase()) ||
+          c.club.toLowerCase().includes(p.club.toLowerCase())
+        ));
+        const dotMap   = { sent:'amber', awaiting:'amber', feedback:'amber', interest:'green', negotiations:'green', done:'green', rejected:'red' };
+        const labelMap = { sent:'Sent', awaiting:'Awaiting Reply', feedback:'Feedback', interest:'Active Interest', negotiations:'Negotiating', done:'Done', rejected:'Not Interested' };
+        plist.innerHTML = cp.length
+          ? cp.map(p => `<div class="dl"><div class="dl-label">${p.player}</div><div class="dl-value"><div class="status"><span class="dot dot-${dotMap[p.stage]||'amber'}"></span> ${labelMap[p.stage]||p.stage}</div></div></div>`).join('')
+          : '<div style="color:var(--text3);font-size:13px;padding:4px 0">No active pitches to this club yet.</div>';
+      }
+      window._currentContactId   = c.id;
+      window._currentContactName = c.name;
+      window._currentContactClub = c.club || '';
+      const feed = document.getElementById('cd-feed');
+      if (feed) _renderContactFeed(feed, c.name);
+      go('contact-detail');
+      document.getElementById('topbar-title').textContent = c.name + (c.club ? ' · ' + c.club : '');
+      return;
     }
-    // Track context for logging
-    window._currentContactName = name;
-    window._currentContactClub = club;
-    // Activity feed — use shared helper (reads from logsAdded, synced from Firebase)
-    const feed = document.getElementById('cd-feed');
-    if (feed) _renderContactFeed(feed, name);
-    go('contact-detail');
+
+    // Fallback: legacy/static row without data-contact-id — try by name
+    const nameEl = tr.querySelector('strong');
+    if (nameEl) _openContactByName(nameEl.textContent.trim());
   });
 
-  // Ensure all rows show pointer cursor
   tbody.querySelectorAll('tr').forEach(tr => { tr.style.cursor = 'pointer'; });
 }
 
