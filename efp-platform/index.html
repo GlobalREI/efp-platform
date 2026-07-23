@@ -2039,10 +2039,9 @@ tr:hover .pdr-btn     { opacity: 1; }
 }
 
 </style>
-  <!-- Firebase Realtime Database SDK -->
-  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js">
-</script>
-  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
+  <!-- Firebase Realtime Database SDK — defer so HTML renders while scripts download -->
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js" defer></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js" defer></script>
 </head>
 <body>
 
@@ -5351,13 +5350,34 @@ const FIREBASE_CONFIG = {
 
 // ─── AUTH ─────────────────────────────────────────────────────────────────────
 
+function _efpShowLoader() {
+  // Keep auth screen visible as a branded loading screen while Firebase connects.
+  // Hide the input steps, show a loading indicator.
+  const box = document.getElementById('efp-auth-box');
+  if (!box) return;
+  const userStep = document.getElementById('efp-user-step');
+  const pinStep  = document.getElementById('efp-pin-step');
+  if (userStep) userStep.style.display = 'none';
+  if (pinStep)  pinStep.style.display  = 'none';
+  // Show spinner in the auth box
+  if (!document.getElementById('efp-load-msg')) {
+    const msg = document.createElement('div');
+    msg.id = 'efp-load-msg';
+    msg.innerHTML = '<div style="display:flex;flex-direction:column;align-items:center;gap:14px;margin-top:8px">'
+      + '<div class="spinner-ring" style="width:32px;height:32px;border-width:3px"></div>'
+      + '<div style="font-size:12px;color:var(--text3);letter-spacing:.05em">Loading data…</div>'
+      + '</div>';
+    box.appendChild(msg);
+  }
+}
+
 function efpAuthCheck() {
   const uid  = sessionStorage.getItem('efp_uid');
   const auth = sessionStorage.getItem('efp_auth');
   if (uid && EFP_USERS[uid] && auth === EFP_USERS[uid].pin) {
     window._efpUser = EFP_USERS[uid];
     _efpApplyUser(window._efpUser);
-    document.getElementById('efp-auth').style.display = 'none';
+    _efpShowLoader();   // stay on auth screen as loader — hidden when Firebase data arrives
     efpInitFirebase();
     return;
   }
@@ -5365,11 +5385,11 @@ function efpAuthCheck() {
   if (!uid && auth === EFP_PASSWORD) {
     window._efpUser = EFP_USERS.timo;
     _efpApplyUser(window._efpUser);
-    document.getElementById('efp-auth').style.display = 'none';
+    _efpShowLoader();   // stay on auth screen as loader
     efpInitFirebase();
     return;
   }
-  // else: auth screen is already visible by default
+  // else: auth screen is already visible by default (not yet authenticated)
 }
 
 // Step 1 — user selects their tile
@@ -5471,37 +5491,34 @@ function efpInitFirebase() {
 
       if (d.allContacts) {
         allContacts = Array.isArray(d.allContacts) ? d.allContacts : Object.values(d.allContacts);
-        _renderContactsTable();
+        setTimeout(_renderContactsTable, 0);   // stagger: let clubs render first
         _efpMigrated = true;
       }
 
       // ── Unified mandates (post-migration) ──
       if (d.allMandates) {
         allMandates = Array.isArray(d.allMandates) ? d.allMandates : Object.values(d.allMandates);
-        // Strip any " X pitched" suffix accidentally baked into stored names
         allMandates.forEach(m => { if (m.name) m.name = m.name.replace(/\s+\d+\s+pitched.*$/i, '').trim(); });
-        _renderMandatesTable();
+        setTimeout(_renderMandatesTable, 60);  // stagger: after contacts
         _efpMigrated = true;
-        if (typeof runMatchEngine === 'function') setTimeout(runMatchEngine, 300);
+        if (typeof runMatchEngine === 'function') setTimeout(runMatchEngine, 500);
       }
 
-      // ── Unified needs (post-migration) — allClubs already loaded above so flag/league lookup works ──
+      // ── Unified needs (post-migration) ──
       if (d.allNeeds) {
         allNeeds = Array.isArray(d.allNeeds) ? d.allNeeds : Object.values(d.allNeeds);
-        _renderNeedsTable();
+        setTimeout(_renderNeedsTable, 120);    // stagger: after mandates
         _efpMigrated = true;
-        if (typeof runMatchEngine === 'function') setTimeout(runMatchEngine, 300);
+        if (typeof runMatchEngine === 'function') setTimeout(runMatchEngine, 500);
       }
 
       // ── Unified tasks (post-migration) ──
       if (d.allTasks) {
         allTasks = Array.isArray(d.allTasks) ? d.allTasks : Object.values(d.allTasks);
-        // Sync allTasks → TASKS array so all existing code keeps working
         TASKS.length = 0;
         allTasks.forEach(t => TASKS.push(t));
         _efpMigrated = true;
-        if (typeof renderTasks === 'function') renderTasks();
-        _renderDashTasks();
+        setTimeout(() => { if (typeof renderTasks === 'function') renderTasks(); _renderDashTasks(); }, 180);
       }
 
       // ── If migration not yet done, trigger it now ──
@@ -5717,6 +5734,11 @@ function efpInitFirebase() {
 
       // Update sync timestamp on every receive
       _fbSetSynced();
+      if (_fbFirstLoad) {
+        // First payload received — hide the loading screen now that we have real data
+        const authEl = document.getElementById('efp-auth');
+        if (authEl) authEl.style.display = 'none';
+      }
       _fbFirstLoad = false;
       // Refresh dashboard KPIs with live data
       if (typeof renderDashboard === 'function') renderDashboard();
@@ -6059,6 +6081,10 @@ function _renderContactsTable() {
         <button onclick="_editContact('${c.id}')" title="Edit"
           style="background:none;border:none;color:var(--text2);cursor:pointer;font-size:13px;padding:2px 4px;opacity:.65">✎</button>
       </div></td>`;
+    tr.onclick = e => {
+      if (e.target.closest('button')) return;
+      _openContactByName(c.name);
+    };
     tbody.appendChild(tr);
   });
   // Update subtitle
@@ -8068,6 +8094,10 @@ function _appendContactRow(c, highlight) {
       <button onclick="deleteContact('${c.id}',this)" title="Delete contact"
         style="background:none;border:none;color:var(--red);cursor:pointer;font-size:13px;padding:2px 4px;opacity:.55;line-height:1">✕</button>
     </div></td>`;
+  tr.onclick = e => {
+    if (e.target.closest('button')) return;
+    _openContactByName(c.name);
+  };
   const tbody = document.getElementById('contacts-table-body');
   if (tbody) tbody.appendChild(tr);
 }
@@ -12852,91 +12882,8 @@ function filterContactsTab(el, category) {
 }
 
 function initContactTableClicks() {
-  const tbody = document.getElementById('contacts-table-body');
-  if (!tbody || tbody.dataset.delegated) return;
-  tbody.dataset.delegated = '1';
-
-  // Single delegated listener — handles ALL rows (rich + non-rich), including dynamically added ones.
-  // Looks up the contact from allContacts by data-contact-id at click-time (no pre-built name lookup,
-  // no DOM scraping) so newly added contacts always work and data is always correct.
-  tbody.addEventListener('click', function(e) {
-    if (e.target.closest('button')) return;
-    const tr = e.target.closest('tr');
-    if (!tr) return;
-
-    // Find contact in allContacts by ID stored in data attribute
-    const cid = tr.dataset.contactId;
-    const c   = cid ? allContacts.find(x => x.id === cid) : null;
-
-    if (c && c.isRich) {
-      // Rich contact: open full profile with relationship intel
-      let clubKey = null;
-      Object.entries(CONTACTS_DB).forEach(([k, arr]) => {
-        if (arr.find(x => x.id === c.id)) clubKey = k;
-      });
-      openContact(clubKey, c.id);
-      return;
-    }
-
-    if (c) {
-      // Non-rich (user-added) contact: fill basic profile from allContacts object — never from DOM
-      const col = c.color || _avCol(c.name);
-      const ini = c.initials || _initials(c.name);
-      const av  = document.getElementById('cd-avatar');
-      if (av) { av.textContent = ini; av.style.background = col; }
-      const setEl     = (id, v) => { const el = document.getElementById(id); if (el) el.textContent = v; };
-      const setElHTML = (id, v) => { const el = document.getElementById(id); if (el) el.innerHTML   = v; };
-      setEl('cd-name', c.name);
-      setEl('cd-role', (c.role||'') + (c.club ? ' · ' + c.club : ''));
-      setElHTML('cd-email', c.email ? '<a>' + c.email + '</a>' : '—');
-      setEl('cd-phone', c.phone || '—');
-      setEl('cd-wa', c.wa || '—');
-      setEl('cd-linkedin', c.linkedin || '—');
-      setEl('cd-location-tag', c.club ? '🏟 ' + c.club : '—');
-      const bar = document.getElementById('cd-score-bar');
-      if (bar) bar.innerHTML = Array(10).fill('<div class="score-seg"></div>').join('');
-      setEl('cd-score-text', '— / 10 · New Contact');
-      setEl('cd-score-tag', 'Relationship — / 10');
-      setEl('cd-last-contact', '—');
-      setEl('cd-next-followup', 'Reach out and build the relationship');
-      const dt2 = document.getElementById('cd-days-tag');
-      if (dt2) { dt2.textContent = '⏰ No contact yet'; dt2.style.color = 'var(--text3)'; dt2.style.borderColor = ''; }
-      setElHTML('cd-stage', '<div class="status"><span class="dot ' + (c.stageColor ? 'dot-'+c.stageColor : 'dot-navy') + '"></span> ' + (c.stage || 'New Contact') + '</div>');
-      // Show user-typed notes in insight area; fall back to generic message
-      setElHTML('cd-insight-text', c.notes
-        ? c.notes
-        : 'User-added contact — full profile not yet available for <strong>' + c.name + '</strong>.');
-      // Pitches panel
-      const ptitle = document.getElementById('cd-pitches-title');
-      const plist  = document.getElementById('cd-pitches-list');
-      if (ptitle) ptitle.textContent = 'Active Pitches' + (c.club ? ' to ' + c.club : '');
-      if (plist) {
-        const cp = pitches.filter(p => c.club && (
-          p.club.toLowerCase().includes(c.club.toLowerCase()) ||
-          c.club.toLowerCase().includes(p.club.toLowerCase())
-        ));
-        const dotMap   = { sent:'amber', awaiting:'amber', feedback:'amber', interest:'green', negotiations:'green', done:'green', rejected:'red' };
-        const labelMap = { sent:'Sent', awaiting:'Awaiting Reply', feedback:'Feedback', interest:'Active Interest', negotiations:'Negotiating', done:'Done', rejected:'Not Interested' };
-        plist.innerHTML = cp.length
-          ? cp.map(p => `<div class="dl"><div class="dl-label">${p.player}</div><div class="dl-value"><div class="status"><span class="dot dot-${dotMap[p.stage]||'amber'}"></span> ${labelMap[p.stage]||p.stage}</div></div></div>`).join('')
-          : '<div style="color:var(--text3);font-size:13px;padding:4px 0">No active pitches to this club yet.</div>';
-      }
-      window._currentContactId   = c.id;
-      window._currentContactName = c.name;
-      window._currentContactClub = c.club || '';
-      const feed = document.getElementById('cd-feed');
-      if (feed) _renderContactFeed(feed, c.name);
-      go('contact-detail');
-      document.getElementById('topbar-title').textContent = c.name + (c.club ? ' · ' + c.club : '');
-      return;
-    }
-
-    // Fallback: legacy/static row without data-contact-id — try by name
-    const nameEl = tr.querySelector('strong');
-    if (nameEl) _openContactByName(nameEl.textContent.trim());
-  });
-
-  tbody.querySelectorAll('tr').forEach(tr => { tr.style.cursor = 'pointer'; });
+  // Click handling is done via tr.onclick set directly in _renderContactsTable / _appendContactRow.
+  // This function is kept as a no-op so callers in go('contacts') don't need to change.
 }
 
 
