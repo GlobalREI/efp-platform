@@ -526,6 +526,10 @@ body {
   display: flex; gap: 4px; align-items: center;
   opacity: 0; transition: opacity 0.12s; flex-shrink: 0;
 }
+/* On touch devices there is no hover — always show task actions */
+@media (hover: none), (max-width: 768px) {
+  .task-actions { opacity: 1; }
+}
 .task-move-btn {
   font-size: 10.5px; font-weight: 500; padding: 3px 8px;
   border-radius: 4px; border: 1px solid var(--border2);
@@ -5105,8 +5109,8 @@ tr:hover .pdr-btn     { opacity: 1; }
       <div><label class="field-label">Age Max</label><input class="field-input" id="r-agemax" placeholder="e.g. 26" type="number"></div>
     </div>
     <div class="field-row field">
-      <div><label class="field-label">Budget Min <span style="font-size:10px;color:var(--text3);font-weight:400">€ format</span></label><input class="field-input" id="r-budmin" placeholder="e.g. 1,000,000" inputmode="numeric" oninput="_valInput(this)" onblur="_valBlur(this)"></div>
-      <div><label class="field-label">Budget Max <span style="font-size:10px;color:var(--text3);font-weight:400">€ format</span></label><input class="field-input" id="r-budmax" placeholder="e.g. 3,000,000" inputmode="numeric" oninput="_valInput(this)" onblur="_valBlur(this)"></div>
+      <div><label class="field-label">Budget Min <span style="color:var(--red)">*</span> <span style="font-size:10px;color:var(--text3);font-weight:400">€ format</span></label><input class="field-input" id="r-budmin" placeholder="e.g. 1,000,000" inputmode="numeric" oninput="_valInput(this)" onblur="_valBlur(this)"></div>
+      <div><label class="field-label">Budget Max <span style="color:var(--red)">*</span> <span style="font-size:10px;color:var(--text3);font-weight:400">€ format</span></label><input class="field-input" id="r-budmax" placeholder="e.g. 3,000,000" inputmode="numeric" oninput="_valInput(this)" onblur="_valBlur(this)"></div>
     </div>
     <div class="field-row field">
       <div>
@@ -5457,6 +5461,17 @@ function _efpApplyUser(u) {
 let _fbDb = null;
 let _fbFirstLoad = true;
 
+// Lightweight change detection: only re-render a table when its data actually changed.
+// Compares array length + first/last IDs — cheap enough to run on every Firebase update.
+const _fbSig = {};
+function _fbChanged(key, arr) {
+  if (!arr) return false;
+  const s = (arr.length || 0) + '|' + (arr[0]?.id || '') + '|' + (arr[arr.length - 1]?.id || '');
+  if (_fbSig[key] === s) return false;
+  _fbSig[key] = s;
+  return true;
+}
+
 function efpInitFirebase() {
   try {
     if (!firebase.apps.length) firebase.initializeApp(FIREBASE_CONFIG);
@@ -5489,36 +5504,39 @@ function efpInitFirebase() {
         _refreshClubDropdowns();
       }
 
-      if (d.allContacts) {
+      if (d.allContacts && _fbChanged('contacts', Array.isArray(d.allContacts) ? d.allContacts : Object.values(d.allContacts))) {
         allContacts = Array.isArray(d.allContacts) ? d.allContacts : Object.values(d.allContacts);
-        setTimeout(_renderContactsTable, 0);   // stagger: let clubs render first
+        setTimeout(_renderContactsTable, _fbFirstLoad ? 0 : 0);
         _efpMigrated = true;
       }
 
       // ── Unified mandates (post-migration) ──
-      if (d.allMandates) {
-        allMandates = Array.isArray(d.allMandates) ? d.allMandates : Object.values(d.allMandates);
+      const _inMandates = d.allMandates ? (Array.isArray(d.allMandates) ? d.allMandates : Object.values(d.allMandates)) : null;
+      if (_inMandates && _fbChanged('mandates', _inMandates)) {
+        allMandates = _inMandates;
         allMandates.forEach(m => { if (m.name) m.name = m.name.replace(/\s+\d+\s+pitched.*$/i, '').trim(); });
-        setTimeout(_renderMandatesTable, 60);  // stagger: after contacts
+        setTimeout(_renderMandatesTable, _fbFirstLoad ? 60 : 0);
         _efpMigrated = true;
-        if (typeof runMatchEngine === 'function') setTimeout(runMatchEngine, 500);
+        if (typeof runMatchEngine === 'function') setTimeout(runMatchEngine, _fbFirstLoad ? 500 : 200);
       }
 
       // ── Unified needs (post-migration) ──
-      if (d.allNeeds) {
-        allNeeds = Array.isArray(d.allNeeds) ? d.allNeeds : Object.values(d.allNeeds);
-        setTimeout(_renderNeedsTable, 120);    // stagger: after mandates
+      const _inNeeds = d.allNeeds ? (Array.isArray(d.allNeeds) ? d.allNeeds : Object.values(d.allNeeds)) : null;
+      if (_inNeeds && _fbChanged('needs', _inNeeds)) {
+        allNeeds = _inNeeds;
+        setTimeout(_renderNeedsTable, _fbFirstLoad ? 120 : 0);
         _efpMigrated = true;
-        if (typeof runMatchEngine === 'function') setTimeout(runMatchEngine, 500);
+        if (typeof runMatchEngine === 'function') setTimeout(runMatchEngine, _fbFirstLoad ? 500 : 200);
       }
 
       // ── Unified tasks (post-migration) ──
-      if (d.allTasks) {
-        allTasks = Array.isArray(d.allTasks) ? d.allTasks : Object.values(d.allTasks);
+      const _inTasks = d.allTasks ? (Array.isArray(d.allTasks) ? d.allTasks : Object.values(d.allTasks)) : null;
+      if (_inTasks && _fbChanged('tasks', _inTasks)) {
+        allTasks = _inTasks;
         TASKS.length = 0;
         allTasks.forEach(t => TASKS.push(t));
         _efpMigrated = true;
-        setTimeout(() => { if (typeof renderTasks === 'function') renderTasks(); _renderDashTasks(); }, 180);
+        setTimeout(() => { if (typeof renderTasks === 'function') renderTasks(); _renderDashTasks(); }, _fbFirstLoad ? 180 : 0);
       }
 
       // ── If migration not yet done, trigger it now ──
@@ -6506,7 +6524,7 @@ function switchTaskTab(tab) {
 
 function moveTask(id, dest, e) {
   e.stopPropagation();
-  const t = TASKS.find(x => x.id === id);
+  const t = TASKS.find(x => x.id == id); // == handles string/number coercion from Firebase
   if (!t) return;
   lastMove = { id, from: t.bucket };
   t.bucket = dest;
@@ -6519,7 +6537,7 @@ function moveTask(id, dest, e) {
 }
 
 function toggleDone(id) {
-  const t = TASKS.find(x => x.id === id);
+  const t = TASKS.find(x => x.id == id); // == handles string/number coercion from Firebase
   if (!t) return;
   t.done = !t.done;
   renderTasks();
@@ -6531,9 +6549,9 @@ function toggleDone(id) {
 function deleteTask(id, e) {
   e.stopPropagation();
   if (!confirm('Delete this task?')) return;
-  const idx = TASKS.findIndex(t => t.id === id);
+  const idx = TASKS.findIndex(t => t.id == id); // == handles Firebase type coercion
   if (idx !== -1) TASKS.splice(idx, 1);
-  const idx2 = tasksAdded.findIndex(t => t.id === id);
+  const idx2 = tasksAdded.findIndex(t => t.id == id);
   if (idx2 !== -1) tasksAdded.splice(idx2, 1);
   renderTasks();
   _renderDashTasks();
@@ -8996,6 +9014,12 @@ function submitRequirement() {
   const ageMax = document.getElementById('r-agemax')?.value || '';
   const budMin = _normVal(document.getElementById('r-budmin')?.value || '');
   const budMax = _normVal(document.getElementById('r-budmax')?.value || '');
+  const budMinEl = document.getElementById('r-budmin');
+  const budMaxEl = document.getElementById('r-budmax');
+  if (!budMin) { if (budMinEl) budMinEl.style.borderColor = 'var(--red)'; showSnack('⚠ Budget Min is required for AI matching', true); return; }
+  if (!budMax) { if (budMaxEl) budMaxEl.style.borderColor = 'var(--red)'; showSnack('⚠ Budget Max is required for AI matching', true); return; }
+  if (budMinEl) budMinEl.style.borderColor = '';
+  if (budMaxEl) budMaxEl.style.borderColor = '';
   const contact= document.getElementById('r-contact')?.value?.trim() || '';
   const notes  = document.getElementById('r-notes')?.value?.trim()   || '';
   const pos    = positions.join(' · ');
@@ -9273,6 +9297,12 @@ function saveNeedDetail() {
   const contact = document.getElementById('nd-contact').value.trim();
   const prio    = document.getElementById('nd-prio').value;
   const notes   = document.getElementById('nd-notes').value.trim();
+  const ndBudMinEl = document.getElementById('nd-budmin');
+  const ndBudMaxEl = document.getElementById('nd-budmax');
+  if (!budMin) { if (ndBudMinEl) ndBudMinEl.style.borderColor = 'var(--red)'; showSnack('⚠ Budget Min is required for AI matching', true); return; }
+  if (!budMax) { if (ndBudMaxEl) ndBudMaxEl.style.borderColor = 'var(--red)'; showSnack('⚠ Budget Max is required for AI matching', true); return; }
+  if (ndBudMinEl) ndBudMinEl.style.borderColor = '';
+  if (ndBudMaxEl) ndBudMaxEl.style.borderColor = '';
 
   if (_currentNeedId) {
     // Update in unified allNeeds array
@@ -11618,8 +11648,8 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 function syncMonday() {
-  showSnack('↻ Syncing with Monday.com…', false);
-  setTimeout(() => showSnack('✓ Monday.com synced — 12 items updated', false), 1800);
+  // Monday.com sync is not yet connected. Show an honest status message.
+  showSnack('Monday.com sync not configured — open Settings to connect', true);
 }
 
 const _FB_BASE = 'https://efp-platform-f2aaa-default-rtdb.europe-west1.firebasedatabase.app/efp';
@@ -13837,11 +13867,11 @@ function saveMandateDetail() {
     </div>
     <div class="field-row field">
       <div>
-        <label class="field-label">Budget min</label>
+        <label class="field-label">Budget min <span style="color:var(--red)">*</span></label>
         <input class="field-input" id="nd-budmin" placeholder="e.g. €3,000,000" inputmode="numeric" oninput="_valInput(this)" onblur="_valBlur(this)">
       </div>
       <div>
-        <label class="field-label">Budget max</label>
+        <label class="field-label">Budget max <span style="color:var(--red)">*</span></label>
         <input class="field-input" id="nd-budmax" placeholder="e.g. €8,000,000" inputmode="numeric" oninput="_valInput(this)" onblur="_valBlur(this)">
       </div>
     </div>
