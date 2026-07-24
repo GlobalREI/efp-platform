@@ -5531,12 +5531,20 @@ function efpInitFirebase() {
 
       // ── Unified tasks (post-migration) ──
       const _inTasks = d.allTasks ? (Array.isArray(d.allTasks) ? d.allTasks : Object.values(d.allTasks)) : null;
-      if (_inTasks && _fbChanged('tasks', _inTasks)) {
+      if (_inTasks) {
+        // Always sync allTasks from Firebase so fbSave() never writes stale/empty data back
         allTasks = _inTasks;
-        TASKS.length = 0;
-        allTasks.forEach(t => TASKS.push(t));
-        _efpMigrated = true;
-        setTimeout(() => { if (typeof renderTasks === 'function') renderTasks(); _renderDashTasks(); }, _fbFirstLoad ? 180 : 0);
+        if (_fbChanged('tasks', _inTasks)) {
+          // Only re-render TASKS when data actually changed
+          TASKS.length = 0;
+          allTasks.forEach(t => TASKS.push(t));
+          // Re-merge user-created tasks that survive independently of allTasks
+          if (tasksAdded && tasksAdded.length) {
+            tasksAdded.forEach(ft => { if (ft && !TASKS.find(t => t.id === ft.id)) TASKS.push(ft); });
+          }
+          _efpMigrated = true;
+          setTimeout(() => { if (typeof renderTasks === 'function') renderTasks(); _renderDashTasks(); }, _fbFirstLoad ? 180 : 0);
+        }
       }
 
       // ── If migration not yet done, trigger it now ──
@@ -5655,17 +5663,25 @@ function efpInitFirebase() {
 
       // ── Interactions / Logs ──
       if (d.logsAdded) {
-        const fbLogs = Array.isArray(d.logsAdded) ? d.logsAdded : Object.values(d.logsAdded);
-        // MERGE: keep seed entries that Firebase doesn't have yet (prevents partial Firebase data from hiding seed)
+        const _rawLogs = Array.isArray(d.logsAdded) ? d.logsAdded : Object.values(d.logsAdded);
+        // Sanitise: drop malformed sync entries (wrong source tag, missing notes, non-football contacts)
+        const fbLogs = _rawLogs.filter(l => {
+          if (!l) return false;
+          if (l.source === 'Beeper') return false;           // wrong-format first-sync entries
+          if (l.contact === 'Martin Heimes') return false;   // non-football contact
+          if (l.source === 'beeper-sync' && !l.notes) return false; // beeper entry missing body
+          return true;
+        });
+        // MERGE: keep seed entries that Firebase doesn't have yet
         const fbIds = new Set(fbLogs.map(l => String(l.id)));
         const seedOnly = logsAdded.filter(l => !fbIds.has(String(l.id)));
         logsAdded = [...seedOnly, ...fbLogs];
         logsAdded.sort((a, b) => (b.id || 0) - (a.id || 0));
-        // If seed had entries not in Firebase, push merged set so all devices stay in sync
-        if (seedOnly.length > 0) {
+        // Write back if seed had extra entries OR if we sanitised Firebase data (bad entries removed)
+        if (seedOnly.length > 0 || fbLogs.length < _rawLogs.length) {
           setTimeout(() => {
             if (_fbDb) _fbDb.ref('efp/logsAdded').set(logsAdded).catch(()=>{});
-          }, 3000);
+          }, 2000);
         }
         // Refresh contact detail feed if open
         if (window._currentContactName) {
@@ -6564,7 +6580,7 @@ function _renderDashTasks() {
   const count = document.getElementById('dash-tasks-count');
   if (!feed) return;
 
-  const pending = TASKS.filter(t => !t.done && (t.bucket === 'today' || t.overdue));
+  const pending = TASKS.filter(t => !t.done && (t.bucket === 'today' || t.overdue) && _taskMatchesPerson(t));
   const sorted  = [...pending].sort((a,b) => {
     // urgent/overdue first, then by priority h > m > l
     if (a.overdue && !b.overdue) return -1;
@@ -9756,6 +9772,7 @@ function submitLog() {
 }
 
 // ─── ADD TASK MODAL ───
+function openAddTaskModal() { openTaskModal(); } // alias used by dashboard button
 function openTaskModal() {
   document.getElementById('task-modal').style.display = 'flex';
   document.getElementById('nt-text').value = '';
@@ -9782,10 +9799,21 @@ function submitNewTask() {
   const newTask = { id, text, meta, prio, bucket, overdue: false, done: false, createdAt: new Date().toISOString(), assignedTo };
   allTasks.push(newTask);
   TASKS.push(newTask);       // keep in sync (TASKS mirrors allTasks)
-  tasksAdded.push(newTask);  // legacy sync
+  tasksAdded.push(newTask);  // user-created tasks tracking
   renderTasks();
   _renderDashTasks();
-  fbSave();
+  // Write only this new task to Firebase — avoids overwriting allTasks when allTasks is stale
+  if (_fbDb) {
+    _fbDb.ref('efp/tasksAdded/' + id).set(newTask).catch(e => console.warn('task save error:', e));
+    _fbDb.ref('efp/allTasks').transaction(current => {
+      const arr = current ? (Array.isArray(current) ? current : Object.values(current)) : [];
+      if (!arr.find(t => t.id === id)) arr.push(newTask);
+      return arr;
+    }).catch(() => {
+      // Fallback: full save if transaction fails
+      if (allTasks.length > 1) fbSave();
+    });
+  }
   document.getElementById('task-modal').style.display = 'none';
   showSnack('✓ Task added', false);
 }
