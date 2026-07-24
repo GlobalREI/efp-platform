@@ -4967,6 +4967,7 @@ tr:hover .pdr-btn     { opacity: 1; }
     <div style="display:flex;gap:8px;margin-bottom:18px">
       <button class="btn btn-primary" onclick="savePlayerProfile()" style="flex:1">Save Changes</button>
       <button class="btn btn-outline" onclick="closePlayerProfile();setTimeout(()=>showMandateSuggestions(document.getElementById('pp-edit-name').value,document.getElementById('pp-edit-pos').value,document.getElementById('pp-edit-age').value,document.getElementById('pp-edit-val').value,document.getElementById('pp-edit-club').value),100)">Suggest Clubs →</button>
+      <button class="btn btn-outline" onclick="deleteMandateFromDrawer()" title="Delete this mandate" style="color:var(--red);border-color:var(--red);flex-shrink:0">🗑</button>
     </div>
 
     <!-- Pitch History -->
@@ -8863,6 +8864,34 @@ function deleteMandate(key, btn) {
   fbSave();
   _updateMandateSubtitle();
   showSnack('Mandate removed', false);
+}
+
+function deleteMandateFromDrawer() {
+  const name = _ppCurrentPlayer;
+  if (!name) return;
+  if (!confirm(`Remove mandate for ${name}?`)) return;
+  // Close the drawer first
+  closePlayerProfile();
+  // Find the mandate key
+  const mandate = allMandates.find(m => m.name === name || m.id === name);
+  const key = mandate?.id || name;
+  // Remove from unified array
+  allMandates = allMandates.filter(m => m.name !== name && m.id !== name);
+  // Legacy sync
+  if (typeof key === 'string' && key.startsWith('m_')) {
+    mandatesAdded = mandatesAdded.filter(m => m.id !== key && m.name !== name);
+  } else {
+    if (!mandatesDeleted.includes(key)) mandatesDeleted.push(key);
+  }
+  // Remove from DOM table row if present
+  const tr = _ppCurrentRow || document.querySelector(`#view-mandates .data-table tbody tr[data-mandate-id="${name}"]`)
+    || [...document.querySelectorAll('#view-mandates .data-table tbody tr')]
+        .find(r => r.querySelector('td:first-child strong')?.textContent?.trim() === name);
+  if (tr) tr.remove();
+  fbSave();
+  _renderMandatesTable();
+  _updateMandateSubtitle();
+  showSnack(`${name} removed`, false);
 }
 
 // ─── ADD REQUIREMENT (Club Need) ───
