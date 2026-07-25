@@ -2184,6 +2184,13 @@ tr:hover .pdr-btn     { opacity: 1; }
     </div>
   </div>
 
+  <div class="nav-section">
+    <div class="nav-label">Export</div>
+    <div class="nav-item" onclick="openPdfExport()">
+      <span class="nav-icon">📄</span> Export to PDF
+    </div>
+  </div>
+
   <div class="sidebar-footer">
     <div class="user-tile">
       <div class="user-avatar">T</div>
@@ -3848,6 +3855,7 @@ tr:hover .pdr-btn     { opacity: 1; }
           <div class="page-title">Club Needs</div>
           <div class="page-subtitle" id="needs-subtitle">23 open requirements across 18 clubs — Summer 2026 window</div>
         </div>
+        <input type="text" id="needs-search" class="view-search" placeholder="🔍  Search needs…" oninput="filterNeeds(this.value)">
         <button class="btn btn-outline btn-sm" id="needs-filter-toggle" onclick="toggleNeedsFilter()">⚙ Filter</button>
         <button class="btn btn-primary btn-sm" onclick="openDrawer('req')">+ Add Requirement</button>
       </div>
@@ -5336,6 +5344,59 @@ European Football Partners</textarea>
   </div>
 </div>
 
+<!-- ══ PDF EXPORT MODAL ══ -->
+<div class="modal-bg" id="pdf-export-modal" onclick="closeModal('pdf-export-modal',event)" style="display:none">
+  <div class="modal" style="width:640px;max-height:88vh;display:flex;flex-direction:column;padding:0;overflow:hidden">
+
+    <!-- Header -->
+    <div style="padding:20px 22px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-shrink:0">
+      <div>
+        <div style="font-size:17px;font-weight:700;color:var(--text);letter-spacing:-0.02em">Export to PDF</div>
+        <div style="font-size:12px;color:var(--text3);margin-top:2px">Tick the items to include — then generate</div>
+      </div>
+      <button class="drawer-close" onclick="document.getElementById('pdf-export-modal').style.display='none'">✕</button>
+    </div>
+
+    <!-- Tabs -->
+    <div style="display:flex;border-bottom:1px solid var(--border);flex-shrink:0">
+      <button id="pdf-tab-mandates" onclick="switchPdfTab('mandates')"
+        style="flex:1;padding:10px 14px;background:none;border:none;border-bottom:2px solid var(--navy);font-size:13px;font-weight:600;color:var(--navy);cursor:pointer">
+        ⚽ Mandates&nbsp;<span id="pdf-mandates-count" style="background:var(--navy);color:#fff;border-radius:10px;padding:1px 7px;font-size:11px">0</span>
+      </button>
+      <button id="pdf-tab-needs" onclick="switchPdfTab('needs')"
+        style="flex:1;padding:10px 14px;background:none;border:none;border-bottom:2px solid transparent;font-size:13px;font-weight:600;color:var(--text2);cursor:pointer">
+        🎯 Club Needs&nbsp;<span id="pdf-needs-count" style="background:var(--text3);color:#fff;border-radius:10px;padding:1px 7px;font-size:11px">0</span>
+      </button>
+    </div>
+
+    <!-- Mandates panel -->
+    <div id="pdf-panel-mandates" style="flex:1;overflow-y:auto;padding:14px 22px">
+      <div style="display:flex;gap:8px;margin-bottom:10px;align-items:center">
+        <button class="btn btn-outline btn-sm" onclick="pdfSelectAll('mandates',true)">Select All</button>
+        <button class="btn btn-outline btn-sm" onclick="pdfSelectAll('mandates',false)">Clear</button>
+        <span style="font-size:11px;color:var(--text3);margin-left:4px" id="pdf-mandates-sel-info"></span>
+      </div>
+      <div id="pdf-mandates-list"></div>
+    </div>
+
+    <!-- Needs panel -->
+    <div id="pdf-panel-needs" style="flex:1;overflow-y:auto;padding:14px 22px;display:none">
+      <div style="display:flex;gap:8px;margin-bottom:10px;align-items:center">
+        <button class="btn btn-outline btn-sm" onclick="pdfSelectAll('needs',true)">Select All</button>
+        <button class="btn btn-outline btn-sm" onclick="pdfSelectAll('needs',false)">Clear</button>
+        <span style="font-size:11px;color:var(--text3);margin-left:4px" id="pdf-needs-sel-info"></span>
+      </div>
+      <div id="pdf-needs-list"></div>
+    </div>
+
+    <!-- Footer -->
+    <div style="padding:14px 22px;border-top:1px solid var(--border);display:flex;align-items:center;gap:12px;flex-shrink:0;background:var(--surface)">
+      <button class="btn btn-primary" onclick="generatePdf()">📄 Generate PDF</button>
+      <span id="pdf-total-summary" style="font-size:12px;color:var(--text3)">0 items selected</span>
+    </div>
+  </div>
+</div>
+
 <script>
 // ═══════════════════════════════════════════════════════════════════════════
 // EFP ONLINE CONFIG — USERS & AUTH
@@ -6245,6 +6306,9 @@ function _renderNeedsTable() {
   _updateNeedsSubtitle();
   _initNeedsContactLinks();
   _applyMobCards('view-needs');
+  // Re-apply search if user has typed something
+  const _nsEl = document.getElementById('needs-search');
+  if (_nsEl && _nsEl.value) filterNeeds(_nsEl.value);
 }
 
 // Quick edit for a contact by id (pre-fills the add-contact drawer)
@@ -7646,7 +7710,7 @@ function globalSearch(q) {
       else if (_avId === 'view-mandates') filterMandates(q);
       else if (_avId === 'view-relationships') filterRel(q);
       else if (_avId === 'view-pitches') filterPitches(q);
-      else if (_avId === 'view-needs') filterClubPitches(q);
+      else if (_avId === 'view-needs') { var _ns = document.getElementById('needs-search'); if (_ns) _ns.value = q; filterNeeds(q); }
     }
   }
 }
@@ -9286,6 +9350,234 @@ function filterClubPitches(q) {
     card.classList.toggle('k-hidden', !(!q || card.textContent.toLowerCase().includes(q)));
   });
 }
+
+function filterNeeds(q) {
+  q = (q || '').toLowerCase();
+  let vis = 0;
+  document.querySelectorAll('#view-needs .data-table tbody tr').forEach(tr => {
+    const show = !q || tr.textContent.toLowerCase().includes(q);
+    if (show) { tr.classList.remove('mob-hidden'); tr.style.removeProperty('display'); _mobShowRow(tr, 'view-needs'); vis++; }
+    else { tr.classList.add('mob-hidden'); tr.style.setProperty('display', 'none', 'important'); }
+  });
+  const sub = document.getElementById('needs-subtitle');
+  if (sub && q) sub.textContent = `${vis} requirement${vis !== 1 ? 's' : ''} matching "${document.getElementById('needs-search').value}"`;
+  else if (sub) sub.textContent = allNeeds.length + ' open requirements across ' + [...new Set(allNeeds.map(n => n.club))].length + ' clubs — Summer 2026 window';
+}
+
+// ─── PDF EXPORT ──────────────────────────────────────────────────────────────
+
+function openPdfExport() {
+  // --- Mandates list ---
+  const mList = document.getElementById('pdf-mandates-list');
+  mList.innerHTML = '';
+  allMandates.forEach((m, i) => {
+    const pos  = m.position || m.pos || '—';
+    const val  = m.value || (m.val ? '€' + (m.val >= 1e6 ? (m.val/1e6).toFixed(1)+'m' : (m.val/1e3).toFixed(0)+'k') : '—');
+    const deal = m.dealType === 'loan' ? '🔄 Loan' : m.dealType === 'permanent' ? '✅ Perm' : '⚡ Either';
+    mList.innerHTML += `
+      <label style="display:flex;align-items:center;gap:10px;padding:9px 12px;border:1px solid var(--border);
+                    border-radius:8px;margin-bottom:7px;cursor:pointer;background:var(--surface2);
+                    transition:border-color .15s" onmouseover="this.style.borderColor='var(--navy)'" onmouseout="this.style.borderColor='var(--border)'">
+        <input type="checkbox" class="pdf-mandate-cb" data-idx="${i}" checked
+          style="width:16px;height:16px;accent-color:var(--navy);flex-shrink:0;cursor:pointer" onchange="_updatePdfCount()">
+        <div style="flex:1;min-width:0">
+          <div style="font-size:13px;font-weight:600;color:var(--text)">${m.name}</div>
+          <div style="font-size:11px;color:var(--text3);margin-top:1px">${pos} · ${m.club||'—'} · ${val}</div>
+        </div>
+        <span style="font-size:11px;font-weight:600;white-space:nowrap;color:var(--text2)">${deal}</span>
+      </label>`;
+  });
+
+  // --- Needs list ---
+  const nList = document.getElementById('pdf-needs-list');
+  nList.innerHTML = '';
+  allNeeds.forEach((n, i) => {
+    const pos = Array.isArray(n.positions) ? n.positions.join(' · ') : (n.pos || '—');
+    const bud = (n.budMin || n.budMax)
+      ? [n.budMin, n.budMax].filter(Boolean).join('–')
+      : (n.budget && n.budget !== '—' ? n.budget : '—');
+    const prio = (n.urgency || n.prio || 'open').toLowerCase();
+    const badge = prio === 'urgent' ? '🔴 Urgent' : '🟡 Open';
+    nList.innerHTML += `
+      <label style="display:flex;align-items:center;gap:10px;padding:9px 12px;border:1px solid var(--border);
+                    border-radius:8px;margin-bottom:7px;cursor:pointer;background:var(--surface2);
+                    transition:border-color .15s" onmouseover="this.style.borderColor='var(--navy)'" onmouseout="this.style.borderColor='var(--border)'">
+        <input type="checkbox" class="pdf-need-cb" data-idx="${i}" checked
+          style="width:16px;height:16px;accent-color:var(--navy);flex-shrink:0;cursor:pointer" onchange="_updatePdfCount()">
+        <div style="flex:1;min-width:0">
+          <div style="font-size:13px;font-weight:600;color:var(--text)">${n.club}</div>
+          <div style="font-size:11px;color:var(--text3);margin-top:1px">${pos}${bud !== '—' ? ' · Budget: ' + bud : ''}</div>
+        </div>
+        <span style="font-size:11px;font-weight:600;white-space:nowrap;color:var(--text2)">${badge}</span>
+      </label>`;
+  });
+
+  _updatePdfCount();
+  switchPdfTab('mandates');
+  document.getElementById('pdf-export-modal').style.display = 'flex';
+}
+
+function switchPdfTab(tab) {
+  const isM = tab === 'mandates';
+  document.getElementById('pdf-panel-mandates').style.display = isM ? 'block' : 'none';
+  document.getElementById('pdf-panel-needs').style.display   = isM ? 'none'  : 'block';
+  // Tab styling
+  const tM = document.getElementById('pdf-tab-mandates');
+  const tN = document.getElementById('pdf-tab-needs');
+  tM.style.borderBottom = isM ? '2px solid var(--navy)' : '2px solid transparent';
+  tM.style.color        = isM ? 'var(--navy)' : 'var(--text2)';
+  tN.style.borderBottom = isM ? '2px solid transparent' : '2px solid var(--navy)';
+  tN.style.color        = isM ? 'var(--text2)' : 'var(--navy)';
+}
+
+function pdfSelectAll(section, checked) {
+  document.querySelectorAll('.pdf-' + (section === 'mandates' ? 'mandate' : 'need') + '-cb')
+    .forEach(cb => cb.checked = checked);
+  _updatePdfCount();
+}
+
+function _updatePdfCount() {
+  const mSel = document.querySelectorAll('.pdf-mandate-cb:checked').length;
+  const nSel = document.querySelectorAll('.pdf-need-cb:checked').length;
+  const mAll = document.querySelectorAll('.pdf-mandate-cb').length;
+  const nAll = document.querySelectorAll('.pdf-need-cb').length;
+  // Badge counts on tabs
+  const mc = document.getElementById('pdf-mandates-count');
+  const nc = document.getElementById('pdf-needs-count');
+  if (mc) { mc.textContent = mSel; mc.style.background = mSel ? 'var(--navy)' : 'var(--text3)'; }
+  if (nc) { nc.textContent = nSel; nc.style.background = nSel ? 'var(--navy)' : 'var(--text3)'; }
+  // Info labels
+  const mi = document.getElementById('pdf-mandates-sel-info');
+  const ni = document.getElementById('pdf-needs-sel-info');
+  if (mi) mi.textContent = `${mSel} of ${mAll} selected`;
+  if (ni) ni.textContent = `${nSel} of ${nAll} selected`;
+  // Footer summary
+  const total = document.getElementById('pdf-total-summary');
+  if (total) total.textContent = `${mSel + nSel} item${mSel + nSel !== 1 ? 's' : ''} selected`;
+}
+
+function generatePdf() {
+  const selMandates = [];
+  document.querySelectorAll('.pdf-mandate-cb:checked').forEach(cb => {
+    const m = allMandates[parseInt(cb.dataset.idx)];
+    if (m) selMandates.push(m);
+  });
+  const selNeeds = [];
+  document.querySelectorAll('.pdf-need-cb:checked').forEach(cb => {
+    const n = allNeeds[parseInt(cb.dataset.idx)];
+    if (n) selNeeds.push(n);
+  });
+
+  if (!selMandates.length && !selNeeds.length) {
+    showSnack('Please select at least one item', true);
+    return;
+  }
+
+  const now   = new Date().toLocaleDateString('en-GB', { day:'numeric', month:'long', year:'numeric' });
+  const _val  = (m) => m.value || (m.val ? '€' + (m.val >= 1e6 ? (m.val/1e6).toFixed(1)+'m' : (m.val/1e3).toFixed(0)+'k') : '—');
+  const _deal = (dt) => dt === 'loan' ? ['🔄 Loan Only','#dbeafe','#1d4ed8'] : dt === 'permanent' ? ['✅ Permanent','#dcfce7','#15803d'] : ['⚡ Loan or Perm','#f3f4f6','#374151'];
+
+  let body = '';
+
+  if (selMandates.length) {
+    body += `<div class="section">
+      <div class="section-title">⚽ Player Mandates (${selMandates.length})</div>`;
+    selMandates.forEach(m => {
+      const pos  = m.position || m.pos || '—';
+      const val  = _val(m);
+      const club = m.club || '—';
+      const age  = m.age ? `${m.age}y` : '';
+      const nat  = m.nationality ? m.nationality : '';
+      const [dealLabel, dealBg, dealColor] = _deal(m.dealType);
+      const agent    = m.agent && m.agent !== 'Not publicly listed' ? `Agent: ${m.agent}` : '';
+      const contract = m.contractExpiry ? `Contract until ${m.contractExpiry}` : '';
+      const source   = m.source ? `Source: ${m.source}` : '';
+      const meta     = [agent, contract, source].filter(Boolean).join('  ·  ');
+      const notesHtml = m.notes ? `<div class="item-notes">${m.notes}</div>` : '';
+      const metaHtml  = meta    ? `<div class="item-notes">${meta}</div>` : '';
+      body += `<div class="item">
+        <div class="item-main">
+          <div class="item-name">${m.name}</div>
+          <div class="item-sub">${[pos, club, age, nat, val].filter(Boolean).join(' · ')}</div>
+          ${metaHtml}${notesHtml}
+        </div>
+        <div class="item-badge" style="background:${dealBg};color:${dealColor}">${dealLabel}</div>
+      </div>`;
+    });
+    body += `</div>`;
+  }
+
+  if (selNeeds.length) {
+    body += `<div class="section">
+      <div class="section-title">🎯 Club Needs (${selNeeds.length})</div>`;
+    selNeeds.forEach(n => {
+      const pos  = Array.isArray(n.positions) ? n.positions.join(' · ') : (n.pos || '—');
+      const bud  = (n.budMin || n.budMax)
+        ? [n.budMin, n.budMax].filter(Boolean).join('–')
+        : (n.budget && n.budget !== '—' ? n.budget : '—');
+      const prio = (n.urgency || n.prio || 'open').toLowerCase();
+      const [urgLabel, urgBg, urgColor] = prio === 'urgent'
+        ? ['🔴 Urgent','#fee2e2','#b91c1c']
+        : ['🟡 Open','#fef9c3','#854d0e'];
+      const contact  = n.contact  ? `Contact: ${n.contact}` : '';
+      const notesHtml = n.notes   ? `<div class="item-notes">${n.notes}</div>` : '';
+      const contactHtml = contact ? `<div class="item-notes">${contact}</div>` : '';
+      body += `<div class="item">
+        <div class="item-main">
+          <div class="item-name">${n.club}</div>
+          <div class="item-sub">${pos}${bud !== '—' ? ' · Budget: ' + bud : ''}</div>
+          ${contactHtml}${notesHtml}
+        </div>
+        <div class="item-badge" style="background:${urgBg};color:${urgColor}">${urgLabel}</div>
+      </div>`;
+    });
+    body += `</div>`;
+  }
+
+  const html = `<!DOCTYPE html><html><head><meta charset="utf-8">
+<title>EFP Export — ${now}</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,sans-serif;color:#111;background:#fff;padding:40px 48px;font-size:13px}
+.doc-header{display:flex;align-items:flex-start;justify-content:space-between;padding-bottom:18px;border-bottom:2px solid #111;margin-bottom:30px}
+.doc-logo{font-size:20px;font-weight:800;letter-spacing:-0.03em}
+.doc-meta{font-size:11px;color:#888;text-align:right;line-height:1.6}
+.section{margin-bottom:32px;page-break-inside:avoid}
+.section-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.09em;color:#1d3461;margin-bottom:12px;padding-bottom:7px;border-bottom:1.5px solid #e5e7eb}
+.item{display:flex;align-items:flex-start;justify-content:space-between;gap:14px;padding:11px 13px;border:1px solid #e5e7eb;border-radius:8px;margin-bottom:7px;page-break-inside:avoid}
+.item-main{flex:1;min-width:0}
+.item-name{font-size:14px;font-weight:700;color:#111;margin-bottom:3px}
+.item-sub{font-size:11.5px;color:#555;line-height:1.5}
+.item-notes{font-size:11px;color:#999;margin-top:4px;font-style:italic}
+.item-badge{font-size:10.5px;font-weight:700;padding:4px 10px;border-radius:20px;white-space:nowrap;flex-shrink:0;margin-top:2px}
+.footer{margin-top:40px;padding-top:12px;border-top:1px solid #e5e7eb;font-size:10px;color:#bbb;display:flex;justify-content:space-between}
+@media print{body{padding:24px 32px}@page{margin:12mm 14mm}}
+</style>
+</head><body>
+<div class="doc-header">
+  <div>
+    <div class="doc-logo">EFP</div>
+    <div style="font-size:11px;color:#888;margin-top:3px">European Football Partners</div>
+  </div>
+  <div class="doc-meta">Confidential — Internal Use Only<br>${now}</div>
+</div>
+${body}
+<div class="footer">
+  <span>EFP — European Football Partners · Confidential</span>
+  <span>Generated ${now}</span>
+</div>
+<script>window.onload=()=>window.print()<\/script>
+</body></html>`;
+
+  const win = window.open('', '_blank', 'width=960,height=780');
+  if (!win) { showSnack('Allow pop-ups to generate the PDF', true); return; }
+  win.document.write(html);
+  win.document.close();
+
+  document.getElementById('pdf-export-modal').style.display = 'none';
+}
+
+// ─── END PDF EXPORT ──────────────────────────────────────────────────────────
 
 function _appendNeedRow(n) {
   const tbody = document.querySelector('#view-needs .data-table tbody');
