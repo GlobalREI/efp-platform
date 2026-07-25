@@ -12232,6 +12232,7 @@ function _openContactByName(rawName) {
       ? cp.map(p => `<div class="dl"><div class="dl-label">${p.player}</div><div class="dl-value"><div class="status"><span class="dot dot-${dotMap[p.stage]||'amber'}"></span> ${labelMap[p.stage]||p.stage}</div></div></div>`).join('')
       : '<div style="color:var(--text3);font-size:13px;padding:4px 0">No active pitches to this club yet.</div>';
   }
+  window._currentContactId   = c.id;   // FIX: was missing — Edit button relies on this
   window._currentContactName = c.name;
   window._currentContactClub = c.club;
   const feed = document.getElementById('cd-feed');
