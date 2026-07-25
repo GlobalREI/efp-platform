@@ -2227,8 +2227,8 @@ tr:hover .pdr-btn     { opacity: 1; }
       <span id="sync-label">Synced · Jul 14, 2026 — 10:07</span>
       <button onclick="triggerSync()" style="background:none;border:1px solid var(--border);border-radius:5px;color:var(--text2);font-size:11px;padding:2px 8px;cursor:pointer;margin-left:2px" title="Refresh from Beeper &amp; email">↻ Sync</button>
     </div>
-    <button class="btn btn-outline btn-sm" onclick="openDrawer('contact')">+ Contact</button>
-    <button class="btn btn-primary btn-sm" onclick="apmOpen('player')">+ New Pitch</button>
+    <button class="btn btn-outline btn-sm" id="topbar-secondary-btn" onclick="openDrawer('contact')" style="display:none">+ Contact</button>
+    <button class="btn btn-primary btn-sm" id="topbar-primary-btn" onclick="apmOpen('player')">+ New Pitch</button>
     <button class="btn btn-outline btn-sm" id="pdf-export-btn" onclick="exportPagePDF()" title="Export current view to PDF" style="gap:4px;display:flex;align-items:center">
       <span style="font-size:13px">⬇</span> PDF
     </button>
@@ -6770,15 +6770,25 @@ function _parseValToNum(str) {
   return null;
 }
 
-// Formats integer euros → "€1,234,000"
+// Formats integer euros → "€1.234.000" (European standard, no decimals)
 function _fmtEuro(num) {
   if (num === null || num === undefined || isNaN(num) || num <= 0) return '';
-  return '€' + Math.round(num).toLocaleString('en-US');
+  return '€' + Math.round(num).toLocaleString('de-DE');
 }
 
-// One-shot: any string → "€1,234,000" or original string if unparseable
+// One-shot: any string → "€1.234.000" (European format) or original string if unparseable.
+// Ranges like "€5-6M" → "€5.000.000 – €6.000.000"
 function _normVal(str) {
   if (!str || str === '—') return str || '';
+  // Detect range before falling through to single-value parse
+  let s = String(str).replace(/\s/g, '').toLowerCase().replace(/[€$£,]/g, '');
+  const rangeMatch = s.match(/^([\d.]+)[–\-]([\d.]+)\s*(m(?:il(?:lion)?)?|k(?:ilo?)?)?$/);
+  if (rangeMatch) {
+    const mult = rangeMatch[3]?.startsWith('m') ? 1e6 : rangeMatch[3]?.startsWith('k') ? 1e3 : 1;
+    const lo = Math.round(parseFloat(rangeMatch[1]) * mult);
+    const hi = Math.round(parseFloat(rangeMatch[2]) * mult);
+    if (lo > 0 && hi > 0) return _fmtEuro(lo) + ' – ' + _fmtEuro(hi);
+  }
   const n = _parseValToNum(str);
   return n !== null ? _fmtEuro(n) : str;
 }
@@ -6795,7 +6805,7 @@ function _valInput(el) {
   }
 }
 
-// Blur event: normalise to €X,XXX,XXX
+// Blur event: normalise to €X.XXX.XXX (European format)
 function _valBlur(el) {
   const n = _parseValToNum(el.value);
   if (n !== null) el.value = _fmtEuro(n);
@@ -13023,6 +13033,15 @@ const NAV_IDX = {
   'contact-detail':2, relationships:5, pitches:6, clubpitches:7, matches:8, activity:9, tasks:10
 };
 
+function _updateTopbarActions(view) {
+  // Each view has its own add button in the page header — topbar buttons stay hidden.
+  // They only show on views that have no dedicated page-header action of their own.
+  const pri = document.getElementById('topbar-primary-btn');
+  const sec = document.getElementById('topbar-secondary-btn');
+  if (pri) pri.style.display = 'none';
+  if (sec) sec.style.display = 'none';
+}
+
 function go(view) {
   document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
   document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
@@ -13050,6 +13069,7 @@ function go(view) {
   if (typeof mobBottomActive === 'function') mobBottomActive(view);
   // Auto-close sidebar on mobile after any navigation
   if (typeof mobCloseNav === 'function') mobCloseNav();
+  _updateTopbarActions(view);
 }
 
 const NEEDS = {
