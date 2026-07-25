@@ -4955,6 +4955,15 @@ tr:hover .pdr-btn     { opacity: 1; }
           <option value="Mandate Ended">Mandate Ended</option>
         </select>
       </div>
+      <!-- Deal Type -->
+      <div class="field" style="margin-top:10px">
+        <label class="field-label">Deal Type</label>
+        <select class="field-select" id="pp-deal-type" style="width:100%">
+          <option value="either">Loan or Permanent</option>
+          <option value="loan">Loan Only</option>
+          <option value="permanent">Permanent Only</option>
+        </select>
+      </div>
     </div>
 
     <!-- Internal Notes -->
@@ -5461,6 +5470,7 @@ function _efpApplyUser(u) {
 // ─── FIREBASE REALTIME SYNC ───────────────────────────────────────────────────
 let _fbDb = null;
 let _fbFirstLoad = true;
+let _fbDataLoaded = false; // blocks fbSave() until Firebase has confirmed real data is in memory
 
 // Lightweight change detection: only re-render a table when its data actually changed.
 // Compares array length + first/last IDs — cheap enough to run on every Firebase update.
@@ -5774,6 +5784,7 @@ function efpInitFirebase() {
         const authEl = document.getElementById('efp-auth');
         if (authEl) authEl.style.display = 'none';
       }
+      _fbDataLoaded = true; // Firebase real data confirmed in memory — fbSave() now allowed
       _fbFirstLoad = false;
       // Refresh dashboard KPIs with live data
       if (typeof renderDashboard === 'function') renderDashboard();
@@ -6227,7 +6238,7 @@ function _renderNeedsTable() {
       </div></td>`;
     tr.addEventListener('click', e => {
       if (e.target.closest('button')) return;
-      openNeedDetail(n.club, posStr, n.budMin||'', n.budMax||'', contactStr, statusTxt, n.notes||'', n.id);
+      openNeedDetail(n.club, posStr, n.budMin||'', n.budMax||'', contactStr, statusTxt, n.notes||'', n.id, n.dealType||'');
     });
     tbody.appendChild(tr);
   });
@@ -6316,6 +6327,10 @@ function dismissSyncBanner() {
 // Save all mutable data to Firebase
 function fbSave() {
   if (!_fbDb) return;
+  // Safety: never write to Firebase before we've confirmed real data is in memory.
+  // This prevents a new index.html deployment from overwriting Firebase with seed/empty arrays
+  // during the brief window before the on('value') callback fires.
+  if (!_fbDataLoaded) { console.warn('[EFP] fbSave blocked — Firebase data not yet confirmed in memory'); return; }
   const payload = {
     pitches,
     clubPitches,
@@ -6451,7 +6466,48 @@ function _taskMatchesPerson(t) {
   return t.assignedTo === _taskPersonFilter;
 }
 
+// ── Compute the ISO date string (YYYY-MM-DD) for a given bucket offset from today ──
+function _dueDateForBucket(bucket) {
+  const d = new Date();
+  if (bucket === 'today')    d.setDate(d.getDate());
+  else if (bucket === 'tomorrow') d.setDate(d.getDate() + 1);
+  else if (bucket === 'week')     d.setDate(d.getDate() + 7);
+  else if (bucket === 'next')     d.setDate(d.getDate() + 14);
+  return d.toISOString().slice(0, 10);
+}
+
+// ── On page load (and after Firebase sync): promote tasks whose dueDate has passed ──
+function _rebucketTasks() {
+  const today = new Date().toISOString().slice(0, 10);
+  let changed = false;
+  TASKS.forEach(t => {
+    if (t.done) return;
+    // Back-fill dueDate for old tasks that don't have one
+    if (!t.dueDate) {
+      t.dueDate = _dueDateForBucket(t.bucket || 'today');
+    }
+    const due = t.dueDate;
+    if (due < today) {
+      // Past due date → today + overdue
+      if (t.bucket !== 'today' || !t.overdue) { t.bucket = 'today'; t.overdue = true; changed = true; }
+    } else if (due === today) {
+      // Due today → today bucket (not overdue unless already marked)
+      if (t.bucket !== 'today') { t.bucket = 'today'; t.overdue = false; changed = true; }
+    } else {
+      // Future — re-slot into correct bucket based on days remaining
+      const daysOut = Math.round((new Date(due) - new Date(today)) / 86400000);
+      const correctBucket = daysOut <= 1 ? 'tomorrow' : daysOut <= 7 ? 'week' : 'next';
+      if (t.bucket !== correctBucket && t.bucket !== 'today') { t.bucket = correctBucket; changed = true; }
+    }
+    // Also sync dueDate onto allTasks mirror
+    const at = allTasks.find(x => x.id == t.id);
+    if (at && !at.dueDate) at.dueDate = t.dueDate;
+  });
+  if (changed) { setTimeout(fbSave, 500); }
+}
+
 function renderTasks() {
+  _rebucketTasks(); // always re-evaluate buckets against today's date before rendering
   const todayOverdue = TASKS.filter(t => t.bucket==='today' && t.overdue && !t.done && _taskMatchesPerson(t));
   const todayDue     = TASKS.filter(t => t.bucket==='today' && !t.overdue && !t.done && _taskMatchesPerson(t));
   const todayDone    = TASKS.filter(t => t.bucket==='today' && t.done && _taskMatchesPerson(t));
@@ -6545,6 +6601,7 @@ function moveTask(id, dest, e) {
   if (!t) return;
   lastMove = { id, from: t.bucket };
   t.bucket = dest;
+  t.dueDate = _dueDateForBucket(dest);
   t.overdue = false;
   renderTasks();
   _renderDashTasks();
@@ -6618,7 +6675,7 @@ function _renderDashTasks() {
 function undoMove() {
   if (!lastMove) return;
   const t = TASKS.find(x => x.id === lastMove.id);
-  if (t) { t.bucket = lastMove.from; t.overdue = lastMove.from === 'today'; }
+  if (t) { t.bucket = lastMove.from; t.dueDate = _dueDateForBucket(lastMove.from); t.overdue = lastMove.from === 'today'; }
   lastMove = null;
   renderTasks();
   hideSnack();
@@ -7118,6 +7175,15 @@ function _scoreMatch(player, need) {
   let score = 0;
   const reasons = [];
 
+  // ── 0. Deal type hard filter ────────────────────────────────────────
+  // If both sides have a specific type set, they must be compatible
+  const pDeal = player.dealType || 'either';
+  const nDeal = need.dealType   || 'either';
+  if (pDeal !== 'either' && nDeal !== 'either' && pDeal !== nDeal) return null; // incompatible deal types
+  if (pDeal !== 'either' && nDeal !== 'either') {
+    reasons.push({ text: pDeal === 'loan' ? '🔄 Loan match' : '✅ Permanent match', cls: 'pos' });
+  }
+
   // ── 1. Position (0–40 pts) ──────────────────────────────────────────
   const playerTags = getPositionTags(player.pos);
   const needTags   = new Set(need.positions);
@@ -7196,7 +7262,7 @@ function runMatchEngine() {
   matchesData.forEach(m => { existing[m.id] = m; });
 
   // Merge allMandates + mandatesAdded (deduplicate by lowercase name)
-  const _toPlayer = m => ({ name:m.name, pos:m.position||m.pos||'', age:parseInt(m.age)||null, club:m.club, val:m.value||m.val });
+  const _toPlayer = m => ({ name:m.name, pos:m.position||m.pos||'', age:parseInt(m.age)||null, club:m.club, val:m.value||m.val, dealType: m.dealType || (playerNotes[m.name]?.dealType) || 'either' });
   const _basePool = allMandates.length ? allMandates.map(_toPlayer) : MANDATES_DB.map(_toPlayer);
   const _addedPool = mandatesAdded.map(_toPlayer);
   const _seen = new Set(_basePool.map(p => (p.name||'').toLowerCase()));
@@ -7210,7 +7276,8 @@ function runMatchEngine() {
     budget:    n.budget || n.budMax || n.budMin || '—',
     contact:   n.contact || '',
     urgency:   n.urgency || (n.prio === 'Urgent' ? 'urgent' : 'open'),
-    notes:     n.notes || ''
+    notes:     n.notes || '',
+    dealType:  n.dealType || 'either'
   });
   const _runNeeds = allNeeds.length
     ? allNeeds.map(_normaliseNeed)
@@ -8275,11 +8342,13 @@ function openPlayerProfile(playerName, data) {
   document.getElementById('pp-edit-val').value    = (data.val   && data.val   !== '—') ? data.val   : '';
   document.getElementById('pp-edit-source').value = data.contact || data.source || '';
 
-  // Load saved notes/status/priority
+  // Load saved notes/status/priority/dealType
   const saved = playerNotes[playerName] || {};
   document.getElementById('pp-status').value = saved.status || data.statusText || 'Active Mandate';
   document.getElementById('pp-notes').value  = saved.notes  || '';
   setPPPrio(saved.priority || null, true);
+  const ppDT = document.getElementById('pp-deal-type');
+  if (ppDT) ppDT.value = data.dealType || saved.dealType || 'either';
 
   // Pitch history — use the richer mandate-detail renderer
   const history = (pitches || []).filter(p => p.player === playerName);
@@ -8356,9 +8425,10 @@ function savePlayerProfile() {
   const status   = document.getElementById('pp-status').value;
   const notes    = document.getElementById('pp-notes').value.trim();
   const priority = _ppSelectedPrio;
+  const dealType = document.getElementById('pp-deal-type')?.value || 'either';
 
-  // Save notes/priority/status under the (possibly new) name
-  playerNotes[newName] = { status, notes, priority, savedAt: Date.now() };
+  // Save notes/priority/status/dealType under the (possibly new) name
+  playerNotes[newName] = { status, notes, priority, dealType, savedAt: Date.now() };
   // Remove old key if name changed
   if (newName !== _ppCurrentPlayer) {
     delete playerNotes[_ppCurrentPlayer];
@@ -8378,16 +8448,19 @@ function savePlayerProfile() {
     if (cells[5]) cells[5].textContent = newSrc  || '—';
   }
 
-  // Update mandatesAdded array if this is a user-added mandate
-  const ma = mandatesAdded.find(m => m.name === _ppCurrentPlayer || m.id === _ppCurrentPlayer);
-  if (ma) {
-    ma.name     = newName;
-    ma.position = newPos;
-    ma.age      = newAge;
-    ma.club     = newClub;
-    ma.value    = newVal;
-    ma.contact  = newSrc;
-  }
+  // Update mandatesAdded and allMandates arrays
+  [mandatesAdded, allMandates].forEach(arr => {
+    const m = arr.find(m => m.name === _ppCurrentPlayer || m.id === _ppCurrentPlayer);
+    if (m) {
+      m.name     = newName;
+      m.position = newPos;
+      m.age      = newAge;
+      m.club     = newClub;
+      m.value    = newVal;
+      m.contact  = newSrc;
+      m.dealType = dealType;
+    }
+  });
 
   _ppCurrentPlayer = newName; // update to new name before badges
   _applyPlayerNoteBadges();
@@ -9275,7 +9348,7 @@ function deleteNeed(id, btn) {
 // Stores the id of the need being edited (null = static row, not in needsAdded)
 let _currentNeedId = null;
 
-function openNeedDetail(clubName, pos, budMin, budMax, contact, prio, notes, needId) {
+function openNeedDetail(clubName, pos, budMin, budMax, contact, prio, notes, needId, dealType) {
   _currentNeedId = needId || null;
 
   // Populate form
@@ -9296,6 +9369,8 @@ function openNeedDetail(clubName, pos, budMin, budMax, contact, prio, notes, nee
     const match = ['Urgent','High','Medium','Low'].find(p => p.toLowerCase() === (prio||'').toLowerCase());
     prioSel.value = match || 'High';
   }
+  const dtSel = document.getElementById('nd-deal-type');
+  if (dtSel) dtSel.value = dealType || 'either';
 
   // ── Pitched players panel ─────────────────────────────────────────────────
   const listEl = document.getElementById('nd-pitch-list');
@@ -9335,13 +9410,14 @@ function openNeedDetail(clubName, pos, budMin, budMax, contact, prio, notes, nee
 }
 
 function saveNeedDetail() {
-  const club    = document.getElementById('nd-club').value.trim();
-  const pos     = document.getElementById('nd-pos').value.trim();
-  const budMin  = document.getElementById('nd-budmin').value.trim();
-  const budMax  = document.getElementById('nd-budmax').value.trim();
-  const contact = document.getElementById('nd-contact').value.trim();
-  const prio    = document.getElementById('nd-prio').value;
-  const notes   = document.getElementById('nd-notes').value.trim();
+  const club     = document.getElementById('nd-club').value.trim();
+  const pos      = document.getElementById('nd-pos').value.trim();
+  const budMin   = document.getElementById('nd-budmin').value.trim();
+  const budMax   = document.getElementById('nd-budmax').value.trim();
+  const contact  = document.getElementById('nd-contact').value.trim();
+  const prio     = document.getElementById('nd-prio').value;
+  const notes    = document.getElementById('nd-notes').value.trim();
+  const dealType = document.getElementById('nd-deal-type')?.value || 'either';
   const ndBudMinEl = document.getElementById('nd-budmin');
   const ndBudMaxEl = document.getElementById('nd-budmax');
   if (!budMin) { if (ndBudMinEl) ndBudMinEl.style.borderColor = 'var(--red)'; showSnack('⚠ Budget Min is required for AI matching', true); return; }
@@ -9353,17 +9429,17 @@ function saveNeedDetail() {
     // Update in unified allNeeds array
     const idxAll = allNeeds.findIndex(n => n.id === _currentNeedId);
     if (idxAll >= 0) {
-      allNeeds[idxAll] = { ...allNeeds[idxAll], club, pos, positions:[pos], budMin, budMax, contact, prio, notes,
+      allNeeds[idxAll] = { ...allNeeds[idxAll], club, pos, positions:[pos], budMin, budMax, contact, prio, notes, dealType,
                             urgency: prio === 'Urgent' ? 'urgent' : 'open' };
     }
     // Also update needsAdded for legacy sync
     const idx = needsAdded.findIndex(n => n.id === _currentNeedId);
-    if (idx >= 0) needsAdded[idx] = { ...needsAdded[idx], club, pos, budMin, budMax, contact, prio, notes };
+    if (idx >= 0) needsAdded[idx] = { ...needsAdded[idx], club, pos, budMin, budMax, contact, prio, notes, dealType };
     // Re-render table so change is immediately visible
     _renderNeedsTable();
   } else {
     // Need is from seed/static — create new entry in allNeeds
-    const newNeed = { id: 'n_' + Date.now(), club, pos, positions:[pos], budMin, budMax, contact, prio, notes,
+    const newNeed = { id: 'n_' + Date.now(), club, pos, positions:[pos], budMin, budMax, contact, prio, notes, dealType,
                        urgency: prio === 'Urgent' ? 'urgent' : 'open' };
     allNeeds.push(newNeed);
     needsAdded.push(newNeed);
@@ -9825,7 +9901,8 @@ function submitNewTask() {
   const meta       = metaParts.join(' · ');
   const id         = Date.now();
   const assignedTo = document.getElementById('nt-assignee')?.value || (window._efpUser?.id || 'both');
-  const newTask = { id, text, meta, prio, bucket, overdue: false, done: false, createdAt: new Date().toISOString(), assignedTo };
+  const dueDate = _dueDateForBucket(bucket);
+  const newTask = { id, text, meta, prio, bucket, dueDate, overdue: false, done: false, createdAt: new Date().toISOString(), assignedTo };
   allTasks.push(newTask);
   TASKS.push(newTask);       // keep in sync (TASKS mirrors allTasks)
   tasksAdded.push(newTask);  // user-created tasks tracking
@@ -13635,7 +13712,7 @@ async function lookupMandateMarketValue() {
   }
 }
 
-function openMandateDetail(name, pos, age, club, val, source, status) {
+function openMandateDetail(name, pos, age, club, val, source, status, dealType) {
   document.getElementById('md-name').value    = name;
   document.getElementById('md-pos').value     = pos;
   document.getElementById('md-age').value     = age !== '—' ? age : '';
@@ -13644,6 +13721,8 @@ function openMandateDetail(name, pos, age, club, val, source, status) {
   document.getElementById('md-source').value  = source !== '—' ? source : '';
   document.getElementById('md-status-label').textContent = status || 'Active Mandate';
   document.getElementById('mandate-detail-drawer-title').textContent = name;
+  const mdDT = document.getElementById('md-deal-type');
+  if (mdDT) mdDT.value = dealType || 'either';
 
   // ── Transfermarkt link ────────────────────────────────────────────────────
   _setMandateTmLink(name, club);
@@ -13714,8 +13793,15 @@ function addPitchForMandate() {
 }
 
 function saveMandateDetail() {
-  const name = document.getElementById('md-name').value.trim();
+  const name     = document.getElementById('md-name').value.trim();
+  const dealType = document.getElementById('md-deal-type')?.value || 'either';
   if (!name) return;
+  // Persist dealType onto mandate records
+  [mandatesAdded, allMandates].forEach(arr => {
+    const m = arr.find(m => m.name === name);
+    if (m) m.dealType = dealType;
+  });
+  fbSave();
   showSnack('✓ Mandate updated', false);
   closeDrawer('mandate-detail');
   // Reset init flags so rows reinitialise with new data on next visit
@@ -13946,6 +14032,14 @@ function saveMandateDetail() {
       </select>
     </div>
     <div class="field">
+      <label class="field-label">Deal Type</label>
+      <select class="field-select" id="nd-deal-type">
+        <option value="either">Loan or Permanent</option>
+        <option value="loan">Loan Only</option>
+        <option value="permanent">Permanent Only</option>
+      </select>
+    </div>
+    <div class="field">
       <label class="field-label">Notes / Profile details</label>
       <textarea class="field-textarea" id="nd-notes" rows="3" placeholder="Age range, playing style, specific requirements…"></textarea>
     </div>
@@ -14021,6 +14115,14 @@ function saveMandateDetail() {
     <div class="field">
       <label class="field-label">Status</label>
       <div class="field-input" id="md-status-label" style="background:var(--surface2);color:var(--text2);cursor:default"></div>
+    </div>
+    <div class="field">
+      <label class="field-label">Deal Type</label>
+      <select class="field-select" id="md-deal-type">
+        <option value="either">Loan or Permanent</option>
+        <option value="loan">Loan Only</option>
+        <option value="permanent">Permanent Only</option>
+      </select>
     </div>
     <div style="display:flex;gap:10px;margin-top:8px">
       <button class="btn btn-primary" style="flex:1" onclick="saveMandateDetail()">Save Changes</button>
