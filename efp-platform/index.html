@@ -4722,7 +4722,7 @@ th.ds-sort:hover { background: rgba(30,58,95,.06); }
         oninput="_clubAC(this,'c-club-drop')"
         onfocus="_clubAC(this,'c-club-drop')"
         onblur="setTimeout(function(){var d=document.getElementById('c-club-drop');if(d)d.style.display='none'},200)">
-      <div id="c-club-drop" style="display:none;position:absolute;left:0;right:0;top:100%;background:var(--surface1);border:1px solid var(--border);border-radius:8px;max-height:220px;overflow-y:auto;z-index:1200;box-shadow:0 4px 20px rgba(0,0,0,.14);margin-top:2px"></div>
+      <div id="c-club-drop" style="display:none;position:fixed;background:var(--surface);border:1px solid var(--border);border-radius:8px;max-height:220px;overflow-y:auto;z-index:9999;box-shadow:0 4px 20px rgba(0,0,0,.18)"></div>
     </div>
     <div class="field-row field">
       <div><label class="field-label">Email</label><input class="field-input" id="c-email" placeholder="name@club.com" type="email"></div>
@@ -5133,7 +5133,7 @@ th.ds-sort:hover { background: rgba(30,58,95,.06); }
           oninput="_contactAC(this,'pp-source-drop')"
           onfocus="_contactAC(this,'pp-source-drop')"
           onblur="setTimeout(function(){var d=document.getElementById('pp-source-drop');if(d)d.style.display='none'},200)">
-        <div id="pp-source-drop" style="display:none;position:absolute;left:0;right:0;top:100%;background:var(--surface1);border:1px solid var(--border);border-radius:8px;max-height:220px;overflow-y:auto;z-index:1200;box-shadow:0 4px 20px rgba(0,0,0,.14);margin-top:2px"></div>
+        <div id="pp-source-drop" style="display:none;position:fixed;background:var(--surface);border:1px solid var(--border);border-radius:8px;max-height:220px;overflow-y:auto;z-index:9999;box-shadow:0 4px 20px rgba(0,0,0,.18)"></div>
       </div>
 
       <!-- Status -->
@@ -8169,6 +8169,21 @@ function filterContacts() {
     ? `${visible} result${visible !== 1 ? 's' : ''} for "${document.getElementById('contacts-search').value}"`
     : (allContacts.length ? allContacts.length + ' contacts' : '155 contacts') + ' with email · DACH, Benelux, UK & more';
 }
+// ─── AUTOCOMPLETE POSITIONING (uses position:fixed so it renders above native <select> elements) ───
+function _positionAcDrop(input, drop) {
+  const rect = input.getBoundingClientRect();
+  const spaceBelow = window.innerHeight - rect.bottom - 8;
+  const spaceAbove = rect.top - 8;
+  const maxH = 220;
+  drop.style.position = 'fixed';
+  drop.style.left     = rect.left + 'px';
+  drop.style.right    = 'auto';
+  drop.style.width    = rect.width + 'px';
+  drop.style.maxHeight = Math.min(maxH, Math.max(spaceBelow, spaceAbove)) + 'px';
+  drop.style.top    = (spaceBelow >= 120 || spaceBelow >= spaceAbove) ? (rect.bottom + 2) + 'px' : 'auto';
+  drop.style.bottom = (spaceBelow >= 120 || spaceBelow >= spaceAbove) ? 'auto' : (window.innerHeight - rect.top + 2) + 'px';
+}
+
 // ─── CLUB AUTOCOMPLETE (replaces unreliable <datalist> on mobile) ───
 function _clubAC(input, dropId) {
   const q = (input.value || '').toLowerCase().trim();
@@ -8186,11 +8201,12 @@ function _clubAC(input, dropId) {
       ? n.replace(new RegExp('(' + q.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + ')', 'gi'),
           '<strong>$1</strong>')
       : n;
-    return `<div style="padding:10px 14px;cursor:pointer;font-size:13px;border-bottom:1px solid var(--border);line-height:1.3"
+    return `<div style="padding:10px 14px;cursor:pointer;font-size:13px;border-bottom:1px solid var(--border);line-height:1.3;background:var(--surface)"
       onmousedown="event.preventDefault()"
       ontouchstart="event.preventDefault();document.getElementById('${inputId}').value='${safe}';document.getElementById('${dropId}').style.display='none'"
       onclick="document.getElementById('${inputId}').value='${safe}';document.getElementById('${dropId}').style.display='none'">${highlighted}</div>`;
   }).join('');
+  _positionAcDrop(input, drop);
   drop.style.display = 'block';
 }
 
@@ -8219,6 +8235,7 @@ function _contactAC(input, dropId) {
       ${highlighted}${sub ? `<div style="font-size:11px;color:var(--text3);margin-top:2px">${sub}</div>` : ''}
     </div>`;
   }).join('');
+  _positionAcDrop(input, drop);
   drop.style.display = 'block';
 }
 
@@ -8945,8 +8962,8 @@ function closePlayerProfile() {
 }
 
 // ── Contact Detail Drawer ──────────────────────────────────
-let _cddCurrentId   = null;
-let _cddCurrentName = null;
+var _cddCurrentId   = null;
+var _cddCurrentName = null;
 
 function openContactDetail(contactId) {
   const c = allContacts.find(x => x.id === contactId);
@@ -9017,7 +9034,7 @@ let _ppSelectedPrio = null;
 // ─── MANDATE / NEED ARCHIVE + SORT STATE ─────────────────────────────────────
 let _showArchivedMandates = false;
 let _showArchivedNeeds    = false;
-let _mandateSortMode      = 'default';
+let _mandateSortMode      = 'prio';
 
 function _toggleArchivedMandates() {
   _showArchivedMandates = !_showArchivedMandates;
@@ -9131,10 +9148,10 @@ function savePlayerProfile() {
   });
 
   _ppCurrentPlayer = newName; // update to new name before re-render
+  closePlayerProfile();       // close first — prevents Firebase onValue from re-opening drawer
   fbSave();
   _renderMandatesTable();     // re-render table from data (fixes stale row bug)
   _applyPlayerNoteBadges();
-  closePlayerProfile();
   showSnack(`✓ ${newName} updated`, false);
 }
 
