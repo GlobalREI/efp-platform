@@ -14821,10 +14821,11 @@ window._db = (function () {
   }
 
   // Club: same name (case-insensitive) = duplicate.
-  function isClubDuplicate(name, excludeId) {
+  // Bug WF-013a fix: clubs have no .id field — exclude by name (edit mode passes old name as second arg)
+  function isClubDuplicate(name, excludeName) {
     var nLow = (name || '').trim().toLowerCase();
     return allClubs.some(function (c) {
-      if (excludeId && c.id === excludeId) return false;
+      if (excludeName && (c.id === excludeName || (c.name || '').trim().toLowerCase() === (excludeName || '').trim().toLowerCase())) return false;
       return (c.name || '').trim().toLowerCase() === nLow;
     });
   }
@@ -14860,7 +14861,7 @@ window._db = (function () {
 
     // 3. Needs: flag orphans (don't auto-delete — user may want to re-assign)
     var orphanedNeeds = allNeeds.filter(function (n) { return (n.club || '') === clubName; });
-    orphanedNeeds.forEach(function (n) { n._clubDeleted = true; dirty = true; });
+    orphanedNeeds.forEach(function (n) { n.club = ''; n._clubDeleted = true; dirty = true; });
 
     // 4. Pitches: nullify club reference
     if (typeof pitches !== 'undefined') {
@@ -14928,6 +14929,7 @@ window._db = (function () {
       pitches.forEach(function (p) {
         if (p.player === playerName && !p._mandateDeleted) {
           p._mandateDeleted = true;
+          p.status = 'Archived'; // Bug WF-011c fix: status must be set so active-pitch filter works
           archived++;
         }
       });
@@ -16268,6 +16270,57 @@ window._regression = (function () {
     });
   }
 
+  // REG-027 — Club delete: onClubDeleted must nullify Need.club, not just flag it.
+  // Bug: orphanedNeeds.forEach set n._clubDeleted=true but left n.club=clubName.
+  // Tests WF-009d/g and T08d were catching this — Need still referenced deleted club.
+  function reg_027_club_delete_nullifies_need_club() {
+    var club = _id('Club');
+    _club(club);
+    var n = _need(club);
+
+    if (window._db) _db.onClubDeleted(club);
+    _fill(allClubs, allClubs.filter(function(x){ return x.name !== club; }));
+
+    var p = _payload(); _load(p);
+
+    var loaded = allNeeds.find(function(x){ return x.id === n.id; });
+    _ok(!loaded || loaded.club !== club, 'REG-027a Need.club nullified after club delete', loaded && loaded.club);
+    _ok(!allNeeds.some(function(x){ return x.club === club; }), 'REG-027b No Need still refs deleted club');
+  }
+
+  // REG-028 — Mandate delete: onMandateDeleted must set pitch.status='Archived'.
+  // Bug: only p._mandateDeleted=true was set; p.status stayed 'Sent'.
+  // The active-pitch filter (status !== 'Archived') still counted these as live.
+  function reg_028_mandate_delete_archives_pitches() {
+    var club   = _id('Club');
+    var player = _id('Player');
+    _club(club);
+    _mandate(player, club);
+    _pitch(player, club); // status: 'Sent'
+
+    if (window._db) _db.onMandateDeleted(player);
+
+    var p = _payload(); _load(p);
+
+    var active = pitches.filter(function(x){ return x.player === player && x.status !== 'Archived'; });
+    _ok(active.length === 0, 'REG-028a No active pitches remain after mandate delete', active.length);
+    var archived = pitches.filter(function(x){ return x.player === player && x.status === 'Archived'; });
+    _ok(archived.length > 0, 'REG-028b Pitch status set to Archived (not just flagged)');
+  }
+
+  // REG-029 — isClubDuplicate must exclude self when editing (clubs have no .id field).
+  // Bug: exclusion used c.id === excludeId but clubs have no id property — check always missed.
+  // Symptom: editing a club and saving with the same name falsely triggered "duplicate" error.
+  function reg_029_club_duplicate_check_edit_mode() {
+    if (!window._db) { _fail('REG-029', '_db not available'); return; }
+    var name = _id('Club');
+    _club(name);
+
+    _ok(_db.isClubDuplicate(name, null),    'REG-029a Club is duplicate when no exclusion (create mode)');
+    _ok(!_db.isClubDuplicate(name, name),   'REG-029b Club not duplicate of itself when name passed as exclude (edit mode)');
+    _ok(_db.isClubDuplicate(name, 'other'), 'REG-029c Club still detected as duplicate when different name excluded');
+  }
+
   // ── Master runner ────────────────────────────────────────────────────────
   var _regressionTests = [
     reg_020_ghost_data_empty_arrays,
@@ -16277,6 +16330,9 @@ window._regression = (function () {
     reg_024_contact_create_wa_linkedin,
     reg_025_player_rename_cascades_pitches,
     reg_026_club_rename_cascades_all_entities,
+    reg_027_club_delete_nullifies_need_club,
+    reg_028_mandate_delete_archives_pitches,
+    reg_029_club_duplicate_check_edit_mode,
   ];
   var _workflowTests = [
     wf_001_club_full_crud,       wf_002_contact_full_crud,
