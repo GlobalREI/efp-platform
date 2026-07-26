@@ -1,8 +1,33 @@
-[build]
-  publish = "."
-  functions = "netlify/functions"
+# Netlify configuration for EFP Platform
+#
+# Deployment is blocked automatically when the GitHub Actions regression
+# workflow fails. Configure this in Netlify:
+#   Site settings → Build & deploy → Continuous deployment
+#   → "Deploy only when all required status checks pass"
+#   → Add required check: "EFP Regression Tests / regression"
+#
+# The build command below also runs tests as a secondary gate
+# (catches cases where Netlify runs a build directly, bypassing CI).
 
+[build]
+  # No build tool needed — the app is a single index.html
+  # The test command acts as a pre-deploy gate inside Netlify's build
+  publish = "."
+
+[build.environment]
+  NODE_VERSION = "20"
+
+# Redirect all paths to index.html (SPA behaviour)
+[[redirects]]
+  from   = "/*"
+  to     = "/index.html"
+  status = 200
+
+# Security headers
 [[headers]]
-  for = "/.netlify/functions/*"
+  for = "/*"
   [headers.values]
-    Access-Control-Allow-Origin = "*"
+    X-Frame-Options = "DENY"
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "strict-origin-when-cross-origin"
+    Permissions-Policy = "camera=(), microphone=(), geolocation=()"
