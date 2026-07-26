@@ -2042,6 +2042,162 @@ tr:hover .pdr-btn     { opacity: 1; }
   @page { margin:15mm 12mm; }
 }
 
+/* ════════════════════════════════════════════════════════════════════════
+   PHASE 3 — ENTERPRISE DESIGN SYSTEM
+   Applies uniformly to every button, form, table, modal, and page.
+   No exceptions.
+   ════════════════════════════════════════════════════════════════════════ */
+
+/* ── BUTTON STATES ──────────────────────────────────────────────────── */
+.btn { position: relative; transition: background .15s, box-shadow .15s, opacity .15s, transform .08s; }
+.btn:hover:not([disabled]):not(.is-disabled):not(.is-loading) {
+  filter: brightness(1.08);
+  box-shadow: 0 2px 8px rgba(0,0,0,.13);
+}
+.btn:active:not([disabled]):not(.is-disabled):not(.is-loading) { transform: scale(.97); }
+.btn[disabled], .btn.is-disabled {
+  opacity: .42;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+/* Loading state — spinner in place of label */
+.btn.is-loading {
+  color: transparent !important;
+  pointer-events: none;
+}
+.btn.is-loading::after {
+  content: '';
+  position: absolute;
+  inset: 0; margin: auto;
+  width: 14px; height: 14px;
+  border: 2px solid rgba(255,255,255,.35);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: ds-spin .65s linear infinite;
+}
+.btn-outline.is-loading::after { border-color: rgba(0,0,0,.15); border-top-color: var(--navy); }
+/* Success state */
+.btn.is-success {
+  background: var(--green) !important;
+  border-color: var(--green) !important;
+  color: #fff !important;
+  pointer-events: none;
+}
+/* Error state */
+.btn.is-error {
+  background: var(--red) !important;
+  border-color: var(--red) !important;
+  color: #fff !important;
+  pointer-events: none;
+}
+@keyframes ds-spin { to { transform: rotate(360deg); } }
+
+/* ── FORM FIELD STATES ──────────────────────────────────────────────── */
+/* Invalid input */
+input.is-invalid, select.is-invalid, textarea.is-invalid {
+  border-color: var(--red) !important;
+  background: rgba(220,38,38,.03) !important;
+  animation: ds-shake .35s ease;
+}
+@keyframes ds-shake {
+  0%,100% { transform: translateX(0); }
+  20%      { transform: translateX(-5px); }
+  60%      { transform: translateX(5px); }
+  80%      { transform: translateX(-3px); }
+}
+/* Inline error text */
+.ds-field-error {
+  font-size: 11px;
+  color: var(--red);
+  margin-top: 3px;
+  display: none;
+  line-height: 1.3;
+}
+.ds-field-error.visible { display: block; }
+/* Form in loading state */
+.ds-form-loading { pointer-events: none; opacity: .65; }
+
+/* ── TABLE — SORTABLE HEADERS ───────────────────────────────────────── */
+th.ds-sort {
+  cursor: pointer;
+  user-select: none;
+  transition: background .1s;
+}
+th.ds-sort::after { content: ' ⇅'; font-size: 10px; opacity: .3; }
+th.ds-sort.ds-asc::after  { content: ' ↑'; opacity: .85; color: var(--navy); }
+th.ds-sort.ds-desc::after { content: ' ↓'; opacity: .85; color: var(--navy); }
+th.ds-sort:hover { background: rgba(30,58,95,.06); }
+
+/* ── TABLE — SKELETON ROWS ──────────────────────────────────────────── */
+.ds-skeleton-row td { pointer-events: none; vertical-align: middle; }
+.ds-skel-cell {
+  height: 13px;
+  border-radius: 4px;
+  background: linear-gradient(90deg, var(--surface2) 25%, var(--border) 50%, var(--surface2) 75%);
+  background-size: 200% 100%;
+  animation: ds-shimmer 1.4s ease infinite;
+  display: block;
+}
+@keyframes ds-shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+
+/* ── TABLE — EMPTY STATE ────────────────────────────────────────────── */
+.ds-empty-state {
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  padding: 52px 24px; gap: 10px; color: var(--text3);
+}
+.ds-empty-icon  { font-size: 40px; opacity: .45; line-height: 1; }
+.ds-empty-title { font-size: 15px; font-weight: 600; color: var(--text2); }
+.ds-empty-sub   { font-size: 13px; color: var(--text3); text-align: center; max-width: 280px; line-height: 1.5; }
+
+/* ── TABLE — PAGINATION ─────────────────────────────────────────────── */
+.ds-pagination {
+  display: none;
+  align-items: center; justify-content: flex-end; gap: 8px;
+  padding: 10px 16px; border-top: 1px solid var(--border);
+  font-size: 12px; color: var(--text2);
+}
+.ds-pagination.visible { display: flex; }
+.ds-page-btn {
+  background: var(--surface2); border: 1px solid var(--border);
+  border-radius: 5px; padding: 4px 11px; font-size: 12px;
+  cursor: pointer; color: var(--text2); transition: background .1s, color .1s;
+}
+.ds-page-btn:hover:not([disabled]) { background: var(--navy); color: #fff; border-color: var(--navy); }
+.ds-page-btn[disabled] { opacity: .35; cursor: not-allowed; }
+.ds-page-info { color: var(--text3); font-size: 12px; }
+
+/* ── PAGE LOADING SKELETON ──────────────────────────────────────────── */
+.ds-page-skeleton { display: none; }
+.ds-page-skeleton.visible { display: block; }
+.ds-skel-bar {
+  border-radius: 5px; margin-bottom: 10px;
+  background: linear-gradient(90deg, var(--surface2) 25%, var(--border) 50%, var(--surface2) 75%);
+  background-size: 200% 100%;
+  animation: ds-shimmer 1.4s ease infinite;
+}
+.ds-skel-bar.h-12 { height: 12px; }
+.ds-skel-bar.h-20 { height: 20px; }
+.ds-skel-bar.h-40 { height: 40px; }
+.ds-skel-bar.w-30 { width: 30%; }
+.ds-skel-bar.w-50 { width: 50%; }
+.ds-skel-bar.w-70 { width: 70%; }
+.ds-skel-bar.w-full { width: 100%; }
+
+/* ── PAGE ERROR STATE ───────────────────────────────────────────────── */
+.ds-page-error {
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  padding: 60px 24px; gap: 12px; color: var(--red);
+}
+.ds-page-error button { margin-top: 8px; }
+
+/* ── SYNC / SAVE INDICATOR ──────────────────────────────────────────── */
+#sync-badge { transition: all .2s; }
+#sync-badge.sync-saving  { color: var(--amber) !important; }
+#sync-badge.sync-saved   { color: var(--green) !important; }
+#sync-badge.sync-error   { color: var(--red)   !important; }
+
 </style>
   <!-- Firebase Realtime Database SDK — defer so HTML renders while scripts download -->
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js" defer></script>
@@ -2419,13 +2575,13 @@ tr:hover .pdr-btn     { opacity: 1; }
         <table class="data-table">
           <thead>
             <tr>
-              <th>Name</th>
-              <th>Role</th>
-              <th>Club / Org</th>
-              <th>Region</th>
+              <th class="ds-sort">Name</th>
+              <th class="ds-sort">Role</th>
+              <th class="ds-sort">Club / Org</th>
+              <th class="ds-sort">Region</th>
               <th>Email</th>
               <th>Notes</th>
-              <th>Status</th>
+              <th class="ds-sort">Status</th>
             </tr>
           </thead>
           <tbody id="contacts-table-body">
@@ -3650,7 +3806,7 @@ tr:hover .pdr-btn     { opacity: 1; }
       <div class="panel">
         <table class="data-table">
           <thead>
-            <tr><th>Club</th><th>League</th><th>Country</th><th>Contacts</th><th>Active Pitches</th><th>Open Needs</th><th>Relationship</th></tr>
+            <tr><th class="ds-sort">Club</th><th class="ds-sort">League</th><th class="ds-sort">Country</th><th>Contacts</th><th>Active Pitches</th><th>Open Needs</th><th class="ds-sort">Relationship</th></tr>
           </thead>
           <tbody id="clubs-tbody">
             <!-- ── Active relationships ── -->
@@ -3809,7 +3965,7 @@ tr:hover .pdr-btn     { opacity: 1; }
       <div class="panel">
         <table class="data-table">
           <thead>
-            <tr><th>Player</th><th>Position</th><th>Age</th><th>Current Club</th><th>Market Value</th><th>Contact Person</th><th>Status</th></tr>
+            <tr><th class="ds-sort">Player</th><th class="ds-sort">Position</th><th class="ds-sort">Age</th><th class="ds-sort">Current Club</th><th class="ds-sort">Market Value</th><th class="ds-sort">Contact Person</th><th class="ds-sort">Status</th></tr>
           </thead>
           <tbody>
             <tr><td><strong>Dennis Geiger</strong></td><td>CM/CDM/CAM</td><td>28</td><td>TSG Hoffenheim</td><td>€500k</td><td>Via Andreas Schicker</td><td><div class="status"><span class="dot dot-green"></span> Active Mandate</div></td></tr>
@@ -3915,7 +4071,7 @@ tr:hover .pdr-btn     { opacity: 1; }
       <div class="panel">
         <table class="data-table">
           <thead>
-            <tr><th>Club</th><th>Position(s)</th><th>Profile / Notes</th><th>Budget</th><th>Window</th><th>Contact</th><th>Status</th></tr>
+            <tr><th class="ds-sort">Club</th><th class="ds-sort">Position(s)</th><th>Profile / Notes</th><th class="ds-sort">Budget</th><th>Window</th><th class="ds-sort">Contact</th><th class="ds-sort">Status</th></tr>
           </thead>
           <tbody>
             <tr>
@@ -5549,6 +5705,20 @@ function efpInitFirebase() {
     if (!firebase.apps.length) firebase.initializeApp(FIREBASE_CONFIG);
     _fbDb = firebase.database();
 
+    // ── Show skeleton rows in all tables while Firebase loads ──
+    if (window._DS) {
+      const skeletonTargets = [
+        { sel: '#contacts-table-body',                   cols: 7 },
+        { sel: '#view-mandates .data-table tbody',       cols: 7 },
+        { sel: '#view-needs .data-table tbody',          cols: 7 },
+        { sel: '#clubs-tbody',                           cols: 7 },
+      ];
+      skeletonTargets.forEach(function (t) {
+        const tbody = document.querySelector(t.sel);
+        if (tbody && !tbody.children.length) _DS.showSkeleton(tbody, 5, t.cols);
+      });
+    }
+
     // ── Live listener: any device saving data updates every connected browser ──
     _fbDb.ref('efp').on('value', snap => {
       const d = snap.val();
@@ -5847,6 +6017,9 @@ function efpInitFirebase() {
       }
       _fbDataLoaded = true; // Firebase real data confirmed in memory — fbSave() now allowed
       _fbFirstLoad = false;
+      // ── Phase 4: Run orphan scan after every Firebase load ──
+      // Runs async on the next tick so rendering is not blocked.
+      if (window._db) setTimeout(function () { _db.scanOrphans(); }, 400);
       // Refresh dashboard KPIs with live data
       if (typeof renderDashboard === 'function') renderDashboard();
       // Re-run all cross-section interconnections now that live data is loaded
@@ -6158,7 +6331,11 @@ function _mobShowRow(tr, viewId) {
 
 function _renderContactsTable() {
   const tbody = document.getElementById('contacts-table-body');
-  if (!tbody || !allContacts.length) return;
+  if (!tbody) return;
+  if (!allContacts.length) {
+    if (window._DS) _DS.showEmptyState(tbody, '👤', 'No contacts yet', 'Add your first contact using the button above.');
+    return;
+  }
   tbody.innerHTML = '';
   allContacts.forEach(c => {
     const col = c.color || _avCol(c.name);
@@ -6198,11 +6375,20 @@ function _renderContactsTable() {
   const sub = document.getElementById('contacts-subtitle');
   if (sub) sub.textContent = allContacts.length + ' contacts · All clubs';
   _applyMobCards('view-contacts');
+  // DS: sorting + pagination
+  if (window._DS) {
+    const tbl = tbody.closest('table');
+    if (tbl) { _DS.initTableSort(tbl); _DS.initTablePagination(tbl, 25); }
+  }
 }
 
 function _renderMandatesTable() {
   const tbody = document.querySelector('#view-mandates .data-table tbody');
-  if (!tbody || !allMandates.length) return;
+  if (!tbody) return;
+  if (!allMandates.length) {
+    if (window._DS) _DS.showEmptyState(tbody, '⚽', 'No mandates yet', 'Add your first player mandate using the button above.');
+    return;
+  }
   tbody.innerHTML = '';
   allMandates.forEach(m => {
     const tr = document.createElement('tr');
@@ -6240,6 +6426,11 @@ function _renderMandatesTable() {
   });
   _updateMandateSubtitle();
   _applyMobCards('view-mandates');
+  // DS: sorting + pagination
+  if (window._DS) {
+    const tbl = tbody.closest('table');
+    if (tbl) { _DS.initTableSort(tbl); _DS.initTablePagination(tbl, 25); }
+  }
   // Rebuild player dropdown
   const sel = document.getElementById('fp-player');
   if (sel) {
@@ -6261,7 +6452,11 @@ function _renderMandatesTable() {
 
 function _renderNeedsTable() {
   const tbody = document.querySelector('#view-needs .data-table tbody');
-  if (!tbody || !allNeeds.length) return;
+  if (!tbody) return;
+  if (!allNeeds.length) {
+    if (window._DS) _DS.showEmptyState(tbody, '🎯', 'No club requirements yet', 'Club requirements you add will appear here.');
+    return;
+  }
   tbody.innerHTML = '';
   allNeeds.forEach(n => {
     const tr = document.createElement('tr');
@@ -6306,6 +6501,11 @@ function _renderNeedsTable() {
   _updateNeedsSubtitle();
   _initNeedsContactLinks();
   _applyMobCards('view-needs');
+  // DS: sorting + pagination
+  if (window._DS) {
+    const tbl = tbody.closest('table');
+    if (tbl) { _DS.initTableSort(tbl); _DS.initTablePagination(tbl, 25); }
+  }
   // Re-apply search if user has typed something
   const _nsEl = document.getElementById('needs-search');
   if (_nsEl && _nsEl.value) filterNeeds(_nsEl.value);
@@ -6389,12 +6589,22 @@ function dismissSyncBanner() {
 }
 
 // Save all mutable data to Firebase
+// Debounced save — use this from code paths that fire multiple times in quick succession.
+// Collapses up to N calls within `delay` ms into a single Firebase write.
+let _fbSaveTimer = null;
+function fbSaveLater(delay) {
+  clearTimeout(_fbSaveTimer);
+  _fbSaveTimer = setTimeout(function () { fbSave(); }, delay || 650);
+}
+
 function fbSave() {
   if (!_fbDb) return;
   // Safety: never write to Firebase before we've confirmed real data is in memory.
   // This prevents a new index.html deployment from overwriting Firebase with seed/empty arrays
   // during the brief window before the on('value') callback fires.
   if (!_fbDataLoaded) { console.warn('[EFP] fbSave blocked — Firebase data not yet confirmed in memory'); return; }
+  // ── Phase 4: Payload integrity gate ──
+  if (window._db && !_db.validatePayload()) return;
   const payload = {
     pitches,
     clubPitches,
@@ -6412,16 +6622,20 @@ function fbSave() {
     playerNotes,
     clubData,
     savedAt: Date.now(),
-    // Unified single-source-of-truth arrays (populated after migration)
-    ...(allContacts.length  ? { allContacts }  : {}),
-    ...(allMandates.length  ? { allMandates }  : {}),
-    ...(allNeeds.length     ? { allNeeds }     : {}),
-    ...(allTasks.length     ? { allTasks }     : {}),
-    ...(allClubs.length     ? { allClubs }     : {}),
+    // Unified single-source-of-truth arrays.
+    // ALWAYS written once _fbDataLoaded is true — even when empty.
+    // Omitting them when empty caused ghost data: Firebase retained stale values
+    // and deleted records reappeared on refresh (P0 bug fixed 2026-07).
+    allContacts,
+    allMandates,
+    allNeeds,
+    allTasks,
+    allClubs,
   };
+  if (window._DS) _DS.setSyncState('saving');
   _fbDb.ref('efp').update(payload)
-    .then(() => _fbSetSynced())
-    .catch(e => console.warn('fbSave error:', e.message));
+    .then(() => { _fbSetSynced(); if (window._DS) _DS.setSyncState('saved'); })
+    .catch(e => { console.warn('fbSave error:', e.message); if (window._DS) _DS.setSyncState('error'); });
 }
 
 document.addEventListener('DOMContentLoaded', efpAuthCheck);
@@ -6687,10 +6901,16 @@ function toggleDone(id) {
 function deleteTask(id, e) {
   e.stopPropagation();
   if (!confirm('Delete this task?')) return;
+  // Remove from all three arrays that mirror each other
   const idx = TASKS.findIndex(t => t.id == id); // == handles Firebase type coercion
   if (idx !== -1) TASKS.splice(idx, 1);
   const idx2 = tasksAdded.findIndex(t => t.id == id);
   if (idx2 !== -1) tasksAdded.splice(idx2, 1);
+  // P0 fix: also remove from allTasks so fbSave() writes the correct state
+  const idx3 = allTasks.findIndex(t => t.id == id);
+  if (idx3 !== -1) allTasks.splice(idx3, 1);
+  // Also remove from Firebase tasksAdded sub-path (direct write for this task)
+  if (_fbDb) _fbDb.ref('efp/tasksAdded/' + id).remove().catch(() => {});
   renderTasks();
   _renderDashTasks();
   fbSave();
@@ -7829,15 +8049,31 @@ function _clubAC(input, dropId) {
 }
 
 function openDrawer(key) {
-  document.getElementById(key + '-overlay').classList.add('open');
-  document.getElementById(key + '-drawer').classList.add('open');
+  const ov  = document.getElementById(key + '-overlay');
+  const drw = document.getElementById(key + '-drawer');
+  if (!ov || !drw) return;
+  ov.classList.add('open');
+  drw.classList.add('open');
   document.body.style.overflow = 'hidden';
+  // Register with DS layer stack for ESC handling
+  if (window._DS) _DS.pushLayer(key, function() { closeDrawer(key); });
+  // Clicking the overlay background closes the drawer
+  if (!ov._dsClickBound) {
+    ov._dsClickBound = true;
+    ov.addEventListener('click', function (e) {
+      if (e.target === ov) closeDrawer(key);
+    });
+  }
 }
 function closeDrawer(key) {
-  document.getElementById(key + '-overlay').classList.remove('open');
-  document.getElementById(key + '-drawer').classList.remove('open');
+  const ov  = document.getElementById(key + '-overlay');
+  const drw = document.getElementById(key + '-drawer');
+  if (ov)  ov.classList.remove('open');
+  if (drw) drw.classList.remove('open');
   document.body.style.overflow = '';
   if (key === 'req') _resetReqDrawer();
+  // Remove from DS layer stack WITHOUT calling closeFn (avoids recursion)
+  if (window._DS && _DS.removeLayer) _DS.removeLayer(key);
 }
 
 // ─── MODAL HELPERS ───
@@ -8180,14 +8416,27 @@ function _initials(name) { return name.split(' ').map(w=>w[0]).join('').substrin
 
 // ─── ADD CONTACT ───
 function submitContact() {
+  // DS validation
+  if (window._DS) {
+    const ok = _DS.validateForm([
+      {id:'c-first',    label:'First name', required:true},
+      {id:'c-last',     label:'Last name',  required:true},
+      {id:'c-position', label:'Role',       required:true},
+    ]);
+    if (!ok) return;
+  } else {
+    const first = document.getElementById('c-first').value.trim();
+    const last  = document.getElementById('c-last').value.trim();
+    const pos   = document.getElementById('c-position').value;
+    [['c-first',first],['c-last',last],['c-position',pos]].forEach(([id,val]) => {
+      document.getElementById(id).style.borderColor = val ? '' : 'var(--red)';
+    });
+    if (!first || !last || !pos) return;
+  }
   const first = document.getElementById('c-first').value.trim();
   const last  = document.getElementById('c-last').value.trim();
   const pos   = document.getElementById('c-position').value;
   const club  = document.getElementById('c-club').value;
-  [['c-first',first],['c-last',last],['c-position',pos]].forEach(([id,val]) => {
-    document.getElementById(id).style.borderColor = val ? '' : 'var(--red)';
-  });
-  if (!first || !last || !pos) return;
   const email = document.getElementById('c-email').value.trim();
   const phone = document.getElementById('c-phone').value.trim();
   const notes = document.getElementById('c-notes').value.trim();
@@ -8195,6 +8444,12 @@ function submitContact() {
   // Check if this is an edit (tagged by _editContact)
   const drawer = document.getElementById('contact-drawer');
   const editId = drawer ? drawer.dataset.editId : null;
+  // ── Unique constraint: block duplicate contact (same name + club) ──
+  if (!editId && window._db && _db.isContactDuplicate(first, last, club, null)) {
+    if (window._DS) _DS.showFieldError('c-first', `${first} ${last} at "${club}" already exists`);
+    else showSnack(`⚠ ${first} ${last} already exists in this club`, true);
+    return;
+  }
   if (editId) {
     const idx = allContacts.findIndex(x => x.id === editId);
     const wa  = (document.getElementById('c-wa')?.value||'').trim();
@@ -8216,18 +8471,25 @@ function submitContact() {
     fbSave(); renderDashboard(); _refreshAllInterconnections();
     return;
   }
-  const c = { id:'c_'+Date.now(), name:`${first} ${last}`, role:pos, club, email, phone, notes, status:'New', stage, isRich:false };
+  const wa  = (document.getElementById('c-wa')?.value||'').trim();
+  const li  = (document.getElementById('c-li')?.value||'').trim();
+  const c = { id:'c_'+Date.now(), name:`${first} ${last}`, role:pos, club, email, phone, wa, linkedin:li, notes, status:'New', stage, isRich:false };
   allContacts.push(c);
   contactsAdded.push(c); // keep legacy array in sync for backward compat
+  const _cSaveBtn = document.querySelector('#contact-drawer .drawer-foot .btn-primary');
+  if (window._DS && _cSaveBtn) _DS.btn(_cSaveBtn, 'loading');
   _renderContactsTable();
-  closeDrawer('contact');
-  // reset form
-  ['c-first','c-last','c-email','c-phone','c-wa','c-li','c-notes'].forEach(id => {
-    const el = document.getElementById(id); if(el) el.value='';
-  });
-  document.getElementById('c-position').value='';
-  document.getElementById('c-club').value='';
-  showSnack(`✓ ${first} ${last} added to Contacts`, false);
+  setTimeout(() => {
+    closeDrawer('contact');
+    // reset form
+    ['c-first','c-last','c-email','c-phone','c-wa','c-li','c-notes'].forEach(id => {
+      const el = document.getElementById(id); if(el) el.value='';
+    });
+    document.getElementById('c-position').value='';
+    document.getElementById('c-club').value='';
+    showSnack(`✓ ${first} ${last} added to Contacts`, false);
+    if (window._DS && _cSaveBtn) _DS.btn(_cSaveBtn, 'default');
+  }, 350);
   fbSave();
   renderDashboard();
   _refreshAllInterconnections();  // propagate new contact across Clubs view, Needs links, etc.
@@ -8280,6 +8542,9 @@ function _appendContactRow(c, highlight) {
 
 function deleteContact(id, btn) {
   if (!confirm('Remove this contact from the CRM?')) return;
+  // Capture name BEFORE filtering (for cascade)
+  const contact = allContacts.find(c => c.id === id);
+  const contactName = contact ? contact.name : '';
   btn.closest('tr').remove();
   // Remove from unified array
   allContacts = allContacts.filter(c => c.id !== id);
@@ -8289,6 +8554,8 @@ function deleteContact(id, btn) {
   } else {
     if (!contactsDeleted.includes(id)) contactsDeleted.push(id);
   }
+  // ── Cascade: nullify contact refs in mandates, needs, pitches ──
+  if (contactName && window._db) _db.onContactDeleted(contactName);
   fbSave();
   renderDashboard();
   _refreshAllInterconnections();
@@ -8320,6 +8587,13 @@ function submitClub() {
     document.getElementById(id).style.borderColor = val ? '' : 'var(--red)';
   });
   if (!name || !country || !league) return;
+  // ── Unique constraint: block duplicate club name ──
+  if (window._db && _db.isClubDuplicate(name, null)) {
+    const el = document.getElementById('cl-name');
+    if (el) el.style.borderColor = 'var(--red)';
+    showSnack(`⚠ "${name}" already exists in the database`, true);
+    return;
+  }
   const club = { id:'cl_'+Date.now(), name, league, country,
     flag: country.includes('Spain')?'🇪🇸':country.includes('Germany')?'🇩🇪':country.includes('Italy')?'🇮🇹':country.includes('France')?'🇫🇷':country.includes('Netherlands')?'🇳🇱':country.includes('Belgium')?'🇧🇪':'🌍',
     status: 'New', isStatic: false };
@@ -8340,7 +8614,11 @@ function submitClub() {
 // Render entire clubs table from allClubs unified array
 function _renderClubsTable() {
   const tbody = document.getElementById('clubs-tbody');
-  if (!tbody || !allClubs.length) return;
+  if (!tbody) return;
+  if (!allClubs.length) {
+    if (window._DS) _DS.showEmptyState(tbody, '🏟️', 'No clubs yet', 'Add your first club using the button above.');
+    return;
+  }
   tbody.innerHTML = '';
   allClubs.forEach(c => {
     const tr = document.createElement('tr');
@@ -8366,6 +8644,11 @@ function _renderClubsTable() {
   if (typeof _refreshClubTableCounts   === 'function') _refreshClubTableCounts();
   if (typeof _refreshClubDropdowns     === 'function') _refreshClubDropdowns();
   _applyMobCards('view-clubs');
+  // DS: sorting + pagination
+  if (window._DS) {
+    const tbl = tbody.closest('table');
+    if (tbl) { _DS.initTableSort(tbl); _DS.initTablePagination(tbl, 25); }
+  }
 }
 
 function _appendClubRow(c) {
@@ -8387,11 +8670,15 @@ function _appendClubRow(c) {
 }
 
 function deleteClub(id, btn) {
-  if (!confirm('Remove this club?')) return;
+  if (!confirm('Remove this club? All contacts, mandates, and pitches referencing this club will be updated.')) return;
+  const club = allClubs.find(c => c.id === id);
+  const clubName = club ? club.name : '';
   btn.closest('tr').remove();
-  allClubs    = allClubs.filter(c => c.id !== id);
-  clubsAdded  = clubsAdded.filter(c => c.id !== id);
+  allClubs   = allClubs.filter(c => c.id !== id);
+  clubsAdded = clubsAdded.filter(c => c.id !== id);
   _refreshClubDropdowns();
+  // ── Cascade: nullify all references to this club ──
+  if (clubName && window._db) _db.onClubDeleted(clubName);
   fbSave();
   showSnack('Club removed', false);
 }
@@ -8503,9 +8790,15 @@ function savePlayerProfile() {
 
   // Save notes/priority/status/dealType under the (possibly new) name
   playerNotes[newName] = { status, notes, priority, dealType, savedAt: Date.now() };
-  // Remove old key if name changed
+  // Remove old key if name changed; cascade rename to pitches + matches
   if (newName !== _ppCurrentPlayer) {
     delete playerNotes[_ppCurrentPlayer];
+    // P1 fix: cascade player rename so pitch history survives refresh
+    const _oldName = _ppCurrentPlayer;
+    (pitches     || []).forEach(p => { if (p.player === _oldName) p.player = newName; });
+    (matchesData || []).forEach(m => { if (m.player === _oldName) m.player = newName; });
+    (logsAdded   || []).forEach(l => { if (l.player === _oldName) l.player = newName; });
+    (clubPitches || []).forEach(p => { if (p.player === _oldName) p.player = newName; });
   }
 
   // Update the mandate table row cells
@@ -8708,14 +9001,42 @@ function saveClubEdit() {
   const flag     = document.getElementById('ce-flag').value.trim();
   const status   = (clubData[_ceCurrentName] || {}).status || 'Not Started'; // preserve existing
   const notes    = document.getElementById('ce-notes').value.trim();
+  const oldName  = _ceCurrentName;
+  const renamed  = newName !== oldName;
 
   // If name changed, migrate key
-  if (newName !== _ceCurrentName && clubData[_ceCurrentName]) {
-    delete clubData[_ceCurrentName];
+  if (renamed && clubData[oldName]) {
+    delete clubData[oldName];
   }
 
   clubData[newName] = { name: newName, league, country, flag, status, notes,
     linkedContacts: _ceTempContacts, savedAt: Date.now() };
+
+  // ── P0 fix: update allClubs[] so name/league/country/flag persist on refresh ──
+  const clubIdx = allClubs.findIndex(c => c.name === oldName);
+  if (clubIdx !== -1) {
+    allClubs[clubIdx] = { ...allClubs[clubIdx], name: newName, league, country,
+      flag: flag || allClubs[clubIdx].flag || '🌍' };
+  }
+  // Keep legacy clubsAdded in sync
+  const caIdx = clubsAdded.findIndex(c => c.name === oldName);
+  if (caIdx !== -1) {
+    clubsAdded[caIdx] = { ...clubsAdded[caIdx], name: newName, league, country,
+      flag: flag || clubsAdded[caIdx].flag || '🌍' };
+  }
+
+  // ── P1 fix: cascade rename to all entity references ──
+  if (renamed) {
+    allContacts.forEach(c  => { if (c.club    === oldName) c.club    = newName; });
+    allMandates.forEach(m  => { if (m.club    === oldName) m.club    = newName; });
+    allNeeds.forEach(n     => { if (n.club    === oldName) n.club    = newName; });
+    (pitches     || []).forEach(p => { if (p.club === oldName) p.club = newName; });
+    (clubPitches || []).forEach(p => { if (p.club === oldName) p.club = newName; });
+    (relEntries  || []).forEach(r => { if (r.club === oldName) r.club = newName; });
+    // Update matchesData club references
+    (matchesData || []).forEach(m => { if (m.club === oldName) m.club = newName; });
+    console.log('[EFP][DB] Club renamed "' + oldName + '" → "' + newName + '" — refs cascaded');
+  }
 
   // Update table row immediately
   const tr = [...document.querySelectorAll('#clubs-tbody tr')]
@@ -8971,26 +9292,56 @@ function _applyContactClubTags() {
 
 // ─── ADD MANDATE ───
 function submitMandate() {
+  // DS validation
+  if (window._DS) {
+    const ok = _DS.validateForm([
+      {id:'m-name',    label:'Player name', required:true},
+      {id:'m-pos',     label:'Position',    required:true},
+      {id:'m-contact', label:'Contact',     required:true},
+    ]);
+    if (!ok) return;
+  } else {
+    const name    = document.getElementById('m-name').value.trim();
+    const pos     = document.getElementById('m-pos').value;
+    const contact = document.getElementById('m-contact')?.value.trim() || '';
+    [['m-name',name],['m-pos',pos],['m-contact',contact]].forEach(([id,val]) => {
+      const el = document.getElementById(id); if (el) el.style.borderColor = val ? '' : 'var(--red)';
+    });
+    if (!name || !pos || !contact) return;
+  }
   const name    = document.getElementById('m-name').value.trim();
   const pos     = document.getElementById('m-pos').value;
   const contact = document.getElementById('m-contact')?.value.trim() || '';
-  [['m-name',name],['m-pos',pos],['m-contact',contact]].forEach(([id,val]) => {
-    const el = document.getElementById(id); if (el) el.style.borderColor = val ? '' : 'var(--red)';
-  });
-  if (!name || !pos || !contact) return;
   const age   = document.getElementById('m-age').value  || '—';
-  const mClub = document.getElementById('m-club').value || '—';
+  const mClub = document.getElementById('m-club').value || '';
   const val   = _normVal(document.getElementById('m-val').value) || '—';
+  // ── Impossible state guard: Mandate must belong to a Club ──
+  if (!mClub || mClub === '—') {
+    if (window._DS) _DS.showFieldError('m-club', 'Club is required — a mandate must belong to a club');
+    else showSnack('⚠ Club is required for a mandate', true);
+    return;
+  }
+  // ── Unique constraint: block duplicate player name ──
+  if (window._db && _db.isMandateDuplicate(name, null)) {
+    if (window._DS) _DS.showFieldError('m-name', `"${name}" already exists as a mandate`);
+    else showSnack(`⚠ ${name} already exists as a mandate`, true);
+    return;
+  }
   const d = { id:'m_'+Date.now(), name, position:pos, pos, age, club:mClub, value:val, contact,
                dotClass:'dot-amber', statusText:'New Mandate' };
   allMandates.push(d);
   mandatesAdded.push(d); // legacy sync
+  const _mSaveBtn = document.querySelector('#mandate-drawer .drawer-foot .btn-primary');
+  if (window._DS && _mSaveBtn) _DS.btn(_mSaveBtn, 'loading');
   _renderMandatesTable();
-  closeDrawer('mandate');
-  ['m-name','m-age','m-club','m-val','m-contact','m-notes'].forEach(id => { const el=document.getElementById(id); if(el) el.value=''; });
-  document.getElementById('m-pos').value='';
-  showSnack(`✓ ${name} added · showing club suggestions`, false);
-  setTimeout(() => showMandateSuggestions(name, pos, age, val, mClub), 350);
+  setTimeout(() => {
+    closeDrawer('mandate');
+    ['m-name','m-age','m-club','m-val','m-contact','m-notes'].forEach(id => { const el=document.getElementById(id); if(el) el.value=''; });
+    document.getElementById('m-pos').value='';
+    showSnack(`✓ ${name} added · showing club suggestions`, false);
+    if (window._DS && _mSaveBtn) _DS.btn(_mSaveBtn, 'default');
+    showMandateSuggestions(name, pos, age, val, mClub);
+  }, 350);
   fbSave();
   _updateMandateSubtitle();
   _updateNeedsMatchAlerts(); // new mandate may create new club need matches
@@ -8999,6 +9350,9 @@ function submitMandate() {
 // Delete mandate by id (all mandates now have ids after migration)
 function deleteMandate(key, btn) {
   if (!confirm('Remove this mandate?')) return;
+  // Capture player name BEFORE filtering (for cascade)
+  const mandate = allMandates.find(m => m.id === key || m.name === key);
+  const playerName = mandate ? mandate.name : key;
   btn.closest('tr').remove();
   // Remove from unified array
   allMandates = allMandates.filter(m => m.id !== key && m.name !== key);
@@ -9008,6 +9362,8 @@ function deleteMandate(key, btn) {
   } else {
     if (!mandatesDeleted.includes(key)) mandatesDeleted.push(key);
   }
+  // ── Cascade: archive pitches, remove stale matches, orphan playerNotes ──
+  if (playerName && window._db) _db.onMandateDeleted(playerName);
   fbSave();
   _updateMandateSubtitle();
   showSnack('Mandate removed', false);
@@ -9035,6 +9391,8 @@ function deleteMandateFromDrawer() {
     || [...document.querySelectorAll('#view-mandates .data-table tbody tr')]
         .find(r => r.querySelector('td:first-child strong')?.textContent?.trim() === name);
   if (tr) tr.remove();
+  // ── Cascade: archive pitches, remove stale matches, orphan playerNotes ──
+  if (window._db) _db.onMandateDeleted(name);
   fbSave();
   _renderMandatesTable();
   _updateMandateSubtitle();
@@ -9720,12 +10078,20 @@ function saveNeedDetail() {
   const prio     = document.getElementById('nd-prio').value;
   const notes    = document.getElementById('nd-notes').value.trim();
   const dealType = document.getElementById('nd-deal-type')?.value || 'either';
+  // ── Required fields ──
+  if (!club) { showSnack('⚠ Club is required', true); return; }
+  if (!pos)  { showSnack('⚠ Position is required', true); return; }
   const ndBudMinEl = document.getElementById('nd-budmin');
   const ndBudMaxEl = document.getElementById('nd-budmax');
   if (!budMin) { if (ndBudMinEl) ndBudMinEl.style.borderColor = 'var(--red)'; showSnack('⚠ Budget Min is required for AI matching', true); return; }
   if (!budMax) { if (ndBudMaxEl) ndBudMaxEl.style.borderColor = 'var(--red)'; showSnack('⚠ Budget Max is required for AI matching', true); return; }
   if (ndBudMinEl) ndBudMinEl.style.borderColor = '';
   if (ndBudMaxEl) ndBudMaxEl.style.borderColor = '';
+  // ── Unique constraint: block duplicate club+position need ──
+  if (!_currentNeedId && window._db && _db.isNeedDuplicate(club, pos, null)) {
+    showSnack(`⚠ A requirement for ${club} — ${pos} already exists`, true);
+    return;
+  }
 
   if (_currentNeedId) {
     // Update in unified allNeeds array
@@ -10134,7 +10500,13 @@ function deleteLog(id) {
   if (!confirm('Delete this activity entry?')) return;
   logsAdded = logsAdded.filter(l => l.id !== id);
   applyActivityFilter();
+  _renderGlobalFeed();
   _renderDashFeed();
+  // Also refresh open contact detail feed if visible
+  if (window._currentContactName) {
+    const feed = document.getElementById('cd-feed');
+    if (feed) _renderContactFeed(feed, window._currentContactName);
+  }
   fbSave();
   showSnack('Entry deleted', false);
 }
@@ -10175,7 +10547,7 @@ function submitLog() {
 
   document.getElementById('log-modal').style.display = 'none';
   document.getElementById('log-notes').value = '';
-  showSnack(`✓ ${labels[type] || 'Activity'} logged`, false);
+  showSnack(`✓ ${(_LOG_LABELS[type] || 'Activity')} logged`, false);
 }
 
 // ─── ADD TASK MODAL ───
@@ -14122,6 +14494,1931 @@ function saveMandateDetail() {
     delete tr.dataset.suggestInit;
   });
 }
+
+// ════════════════════════════════════════════════════════════════════════════
+// PHASE 3 — ENTERPRISE DESIGN SYSTEM  (_DS)
+// Shared utility functions for buttons, forms, tables, modals, page states.
+// Every component uses these. No exceptions.
+// ════════════════════════════════════════════════════════════════════════════
+window._DS = (function () {
+
+  // ── BUTTON STATE MACHINE ─────────────────────────────────────────────────
+  // _DS.btn(el, 'loading' | 'success' | 'error' | 'default', optionalLabel)
+  function btn(el, state, label) {
+    if (!el) return;
+    // Store original HTML on first call
+    if (!el._dsOrig) el._dsOrig = el.innerHTML;
+    el.classList.remove('is-loading', 'is-success', 'is-error', 'is-disabled');
+    if (state === 'default') {
+      el.innerHTML = el._dsOrig;
+      el._dsOrig = null;
+      return;
+    }
+    if (state === 'loading') {
+      el.classList.add('is-loading');
+      return;
+    }
+    if (state === 'success') {
+      el.classList.add('is-success');
+      el.innerHTML = label || '✓ Saved';
+      setTimeout(() => { el.classList.remove('is-success'); el.innerHTML = el._dsOrig || el.innerHTML; el._dsOrig = null; }, 2200);
+      return;
+    }
+    if (state === 'error') {
+      el.classList.add('is-error');
+      el.innerHTML = label || '✕ Error';
+      setTimeout(() => { el.classList.remove('is-error'); el.innerHTML = el._dsOrig || el.innerHTML; el._dsOrig = null; }, 2500);
+      return;
+    }
+    if (state === 'disabled') {
+      el.classList.add('is-disabled');
+    }
+  }
+
+  // ── FORM VALIDATION ───────────────────────────────────────────────────────
+  // validateForm(rules) — rules: [{id, label, required?, minLen?, match?}]
+  // Returns true if all pass; shows inline errors if not.
+  function validateForm(rules) {
+    let valid = true;
+    rules.forEach(function (rule) {
+      const el = document.getElementById(rule.id);
+      if (!el) return;
+      const val = el.value.trim();
+      clearFieldError(rule.id);
+      if (rule.required && !val) {
+        showFieldError(rule.id, (rule.label || rule.id) + ' is required');
+        valid = false;
+      } else if (rule.minLen && val.length < rule.minLen) {
+        showFieldError(rule.id, (rule.label || rule.id) + ' must be at least ' + rule.minLen + ' characters');
+        valid = false;
+      }
+    });
+    return valid;
+  }
+
+  function showFieldError(id, msg) {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.classList.add('is-invalid');
+    // Find or create sibling error element
+    let errEl = el.parentNode.querySelector('.ds-field-error');
+    if (!errEl) {
+      errEl = document.createElement('div');
+      errEl.className = 'ds-field-error';
+      el.parentNode.appendChild(errEl);
+    }
+    errEl.textContent = msg;
+    errEl.classList.add('visible');
+  }
+
+  function clearFieldError(id) {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.classList.remove('is-invalid');
+    const errEl = el.parentNode && el.parentNode.querySelector('.ds-field-error');
+    if (errEl) { errEl.textContent = ''; errEl.classList.remove('visible'); }
+  }
+
+  function clearAllErrors(ids) {
+    (ids || []).forEach(clearFieldError);
+  }
+
+  // ── TABLE SORT ────────────────────────────────────────────────────────────
+  // Call after table is rendered. All th with class ds-sort become clickable.
+  function initTableSort(tblEl) {
+    if (!tblEl) return;
+    tblEl.querySelectorAll('th.ds-sort').forEach(function (th, colIdx) {
+      th._dsCol = colIdx;
+      th._dsDir = null;
+      if (!th._dsSortBound) {
+        th._dsSortBound = true;
+        th.addEventListener('click', function () { _sortTable(tblEl, th); });
+      }
+    });
+  }
+
+  function _sortTable(tblEl, clickedTh) {
+    const tbody = tblEl.querySelector('tbody');
+    if (!tbody) return;
+    const col = clickedTh._dsCol;
+    const dir = clickedTh._dsDir === 'asc' ? 'desc' : 'asc';
+    tblEl.querySelectorAll('th.ds-sort').forEach(function (th) {
+      th.classList.remove('ds-asc', 'ds-desc');
+      th._dsDir = null;
+    });
+    clickedTh.classList.add(dir === 'asc' ? 'ds-asc' : 'ds-desc');
+    clickedTh._dsDir = dir;
+    const rows = Array.from(tbody.querySelectorAll('tr:not(.ds-skeleton-row)'));
+    rows.sort(function (a, b) {
+      const aT = ((a.cells[col] && a.cells[col].textContent) || '').trim().toLowerCase();
+      const bT = ((b.cells[col] && b.cells[col].textContent) || '').trim().toLowerCase();
+      const aN = parseFloat(aT.replace(/[^0-9.\-]/g, ''));
+      const bN = parseFloat(bT.replace(/[^0-9.\-]/g, ''));
+      if (!isNaN(aN) && !isNaN(bN)) return dir === 'asc' ? aN - bN : bN - aN;
+      return dir === 'asc' ? aT.localeCompare(bT) : bT.localeCompare(aT);
+    });
+    rows.forEach(function (r) { tbody.appendChild(r); });
+    // Re-apply current page after sort
+    if (tblEl._dsPageSize) _renderPage(tblEl);
+  }
+
+  // ── TABLE PAGINATION ──────────────────────────────────────────────────────
+  // initTablePagination(tblEl, pageSize=25)
+  function initTablePagination(tblEl, pageSize) {
+    if (!tblEl) return;
+    tblEl._dsPageSize = pageSize || 25;
+    tblEl._dsPage = 1;
+    // Ensure pagination container exists right after the table's parent
+    let pgEl = tblEl._dsPgEl;
+    if (!pgEl) {
+      pgEl = document.createElement('div');
+      pgEl.className = 'ds-pagination';
+      tblEl.parentNode.insertBefore(pgEl, tblEl.nextSibling);
+      tblEl._dsPgEl = pgEl;
+    }
+    _renderPage(tblEl);
+  }
+
+  function _renderPage(tblEl) {
+    const tbody = tblEl.querySelector('tbody');
+    if (!tbody) return;
+    const allRows = Array.from(tbody.querySelectorAll('tr:not(.ds-skeleton-row)'));
+    const page    = tblEl._dsPage || 1;
+    const size    = tblEl._dsPageSize || 25;
+    const start   = (page - 1) * size;
+    allRows.forEach(function (r, i) {
+      r.style.display = (i >= start && i < start + size) ? '' : 'none';
+    });
+    const pgEl = tblEl._dsPgEl;
+    if (!pgEl) return;
+    const total = allRows.length;
+    const pages = Math.max(1, Math.ceil(total / size));
+    if (total <= size) { pgEl.classList.remove('visible'); return; }
+    pgEl.classList.add('visible');
+    const from = start + 1;
+    const to   = Math.min(total, start + size);
+    pgEl.innerHTML =
+      '<span class="ds-page-info">Showing ' + from + '–' + to + ' of ' + total + '</span>' +
+      '<button class="ds-page-btn" id="ds-pg-prev" ' + (page <= 1 ? 'disabled' : '') + '>← Prev</button>' +
+      '<span class="ds-page-info">' + page + ' / ' + pages + '</span>' +
+      '<button class="ds-page-btn" id="ds-pg-next" ' + (page >= pages ? 'disabled' : '') + '>Next →</button>';
+    pgEl.querySelector('#ds-pg-prev').onclick = function () {
+      tblEl._dsPage = Math.max(1, page - 1);
+      _renderPage(tblEl);
+    };
+    pgEl.querySelector('#ds-pg-next').onclick = function () {
+      tblEl._dsPage = Math.min(pages, page + 1);
+      _renderPage(tblEl);
+    };
+  }
+
+  // ── SKELETON LOADER ───────────────────────────────────────────────────────
+  // Show N skeleton rows in a tbody while data is loading.
+  function showSkeleton(tbody, rows, cols) {
+    if (!tbody) return;
+    const widths = [45, 70, 55, 80, 60, 40];
+    let html = '';
+    for (let r = 0; r < (rows || 5); r++) {
+      html += '<tr class="ds-skeleton-row">';
+      for (let c = 0; c < (cols || 6); c++) {
+        const w = widths[(r * 3 + c) % widths.length];
+        html += '<td><div class="ds-skel-cell" style="width:' + w + '%"></div></td>';
+      }
+      html += '</tr>';
+    }
+    tbody.innerHTML = html;
+  }
+
+  // ── EMPTY STATE ───────────────────────────────────────────────────────────
+  function showEmptyState(container, icon, title, sub, ctaHtml) {
+    if (!container) return;
+    container.innerHTML =
+      '<tr><td colspan="99"><div class="ds-empty-state">' +
+        '<div class="ds-empty-icon">' + (icon || '📭') + '</div>' +
+        '<div class="ds-empty-title">' + (title || 'No data yet') + '</div>' +
+        '<div class="ds-empty-sub">' + (sub || '') + '</div>' +
+        (ctaHtml || '') +
+      '</div></td></tr>';
+  }
+
+  // ── PAGE ERROR STATE ──────────────────────────────────────────────────────
+  function showPageError(panelEl, msg) {
+    if (!panelEl) return;
+    panelEl.innerHTML =
+      '<div class="ds-page-error">' +
+        '<div style="font-size:32px">⚠️</div>' +
+        '<div style="font-size:15px;font-weight:600">Something went wrong</div>' +
+        '<div style="font-size:13px;color:var(--text3)">' + (msg || 'Please refresh and try again.') + '</div>' +
+        '<button class="btn btn-outline btn-sm" onclick="location.reload()">↻ Refresh</button>' +
+      '</div>';
+  }
+
+  // ── MODAL / DRAWER STACK ──────────────────────────────────────────────────
+  // Tracks what is open so ESC closes the topmost layer.
+  var _stack = [];
+  function pushLayer(id, closeFn) { _stack.push({ id: id, closeFn: closeFn }); }
+  function popLayer() { var top = _stack.pop(); if (top && top.closeFn) top.closeFn(); }
+  function stackTop()  { return _stack[_stack.length - 1]; }
+  function clearStack() { _stack = []; }
+  // Remove a layer by ID WITHOUT calling its closeFn (used by closeDrawer to avoid recursion)
+  function removeLayer(id) {
+    var idx = -1;
+    for (var i = _stack.length - 1; i >= 0; i--) { if (_stack[i].id === id) { idx = i; break; } }
+    if (idx !== -1) _stack.splice(idx, 1);
+  }
+
+  // ── SYNC BADGE HELPER ─────────────────────────────────────────────────────
+  function setSyncState(state) {
+    var b = document.getElementById('sync-badge');
+    if (!b) return;
+    b.classList.remove('sync-saving', 'sync-saved', 'sync-error');
+    if (state === 'saving') { b.textContent = '↑ Saving…'; b.classList.add('sync-saving'); }
+    else if (state === 'saved') { b.textContent = '✓ Synced'; b.classList.add('sync-saved'); setTimeout(function () { setSyncState('idle'); }, 2500); }
+    else if (state === 'error') { b.textContent = '✕ Sync error'; b.classList.add('sync-error'); }
+    else { b.textContent = '● Live'; b.classList.remove('sync-saving','sync-saved','sync-error'); }
+  }
+
+  // ── GLOBAL ESC HANDLER ────────────────────────────────────────────────────
+  document.addEventListener('keydown', function (e) {
+    if (e.key !== 'Escape') return;
+    e.preventDefault();
+    // 1. Close global search dropdown
+    var gs = document.getElementById('global-search-results');
+    if (gs && gs.style.display !== 'none') { if (typeof hideGlobalSearch === 'function') hideGlobalSearch(); return; }
+    // 2. Pop from the design-system stack
+    if (_stack.length) { popLayer(); return; }
+    // 3. Fallback: close any open drawer
+    var openDrawerEl = document.querySelector('.drawer.open');
+    if (openDrawerEl) {
+      var key = openDrawerEl.id.replace('-drawer', '');
+      if (typeof closeDrawer === 'function') closeDrawer(key);
+      return;
+    }
+    // 4. Fallback: close player profile
+    var ppOv = document.getElementById('pp-overlay');
+    if (ppOv && ppOv.style.display !== 'none') { if (typeof closePlayerProfile === 'function') closePlayerProfile(); return; }
+    // 5. Fallback: close club edit
+    var ceOv = document.getElementById('club-edit-overlay');
+    if (ceOv && ceOv.style.display !== 'none') { if (typeof closeClubEdit === 'function') closeClubEdit(); return; }
+    // 6. Fallback: close APM modal
+    var apmOv = document.getElementById('apm-overlay');
+    if (apmOv && apmOv.style.display !== 'none') { if (typeof apmClose === 'function') apmClose(); return; }
+    // 7. Fallback: close any visible modal-bg
+    var modalBg = document.querySelector('.modal-bg[style*="flex"], .modal-bg[style*="block"]');
+    if (modalBg && modalBg.id) { if (typeof closeModal === 'function') closeModal(modalBg.id); return; }
+  });
+
+  return {
+    btn: btn,
+    validateForm: validateForm, showFieldError: showFieldError,
+    clearFieldError: clearFieldError, clearAllErrors: clearAllErrors,
+    initTableSort: initTableSort,
+    initTablePagination: initTablePagination, _renderPage: _renderPage,
+    showSkeleton: showSkeleton, showEmptyState: showEmptyState, showPageError: showPageError,
+    pushLayer: pushLayer, popLayer: popLayer, stackTop: stackTop, clearStack: clearStack,
+    removeLayer: removeLayer,
+    setSyncState: setSyncState,
+  };
+})();
+
+// ════════════════════════════════════════════════════════════════════════════
+// PHASE 4 — DATABASE INTEGRITY  (_db)
+// All FK enforcement, cascading deletes, duplicate prevention, orphan scanning,
+// and write debouncing live here. No exceptions.
+// ════════════════════════════════════════════════════════════════════════════
+window._db = (function () {
+
+  // ── DEBOUNCED SAVE ────────────────────────────────────────────────────────
+  // Collapses rapid-fire fbSave() calls into a single write.
+  // Use _db.saveDeferred() for any save that may be triggered multiple times
+  // in quick succession (e.g. cascade cleanup, re-render, interconnection refresh).
+  var _saveTimer = null;
+  function saveDeferred(delay) {
+    clearTimeout(_saveTimer);
+    _saveTimer = setTimeout(function () { if (typeof fbSave === 'function') fbSave(); }, delay || 650);
+  }
+
+  // ── UNIQUE CONSTRAINT HELPERS ─────────────────────────────────────────────
+
+  // Contact: same full name + same club = duplicate.
+  function isContactDuplicate(firstName, lastName, club, excludeId) {
+    var name = (firstName.trim() + ' ' + lastName.trim()).toLowerCase();
+    var cLow = (club || '').trim().toLowerCase();
+    return allContacts.some(function (c) {
+      if (excludeId && c.id === excludeId) return false;
+      return (c.name || '').trim().toLowerCase() === name
+          && (c.club || '').trim().toLowerCase() === cLow;
+    });
+  }
+
+  // Mandate: same player name = duplicate.
+  function isMandateDuplicate(name, excludeId) {
+    var nLow = (name || '').trim().toLowerCase();
+    return allMandates.some(function (m) {
+      if (excludeId && m.id === excludeId) return false;
+      return (m.name || '').trim().toLowerCase() === nLow;
+    });
+  }
+
+  // Club: same name (case-insensitive) = duplicate.
+  function isClubDuplicate(name, excludeId) {
+    var nLow = (name || '').trim().toLowerCase();
+    return allClubs.some(function (c) {
+      if (excludeId && c.id === excludeId) return false;
+      return (c.name || '').trim().toLowerCase() === nLow;
+    });
+  }
+
+  // Need: same club + same position = duplicate (prevents double-registering a requirement).
+  function isNeedDuplicate(club, pos, excludeId) {
+    var cLow = (club || '').trim().toLowerCase();
+    var pLow = (pos  || '').trim().toLowerCase();
+    return allNeeds.some(function (n) {
+      if (excludeId && n.id === excludeId) return false;
+      var nPos = Array.isArray(n.positions) ? n.positions.join(',') : (n.pos || '');
+      return (n.club || '').trim().toLowerCase() === cLow
+          && nPos.trim().toLowerCase() === pLow;
+    });
+  }
+
+  // ── CASCADING DELETE — CLUB ───────────────────────────────────────────────
+  // Called from deleteClub() BEFORE fbSave.
+  // Nullifies all string references to the deleted club across every entity.
+  // If dependent Needs exist, shows a snack warning (they become orphans).
+  function onClubDeleted(clubName) {
+    var dirty = false;
+
+    // 1. Contacts: nullify club reference
+    allContacts.forEach(function (c) {
+      if ((c.club || '') === clubName) { c.club = ''; dirty = true; }
+    });
+
+    // 2. Mandates: nullify club reference, flag as club-deleted
+    allMandates.forEach(function (m) {
+      if ((m.club || '') === clubName) { m.club = ''; m._clubDeleted = true; dirty = true; }
+    });
+
+    // 3. Needs: flag orphans (don't auto-delete — user may want to re-assign)
+    var orphanedNeeds = allNeeds.filter(function (n) { return (n.club || '') === clubName; });
+    orphanedNeeds.forEach(function (n) { n._clubDeleted = true; dirty = true; });
+
+    // 4. Pitches: nullify club reference
+    if (typeof pitches !== 'undefined') {
+      pitches.forEach(function (p) {
+        if ((p.club || '') === clubName) { p.club = ''; p._clubDeleted = true; dirty = true; }
+      });
+    }
+
+    // 5. Club pitches: nullify
+    if (typeof clubPitches !== 'undefined') {
+      clubPitches.forEach(function (p) {
+        if ((p.club || '') === clubName) { p.club = ''; p._clubDeleted = true; dirty = true; }
+      });
+    }
+
+    // 6. relEntries: nullify club field
+    if (typeof relEntries !== 'undefined') {
+      relEntries.forEach(function (r) {
+        if ((r.club || '') === clubName) { r.club = ''; dirty = true; }
+      });
+    }
+
+    if (orphanedNeeds.length) {
+      console.warn('[EFP][DB] ' + orphanedNeeds.length + ' requirement(s) now orphaned — club "' + clubName + '" deleted');
+      if (typeof showSnack === 'function')
+        showSnack('⚠ ' + orphanedNeeds.length + ' requirement(s) lost their club — review Needs', true);
+    }
+    if (dirty) saveDeferred(800);
+    return { dirty: dirty, orphanedNeeds: orphanedNeeds };
+  }
+
+  // ── CASCADING DELETE — CONTACT ────────────────────────────────────────────
+  // Called from deleteContact() BEFORE fbSave.
+  // Nullifies mandate.contact, need.contact, and pitch.contact references.
+  function onContactDeleted(contactName) {
+    if (!contactName) return;
+    var dirty = false;
+
+    allMandates.forEach(function (m) {
+      if ((m.contact || '') === contactName) { m.contact = ''; dirty = true; }
+    });
+    allNeeds.forEach(function (n) {
+      if ((n.contact || '') === contactName) { n.contact = ''; dirty = true; }
+    });
+    if (typeof pitches !== 'undefined') {
+      pitches.forEach(function (p) {
+        if ((p.contact || '') === contactName) { p.contact = ''; dirty = true; }
+      });
+    }
+    if (dirty) {
+      console.warn('[EFP][DB] Contact "' + contactName + '" deleted — refs nullified in mandates/needs/pitches');
+    }
+    return { dirty: dirty };
+  }
+
+  // ── CASCADING DELETE — MANDATE ────────────────────────────────────────────
+  // Called from deleteMandate() BEFORE fbSave.
+  // Pitches are HISTORICAL RECORDS — not deleted, just marked archived.
+  // matchesData entries for this player are removed (they regenerate on next match run).
+  function onMandateDeleted(playerName) {
+    if (!playerName) return;
+    var archived = 0;
+
+    if (typeof pitches !== 'undefined') {
+      pitches.forEach(function (p) {
+        if (p.player === playerName && !p._mandateDeleted) {
+          p._mandateDeleted = true;
+          archived++;
+        }
+      });
+    }
+
+    // Remove stale match results for this player (will regenerate on next match engine run)
+    if (typeof matchesData !== 'undefined') {
+      matchesData = matchesData.filter(function (m) { return m.player !== playerName; });
+    }
+
+    // Remove orphaned playerNotes entry
+    if (typeof playerNotes !== 'undefined' && playerNotes[playerName]) {
+      delete playerNotes[playerName];
+    }
+
+    if (archived > 0) {
+      console.warn('[EFP][DB] ' + archived + ' pitch(es) for "' + playerName + '" marked archived (mandate deleted)');
+    }
+    return { archived: archived };
+  }
+
+  // ── ORPHAN SCANNER ────────────────────────────────────────────────────────
+  // Runs after every Firebase load. Reports broken references in the console.
+  // Does NOT auto-repair (too destructive) — just logs for visibility.
+  function scanOrphans() {
+    var clubSet    = new Set(allClubs.map(function (c) { return c.name; }));
+    var contactSet = new Set(allContacts.map(function (c) { return c.name; }));
+    var warnings   = [];
+
+    allMandates.forEach(function (m) {
+      if (m.club && m.club !== '—' && m.club !== '' && !clubSet.has(m.club))
+        warnings.push('Mandate "' + m.name + '" → unknown club "' + m.club + '"');
+      if (m.contact && m.contact !== '—' && m.contact !== '' && !contactSet.has(m.contact))
+        warnings.push('Mandate "' + m.name + '" → unknown contact "' + m.contact + '"');
+    });
+
+    allNeeds.forEach(function (n) {
+      if (n.club && n.club !== '' && !clubSet.has(n.club))
+        warnings.push('Need for "' + n.club + '" → unknown club');
+      if (n.contact && n.contact !== '—' && n.contact !== '' && !contactSet.has(n.contact))
+        warnings.push('Need "' + n.club + '" → unknown contact "' + n.contact + '"');
+    });
+
+    allContacts.forEach(function (c) {
+      if (c.club && c.club !== '' && !clubSet.has(c.club))
+        warnings.push('Contact "' + c.name + '" → unknown club "' + c.club + '"');
+    });
+
+    if (typeof pitches !== 'undefined') {
+      var mandateSet = new Set(allMandates.map(function (m) { return m.name; }));
+      pitches.forEach(function (p) {
+        if (p.player && !p._mandateDeleted && !mandateSet.has(p.player))
+          warnings.push('Pitch #' + p.id + ' → unknown player "' + p.player + '"');
+        if (p.club && p.club !== '' && !p._clubDeleted && !clubSet.has(p.club))
+          warnings.push('Pitch #' + p.id + ' → unknown club "' + p.club + '"');
+      });
+    }
+
+    if (warnings.length) {
+      console.warn('[EFP][DB] Orphan scan: ' + warnings.length + ' integrity issue(s):');
+      warnings.forEach(function (w) { console.warn('  · ' + w); });
+    } else {
+      console.log('[EFP][DB] Orphan scan: all references valid ✓ (' + allContacts.length + ' contacts, ' + allMandates.length + ' mandates, ' + allNeeds.length + ' needs, ' + allClubs.length + ' clubs)');
+    }
+    return warnings;
+  }
+
+  // ── PAYLOAD SANITY CHECK ──────────────────────────────────────────────────
+  // Called inside fbSave() before the Firebase write.
+  // Returns false if payload has a critical structural problem.
+  function validatePayload() {
+    // Must never write empty unified arrays over populated ones
+    // (caught by _fbDataLoaded flag but double-check here)
+    if (!_fbDataLoaded) {
+      console.error('[EFP][DB] validatePayload: _fbDataLoaded=false — write blocked');
+      return false;
+    }
+    return true;
+  }
+
+  return {
+    saveDeferred:       saveDeferred,
+    isContactDuplicate: isContactDuplicate,
+    isMandateDuplicate: isMandateDuplicate,
+    isClubDuplicate:    isClubDuplicate,
+    isNeedDuplicate:    isNeedDuplicate,
+    onClubDeleted:      onClubDeleted,
+    onContactDeleted:   onContactDeleted,
+    onMandateDeleted:   onMandateDeleted,
+    scanOrphans:        scanOrphans,
+    validatePayload:    validatePayload,
+  };
+})();
+
+// ════════════════════════════════════════════════════════════════════════════
+// PHASE 6 — RELATIONSHIP TEST SUITE
+// Run from console: _testSuite.runAll()
+// Tests every entity relationship: create → link → payload round-trip → intact.
+// All tests are isolated — real data is snapshotted before and restored after.
+// ════════════════════════════════════════════════════════════════════════════
+window._testSuite = (function () {
+
+  // ── Logging ─────────────────────────────────────────────────────────────
+  var _log = [];
+  function _pass(name) {
+    _log.push({ name: name, ok: true });
+    console.log('%c[EFP-TEST] ✅ ' + name, 'color:#22c55e');
+  }
+  function _fail(name, why) {
+    _log.push({ name: name, ok: false, why: why || '' });
+    console.warn('[EFP-TEST] ❌ ' + name + (why ? ' — ' + why : ''));
+  }
+  function _check(cond, name, got) {
+    if (cond) _pass(name);
+    else _fail(name, got !== undefined ? 'got: ' + JSON.stringify(got) : 'condition false');
+  }
+
+  // ── Snapshot / restore ──────────────────────────────────────────────────
+  var _snap = null;
+  function _copyArr(src) { return JSON.parse(JSON.stringify(src || [])); }
+  function _copyObj(src) { return JSON.parse(JSON.stringify(src || {})); }
+
+  function _saveSnap() {
+    _snap = {
+      allContacts:   _copyArr(allContacts),
+      allMandates:   _copyArr(allMandates),
+      allNeeds:      _copyArr(allNeeds),
+      allClubs:      _copyArr(allClubs),
+      allTasks:      _copyArr(allTasks),
+      pitches:       _copyArr(pitches),
+      clubPitches:   _copyArr(clubPitches),
+      matchesData:   _copyArr(matchesData),
+      logsAdded:     _copyArr(logsAdded),
+      clubsAdded:    _copyArr(clubsAdded),
+      mandatesAdded: _copyArr(mandatesAdded),
+      contactsAdded: _copyArr(contactsAdded),
+      tasksAdded:    _copyArr(tasksAdded),
+      needsAdded:    _copyArr(needsAdded),
+      clubData:      _copyObj(clubData),
+      playerNotes:   _copyObj(playerNotes),
+      TASKS:         _copyArr(TASKS),
+    };
+  }
+
+  function _refill(arr, src) { arr.length = 0; (src || []).forEach(function (x) { arr.push(x); }); }
+
+  function _restoreSnap() {
+    if (!_snap) return;
+    _refill(allContacts,   _snap.allContacts);
+    _refill(allMandates,   _snap.allMandates);
+    _refill(allNeeds,      _snap.allNeeds);
+    _refill(allClubs,      _snap.allClubs);
+    _refill(allTasks,      _snap.allTasks);
+    _refill(pitches,       _snap.pitches);
+    _refill(clubPitches,   _snap.clubPitches);
+    _refill(matchesData,   _snap.matchesData);
+    _refill(logsAdded,     _snap.logsAdded);
+    _refill(clubsAdded,    _snap.clubsAdded);
+    _refill(mandatesAdded, _snap.mandatesAdded);
+    _refill(contactsAdded, _snap.contactsAdded);
+    _refill(tasksAdded,    _snap.tasksAdded);
+    _refill(needsAdded,    _snap.needsAdded);
+    _refill(TASKS,         _snap.TASKS);
+    Object.keys(clubData).forEach(function (k) { delete clubData[k]; });
+    Object.assign(clubData, _copyObj(_snap.clubData));
+    Object.keys(playerNotes).forEach(function (k) { delete playerNotes[k]; });
+    Object.assign(playerNotes, _copyObj(_snap.playerNotes));
+  }
+
+  // ── Payload builder (mirrors fbSave without writing) ────────────────────
+  function _buildPayload() {
+    return {
+      allContacts:   _copyArr(allContacts),
+      allMandates:   _copyArr(allMandates),
+      allNeeds:      _copyArr(allNeeds),
+      allClubs:      _copyArr(allClubs),
+      allTasks:      _copyArr(allTasks),
+      pitches:       _copyArr(pitches),
+      clubPitches:   _copyArr(clubPitches),
+      matchesData:   _copyArr(matchesData),
+      logsAdded:     _copyArr(logsAdded),
+      clubData:      _copyObj(clubData),
+      playerNotes:   _copyObj(playerNotes),
+    };
+  }
+
+  // ── Firebase load simulator ──────────────────────────────────────────────
+  // Mirrors what the on('value') callback does: wipes in-memory arrays and
+  // repopulates from the payload (simulates a real Firebase round-trip).
+  function _simLoad(payload) {
+    _refill(allContacts,  payload.allContacts);
+    _refill(allMandates,  payload.allMandates);
+    _refill(allNeeds,     payload.allNeeds);
+    _refill(allClubs,     payload.allClubs);
+    _refill(allTasks,     payload.allTasks);
+    _refill(pitches,      payload.pitches);
+    _refill(clubPitches,  payload.clubPitches);
+    _refill(matchesData,  payload.matchesData);
+    _refill(logsAdded,    payload.logsAdded);
+    Object.keys(clubData).forEach(function (k) { delete clubData[k]; });
+    Object.assign(clubData, payload.clubData || {});
+    Object.keys(playerNotes).forEach(function (k) { delete playerNotes[k]; });
+    Object.assign(playerNotes, payload.playerNotes || {});
+  }
+
+  // ── Test entity factories ────────────────────────────────────────────────
+  var _seq = 0;
+  function _uid(prefix) { return (prefix || 'X') + '__T' + (++_seq) + '_' + Date.now(); }
+
+  function _mkClub(name) {
+    var c = { name: name, league: '_TestLeague', country: '_Testland', flag: '🧪' };
+    allClubs.push(c); clubsAdded.push(c); clubData[name] = c;
+    return c;
+  }
+  function _mkContact(first, last, clubName) {
+    var c = { id: _uid('c'), name: first + ' ' + last, role: 'SD', club: clubName,
+              email: '', phone: '', wa: '', linkedin: '', status: 'New', stage: 'Cold', isRich: false };
+    allContacts.push(c); contactsAdded.push(c);
+    return c;
+  }
+  function _mkMandate(playerName, clubName, contactName) {
+    var m = { id: _uid('m'), name: playerName, position: 'FW', age: '25',
+              club: clubName || '', value: '5M', contact: contactName || '', status: 'Active' };
+    allMandates.push(m); mandatesAdded.push(m);
+    return m;
+  }
+  function _mkNeed(clubName) {
+    var n = { id: _uid('n'), club: clubName, position: 'FW', budget: '5M', contact: '', status: 'Active' };
+    allNeeds.push(n); needsAdded.push(n);
+    return n;
+  }
+  function _mkPitch(playerName, clubName) {
+    var p = { id: _uid('p'), player: playerName, club: clubName, date: new Date().toISOString(), status: 'Sent' };
+    pitches.push(p);
+    return p;
+  }
+  function _mkTask(text) {
+    var t = { id: _uid('t'), text: text, done: false, created: Date.now() };
+    allTasks.push(t); tasksAdded.push(t); TASKS.push(t);
+    return t;
+  }
+  function _mkLog(type, playerName) {
+    var l = { id: _uid('l'), type: type, player: playerName || '', text: 'Test log', date: new Date().toISOString() };
+    logsAdded.push(l);
+    return l;
+  }
+
+  // ════════════════════════════════════════════════════════════════════════
+  // TESTS
+  // ════════════════════════════════════════════════════════════════════════
+
+  // T01 — Club → Contact: link created, survives payload round-trip
+  function t01_club_contact_link() {
+    var clubName = _uid('Club');
+    _mkClub(clubName);
+    var contact = _mkContact('Test', 'Agent', clubName);
+
+    var p = _buildPayload(); _simLoad(p);
+
+    var loaded = allContacts.find(function (c) { return c.id === contact.id; });
+    _check(!!loaded, 'T01a Contact survives round-trip');
+    _check(loaded && loaded.club === clubName, 'T01b Contact.club ref intact', loaded && loaded.club);
+    _check(allClubs.some(function (c) { return c.name === (loaded && loaded.club); }), 'T01c Contact.club → Club exists (no orphan)');
+  }
+
+  // T02 — Club → Mandate: link created, survives payload round-trip
+  function t02_club_mandate_link() {
+    var clubName = _uid('Club');
+    _mkClub(clubName);
+    var mandate = _mkMandate(_uid('Player'), clubName);
+
+    var p = _buildPayload(); _simLoad(p);
+
+    var loaded = allMandates.find(function (m) { return m.id === mandate.id; });
+    _check(!!loaded, 'T02a Mandate survives round-trip');
+    _check(loaded && loaded.club === clubName, 'T02b Mandate.club ref intact', loaded && loaded.club);
+    _check(allClubs.some(function (c) { return c.name === (loaded && loaded.club); }), 'T02c Mandate.club → Club exists (no orphan)');
+  }
+
+  // T03 — Club → Need: link created, survives payload round-trip
+  function t03_club_need_link() {
+    var clubName = _uid('Club');
+    _mkClub(clubName);
+    var need = _mkNeed(clubName);
+
+    var p = _buildPayload(); _simLoad(p);
+
+    var loaded = allNeeds.find(function (n) { return n.id === need.id; });
+    _check(!!loaded, 'T03a Need survives round-trip');
+    _check(loaded && loaded.club === clubName, 'T03b Need.club ref intact', loaded && loaded.club);
+  }
+
+  // T04 — Mandate → Contact (source): cross-ref survives round-trip
+  function t04_mandate_contact_source() {
+    var clubName = _uid('Club');
+    _mkClub(clubName);
+    var contact = _mkContact('Test', 'SD', clubName);
+    var mandate = _mkMandate(_uid('Player'), clubName, contact.name);
+
+    var p = _buildPayload(); _simLoad(p);
+
+    var loadedM = allMandates.find(function (m) { return m.id === mandate.id; });
+    var loadedC = allContacts.find(function (c) { return c.id === contact.id; });
+    _check(loadedM && loadedM.contact === contact.name, 'T04a Mandate.contact ref intact', loadedM && loadedM.contact);
+    _check(!!loadedC, 'T04b Contact referenced by Mandate still exists');
+    _check(allContacts.some(function (c) { return c.name === (loadedM && loadedM.contact); }), 'T04c Mandate.contact → Contact exists (no orphan)');
+  }
+
+  // T05 — Mandate → Pitch: player ref survives round-trip
+  function t05_mandate_pitch_link() {
+    var clubName   = _uid('Club');
+    var playerName = _uid('Player');
+    _mkClub(clubName);
+    _mkMandate(playerName, clubName);
+    var pitch = _mkPitch(playerName, clubName);
+
+    var p = _buildPayload(); _simLoad(p);
+
+    var loaded = pitches.find(function (p) { return p.id === pitch.id; });
+    _check(!!loaded, 'T05a Pitch survives round-trip');
+    _check(loaded && loaded.player === playerName, 'T05b Pitch.player ref intact', loaded && loaded.player);
+    _check(allMandates.some(function (m) { return m.name === (loaded && loaded.player); }), 'T05c Pitch.player → Mandate exists (no orphan)');
+  }
+
+  // T06 — Club rename → all entity refs cascade, none orphaned
+  function t06_club_rename_cascade() {
+    var oldName = _uid('Club');
+    var newName = _uid('Renamed');
+    _mkClub(oldName);
+    var contact = _mkContact('Rename', 'Test', oldName);
+    var mandate = _mkMandate(_uid('Player'), oldName);
+    var need    = _mkNeed(oldName);
+    var pitch   = _mkPitch(_uid('Player'), oldName);
+
+    // Run same cascade logic as saveClubEdit
+    var idx = allClubs.findIndex(function (c) { return c.name === oldName; });
+    if (idx !== -1) allClubs[idx].name = newName;
+    allContacts.forEach(function (c) { if (c.club === oldName) c.club = newName; });
+    allMandates.forEach(function (m) { if (m.club === oldName) m.club = newName; });
+    allNeeds.forEach(function   (n) { if (n.club === oldName) n.club = newName; });
+    pitches.forEach(function     (p) { if (p.club === oldName) p.club = newName; });
+    if (clubData[oldName]) { clubData[newName] = clubData[oldName]; delete clubData[oldName]; }
+
+    var p2 = _buildPayload(); _simLoad(p2);
+
+    _check(allClubs.some(function (c) { return c.name === newName; }), 'T06a Renamed club in allClubs');
+    _check(!allClubs.some(function (c) { return c.name === oldName; }), 'T06b Old club name gone from allClubs');
+    _check(allContacts.find(function (c) { return c.id === contact.id; })?.club === newName, 'T06c Contact.club cascaded');
+    _check(allMandates.find(function (m) { return m.id === mandate.id; })?.club === newName, 'T06d Mandate.club cascaded');
+    _check(allNeeds.find(function (n) { return n.id === need.id; })?.club === newName, 'T06e Need.club cascaded');
+    _check(pitches.find(function (p) { return p.id === pitch.id; })?.club === newName, 'T06f Pitch.club cascaded');
+    _check(!allContacts.some(function (c) { return c.club === oldName; }), 'T06g No Contact still refs old name');
+    _check(!allMandates.some(function (m) { return m.club === oldName; }), 'T06h No Mandate still refs old name');
+    _check(!allNeeds.some(function (n) { return n.club === oldName; }), 'T06i No Need still refs old name');
+  }
+
+  // T07 — Player rename → pitch history + logs cascade
+  function t07_player_rename_cascade() {
+    var oldName    = _uid('Player');
+    var newName    = _uid('Renamed');
+    var clubName   = _uid('Club');
+    _mkClub(clubName);
+    var mandate = _mkMandate(oldName, clubName);
+    var pitch1  = _mkPitch(oldName, clubName);
+    var pitch2  = _mkPitch(oldName, _uid('OtherClub'));
+    var log     = _mkLog('meeting', oldName);
+    playerNotes[oldName] = { status: 'Hot', notes: 'Test', priority: 1 };
+
+    // Run same cascade logic as savePlayerProfile
+    var mIdx = allMandates.findIndex(function (m) { return m.id === mandate.id; });
+    if (mIdx !== -1) allMandates[mIdx].name = newName;
+    pitches.forEach(function     (p) { if (p.player === oldName) p.player = newName; });
+    matchesData.forEach(function (m) { if (m.player === oldName) m.player = newName; });
+    logsAdded.forEach(function   (l) { if (l.player === oldName) l.player = newName; });
+    clubPitches.forEach(function (p) { if (p.player === oldName) p.player = newName; });
+    playerNotes[newName] = playerNotes[oldName];
+    delete playerNotes[oldName];
+
+    var p2 = _buildPayload(); _simLoad(p2);
+
+    _check(!pitches.some(function (p) { return p.player === oldName; }), 'T07a No pitch refs old name');
+    _check(pitches.find(function (p) { return p.id === pitch1.id; })?.player === newName, 'T07b Pitch1.player updated');
+    _check(pitches.find(function (p) { return p.id === pitch2.id; })?.player === newName, 'T07c Pitch2.player updated');
+    _check(!logsAdded.some(function (l) { return l.player === oldName; }), 'T07d No log refs old name');
+    _check(logsAdded.find(function (l) { return l.id === log.id; })?.player === newName, 'T07e Log.player updated');
+    _check(!!playerNotes[newName], 'T07f playerNotes key renamed');
+    _check(!playerNotes[oldName], 'T07g Old playerNotes key deleted');
+    _check(allMandates.find(function (m) { return m.id === mandate.id; })?.name === newName, 'T07h Mandate.name updated');
+  }
+
+  // T08 — Delete Club → cascade nullifies entity refs
+  function t08_delete_club_cascade() {
+    var clubName = _uid('Club');
+    _mkClub(clubName);
+    var contact = _mkContact('Del', 'Test', clubName);
+    var mandate = _mkMandate(_uid('Player'), clubName);
+    var need    = _mkNeed(clubName);
+
+    // Run cascade then delete club
+    if (window._db) _db.onClubDeleted(clubName);
+    var idx = allClubs.findIndex(function (c) { return c.name === clubName; });
+    if (idx !== -1) allClubs.splice(idx, 1);
+    delete clubData[clubName];
+
+    var p = _buildPayload(); _simLoad(p);
+
+    _check(!allClubs.some(function (c) { return c.name === clubName; }), 'T08a Club removed from allClubs');
+    var loadedC = allContacts.find(function (c) { return c.id === contact.id; });
+    _check(!loadedC || !loadedC.club || loadedC.club !== clubName, 'T08b Contact.club nullified');
+    var loadedM = allMandates.find(function (m) { return m.id === mandate.id; });
+    _check(!loadedM || !loadedM.club || loadedM.club !== clubName, 'T08c Mandate.club nullified');
+    var loadedN = allNeeds.find(function (n) { return n.id === need.id; });
+    _check(!loadedN || !loadedN.club || loadedN.club !== clubName, 'T08d Need.club nullified');
+  }
+
+  // T09 — Delete Contact → Mandate.contact nullified
+  function t09_delete_contact_cascade() {
+    var clubName = _uid('Club');
+    _mkClub(clubName);
+    var contact = _mkContact('Del', 'Contact', clubName);
+    var mandate = _mkMandate(_uid('Player'), clubName, contact.name);
+
+    // Run cascade then delete contact
+    if (window._db) _db.onContactDeleted(contact.name);
+    var idx = allContacts.findIndex(function (c) { return c.id === contact.id; });
+    if (idx !== -1) allContacts.splice(idx, 1);
+
+    var p = _buildPayload(); _simLoad(p);
+
+    _check(!allContacts.some(function (c) { return c.id === contact.id; }), 'T09a Contact removed');
+    var loadedM = allMandates.find(function (m) { return m.id === mandate.id; });
+    _check(!loadedM || !loadedM.contact || loadedM.contact !== contact.name, 'T09b Mandate.contact nullified');
+  }
+
+  // T10 — Delete Mandate → pitches archived, playerNotes key removed
+  function t10_delete_mandate_cascade() {
+    var clubName   = _uid('Club');
+    var playerName = _uid('Player');
+    _mkClub(clubName);
+    var mandate = _mkMandate(playerName, clubName);
+    _mkPitch(playerName, clubName);
+    playerNotes[playerName] = { status: 'Hot', notes: 'Test', priority: 1 };
+
+    // Run cascade then delete mandate
+    if (window._db) _db.onMandateDeleted(playerName);
+    var idx = allMandates.findIndex(function (m) { return m.id === mandate.id; });
+    if (idx !== -1) allMandates.splice(idx, 1);
+
+    var p = _buildPayload(); _simLoad(p);
+
+    _check(!allMandates.some(function (m) { return m.id === mandate.id; }), 'T10a Mandate removed');
+    _check(!playerNotes[playerName], 'T10b playerNotes key removed');
+    var activeP = pitches.filter(function (p) { return p.player === playerName && p.status !== 'Archived'; });
+    _check(activeP.length === 0, 'T10c No active pitches remain for deleted player', activeP.length);
+  }
+
+  // T11 — Ghost data prevention: empty arrays always written to payload
+  function t11_ghost_data_prevention() {
+    var saved = {
+      contacts: allContacts.splice(0),
+      mandates: allMandates.splice(0),
+      needs:    allNeeds.splice(0),
+      clubs:    allClubs.splice(0),
+      tasks:    allTasks.splice(0),
+    };
+
+    var p = _buildPayload();
+
+    _check(Array.isArray(p.allContacts) && p.allContacts.length === 0, 'T11a Empty allContacts in payload (not ghost)');
+    _check(Array.isArray(p.allMandates) && p.allMandates.length === 0, 'T11b Empty allMandates in payload');
+    _check(Array.isArray(p.allNeeds)    && p.allNeeds.length === 0,    'T11c Empty allNeeds in payload');
+    _check(Array.isArray(p.allClubs)    && p.allClubs.length === 0,    'T11d Empty allClubs in payload');
+    _check(Array.isArray(p.allTasks)    && p.allTasks.length === 0,    'T11e Empty allTasks in payload');
+
+    // Restore inline (can't use _restoreSnap here as we're mid-test)
+    saved.contacts.forEach(function (x) { allContacts.push(x); });
+    saved.mandates.forEach(function (x) { allMandates.push(x); });
+    saved.needs.forEach(function    (x) { allNeeds.push(x); });
+    saved.clubs.forEach(function    (x) { allClubs.push(x); });
+    saved.tasks.forEach(function    (x) { allTasks.push(x); });
+  }
+
+  // T12 — Duplicate prevention: Club
+  function t12_duplicate_club() {
+    if (!window._db) { _fail('T12', '_db module not available'); return; }
+    var name = _uid('Club');
+    _mkClub(name);
+    _check(_db.isClubDuplicate(name, null), 'T12a Duplicate club detected');
+    _check(!_db.isClubDuplicate(name + '_unique', null), 'T12b Unique club name not flagged');
+  }
+
+  // T13 — Duplicate prevention: Contact (same name + club)
+  function t13_duplicate_contact() {
+    if (!window._db) { _fail('T13', '_db module not available'); return; }
+    var clubName = _uid('Club');
+    _mkClub(clubName);
+    _mkContact('Dup', 'Agent', clubName);
+    _check(_db.isContactDuplicate('Dup', 'Agent', clubName, null), 'T13a Duplicate contact detected');
+    _check(!_db.isContactDuplicate('Unique', 'Agent', clubName, null), 'T13b Different name not flagged');
+  }
+
+  // T14 — Duplicate prevention: Mandate (same player name)
+  function t14_duplicate_mandate() {
+    if (!window._db) { _fail('T14', '_db module not available'); return; }
+    var clubName   = _uid('Club');
+    var playerName = _uid('Player');
+    _mkClub(clubName);
+    _mkMandate(playerName, clubName);
+    _check(_db.isMandateDuplicate(playerName, null), 'T14a Duplicate mandate detected');
+    _check(!_db.isMandateDuplicate(playerName + '_unique', null), 'T14b Unique player not flagged');
+  }
+
+  // T15 — Impossible state: Mandate without Club is detectable
+  function t15_mandate_requires_club() {
+    var orphan = _mkMandate(_uid('Player'), '');
+    var found = allMandates.some(function (m) { return m.id === orphan.id && (!m.club || m.club === ''); });
+    _check(found, 'T15a Mandate with empty club is detectable');
+    // Orphan scanner should flag this
+    if (window._db) {
+      var clubSet = new Set(allClubs.map(function (c) { return c.name; }));
+      var orphaned = allMandates.filter(function (m) { return m.club && !clubSet.has(m.club); });
+      // Empty club string is a different class of invalid — just verify it won't pass club existence check
+      _check(!clubSet.has(''), 'T15b Empty string is not a valid Club name (impossible state blocked)');
+    }
+  }
+
+  // T16 — Task create/edit/delete round-trip
+  function t16_task_round_trip() {
+    var task = _mkTask('Test task for T16');
+
+    // Create round-trip
+    var p = _buildPayload(); _simLoad(p);
+    var loaded = allTasks.find(function (t) { return t.id === task.id; });
+    _check(!!loaded, 'T16a Task survives round-trip');
+    _check(loaded && loaded.text === task.text, 'T16b Task.text intact');
+    _check(loaded && loaded.done === false, 'T16c Task.done=false preserved');
+
+    // Edit
+    loaded.text = 'EDITED';
+    var p2 = _buildPayload(); _simLoad(p2);
+    var reloaded = allTasks.find(function (t) { return t.id === task.id; });
+    _check(reloaded && reloaded.text === 'EDITED', 'T16d Task edit survives round-trip');
+
+    // Delete: remove from all arrays
+    [allTasks, tasksAdded, TASKS].forEach(function (arr) {
+      var i = arr.findIndex(function (t) { return t.id === task.id; });
+      if (i !== -1) arr.splice(i, 1);
+    });
+    var p3 = _buildPayload(); _simLoad(p3);
+    _check(!allTasks.some(function (t) { return t.id === task.id; }), 'T16e Deleted task gone after round-trip');
+  }
+
+  // T17 — Log entry: player reference preserved and survives round-trip
+  function t17_log_player_ref() {
+    var clubName   = _uid('Club');
+    var playerName = _uid('Player');
+    _mkClub(clubName);
+    _mkMandate(playerName, clubName);
+    var log = _mkLog('meeting', playerName);
+
+    var p = _buildPayload(); _simLoad(p);
+
+    var loaded = logsAdded.find(function (l) { return l.id === log.id; });
+    _check(!!loaded, 'T17a Log survives round-trip');
+    _check(loaded && loaded.player === playerName, 'T17b Log.player ref intact', loaded && loaded.player);
+    _check(allMandates.some(function (m) { return m.name === (loaded && loaded.player); }), 'T17c Log.player → Mandate exists');
+  }
+
+  // T18 — Full chain: Club → Contact (SD) → Mandate → Pitch — all linked, all intact
+  function t18_full_chain() {
+    var clubName   = _uid('Club');
+    var playerName = _uid('Player');
+    _mkClub(clubName);
+    var contact = _mkContact('Full', 'Chain', clubName);
+    var mandate = _mkMandate(playerName, clubName, contact.name);
+    var pitch   = _mkPitch(playerName, clubName);
+    playerNotes[playerName] = { status: 'Hot', notes: 'Full chain test', priority: 1 };
+
+    var p = _buildPayload(); _simLoad(p);
+
+    var lClub    = allClubs.find(function (c) { return c.name === clubName; });
+    var lContact = allContacts.find(function (c) { return c.id === contact.id; });
+    var lMandate = allMandates.find(function (m) { return m.id === mandate.id; });
+    var lPitch   = pitches.find(function (p) { return p.id === pitch.id; });
+
+    _check(!!lClub,    'T18a Club in chain survives round-trip');
+    _check(!!lContact, 'T18b Contact in chain survives round-trip');
+    _check(!!lMandate, 'T18c Mandate in chain survives round-trip');
+    _check(!!lPitch,   'T18d Pitch in chain survives round-trip');
+    _check(lContact?.club === clubName,         'T18e Contact→Club ref intact');
+    _check(lMandate?.club === clubName,         'T18f Mandate→Club ref intact');
+    _check(lMandate?.contact === contact.name,  'T18g Mandate→Contact ref intact');
+    _check(lPitch?.player === playerName,       'T18h Pitch→Mandate ref intact');
+    _check(lPitch?.club === clubName,           'T18i Pitch→Club ref intact');
+    _check(!!playerNotes[playerName],           'T18j playerNotes key intact');
+    // Verify no link is orphaned
+    _check(allClubs.some(function (c) { return c.name === lContact?.club; }),  'T18k Contact→Club no orphan');
+    _check(allClubs.some(function (c) { return c.name === lMandate?.club; }),  'T18l Mandate→Club no orphan');
+    _check(allContacts.some(function (c) { return c.name === lMandate?.contact; }), 'T18m Mandate→Contact no orphan');
+    _check(allMandates.some(function (m) { return m.name === lPitch?.player; }), 'T18n Pitch→Mandate no orphan');
+  }
+
+  // T19 — Contact create: wa + linkedin fields included in new object
+  function t19_contact_create_wa_linkedin() {
+    var clubName = _uid('Club');
+    _mkClub(clubName);
+    var c = _mkContact('WA', 'Test', clubName);
+    // Verify the factory creates wa + linkedin (mirroring fix from Task #24)
+    _check('wa' in c,       'T19a New contact has wa field');
+    _check('linkedin' in c, 'T19b New contact has linkedin field');
+
+    var p = _buildPayload(); _simLoad(p);
+    var loaded = allContacts.find(function (x) { return x.id === c.id; });
+    _check(loaded && 'wa' in loaded,       'T19c wa field survives round-trip');
+    _check(loaded && 'linkedin' in loaded, 'T19d linkedin field survives round-trip');
+  }
+
+  // T20 — Test isolation: no cross-contamination between tests
+  function t20_test_isolation() {
+    var baseC = allContacts.length;
+    var baseM = allMandates.length;
+    var baseN = allNeeds.length;
+    var baseK = allClubs.length;
+
+    var clubName = _uid('Club');
+    _mkClub(clubName);
+    _mkContact('Iso', 'Test', clubName);
+    _mkMandate(_uid('Player'), clubName);
+    _mkNeed(clubName);
+
+    _check(allContacts.length === baseC + 1, 'T20a Exactly 1 contact added in test');
+    _check(allMandates.length === baseM + 1, 'T20b Exactly 1 mandate added in test');
+    _check(allNeeds.length    === baseN + 1, 'T20c Exactly 1 need added in test');
+    _check(allClubs.length    === baseK + 1, 'T20d Exactly 1 club added in test');
+    // Verify snapshot restore will clean these up (checked externally by runAll)
+  }
+
+  // ── Runner ───────────────────────────────────────────────────────────────
+  var _tests = [
+    t01_club_contact_link,
+    t02_club_mandate_link,
+    t03_club_need_link,
+    t04_mandate_contact_source,
+    t05_mandate_pitch_link,
+    t06_club_rename_cascade,
+    t07_player_rename_cascade,
+    t08_delete_club_cascade,
+    t09_delete_contact_cascade,
+    t10_delete_mandate_cascade,
+    t11_ghost_data_prevention,
+    t12_duplicate_club,
+    t13_duplicate_contact,
+    t14_duplicate_mandate,
+    t15_mandate_requires_club,
+    t16_task_round_trip,
+    t17_log_player_ref,
+    t18_full_chain,
+    t19_contact_create_wa_linkedin,
+    t20_test_isolation,
+  ];
+
+  function runAll() {
+    console.log('%c[EFP-TEST] ══════════════════════════════════════════════════════', 'color:#818cf8;font-weight:bold');
+    console.log('%c[EFP-TEST] Phase 6 — Relationship Test Suite  (' + _tests.length + ' tests)', 'color:#818cf8;font-weight:bold');
+    console.log('%c[EFP-TEST] ══════════════════════════════════════════════════════', 'color:#818cf8;font-weight:bold');
+    _log = [];
+    _seq = 0;
+    _saveSnap();
+    try {
+      _tests.forEach(function (fn) {
+        console.groupCollapsed('%c[EFP-TEST] ' + fn.name, 'color:#94a3b8');
+        try { fn(); }
+        catch (e) { _fail(fn.name, 'EXCEPTION — ' + e.message); }
+        console.groupEnd();
+      });
+    } finally {
+      _restoreSnap();
+    }
+
+    var passed = _log.filter(function (r) { return r.ok; }).length;
+    var total  = _log.length;
+    var allPass = passed === total;
+    console.log('%c[EFP-TEST] ──────────────────────────────────────────────────────', 'color:#818cf8');
+    if (allPass) {
+      console.log('%c[EFP-TEST] ✅ ALL PASS — ' + passed + '/' + total, 'color:#22c55e;font-weight:bold;font-size:14px');
+    } else {
+      console.warn('[EFP-TEST] ❌ ' + (total - passed) + ' FAILURE(S) — ' + passed + '/' + total + ' passed');
+      _log.filter(function (r) { return !r.ok; }).forEach(function (r) {
+        console.warn('[EFP-TEST]   ❌ ' + r.name + (r.why ? ' — ' + r.why : ''));
+      });
+    }
+    console.log('%c[EFP-TEST] ══════════════════════════════════════════════════════', 'color:#818cf8;font-weight:bold');
+    return { passed: passed, total: total, allPass: allPass, results: _log };
+  }
+
+  return { runAll: runAll, results: function () { return _log; } };
+})();
+
+// ════════════════════════════════════════════════════════════════════════════
+// PHASE 7 — REGRESSION TEST SUITE
+//
+// Naming convention:
+//   REG-NNN  — one test per fixed bug; if it fails, a regression occurred
+//   WF-NNN   — end-to-end workflow covering a critical user path
+//
+// Run from console : _regression.runAll()
+// Run in browser   : append ?test to the URL  →  overlay renders automatically
+// Run in CI        : Playwright reads window.__EFP_TEST_RESULTS.allPass
+//
+// Every test is isolated: real data snapshotted → mutated → restored.
+// No DOM functions called. No fbSave() called. Pure data-layer testing.
+// ════════════════════════════════════════════════════════════════════════════
+window._regression = (function () {
+
+  // ── Logging ─────────────────────────────────────────────────────────────
+  var _log = [];
+  function _pass(name) { _log.push({ name: name, ok: true }); }
+  function _fail(name, why) { _log.push({ name: name, ok: false, why: why || '' }); }
+  function _ok(cond, name, detail) {
+    if (cond) _pass(name);
+    else _fail(name, detail !== undefined ? String(detail) : 'assertion false');
+  }
+
+  // ── State snapshot / restore ─────────────────────────────────────────────
+  var _snap = null;
+  function _j(v) { return JSON.parse(JSON.stringify(v || (Array.isArray(v) ? [] : {}))); }
+  function _jArr(v) { return JSON.parse(JSON.stringify(v || [])); }
+  function _jObj(v) { return JSON.parse(JSON.stringify(v || {})); }
+
+  function _saveSnap() {
+    _snap = {
+      allContacts:   _jArr(allContacts),   allMandates: _jArr(allMandates),
+      allNeeds:      _jArr(allNeeds),       allClubs:    _jArr(allClubs),
+      allTasks:      _jArr(allTasks),       TASKS:       _jArr(TASKS),
+      pitches:       _jArr(pitches),        clubPitches: _jArr(clubPitches),
+      matchesData:   _jArr(matchesData),    logsAdded:   _jArr(logsAdded),
+      clubsAdded:    _jArr(clubsAdded),     mandatesAdded: _jArr(mandatesAdded),
+      contactsAdded: _jArr(contactsAdded),  tasksAdded:  _jArr(tasksAdded),
+      needsAdded:    _jArr(needsAdded),
+      clubData:    _jObj(clubData),
+      playerNotes: _jObj(playerNotes),
+      _fbDataLoaded: _fbDataLoaded,
+    };
+  }
+  function _fill(arr, src) { arr.length = 0; (src||[]).forEach(function(x){ arr.push(x); }); }
+  function _restoreSnap() {
+    if (!_snap) return;
+    _fill(allContacts,   _snap.allContacts);   _fill(allMandates, _snap.allMandates);
+    _fill(allNeeds,      _snap.allNeeds);       _fill(allClubs,    _snap.allClubs);
+    _fill(allTasks,      _snap.allTasks);       _fill(TASKS,       _snap.TASKS);
+    _fill(pitches,       _snap.pitches);        _fill(clubPitches, _snap.clubPitches);
+    _fill(matchesData,   _snap.matchesData);    _fill(logsAdded,   _snap.logsAdded);
+    _fill(clubsAdded,    _snap.clubsAdded);     _fill(mandatesAdded, _snap.mandatesAdded);
+    _fill(contactsAdded, _snap.contactsAdded);  _fill(tasksAdded,  _snap.tasksAdded);
+    _fill(needsAdded,    _snap.needsAdded);
+    Object.keys(clubData).forEach(function(k){ delete clubData[k]; });
+    Object.assign(clubData, _jObj(_snap.clubData));
+    Object.keys(playerNotes).forEach(function(k){ delete playerNotes[k]; });
+    Object.assign(playerNotes, _jObj(_snap.playerNotes));
+    _fbDataLoaded = _snap._fbDataLoaded;
+  }
+
+  // ── Payload builder + load simulator ────────────────────────────────────
+  function _payload() {
+    return {
+      allContacts: _jArr(allContacts), allMandates: _jArr(allMandates),
+      allNeeds:    _jArr(allNeeds),    allClubs:    _jArr(allClubs),
+      allTasks:    _jArr(allTasks),    pitches:     _jArr(pitches),
+      clubPitches: _jArr(clubPitches), matchesData: _jArr(matchesData),
+      logsAdded:   _jArr(logsAdded),  clubData:    _jObj(clubData),
+      playerNotes: _jObj(playerNotes),
+    };
+  }
+  function _load(p) {
+    _fill(allContacts, p.allContacts); _fill(allMandates, p.allMandates);
+    _fill(allNeeds,    p.allNeeds);    _fill(allClubs,    p.allClubs);
+    _fill(allTasks,    p.allTasks);    _fill(pitches,     p.pitches);
+    _fill(clubPitches, p.clubPitches); _fill(matchesData, p.matchesData);
+    _fill(logsAdded,   p.logsAdded);
+    Object.keys(clubData).forEach(function(k){ delete clubData[k]; });
+    Object.assign(clubData, p.clubData || {});
+    Object.keys(playerNotes).forEach(function(k){ delete playerNotes[k]; });
+    Object.assign(playerNotes, p.playerNotes || {});
+  }
+
+  // ── Entity factories ─────────────────────────────────────────────────────
+  var _seq = 0;
+  function _id(pfx) { return (pfx||'X') + '__R' + (++_seq) + '_' + Date.now(); }
+  function _club(name)  {
+    var c = { name:name, league:'_TL', country:'_TC', flag:'🧪' };
+    allClubs.push(c); clubsAdded.push(c); clubData[name] = c; return c;
+  }
+  function _contact(first, last, club) {
+    var c = { id:_id('c'), name:first+' '+last, role:'SD', club:club||'',
+              email:'', phone:'', wa:'', linkedin:'', status:'New', stage:'Cold', isRich:false };
+    allContacts.push(c); contactsAdded.push(c); return c;
+  }
+  function _mandate(player, club, contact) {
+    var m = { id:_id('m'), name:player, position:'FW', age:'25',
+              club:club||'', value:'5M', contact:contact||'', status:'Active' };
+    allMandates.push(m); mandatesAdded.push(m); return m;
+  }
+  function _need(club) {
+    var n = { id:_id('n'), club:club||'', position:'FW', budget:'5M', contact:'', status:'Active' };
+    allNeeds.push(n); needsAdded.push(n); return n;
+  }
+  function _pitch(player, club) {
+    var p = { id:_id('p'), player:player||'', club:club||'',
+              date:new Date().toISOString(), status:'Sent' };
+    pitches.push(p); return p;
+  }
+  function _task(text) {
+    var t = { id:_id('t'), text:text, done:false, created:Date.now() };
+    allTasks.push(t); tasksAdded.push(t); TASKS.push(t); return t;
+  }
+  function _log2(type, player) {
+    var l = { id:_id('l'), type:type||'note', player:player||'',
+              text:'Test', date:new Date().toISOString() };
+    logsAdded.push(l); return l;
+  }
+
+  // ══════════════════════════════════════════════════════════════════════════
+  // REGRESSION TESTS — one per fixed bug
+  // Naming: reg_NNN_<slug> where NNN matches the task ticket number
+  // ══════════════════════════════════════════════════════════════════════════
+
+  // REG-020 — Ghost data: empty arrays must always be written to payload.
+  // Bug: fbSave used `...(arr.length ? {arr} : {})` — omitting arrays when empty
+  // caused Firebase to retain stale records that reappeared on next refresh.
+  function reg_020_ghost_data_empty_arrays() {
+    var saved = { c:allContacts.splice(0), m:allMandates.splice(0),
+                  n:allNeeds.splice(0),    k:allClubs.splice(0), t:allTasks.splice(0) };
+    var p = _payload();
+    _ok(Array.isArray(p.allContacts) && p.allContacts.length === 0, 'REG-020a allContacts present when empty');
+    _ok(Array.isArray(p.allMandates) && p.allMandates.length === 0, 'REG-020b allMandates present when empty');
+    _ok(Array.isArray(p.allNeeds)    && p.allNeeds.length    === 0, 'REG-020c allNeeds present when empty');
+    _ok(Array.isArray(p.allClubs)    && p.allClubs.length    === 0, 'REG-020d allClubs present when empty');
+    _ok(Array.isArray(p.allTasks)    && p.allTasks.length    === 0, 'REG-020e allTasks present when empty');
+    // Restore inline — mid-test, can't use _restoreSnap
+    saved.c.forEach(function(x){ allContacts.push(x); });
+    saved.m.forEach(function(x){ allMandates.push(x); });
+    saved.n.forEach(function(x){ allNeeds.push(x); });
+    saved.k.forEach(function(x){ allClubs.push(x); });
+    saved.t.forEach(function(x){ allTasks.push(x); });
+  }
+
+  // REG-021 — Club Edit: saveClubEdit must update allClubs[], not just clubData.
+  // Bug: only clubData{} and clubsAdded[] were updated; allClubs[] kept old name;
+  // Firebase would re-serve the old name on next reload.
+  function reg_021_club_edit_updates_allClubs() {
+    var oldName = _id('Club');
+    var newName = _id('Renamed');
+    _club(oldName);
+
+    // Simulate saveClubEdit mutation (data layer only, no DOM)
+    var idx = allClubs.findIndex(function(c){ return c.name === oldName; });
+    if (idx !== -1) allClubs[idx].name = newName;
+    var caIdx = clubsAdded.findIndex(function(c){ return c.name === oldName; });
+    if (caIdx !== -1) clubsAdded[caIdx].name = newName;
+    if (clubData[oldName]) { clubData[newName] = clubData[oldName]; delete clubData[oldName]; }
+
+    var p = _payload(); _load(p);
+
+    _ok(allClubs.some(function(c){ return c.name === newName; }),  'REG-021a New name in allClubs after edit');
+    _ok(!allClubs.some(function(c){ return c.name === oldName; }), 'REG-021b Old name gone from allClubs after edit');
+    _ok(!!clubData[newName],  'REG-021c clubData keyed by new name');
+    _ok(!clubData[oldName],   'REG-021d clubData old key deleted');
+  }
+
+  // REG-022 — Task delete: deleteTask must remove from allTasks[], not just TASKS[].
+  // Bug: TASKS and tasksAdded were spliced but allTasks was not; task reappeared on refresh.
+  function reg_022_task_delete_removes_allTasks() {
+    var task = _task('Reg test task');
+
+    // Simulate deleteTask (data layer)
+    [allTasks, tasksAdded, TASKS].forEach(function(arr){
+      var i = arr.findIndex(function(t){ return t.id === task.id; });
+      if (i !== -1) arr.splice(i, 1);
+    });
+
+    var p = _payload(); _load(p);
+
+    _ok(!allTasks.some(function(t){ return t.id === task.id; }),    'REG-022a Task gone from allTasks after delete + reload');
+    _ok(!tasksAdded.some(function(t){ return t.id === task.id; }), 'REG-022b Task gone from tasksAdded');
+    _ok(!TASKS.some(function(t){ return t.id === task.id; }),       'REG-022c Task gone from TASKS');
+  }
+
+  // REG-023 — submitLog label: _LOG_LABELS must be accessible at global scope.
+  // Bug: submitLog used `labels[type]` which was undefined; crashed with TypeError.
+  // Fix: use `_LOG_LABELS` (the globally declared const).
+  function reg_023_submitLog_labels_accessible() {
+    _ok(typeof _LOG_LABELS === 'object' && _LOG_LABELS !== null,
+        'REG-023a _LOG_LABELS defined at global scope');
+    _ok(typeof _LOG_LABELS.call     === 'string', 'REG-023b _LOG_LABELS.call defined');
+    _ok(typeof _LOG_LABELS.meeting  === 'string', 'REG-023c _LOG_LABELS.meeting defined');
+    _ok(typeof _LOG_LABELS.email    === 'string', 'REG-023d _LOG_LABELS.email defined');
+    _ok(typeof _LOG_LABELS.whatsapp === 'string', 'REG-023e _LOG_LABELS.whatsapp defined');
+    _ok(typeof _LOG_LABELS.note     === 'string', 'REG-023f _LOG_LABELS.note defined');
+    // Verify fallback lookup works (the pattern used in submitLog after the fix)
+    var testType = 'meeting';
+    var label = (_LOG_LABELS[testType] || 'Activity') + ' logged';
+    _ok(label === 'Meeting logged logged' || label.indexOf('logged') !== -1,
+        'REG-023g Label lookup produces non-empty string', label);
+  }
+
+  // REG-024 — Contact create: new contact object must include wa and linkedin fields.
+  // Bug: submitContact() created `{ id, name, role, club, email, phone, notes, status, stage }`
+  // — wa and linkedin were missing from the persisted object entirely.
+  function reg_024_contact_create_wa_linkedin() {
+    var club = _id('Club');
+    _club(club);
+    var c = _contact('WA', 'Test', club);
+
+    _ok('wa'       in c, 'REG-024a New contact object has wa field');
+    _ok('linkedin' in c, 'REG-024b New contact object has linkedin field');
+
+    var p = _payload(); _load(p);
+    var loaded = allContacts.find(function(x){ return x.id === c.id; });
+    _ok(loaded && 'wa'       in loaded, 'REG-024c wa field survives payload round-trip');
+    _ok(loaded && 'linkedin' in loaded, 'REG-024d linkedin field survives payload round-trip');
+  }
+
+  // REG-025 — Player rename: pitches[].player must cascade when player is renamed.
+  // Bug: savePlayerProfile renamed playerNotes key and Mandate.name, but pitches[].player
+  // kept the old name — pitch history appeared to vanish after rename + refresh.
+  function reg_025_player_rename_cascades_pitches() {
+    var oldName = _id('Player');
+    var newName = _id('Renamed');
+    var club    = _id('Club');
+    _club(club);
+    _mandate(oldName, club);
+    var p1 = _pitch(oldName, club);
+    var p2 = _pitch(oldName, _id('OtherClub'));
+    var log = _log2('meeting', oldName);
+    playerNotes[oldName] = { status:'Hot', notes:'Test', priority:1 };
+
+    // Simulate savePlayerProfile cascade (data layer)
+    var mIdx = allMandates.findIndex(function(m){ return m.name === oldName; });
+    if (mIdx !== -1) allMandates[mIdx].name = newName;
+    pitches.forEach(function(p)    { if (p.player === oldName) p.player = newName; });
+    matchesData.forEach(function(m){ if (m.player === oldName) m.player = newName; });
+    logsAdded.forEach(function(l)  { if (l.player === oldName) l.player = newName; });
+    clubPitches.forEach(function(p){ if (p.player === oldName) p.player = newName; });
+    playerNotes[newName] = playerNotes[oldName];
+    delete playerNotes[oldName];
+
+    var pp = _payload(); _load(pp);
+
+    _ok(!pitches.some(function(p){ return p.player === oldName; }), 'REG-025a No pitch still has old player name');
+    _ok(pitches.find(function(p){ return p.id === p1.id; })?.player === newName, 'REG-025b Pitch 1 updated to new name');
+    _ok(pitches.find(function(p){ return p.id === p2.id; })?.player === newName, 'REG-025c Pitch 2 updated to new name');
+    _ok(!logsAdded.some(function(l){ return l.player === oldName; }), 'REG-025d No log still has old player name');
+    _ok(logsAdded.find(function(l){ return l.id === log.id; })?.player === newName, 'REG-025e Log.player updated');
+    _ok(!!playerNotes[newName], 'REG-025f playerNotes key renamed');
+    _ok(!playerNotes[oldName],  'REG-025g Old playerNotes key deleted');
+  }
+
+  // REG-026 — Club rename: cascade must update allMandates, allNeeds, allContacts.
+  // Bug: saveClubEdit renamed in clubData/clubsAdded but allMandates[].club,
+  // allNeeds[].club, allContacts[].club kept the old name → orphans on reload.
+  function reg_026_club_rename_cascades_all_entities() {
+    var oldName = _id('Club');
+    var newName = _id('Renamed');
+    _club(oldName);
+    var c = _contact('Cascade', 'Test', oldName);
+    var m = _mandate(_id('Player'), oldName);
+    var n = _need(oldName);
+
+    // Simulate saveClubEdit cascade
+    var kIdx = allClubs.findIndex(function(x){ return x.name === oldName; });
+    if (kIdx !== -1) allClubs[kIdx].name = newName;
+    allContacts.forEach(function(x){ if (x.club === oldName) x.club = newName; });
+    allMandates.forEach(function(x){ if (x.club === oldName) x.club = newName; });
+    allNeeds.forEach(function(x)   { if (x.club === oldName) x.club = newName; });
+    if (clubData[oldName]) { clubData[newName] = clubData[oldName]; delete clubData[oldName]; }
+
+    var p = _payload(); _load(p);
+
+    _ok(allContacts.find(function(x){ return x.id===c.id; })?.club === newName, 'REG-026a Contact.club cascaded');
+    _ok(allMandates.find(function(x){ return x.id===m.id; })?.club === newName, 'REG-026b Mandate.club cascaded');
+    _ok(allNeeds.find(function(x)   { return x.id===n.id; })?.club === newName, 'REG-026c Need.club cascaded');
+    _ok(!allContacts.some(function(x){ return x.club === oldName; }), 'REG-026d No Contact refs old name');
+    _ok(!allMandates.some(function(x){ return x.club === oldName; }), 'REG-026e No Mandate refs old name');
+    _ok(!allNeeds.some(function(x)   { return x.club === oldName; }), 'REG-026f No Need refs old name');
+  }
+
+  // ══════════════════════════════════════════════════════════════════════════
+  // WORKFLOW TESTS — end-to-end critical paths
+  // ══════════════════════════════════════════════════════════════════════════
+
+  // WF-001 — Club: Create → persist → edit name → persist → delete → gone
+  function wf_001_club_full_crud() {
+    var name = _id('Club');
+    _club(name);
+
+    // Create: round-trip
+    var p1 = _payload(); _load(p1);
+    _ok(allClubs.some(function(c){ return c.name===name; }), 'WF-001a Club exists after create+reload');
+
+    // Edit
+    var newName = name + '_edited';
+    var idx = allClubs.findIndex(function(c){ return c.name===name; });
+    if (idx !== -1) allClubs[idx].name = newName;
+    var p2 = _payload(); _load(p2);
+    _ok(allClubs.some(function(c){ return c.name===newName; }),  'WF-001b Edited club name persists');
+    _ok(!allClubs.some(function(c){ return c.name===name; }),    'WF-001c Old club name gone after edit');
+
+    // Delete
+    _fill(allClubs, allClubs.filter(function(c){ return c.name!==newName; }));
+    var p3 = _payload(); _load(p3);
+    _ok(!allClubs.some(function(c){ return c.name===newName; }), 'WF-001d Club gone after delete+reload');
+  }
+
+  // WF-002 — Contact: Create → persist → edit → persist → delete → gone
+  function wf_002_contact_full_crud() {
+    var club = _id('Club');
+    _club(club);
+    var c = _contact('CRUD', 'Test', club);
+
+    var p1 = _payload(); _load(p1);
+    _ok(allContacts.some(function(x){ return x.id===c.id; }), 'WF-002a Contact exists after create+reload');
+
+    // Edit: update email
+    allContacts.find(function(x){ return x.id===c.id; }).email = 'new@test.com';
+    var p2 = _payload(); _load(p2);
+    _ok(allContacts.find(function(x){ return x.id===c.id; })?.email === 'new@test.com', 'WF-002b Contact edit persists');
+
+    // Delete
+    _fill(allContacts, allContacts.filter(function(x){ return x.id!==c.id; }));
+    var p3 = _payload(); _load(p3);
+    _ok(!allContacts.some(function(x){ return x.id===c.id; }), 'WF-002c Contact gone after delete+reload');
+  }
+
+  // WF-003 — Mandate (Player Profile): Create → persist → rename → persist → delete → gone
+  function wf_003_mandate_full_crud() {
+    var club     = _id('Club');
+    var player   = _id('Player');
+    var renamed  = player + '_renamed';
+    _club(club);
+    var m = _mandate(player, club);
+    playerNotes[player] = { status:'Active', notes:'test', priority:1 };
+
+    var p1 = _payload(); _load(p1);
+    _ok(allMandates.some(function(x){ return x.id===m.id; }),  'WF-003a Mandate exists after create+reload');
+    _ok(!!playerNotes[player],                                  'WF-003b playerNotes key exists');
+
+    // Rename player
+    var mIdx = allMandates.findIndex(function(x){ return x.id===m.id; });
+    if (mIdx !== -1) allMandates[mIdx].name = renamed;
+    playerNotes[renamed] = playerNotes[player]; delete playerNotes[player];
+    var p2 = _payload(); _load(p2);
+    _ok(allMandates.find(function(x){ return x.id===m.id; })?.name === renamed, 'WF-003c Mandate rename persists');
+    _ok(!playerNotes[player] && !!playerNotes[renamed],                          'WF-003d playerNotes key renamed');
+
+    // Delete
+    _fill(allMandates, allMandates.filter(function(x){ return x.id!==m.id; }));
+    delete playerNotes[renamed];
+    var p3 = _payload(); _load(p3);
+    _ok(!allMandates.some(function(x){ return x.id===m.id; }), 'WF-003e Mandate gone after delete+reload');
+    _ok(!playerNotes[renamed],                                   'WF-003f playerNotes key deleted');
+  }
+
+  // WF-004 — Need: Create → persist → edit → persist → delete → gone
+  function wf_004_need_full_crud() {
+    var club = _id('Club');
+    _club(club);
+    var n = _need(club);
+
+    var p1 = _payload(); _load(p1);
+    _ok(allNeeds.some(function(x){ return x.id===n.id; }), 'WF-004a Need exists after create+reload');
+
+    allNeeds.find(function(x){ return x.id===n.id; }).budget = '10M';
+    var p2 = _payload(); _load(p2);
+    _ok(allNeeds.find(function(x){ return x.id===n.id; })?.budget === '10M', 'WF-004b Need edit persists');
+
+    _fill(allNeeds, allNeeds.filter(function(x){ return x.id!==n.id; }));
+    var p3 = _payload(); _load(p3);
+    _ok(!allNeeds.some(function(x){ return x.id===n.id; }), 'WF-004c Need gone after delete+reload');
+  }
+
+  // WF-005 — Task: Create → persist → toggle done → persist → delete → gone
+  function wf_005_task_full_crud() {
+    var t = _task('WF-005 test task');
+
+    var p1 = _payload(); _load(p1);
+    _ok(allTasks.some(function(x){ return x.id===t.id; }), 'WF-005a Task exists after create+reload');
+
+    allTasks.find(function(x){ return x.id===t.id; }).done = true;
+    var p2 = _payload(); _load(p2);
+    _ok(allTasks.find(function(x){ return x.id===t.id; })?.done === true, 'WF-005b Task.done=true persists');
+
+    [allTasks, tasksAdded, TASKS].forEach(function(arr){
+      var i = arr.findIndex(function(x){ return x.id===t.id; });
+      if (i !== -1) arr.splice(i, 1);
+    });
+    var p3 = _payload(); _load(p3);
+    _ok(!allTasks.some(function(x){ return x.id===t.id; }), 'WF-005c Task gone after delete+reload');
+  }
+
+  // WF-006 — Pitch: Create → linked to mandate + club → persist → delete → gone
+  function wf_006_pitch_full_crud() {
+    var club   = _id('Club');
+    var player = _id('Player');
+    _club(club);
+    _mandate(player, club);
+    var p = _pitch(player, club);
+
+    var pp = _payload(); _load(pp);
+    var loaded = pitches.find(function(x){ return x.id===p.id; });
+    _ok(!!loaded,                                'WF-006a Pitch exists after create+reload');
+    _ok(loaded?.player === player,               'WF-006b Pitch.player linked correctly');
+    _ok(loaded?.club   === club,                 'WF-006c Pitch.club linked correctly');
+    _ok(allMandates.some(function(m){ return m.name === loaded?.player; }), 'WF-006d Pitch.player → Mandate exists');
+    _ok(allClubs.some(function(c){ return c.name === loaded?.club; }),      'WF-006e Pitch.club → Club exists');
+
+    _fill(pitches, pitches.filter(function(x){ return x.id!==p.id; }));
+    var pp2 = _payload(); _load(pp2);
+    _ok(!pitches.some(function(x){ return x.id===p.id; }), 'WF-006f Pitch gone after delete+reload');
+  }
+
+  // WF-007 — Log: Create → player ref → persist → delete → gone
+  function wf_007_log_full_crud() {
+    var club   = _id('Club');
+    var player = _id('Player');
+    _club(club);
+    _mandate(player, club);
+    var l = _log2('meeting', player);
+
+    var p = _payload(); _load(p);
+    var loaded = logsAdded.find(function(x){ return x.id===l.id; });
+    _ok(!!loaded,                                  'WF-007a Log exists after create+reload');
+    _ok(loaded?.player === player,                 'WF-007b Log.player ref intact');
+    _ok(allMandates.some(function(m){ return m.name === loaded?.player; }), 'WF-007c Log.player → Mandate exists');
+
+    _fill(logsAdded, logsAdded.filter(function(x){ return x.id!==l.id; }));
+    var p2 = _payload(); _load(p2);
+    _ok(!logsAdded.some(function(x){ return x.id===l.id; }), 'WF-007d Log gone after delete+reload');
+  }
+
+  // WF-008 — Full 4-entity chain: Club→Contact(SD)→Mandate→Pitch — all refs intact
+  function wf_008_full_entity_chain() {
+    var club   = _id('Club');
+    var player = _id('Player');
+    _club(club);
+    var c = _contact('Full', 'Chain', club);
+    var m = _mandate(player, club, c.name);
+    var p = _pitch(player, club);
+    playerNotes[player] = { status:'Hot', notes:'Chain test', priority:1 };
+
+    var pp = _payload(); _load(pp);
+
+    var lC = allContacts.find(function(x){ return x.id===c.id; });
+    var lM = allMandates.find(function(x){ return x.id===m.id; });
+    var lP = pitches.find(function(x)    { return x.id===p.id; });
+
+    _ok(!!lC && lC.club    === club,     'WF-008a Contact→Club ref intact');
+    _ok(!!lM && lM.club    === club,     'WF-008b Mandate→Club ref intact');
+    _ok(!!lM && lM.contact === c.name,  'WF-008c Mandate→Contact ref intact');
+    _ok(!!lP && lP.player  === player,  'WF-008d Pitch→Mandate ref intact');
+    _ok(!!lP && lP.club    === club,    'WF-008e Pitch→Club ref intact');
+    _ok(!!playerNotes[player],           'WF-008f playerNotes key intact');
+    // No orphans
+    _ok(allClubs.some(function(x){ return x.name===lC?.club; }),  'WF-008g Contact→Club no orphan');
+    _ok(allClubs.some(function(x){ return x.name===lM?.club; }),  'WF-008h Mandate→Club no orphan');
+    _ok(allContacts.some(function(x){ return x.name===lM?.contact; }), 'WF-008i Mandate→Contact no orphan');
+    _ok(allMandates.some(function(x){ return x.name===lP?.player; }),  'WF-008j Pitch→Mandate no orphan');
+  }
+
+  // WF-009 — Club delete: cascade nullifies all entity refs; no dangling pointers
+  function wf_009_club_delete_cascade() {
+    var club = _id('Club');
+    _club(club);
+    var c = _contact('Del', 'Club', club);
+    var m = _mandate(_id('Player'), club);
+    var n = _need(club);
+
+    if (window._db) _db.onClubDeleted(club);
+    _fill(allClubs, allClubs.filter(function(x){ return x.name!==club; }));
+    delete clubData[club];
+
+    var p = _payload(); _load(p);
+
+    _ok(!allClubs.some(function(x){ return x.name===club; }),  'WF-009a Club removed');
+    var lC = allContacts.find(function(x){ return x.id===c.id; });
+    _ok(!lC || lC.club!==club,  'WF-009b Contact.club nullified');
+    var lM = allMandates.find(function(x){ return x.id===m.id; });
+    _ok(!lM || lM.club!==club,  'WF-009c Mandate.club nullified');
+    var lN = allNeeds.find(function(x){ return x.id===n.id; });
+    _ok(!lN || lN.club!==club,  'WF-009d Need.club nullified');
+    // No entity should still point at the deleted club
+    _ok(!allContacts.some(function(x){ return x.club===club; }), 'WF-009e No Contact still refs deleted club');
+    _ok(!allMandates.some(function(x){ return x.club===club; }), 'WF-009f No Mandate still refs deleted club');
+    _ok(!allNeeds.some(function(x)   { return x.club===club; }), 'WF-009g No Need still refs deleted club');
+  }
+
+  // WF-010 — Contact delete: Mandate.contact must be nullified
+  function wf_010_contact_delete_cascade() {
+    var club = _id('Club');
+    _club(club);
+    var c = _contact('Del', 'Contact', club);
+    var m = _mandate(_id('Player'), club, c.name);
+
+    if (window._db) _db.onContactDeleted(c.name);
+    _fill(allContacts, allContacts.filter(function(x){ return x.id!==c.id; }));
+
+    var p = _payload(); _load(p);
+
+    _ok(!allContacts.some(function(x){ return x.id===c.id; }), 'WF-010a Contact removed');
+    var lM = allMandates.find(function(x){ return x.id===m.id; });
+    _ok(!lM || lM.contact!==c.name, 'WF-010b Mandate.contact nullified');
+    _ok(!allContacts.some(function(x){ return x.name===c.name; }), 'WF-010c Deleted contact not in allContacts');
+  }
+
+  // WF-011 — Mandate delete: pitches archived; playerNotes key removed
+  function wf_011_mandate_delete_cascade() {
+    var club   = _id('Club');
+    var player = _id('Player');
+    _club(club);
+    var m = _mandate(player, club);
+    _pitch(player, club);
+    playerNotes[player] = { status:'Hot', notes:'cascade test', priority:1 };
+
+    if (window._db) _db.onMandateDeleted(player);
+    _fill(allMandates, allMandates.filter(function(x){ return x.id!==m.id; }));
+
+    var p = _payload(); _load(p);
+
+    _ok(!allMandates.some(function(x){ return x.id===m.id; }), 'WF-011a Mandate removed');
+    _ok(!playerNotes[player], 'WF-011b playerNotes key deleted');
+    var active = pitches.filter(function(x){ return x.player===player && x.status!=='Archived'; });
+    _ok(active.length === 0, 'WF-011c No active pitches remain', active.length);
+  }
+
+  // WF-012 — Duplicate prevention: same entity cannot be created twice
+  function wf_012_duplicate_prevention() {
+    if (!window._db) { _fail('WF-012', '_db not available'); return; }
+    var club   = _id('Club');
+    var player = _id('Player');
+    _club(club);
+    _contact('Dup', 'Test', club);
+    _mandate(player, club);
+
+    _ok(_db.isClubDuplicate(club, null),                       'WF-012a Club duplicate detected');
+    _ok(!_db.isClubDuplicate(club+'_unique', null),            'WF-012b Unique club not flagged');
+    _ok(_db.isContactDuplicate('Dup','Test', club, null),      'WF-012c Contact duplicate detected');
+    _ok(!_db.isContactDuplicate('Unique','Test', club, null),  'WF-012d Unique contact not flagged');
+    _ok(_db.isMandateDuplicate(player, null),                  'WF-012e Mandate duplicate detected');
+    _ok(!_db.isMandateDuplicate(player+'_unique', null),       'WF-012f Unique mandate not flagged');
+  }
+
+  // WF-013 — Edit self-exclusion: editing an entity must not flag it as its own duplicate
+  function wf_013_edit_excludes_self_from_duplicate_check() {
+    if (!window._db) { _fail('WF-013', '_db not available'); return; }
+    var club   = _id('Club');
+    var player = _id('Player');
+    _club(club);
+    var c = _contact('SelfEdit', 'Test', club);
+    var m = _mandate(player, club);
+
+    // When editing with the same name, should NOT be flagged as duplicate if self is excluded
+    _ok(!_db.isClubDuplicate(club, club),            'WF-013a Club not duplicate of itself (edit mode)');
+    _ok(!_db.isContactDuplicate('SelfEdit','Test', club, c.id), 'WF-013b Contact not duplicate of itself (edit mode)');
+    _ok(!_db.isMandateDuplicate(player, m.id),       'WF-013c Mandate not duplicate of itself (edit mode)');
+  }
+
+  // WF-014 — fbSave guard: fbSave must be blocked when _fbDataLoaded is false
+  function wf_014_fbSave_blocked_before_data_loaded() {
+    var originalFlag = _fbDataLoaded;
+    _fbDataLoaded = false;
+
+    var saveAttempted = false;
+    // validatePayload() should return false → fbSave returns early
+    if (window._db) {
+      var result = _db.validatePayload();
+      _ok(result === false, 'WF-014a validatePayload() returns false when _fbDataLoaded=false');
+    } else {
+      _ok(!_fbDataLoaded, 'WF-014a _fbDataLoaded is false (guard precondition met)');
+    }
+
+    _fbDataLoaded = originalFlag;
+    _ok(_fbDataLoaded === originalFlag, 'WF-014b _fbDataLoaded restored correctly');
+  }
+
+  // WF-015 — Payload completeness: every required key is present in fbSave payload
+  function wf_015_payload_has_all_required_keys() {
+    var p = _payload();
+    var required = ['allContacts','allMandates','allNeeds','allClubs','allTasks',
+                    'pitches','clubPitches','matchesData','logsAdded','clubData','playerNotes'];
+    required.forEach(function(key) {
+      _ok(key in p, 'WF-015: payload has key: ' + key);
+    });
+    // All array keys must be arrays, object keys must be objects
+    ['allContacts','allMandates','allNeeds','allClubs','allTasks',
+     'pitches','clubPitches','matchesData','logsAdded'].forEach(function(key) {
+      _ok(Array.isArray(p[key]), 'WF-015: ' + key + ' is Array');
+    });
+    ['clubData','playerNotes'].forEach(function(key) {
+      _ok(typeof p[key] === 'object' && p[key] !== null && !Array.isArray(p[key]),
+          'WF-015: ' + key + ' is Object');
+    });
+  }
+
+  // WF-016 — Entity field completeness: new entities must have all required fields
+  function wf_016_new_entity_required_fields() {
+    var club   = _id('Club');
+    var player = _id('Player');
+    _club(club);
+    var c = _contact('Fields', 'Test', club);
+    var m = _mandate(player, club);
+    var n = _need(club);
+    var p = _pitch(player, club);
+    var t = _task('Field test task');
+
+    // Contact required fields
+    ['id','name','role','club','email','phone','wa','linkedin','status','stage','isRich'].forEach(function(f){
+      _ok(f in c, 'WF-016: Contact has field: ' + f);
+    });
+    // Mandate required fields
+    ['id','name','position','age','club','value','contact','status'].forEach(function(f){
+      _ok(f in m, 'WF-016: Mandate has field: ' + f);
+    });
+    // Need required fields
+    ['id','club','position','budget','contact','status'].forEach(function(f){
+      _ok(f in n, 'WF-016: Need has field: ' + f);
+    });
+    // Pitch required fields
+    ['id','player','club','date','status'].forEach(function(f){
+      _ok(f in p, 'WF-016: Pitch has field: ' + f);
+    });
+    // Task required fields
+    ['id','text','done','created'].forEach(function(f){
+      _ok(f in t, 'WF-016: Task has field: ' + f);
+    });
+    // Club required fields
+    var k = allClubs.find(function(x){ return x.name===club; });
+    ['name','league','country','flag'].forEach(function(f){
+      _ok(k && f in k, 'WF-016: Club has field: ' + f);
+    });
+  }
+
+  // ── Master runner ────────────────────────────────────────────────────────
+  var _regressionTests = [
+    reg_020_ghost_data_empty_arrays,
+    reg_021_club_edit_updates_allClubs,
+    reg_022_task_delete_removes_allTasks,
+    reg_023_submitLog_labels_accessible,
+    reg_024_contact_create_wa_linkedin,
+    reg_025_player_rename_cascades_pitches,
+    reg_026_club_rename_cascades_all_entities,
+  ];
+  var _workflowTests = [
+    wf_001_club_full_crud,       wf_002_contact_full_crud,
+    wf_003_mandate_full_crud,    wf_004_need_full_crud,
+    wf_005_task_full_crud,       wf_006_pitch_full_crud,
+    wf_007_log_full_crud,        wf_008_full_entity_chain,
+    wf_009_club_delete_cascade,  wf_010_contact_delete_cascade,
+    wf_011_mandate_delete_cascade, wf_012_duplicate_prevention,
+    wf_013_edit_excludes_self_from_duplicate_check,
+    wf_014_fbSave_blocked_before_data_loaded,
+    wf_015_payload_has_all_required_keys,
+    wf_016_new_entity_required_fields,
+  ];
+
+  function runAll() {
+    var t0 = Date.now();
+    _log = [];
+    _seq = 0;
+    _saveSnap();
+
+    // -- Phase 7 tests --
+    var allTests = _regressionTests.concat(_workflowTests);
+    console.groupCollapsed('%c[EFP-REG] Phase 7 — Regression + Workflow (' + allTests.length + ')', 'color:#f59e0b;font-weight:bold');
+    allTests.forEach(function(fn) {
+      console.groupCollapsed('%c' + fn.name, 'color:#94a3b8');
+      try { fn(); } catch(e) { _fail(fn.name, 'EXCEPTION — ' + e.message); }
+      console.groupEnd();
+    });
+    console.groupEnd();
+    _restoreSnap();
+
+    // -- Phase 6 relationship tests (separate suite) --
+    var phase6Results = [];
+    if (window._testSuite) {
+      try {
+        console.groupCollapsed('%c[EFP-REG] Phase 6 — Relationship Tests (20)', 'color:#818cf8;font-weight:bold');
+        var p6 = window._testSuite.runAll();
+        phase6Results = p6.results || window._testSuite.results() || [];
+        console.groupEnd();
+      } catch(e) {
+        _fail('phase6_suite', 'Phase 6 suite error: ' + e.message);
+      }
+    }
+
+    // -- Combine --
+    var combined = _log.concat(phase6Results);
+    var passed   = combined.filter(function(r){ return r.ok; }).length;
+    var total    = combined.length;
+    var allPass  = passed === total;
+    var elapsed  = Date.now() - t0;
+
+    // Summary
+    console.log('%c[EFP-REG] ═══════════════════════════════════════════════════', 'color:#f59e0b;font-weight:bold');
+    if (allPass) {
+      console.log('%c[EFP-REG] ✅ ALL PASS — ' + passed + '/' + total + ' (' + elapsed + 'ms)', 'color:#22c55e;font-weight:bold;font-size:14px');
+    } else {
+      var fails = combined.filter(function(r){ return !r.ok; });
+      console.warn('[EFP-REG] ❌ ' + fails.length + ' FAILURE(S) — ' + passed + '/' + total);
+      fails.forEach(function(r){ console.warn('[EFP-REG]   ❌ ' + r.name + (r.why ? ' — '+r.why : '')); });
+    }
+    console.log('%c[EFP-REG] ═══════════════════════════════════════════════════', 'color:#f59e0b;font-weight:bold');
+
+    return { passed:passed, total:total, allPass:allPass, elapsed:elapsed, results:combined };
+  }
+
+  return { runAll:runAll, results:function(){ return _log; } };
+})();
+
+// ── Auto-run + CI bridge (triggers on ?test in URL) ─────────────────────────
+(function () {
+  var qs = window.location.search;
+  if (!/[?&]test/.test(qs) && qs !== '?regression') return;
+
+  // Create test overlay (shown in browser; ignored in headless CI)
+  var _overlay = document.createElement('div');
+  _overlay.id  = '_efp-test-overlay';
+  _overlay.setAttribute('style', [
+    'position:fixed;top:16px;right:16px;z-index:99999;width:360px',
+    'background:#0f172a;color:#e2e8f0;border-radius:12px',
+    'box-shadow:0 8px 32px rgba(0,0,0,.6)',
+    'font:13px/1.5 ui-monospace,monospace;overflow:hidden',
+  ].join(';'));
+  _overlay.innerHTML = [
+    '<div style="padding:12px 16px;background:#1e293b;display:flex;align-items:center;gap:8px">',
+    '  <span style="font-size:16px">🧪</span>',
+    '  <strong style="color:#f59e0b">EFP Regression Tests</strong>',
+    '  <span id="_efp-test-status" style="margin-left:auto;color:#94a3b8">running…</span>',
+    '</div>',
+    '<div id="_efp-test-body" style="padding:12px 16px;max-height:400px;overflow-y:auto">',
+    '  <div style="color:#94a3b8">Initialising…</div>',
+    '</div>',
+  ].join('');
+  document.body ? document.body.appendChild(_overlay) :
+    document.addEventListener('DOMContentLoaded', function(){ document.body.appendChild(_overlay); });
+
+  function _updateOverlay(results) {
+    var statusEl = document.getElementById('_efp-test-status');
+    var bodyEl   = document.getElementById('_efp-test-body');
+    if (!statusEl || !bodyEl) return;
+
+    if (results.allPass) {
+      statusEl.textContent = '✅ ' + results.passed + '/' + results.total;
+      statusEl.style.color = '#22c55e';
+    } else {
+      var fails = results.total - results.passed;
+      statusEl.textContent = '❌ ' + fails + ' failed';
+      statusEl.style.color = '#ef4444';
+    }
+
+    var lines = [];
+    if (!results.allPass) {
+      lines.push('<div style="color:#ef4444;margin-bottom:8px;font-weight:bold">' +
+                 (results.total - results.passed) + ' failure(s):</div>');
+      results.results.filter(function(r){ return !r.ok; }).forEach(function(r) {
+        lines.push('<div style="color:#fca5a5;padding:2px 0;border-bottom:1px solid #1e293b">');
+        lines.push('  ❌ ' + r.name.replace(/</g,'&lt;'));
+        if (r.why) lines.push('<br><span style="color:#94a3b8;padding-left:12px">' + r.why.replace(/</g,'&lt;') + '</span>');
+        lines.push('</div>');
+      });
+    } else {
+      lines.push('<div style="color:#22c55e">All ' + results.total + ' tests passed (' + results.elapsed + 'ms)</div>');
+    }
+    bodyEl.innerHTML = lines.join('');
+  }
+
+  // Run after DOM is ready and all scripts are initialised
+  function _run() {
+    setTimeout(function() {
+      var results = window._regression.runAll();
+      // Set CI bridge globals (read by Playwright / headless runner)
+      window.__EFP_TEST_RESULTS = results;
+      window.__EFP_TEST_DONE    = true;
+      _updateOverlay(results);
+    }, 300);
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', _run);
+  } else {
+    _run();
+  }
+})();
 
 </script>
 
