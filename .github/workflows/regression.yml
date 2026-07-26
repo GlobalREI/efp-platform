@@ -38,3 +38,6 @@ jobs:
           name: playwright-report
           path: efp-platform/playwright-report/
           retention-days: 7
+      - name: Deploy to Netlify
+        if: success() && github.event_name == 'push'
+        run: curl -X POST "${{ secrets.NETLIFY_DEPLOY_HOOK }}"
