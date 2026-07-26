@@ -3958,6 +3958,14 @@ th.ds-sort:hover { background: rgba(30,58,95,.06); }
           <div class="page-title">Player Mandates</div>
           <div class="page-subtitle" id="mandates-subtitle">29 active mandates · Summer 2026 window</div>
         </div>
+        <select class="btn btn-outline btn-sm" style="padding:5px 10px;font-size:12px;cursor:pointer" onchange="_sortMandates(this.value);this.blur()">
+          <option value="default">Sort: Default</option>
+          <option value="name-az">Name A–Z</option>
+          <option value="val-high">Market Value ↓</option>
+          <option value="val-low">Market Value ↑</option>
+          <option value="prio">Priority</option>
+        </select>
+        <button id="btn-archived-mandates" class="btn btn-outline btn-sm" onclick="_toggleArchivedMandates()">Show Archived</button>
         <button class="btn btn-primary btn-sm" onclick="openMandateMethodPicker()">+ New Mandate</button>
       </div>
       <div class="panel">
@@ -4011,6 +4019,7 @@ th.ds-sort:hover { background: rgba(30,58,95,.06); }
         </div>
         <input type="text" id="needs-search" class="view-search" placeholder="🔍  Search needs…" oninput="filterNeeds(this.value)">
         <button class="btn btn-outline btn-sm" id="needs-filter-toggle" onclick="toggleNeedsFilter()">⚙ Filter</button>
+        <button id="btn-archived-needs" class="btn btn-outline btn-sm" onclick="_toggleArchivedNeeds()">Show Archived</button>
         <button class="btn btn-primary btn-sm" onclick="openDrawer('req')">+ New Club Need</button>
       </div>
 
@@ -5098,6 +5107,16 @@ th.ds-sort:hover { background: rgba(30,58,95,.06); }
           <input class="field-input" id="pp-edit-val" placeholder="e.g. €3.5M">
         </div>
       </div>
+      <div style="display:flex;gap:10px;margin-bottom:10px">
+        <div style="flex:1">
+          <label class="field-label">Expected Price</label>
+          <input class="field-input" id="pp-edit-expected-price" placeholder="e.g. €2.5M" inputmode="numeric" oninput="_valInput(this)" onblur="_valBlur(this)">
+        </div>
+        <div style="flex:1">
+          <label class="field-label">Salary (p/m)</label>
+          <input class="field-input" id="pp-edit-salary" placeholder="e.g. €80.000" inputmode="numeric" oninput="_valInput(this)" onblur="_valBlur(this)">
+        </div>
+      </div>
       <div class="field" style="margin-bottom:10px">
         <label class="field-label">Source / Via</label>
         <input class="field-input" id="pp-edit-source" placeholder="e.g. Via Rick Pattenden">
@@ -5138,6 +5157,7 @@ th.ds-sort:hover { background: rgba(30,58,95,.06); }
     <div style="display:flex;gap:8px;margin-bottom:18px">
       <button class="btn btn-primary" onclick="savePlayerProfile()" style="flex:1">Save Changes</button>
       <button class="btn btn-outline" onclick="closePlayerProfile();setTimeout(()=>showMandateSuggestions(document.getElementById('pp-edit-name').value,document.getElementById('pp-edit-pos').value,document.getElementById('pp-edit-age').value,document.getElementById('pp-edit-val').value,document.getElementById('pp-edit-club').value),100)">Suggest Clubs →</button>
+      <button id="pp-archive-btn" class="btn btn-outline" onclick="archiveMandate()" title="Archive this mandate" style="flex-shrink:0">📦</button>
       <button class="btn btn-outline" onclick="deleteMandateFromDrawer()" title="Delete this mandate" style="color:var(--red);border-color:var(--red);flex-shrink:0">🗑</button>
     </div>
 
@@ -6421,15 +6441,28 @@ function _renderContactsTable() {
 function _renderMandatesTable() {
   const tbody = document.querySelector('#view-mandates .data-table tbody');
   if (!tbody) return;
-  if (!allMandates.length) {
-    if (window._DS) _DS.showEmptyState(tbody, '⚽', 'No mandates yet', 'Add your first player mandate using the button above.');
+  // Filter archived unless toggle is on
+  let mandatesToShow = _showArchivedMandates ? allMandates : allMandates.filter(m => !m.archived);
+  // Apply sort
+  if (_mandateSortMode === 'name-az') {
+    mandatesToShow = [...mandatesToShow].sort((a,b) => a.name.localeCompare(b.name));
+  } else if (_mandateSortMode === 'val-high') {
+    mandatesToShow = [...mandatesToShow].sort((a,b) => (_parseValToNum(b.value||b.val||'')||0) - (_parseValToNum(a.value||a.val||'')||0));
+  } else if (_mandateSortMode === 'val-low') {
+    mandatesToShow = [...mandatesToShow].sort((a,b) => (_parseValToNum(a.value||a.val||'')||0) - (_parseValToNum(b.value||b.val||'')||0));
+  } else if (_mandateSortMode === 'prio') {
+    mandatesToShow = [...mandatesToShow].sort((a,b) => (playerNotes[a.name]?.priority||99) - (playerNotes[b.name]?.priority||99));
+  }
+  if (!mandatesToShow.length) {
+    if (window._DS) _DS.showEmptyState(tbody, '⚽', _showArchivedMandates ? 'No archived mandates' : 'No mandates yet', _showArchivedMandates ? '' : 'Add your first player mandate using the button above.');
     return;
   }
   tbody.innerHTML = '';
-  allMandates.forEach(m => {
+  mandatesToShow.forEach(m => {
     const tr = document.createElement('tr');
     tr.dataset.mandateId = m.id || ('sm_' + m.name.replace(/\s/g,'_'));
     tr.style.cursor = 'pointer';
+    if (m.archived) tr.style.opacity = '0.55';
     const dotClass  = m.dotClass || (m.id && m.id.startsWith('m_') ? 'dot-amber' : 'dot-green');
     const statusTxt = m.statusText || 'Active Mandate';
     const posStr    = m.position || m.pos || '—';
@@ -6443,19 +6476,22 @@ function _renderMandatesTable() {
       : '—';
     const mNotes = m.notes || '';
     const mNotesSub = mNotes ? `<div style="font-size:11px;color:var(--text3);margin-top:2px;max-width:220px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${mNotes}</div>` : '';
+    const mValFmt = _normVal(m.value||m.val||'') || '—';
+    const archivedTag = m.archived ? ' <span style="font-size:10px;background:var(--surface2);border:1px solid var(--border);border-radius:4px;padding:1px 5px;color:var(--text3);margin-left:4px">Archived</span>' : '';
     tr.innerHTML = `
-      <td><strong>${m.name}</strong>${mNotesSub}</td>
+      <td><strong>${m.name}</strong>${archivedTag}${mNotesSub}</td>
       <td>${posStr}</td>
       <td>${m.age||'—'}</td>
       <td>${mClubHtml}</td>
-      <td>${m.value||m.val||'—'}</td>
+      <td>${mValFmt}</td>
       <td style="font-size:12px;color:var(--text2)">${mContactHtml}</td>
       <td><div class="status"><span class="dot ${dotClass}"></span> ${statusTxt}</div></td>`;
     tr.onclick = e => {
       if (e.target.closest('button')) return;
       openPlayerProfile(m.name, {
         pos: posStr, age: m.age||'', club: m.club||'',
-        val: m.value||m.val||'', contact: m.contact||'', statusText: statusTxt, _tr: tr
+        val: m.value||m.val||'', contact: m.contact||'', statusText: statusTxt, _tr: tr,
+        expectedPrice: m.expectedPrice||'', salary: m.salary||'', archived: !!m.archived
       });
     };
     tbody.appendChild(tr);
@@ -6489,15 +6525,17 @@ function _renderMandatesTable() {
 function _renderNeedsTable() {
   const tbody = document.querySelector('#view-needs .data-table tbody');
   if (!tbody) return;
-  if (!allNeeds.length) {
-    if (window._DS) _DS.showEmptyState(tbody, '🎯', 'No club requirements yet', 'Club requirements you add will appear here.');
+  const needsToShow = _showArchivedNeeds ? allNeeds : allNeeds.filter(n => !n.archived);
+  if (!needsToShow.length) {
+    if (window._DS) _DS.showEmptyState(tbody, '🎯', _showArchivedNeeds ? 'No archived needs' : 'No club requirements yet', _showArchivedNeeds ? '' : 'Club requirements you add will appear here.');
     return;
   }
   tbody.innerHTML = '';
-  allNeeds.forEach(n => {
+  needsToShow.forEach(n => {
     const tr = document.createElement('tr');
     if (n.id) tr.dataset.needId = n.id;
     tr.style.cursor = 'pointer';
+    if (n.archived) tr.style.opacity = '0.55';
     // Support both CLUB_NEEDS_DB format (positions[]) and needsAdded format (pos string)
     const posStr    = Array.isArray(n.positions) ? n.positions.join(' · ') : (n.pos || '—');
     const budStr    = (n.budget && n.budget !== '—' ? _normVal(n.budget) || n.budget : null)
@@ -8741,6 +8779,13 @@ function openPlayerProfile(playerName, data) {
   document.getElementById('pp-edit-club').value   = (data.club  && data.club  !== '—') ? data.club  : '';
   document.getElementById('pp-edit-val').value    = (data.val   && data.val   !== '—') ? data.val   : '';
   document.getElementById('pp-edit-source').value = data.contact || data.source || '';
+  const ppExpEl = document.getElementById('pp-edit-expected-price');
+  if (ppExpEl) ppExpEl.value = data.expectedPrice || '';
+  const ppSalEl = document.getElementById('pp-edit-salary');
+  if (ppSalEl) ppSalEl.value = data.salary || '';
+  // Archive button label
+  const ppArchBtn = document.getElementById('pp-archive-btn');
+  if (ppArchBtn) ppArchBtn.title = data.archived ? 'Restore mandate' : 'Archive mandate';
 
   // Load saved notes/status/priority/dealType
   const saved = playerNotes[playerName] || {};
@@ -8867,6 +8912,63 @@ function closeContactDrawer() {
 
 let _ppSelectedPrio = null;
 
+// ─── MANDATE / NEED ARCHIVE + SORT STATE ─────────────────────────────────────
+let _showArchivedMandates = false;
+let _showArchivedNeeds    = false;
+let _mandateSortMode      = 'default';
+
+function _toggleArchivedMandates() {
+  _showArchivedMandates = !_showArchivedMandates;
+  const btn = document.getElementById('btn-archived-mandates');
+  if (btn) btn.textContent = _showArchivedMandates ? 'Hide Archived' : 'Show Archived';
+  _renderMandatesTable();
+  _applyPlayerNoteBadges();
+}
+
+function _toggleArchivedNeeds() {
+  _showArchivedNeeds = !_showArchivedNeeds;
+  const btn = document.getElementById('btn-archived-needs');
+  if (btn) btn.textContent = _showArchivedNeeds ? 'Hide Archived' : 'Show Archived';
+  _renderNeedsTable();
+}
+
+function _sortMandates(mode) {
+  _mandateSortMode = mode;
+  _renderMandatesTable();
+  _applyPlayerNoteBadges();
+}
+
+function archiveMandate() {
+  const name = _ppCurrentPlayer;
+  if (!name) return;
+  const mandate = allMandates.find(m => m.name === name || m.id === name);
+  if (!mandate) return;
+  mandate.archived = !mandate.archived;
+  const inAdded = mandatesAdded.find(m => m.name === name || m.id === mandate.id);
+  if (inAdded) inAdded.archived = mandate.archived;
+  fbSave();
+  closePlayerProfile();
+  _renderMandatesTable();
+  _applyPlayerNoteBadges();
+  _updateMandateSubtitle();
+  showSnack(mandate.archived ? `${name} archived` : `${name} restored`, false);
+}
+
+function archiveNeed(id) {
+  if (!id) return;
+  const need = allNeeds.find(n => n.id === id);
+  if (!need) return;
+  need.archived = !need.archived;
+  const inAdded = needsAdded.find(n => n.id === id);
+  if (inAdded) inAdded.archived = need.archived;
+  fbSave();
+  closeDrawer('need-detail');
+  _renderNeedsTable();
+  _updateNeedsSubtitle();
+  showSnack(need.archived ? `${need.club} requirement archived` : `${need.club} requirement restored`, false);
+}
+// ─────────────────────────────────────────────────────────────────────────────
+
 function setPPPrio(n, silent) {
   _ppSelectedPrio = n;
   [1,2,3].forEach(i => {
@@ -8884,12 +8986,14 @@ function savePlayerProfile() {
   if (!_ppCurrentPlayer) return;
 
   // Read all fields
-  const newName  = document.getElementById('pp-edit-name').value.trim()   || _ppCurrentPlayer;
-  const newPos   = document.getElementById('pp-edit-pos').value.trim();
-  const newAge   = document.getElementById('pp-edit-age').value.trim();
-  const newClub  = document.getElementById('pp-edit-club').value.trim();
-  const newVal   = document.getElementById('pp-edit-val').value.trim();
-  const newSrc   = document.getElementById('pp-edit-source').value.trim();
+  const newName          = document.getElementById('pp-edit-name').value.trim()           || _ppCurrentPlayer;
+  const newPos           = document.getElementById('pp-edit-pos').value.trim();
+  const newAge           = document.getElementById('pp-edit-age').value.trim();
+  const newClub          = document.getElementById('pp-edit-club').value.trim();
+  const newVal           = _normVal(document.getElementById('pp-edit-val').value.trim()) || document.getElementById('pp-edit-val').value.trim();
+  const newSrc           = document.getElementById('pp-edit-source').value.trim();
+  const newExpectedPrice = _normVal(document.getElementById('pp-edit-expected-price')?.value.trim()||'') || document.getElementById('pp-edit-expected-price')?.value.trim() || '';
+  const newSalary        = _normVal(document.getElementById('pp-edit-salary')?.value.trim()||'')        || document.getElementById('pp-edit-salary')?.value.trim()        || '';
   const status   = document.getElementById('pp-status').value;
   const notes    = document.getElementById('pp-notes').value.trim();
   const priority = _ppSelectedPrio;
@@ -8908,37 +9012,26 @@ function savePlayerProfile() {
     (clubPitches || []).forEach(p => { if (p.player === _oldName) p.player = newName; });
   }
 
-  // Update the mandate table row cells
-  const tr = _ppCurrentRow || document.querySelector(`#view-mandates .data-table tbody tr[data-mandate-id="${_ppCurrentPlayer}"]`)
-             || [...document.querySelectorAll('#view-mandates .data-table tbody tr')]
-                  .find(r => r.querySelector('td:first-child strong')?.textContent?.trim() === _ppCurrentPlayer);
-  if (tr) {
-    const cells = tr.querySelectorAll('td');
-    if (cells[0]) { const s = cells[0].querySelector('strong'); if (s) s.textContent = newName; }
-    if (cells[1]) cells[1].childNodes[0] && (cells[1].childNodes[0].textContent = newPos)  || (cells[1].textContent = newPos);
-    if (cells[2]) cells[2].textContent = newAge  || '—';
-    if (cells[3]) cells[3].textContent = newClub || '—';
-    if (cells[4]) cells[4].textContent = newVal  || '—';
-    if (cells[5]) cells[5].textContent = newSrc  || '—';
-  }
-
   // Update mandatesAdded and allMandates arrays
   [mandatesAdded, allMandates].forEach(arr => {
     const m = arr.find(m => m.name === _ppCurrentPlayer || m.id === _ppCurrentPlayer);
     if (m) {
-      m.name     = newName;
-      m.position = newPos;
-      m.age      = newAge;
-      m.club     = newClub;
-      m.value    = newVal;
-      m.contact  = newSrc;
-      m.dealType = dealType;
+      m.name          = newName;
+      m.position      = newPos;
+      m.age           = newAge;
+      m.club          = newClub;
+      m.value         = newVal;
+      m.contact       = newSrc;
+      m.dealType      = dealType;
+      m.expectedPrice = newExpectedPrice;
+      m.salary        = newSalary;
     }
   });
 
-  _ppCurrentPlayer = newName; // update to new name before badges
-  _applyPlayerNoteBadges();
+  _ppCurrentPlayer = newName; // update to new name before re-render
   fbSave();
+  _renderMandatesTable();     // re-render table from data (fixes stale row bug)
+  _applyPlayerNoteBadges();
   closePlayerProfile();
   showSnack(`✓ ${newName} updated`, false);
 }
@@ -10138,6 +10231,16 @@ function openNeedDetail(clubName, pos, budMin, budMax, contact, prio, notes, nee
   }
   const dtSel = document.getElementById('nd-deal-type');
   if (dtSel) dtSel.value = dealType || 'either';
+
+  // Archive button label
+  const ndArchBtn = document.getElementById('nd-archive-btn');
+  if (ndArchBtn && needId) {
+    const thisNeed = allNeeds.find(n => n.id === needId);
+    ndArchBtn.title = thisNeed?.archived ? 'Restore requirement' : 'Archive requirement';
+    ndArchBtn.style.display = '';
+  } else if (ndArchBtn) {
+    ndArchBtn.style.display = 'none'; // hide for static (non-saved) needs
+  }
 
   // ── Pitched players panel ─────────────────────────────────────────────────
   const listEl = document.getElementById('nd-pitch-list');
@@ -16978,6 +17081,7 @@ window._regression = (function () {
     <div style="display:flex;gap:10px;margin-top:8px">
       <button class="btn btn-primary" style="flex:1" onclick="saveNeedDetail()">Save Changes</button>
       <button class="btn btn-outline" onclick="closeDrawer('need-detail')">Cancel</button>
+      <button id="nd-archive-btn" class="btn btn-outline" title="Archive requirement" style="flex-shrink:0" onclick="if(_currentNeedId)archiveNeed(_currentNeedId)">📦</button>
       <button class="btn btn-outline" title="Delete requirement" style="color:var(--red);border-color:var(--red);flex-shrink:0" onclick="if(_currentNeedId&&confirm('Delete this club requirement?')){closeDrawer('need-detail');deleteNeed(_currentNeedId,null)}">🗑</button>
     </div>
 
