@@ -1721,21 +1721,30 @@ body {
   /* ── MANDATES card ────────────────────────────────────────
      col 1: Name (row1) / Position (row2) / Club (row3)
      col 2: Status (row1) / Age (row2) / Value (row3)        */
-  #view-mandates .data-table td:nth-child(1) { grid-column:1; grid-row:1; font-size:14px; font-weight:700; align-self:center; }
-  #view-mandates .data-table td:nth-child(2) { grid-column:1; grid-row:2; font-size:11px; color:var(--text2); margin-top:4px; }
-  #view-mandates .data-table td:nth-child(3) { grid-column:2; grid-row:2; font-size:11px; color:var(--text3); text-align:right; margin-top:4px; }
-  #view-mandates .data-table td:nth-child(4) { grid-column:1; grid-row:3; font-size:11px; color:var(--text3); margin-top:2px; }
-  #view-mandates .data-table td:nth-child(5) { grid-column:2; grid-row:3; font-size:11px; color:var(--green); font-weight:600; text-align:right; margin-top:2px; }
-  #view-mandates .data-table td:nth-child(6) { display:none !important; }
-  #view-mandates .data-table td:nth-child(7) {
+  /* col 1 = Priority — hidden on mobile (shown in player name area via left-border accent) */
+  #view-mandates .data-table td:nth-child(1) { display:none !important; }
+  /* col 2 = Player name */
+  #view-mandates .data-table td:nth-child(2) { grid-column:1; grid-row:1; font-size:14px; font-weight:700; align-self:center; }
+  /* col 3 = Position */
+  #view-mandates .data-table td:nth-child(3) { grid-column:1; grid-row:2; font-size:11px; color:var(--text2); margin-top:4px; }
+  /* col 4 = Age */
+  #view-mandates .data-table td:nth-child(4) { grid-column:2; grid-row:2; font-size:11px; color:var(--text3); text-align:right; margin-top:4px; }
+  /* col 5 = Current Club */
+  #view-mandates .data-table td:nth-child(5) { grid-column:1; grid-row:3; font-size:11px; color:var(--text3); margin-top:2px; }
+  /* col 6 = Market Value */
+  #view-mandates .data-table td:nth-child(6) { grid-column:2; grid-row:3; font-size:11px; color:var(--green); font-weight:600; text-align:right; margin-top:2px; }
+  /* col 7 = Contact — hidden on mobile */
+  #view-mandates .data-table td:nth-child(7) { display:none !important; }
+  /* col 8 = Status */
+  #view-mandates .data-table td:nth-child(8) {
     grid-column:2; grid-row:1;
     display:flex !important; align-items:center; justify-content:flex-end;
     padding-left:8px !important;
   }
   /* Hide Suggest / PDF / delete action buttons inside mandate cards on mobile */
-  #view-mandates .data-table td:nth-child(7) .suggest-btn,
-  #view-mandates .data-table td:nth-child(7) .pdr-btn,
-  #view-mandates .data-table td:nth-child(7) > div > button { display:none !important; }
+  #view-mandates .data-table td:nth-child(8) .suggest-btn,
+  #view-mandates .data-table td:nth-child(8) .pdr-btn,
+  #view-mandates .data-table td:nth-child(8) > div > button { display:none !important; }
 
   /* ── CLUBS card ───────────────────────────────────────────
      col 1: Name (row1) / League (row2) / Country (row3)
@@ -3972,7 +3981,7 @@ th.ds-sort:hover { background: rgba(30,58,95,.06); }
       <div class="panel">
         <table class="data-table">
           <thead>
-            <tr><th class="ds-sort">Player</th><th class="ds-sort">Position</th><th class="ds-sort">Age</th><th class="ds-sort">Current Club</th><th class="ds-sort">Market Value</th><th class="ds-sort">Contact Person</th><th class="ds-sort">Status</th></tr>
+            <tr><th class="ds-sort">Priority</th><th class="ds-sort">Player</th><th class="ds-sort">Position</th><th class="ds-sort">Age</th><th class="ds-sort">Current Club</th><th class="ds-sort">Market Value</th><th class="ds-sort">Contact Person</th><th class="ds-sort">Status</th></tr>
           </thead>
           <tbody>
             <tr><td><strong>Dennis Geiger</strong></td><td>CM/CDM/CAM</td><td>28</td><td>TSG Hoffenheim</td><td>€500k</td><td>Via Andreas Schicker</td><td><div class="status"><span class="dot dot-green"></span> Active Mandate</div></td></tr>
@@ -6475,11 +6484,19 @@ function _renderMandatesTable() {
     const mContactHtml = mContact !== '—'
       ? `<span class="feed-link" onclick="event.stopPropagation();_openContactByName('${mContact.replace(/'/g,"\\'")}')">${mContact}</span>`
       : '—';
-    const mNotes = m.notes || '';
+    const mNotes = (playerNotes[m.name] && playerNotes[m.name].notes) || m.notes || '';
     const mNotesSub = mNotes ? `<div style="font-size:11px;color:var(--text3);margin-top:2px;max-width:220px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${mNotes}</div>` : '';
     const mValFmt = _normVal(m.value||m.val||'') || '—';
     const archivedTag = m.archived ? ' <span style="font-size:10px;background:var(--surface2);border:1px solid var(--border);border-radius:4px;padding:1px 5px;color:var(--text3);margin-left:4px">Archived</span>' : '';
+    // Priority badge
+    const _PRIO_MAP = { 1:{ label:'P1', bg:'#dc2626' }, 2:{ label:'P2', bg:'#d97706' }, 3:{ label:'P3', bg:'#64748b' } };
+    const _prio = (playerNotes[m.name] && playerNotes[m.name].priority) || null;
+    const _prioCfg = _prio ? _PRIO_MAP[_prio] : null;
+    const prioHtml = _prioCfg
+      ? `<span style="display:inline-block;padding:2px 8px;border-radius:4px;background:${_prioCfg.bg};color:#fff;font-size:11px;font-weight:700;letter-spacing:.03em">${_prioCfg.label}</span>`
+      : `<span style="color:var(--text3);font-size:12px">—</span>`;
     tr.innerHTML = `
+      <td>${prioHtml}</td>
       <td><strong>${m.name}</strong>${archivedTag}${mNotesSub}</td>
       <td>${posStr}</td>
       <td>${m.age||'—'}</td>
@@ -9050,7 +9067,7 @@ function _applyPlayerNoteBadges() {
   };
 
   document.querySelectorAll('#view-mandates .data-table tbody tr').forEach(tr => {
-    const nameEl = tr.querySelector('td:first-child strong');
+    const nameEl = tr.querySelector('td:nth-child(2) strong');
     if (!nameEl) return;
     const name  = nameEl.textContent.trim();
     const saved = playerNotes[name];
@@ -9064,7 +9081,7 @@ function _applyPlayerNoteBadges() {
       statusCell.innerHTML = `<span class="dot ${dotClass}"></span> ${saved.status}`;
     }
 
-    // ── Update / add / remove priority badge ──
+    // ── Priority: row left-border accent only (badge rendered in dedicated column by _renderMandatesTable) ──
     const PRIO_CFG = {
       1: { label:'P1', solid:'#dc2626' },
       2: { label:'P2', solid:'#d97706' },
@@ -9072,30 +9089,14 @@ function _applyPlayerNoteBadges() {
     };
 
     // Clean up any legacy badge markup from the old format
-    tr.querySelectorAll('.pp-prio-badge').forEach(el => {
-      const wrap = el.closest('div[style*="margin-top"]');
-      if (wrap) wrap.remove(); else el.remove();
-    });
-
-    const firstTd = tr.querySelector('td:first-child');
-    let prioBadge = firstTd ? firstTd.querySelector('.pp-prio-tag') : null;
+    tr.querySelectorAll('.pp-prio-badge, .pp-prio-tag').forEach(el => el.remove());
 
     if (saved.priority) {
       const cfg = PRIO_CFG[saved.priority];
       // Row left-border accent via box-shadow (works with border-collapse)
       tr.style.boxShadow = `inset 3px 0 0 ${cfg.solid}`;
-      if (!prioBadge && firstTd) {
-        prioBadge = document.createElement('span');
-        prioBadge.className = 'pp-prio-tag';
-        firstTd.insertBefore(prioBadge, firstTd.firstChild);
-      }
-      if (prioBadge) {
-        prioBadge.textContent = cfg.label;
-        prioBadge.style.background = cfg.solid;
-      }
     } else {
       tr.style.boxShadow = '';
-      if (prioBadge) prioBadge.remove();
     }
 
     // ── Update / add / remove note indicator ──
