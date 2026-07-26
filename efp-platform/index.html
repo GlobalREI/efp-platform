@@ -2442,7 +2442,7 @@ th.ds-sort:hover { background: rgba(30,58,95,.06); }
             </div>
           </div>
           <div style="display:flex;align-items:center;gap:8px">
-            <button class="btn btn-outline btn-xs" onclick="openAddTaskModal ? openAddTaskModal() : go('tasks')">+ Add Task</button>
+            <button class="btn btn-outline btn-xs" onclick="openAddTaskModal ? openAddTaskModal() : go('tasks')">+ New Task</button>
             <button class="btn btn-outline btn-xs" onclick="go('tasks')">View All →</button>
           </div>
         </div>
@@ -2561,7 +2561,7 @@ th.ds-sort:hover { background: rgba(30,58,95,.06); }
         </div>
         <input id="contacts-search" type="text" class="view-search" placeholder="🔍  Search name, club, email…" oninput="filterContacts()" style="width:240px">
         <button class="btn btn-outline btn-sm" onclick="exportContacts()">⬇ Export</button>
-        <button class="btn btn-primary btn-sm" onclick="openDrawer('contact')">+ Add Contact</button>
+        <button class="btn btn-primary btn-sm" onclick="openDrawer('contact')">+ New Contact</button>
       </div>
       <div class="tabs">
         <div class="tab active" onclick="filterContactsTab(this,'all')">All</div>
@@ -3800,8 +3800,7 @@ th.ds-sort:hover { background: rgba(30,58,95,.06); }
           <div class="page-title">Clubs</div>
           <div class="page-subtitle" id="clubs-subtitle">European leagues · 129 clubs tracked</div>
         </div>
-        <input type="text" id="clubs-search" class="view-search" placeholder="🔍  Search clubs…" oninput="filterClubs(this.value)">
-        <button class="btn btn-primary btn-sm" onclick="openDrawer('club')">+ Add Club</button>
+        <button class="btn btn-primary btn-sm" onclick="openDrawer('club')">+ New Club</button>
       </div>
       <div class="panel">
         <table class="data-table">
@@ -3959,8 +3958,7 @@ th.ds-sort:hover { background: rgba(30,58,95,.06); }
           <div class="page-title">Player Mandates</div>
           <div class="page-subtitle" id="mandates-subtitle">29 active mandates · Summer 2026 window</div>
         </div>
-        <input type="text" id="mandates-search" class="view-search" placeholder="🔍  Search mandates…" oninput="filterMandates(this.value)">
-        <button class="btn btn-primary btn-sm" onclick="openMandateMethodPicker()">+ Add Mandate</button>
+        <button class="btn btn-primary btn-sm" onclick="openMandateMethodPicker()">+ New Mandate</button>
       </div>
       <div class="panel">
         <table class="data-table">
@@ -4013,7 +4011,7 @@ th.ds-sort:hover { background: rgba(30,58,95,.06); }
         </div>
         <input type="text" id="needs-search" class="view-search" placeholder="🔍  Search needs…" oninput="filterNeeds(this.value)">
         <button class="btn btn-outline btn-sm" id="needs-filter-toggle" onclick="toggleNeedsFilter()">⚙ Filter</button>
-        <button class="btn btn-primary btn-sm" onclick="openDrawer('req')">+ Add Requirement</button>
+        <button class="btn btn-primary btn-sm" onclick="openDrawer('req')">+ New Club Need</button>
       </div>
 
       <!-- ── STRUCTURED NEEDS FILTER PANEL ── -->
@@ -4275,8 +4273,7 @@ th.ds-sort:hover { background: rgba(30,58,95,.06); }
           <div class="page-title">Relationship Pipeline</div>
           <div class="page-subtitle" id="rel-subtitle">114 contacts tracked across all stages</div>
         </div>
-        <input type="text" id="rel-search" class="view-search" placeholder="🔍  Search relationships…" oninput="filterRel(this.value)">
-        <button class="btn btn-primary btn-sm" onclick="openRelDrawer()">+ Add Relationship</button>
+        <button class="btn btn-primary btn-sm" onclick="openRelDrawer()">+ New Relationship</button>
       </div>
       <div class="kanban" id="rel-kanban"></div>
     </div>
@@ -4288,7 +4285,6 @@ th.ds-sort:hover { background: rgba(30,58,95,.06); }
           <div class="page-title">Player Pitch Pipeline</div>
           <div class="page-subtitle">17 active pitches this window · 2 in active negotiation</div>
         </div>
-        <input type="text" id="pitches-search" class="view-search" placeholder="🔍  Search pitches…" oninput="filterPitches(this.value)">
         <button class="btn btn-primary btn-sm" onclick="openPitchDrawer()">+ New Pitch</button>
       </div>
       <div class="kanban" id="pitch-kanban">
@@ -4331,7 +4327,6 @@ th.ds-sort:hover { background: rgba(30,58,95,.06); }
           <div class="page-title">Club Mandate Pipeline</div>
           <div class="page-subtitle">Pitches of EFP's service to selling clubs · tracking mandate acquisition</div>
         </div>
-        <input type="text" id="clubpitches-search" class="view-search" placeholder="🔍  Search club mandates…" oninput="filterClubPitches(this.value)">
         <button class="btn btn-primary btn-sm" onclick="apmOpen('club')">+ New Club Pitch</button>
       </div>
       <div class="kanban" id="club-pitch-kanban">
@@ -4382,8 +4377,8 @@ th.ds-sort:hover { background: rgba(30,58,95,.06); }
         </select>
         <input id="af-search" type="text" class="input" placeholder="Search person or club…" style="width:200px;height:34px;font-size:12px;" oninput="applyActivityFilter()">
       </div>
-      <div id="af-results-bar" style="font-size:12px;color:var(--text3);padding:6px 4px 0;max-width:720px;display:none;"></div>
-      <div class="panel" id="activity-feed-panel" style="max-width:720px"></div>
+      <div id="af-results-bar" style="font-size:12px;color:var(--text3);padding:6px 4px 0;display:none;"></div>
+      <div class="panel" id="activity-feed-panel"></div>
     </div>
 
     <!-- ══════════ AI MATCHES ══════════ -->
@@ -4394,7 +4389,7 @@ th.ds-sort:hover { background: rgba(30,58,95,.06); }
           <div class="page-subtitle" id="matches-subtitle">Comparing mandates against club needs…</div>
         </div>
         <button class="btn btn-outline btn-sm" onclick="runMatchEngine()">↻ Re-run</button>
-        <button class="btn btn-primary btn-sm" onclick="go('needs')">+ Club Need</button>
+        <button class="btn btn-primary btn-sm" onclick="go('needs')">+ New Club Need</button>
       </div>
 
       <!-- KPI row -->
@@ -4440,7 +4435,7 @@ th.ds-sort:hover { background: rgba(30,58,95,.06); }
           <div class="page-subtitle" id="task-subtitle">Synced with Monday.com · 9 pending</div>
         </div>
         <button class="btn btn-outline btn-sm" onclick="syncMonday()">↻ Sync</button>
-        <button class="btn btn-primary btn-sm" onclick="openTaskModal()">+ Add Task</button>
+        <button class="btn btn-primary btn-sm" onclick="openTaskModal()">+ New Task</button>
       </div>
 
       <!-- Tab bar -->
@@ -5029,7 +5024,10 @@ th.ds-sort:hover { background: rgba(30,58,95,.06); }
       </div>
     </div>
 
-    <button class="btn btn-primary" onclick="saveClubEdit()" style="width:100%;margin-top:4px">Save Changes</button>
+    <div style="display:flex;gap:8px;margin-top:4px">
+      <button class="btn btn-primary" onclick="saveClubEdit()" style="flex:1">Save Changes</button>
+      <button class="btn btn-outline" title="Delete club" style="color:var(--red);border-color:var(--red);flex-shrink:0" onclick="const _c=allClubs.find(x=>x.name===_ceCurrentName);if(_c&&confirm('Delete this club and all linked data? This cannot be undone.')){closeClubEdit();deleteClub(_c.id,null)}">🗑</button>
+    </div>
 
     <div class="profile-activity-section">
       <div class="sec-label">RELATED ACTIVITY</div>
@@ -5157,6 +5155,47 @@ th.ds-sort:hover { background: rgba(30,58,95,.06); }
       <div id="pp-activity"></div>
     </div>
 
+  </div>
+</div>
+
+<!-- ══ CONTACT DETAIL DRAWER ══ -->
+<div class="drawer-overlay" id="cd-drawer-overlay" onclick="closeContactDrawer()" style="display:none"></div>
+<div class="drawer" id="cd-detail-drawer">
+  <div class="drawer-head">
+    <div style="display:flex;align-items:center;gap:12px">
+      <div class="avatar" id="cdd-avatar" style="width:36px;height:36px;font-size:13px;flex-shrink:0">?</div>
+      <div>
+        <div class="drawer-title" id="cdd-name">Contact</div>
+        <div class="drawer-sub" id="cdd-role">—</div>
+      </div>
+    </div>
+    <div class="drawer-close" onclick="closeContactDrawer()">✕</div>
+  </div>
+  <div class="drawer-body" style="padding-top:16px">
+    <div id="cdd-stage" style="margin-bottom:16px"></div>
+    <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:16px">
+      <div class="dl"><div class="dl-label">Email</div><div class="dl-value" id="cdd-email">—</div></div>
+      <div class="dl"><div class="dl-label">Phone</div><div class="dl-value" id="cdd-phone">—</div></div>
+      <div class="dl"><div class="dl-label">WhatsApp</div><div class="dl-value" id="cdd-wa">—</div></div>
+      <div class="dl"><div class="dl-label">LinkedIn</div><div class="dl-value" id="cdd-linkedin">—</div></div>
+    </div>
+    <div id="cdd-notes-wrap" style="margin-bottom:16px;display:none">
+      <div class="sec-label">NOTES</div>
+      <div id="cdd-notes" style="font-size:13px;color:var(--text2);line-height:1.5;padding-top:4px"></div>
+    </div>
+    <div style="display:flex;gap:8px;margin-bottom:18px">
+      <button class="btn btn-primary" style="flex:1" onclick="closeContactDrawer();setTimeout(()=>_editContact(window._cddCurrentId),50)">Edit Contact</button>
+      <button class="btn btn-outline" onclick="closeContactDrawer();setTimeout(()=>_openContactByName(window._cddCurrentName),50)">Full Profile →</button>
+      <button class="btn btn-outline" title="Delete contact" style="color:var(--red);border-color:var(--red);flex-shrink:0" onclick="if(confirm('Delete this contact? This cannot be undone.')){closeContactDrawer();deleteContact(window._cddCurrentId,null)}">🗑</button>
+    </div>
+    <div id="cdd-pitches-wrap" style="border-top:1px solid var(--border);padding-top:14px;margin-bottom:14px;display:none">
+      <div class="sec-label" style="margin-bottom:8px">PITCHES TO THEIR CLUB</div>
+      <div id="cdd-pitches"></div>
+    </div>
+    <div style="border-top:1px solid var(--border);padding-top:14px">
+      <div class="sec-label" style="margin-bottom:8px">RECENT ACTIVITY</div>
+      <div id="cdd-feed"></div>
+    </div>
   </div>
 </div>
 
@@ -6358,16 +6397,10 @@ function _renderContactsTable() {
         ${c.wa && c.wa !== c.phone ? `<div style="font-size:11px;color:var(--text3);margin-top:1px">💬 ${c.wa}</div>` : ''}
       </td>
       <td style="font-size:11px;color:var(--text3)">${(c.notes||'').length > 60 ? c.notes.slice(0,58)+'…' : (c.notes||'')}</td>
-      <td><div style="display:flex;align-items:center;gap:6px">
-        <div class="status"><span class="dot ${c.stageColor ? 'dot-'+c.stageColor : (c.isRich?'dot-green':'dot-navy')}"></span> ${c.stage || c.status || 'New'}</div>
-        <button onclick="deleteContact('${c.id}',this)" title="Delete"
-          style="background:none;border:none;color:var(--red);cursor:pointer;font-size:13px;padding:2px 4px;opacity:.55">✕</button>
-        <button onclick="_editContact('${c.id}')" title="Edit"
-          style="background:none;border:none;color:var(--text2);cursor:pointer;font-size:13px;padding:2px 4px;opacity:.65">✎</button>
-      </div></td>`;
+      <td><div class="status"><span class="dot ${c.stageColor ? 'dot-'+c.stageColor : (c.isRich?'dot-green':'dot-navy')}"></span> ${c.stage || c.status || 'New'}</div></td>`;
     tr.onclick = e => {
       if (e.target.closest('button')) return;
-      _openContactByName(c.name);
+      openContactDetail(c.id);
     };
     tbody.appendChild(tr);
   });
@@ -6487,11 +6520,7 @@ function _renderNeedsTable() {
       <td><strong style="color:var(--green)">${budStr}</strong></td>
       <td><strong>Summer 2026</strong></td>
       <td><div style="font-size:12px">${nContactHtml}</div></td>
-      <td><div style="display:flex;align-items:center;gap:6px">
-        <div class="status"><span class="dot ${dotCls}"></span> ${statusTxt}</div>
-        <button onclick="deleteNeed('${n.id}',this)" title="Delete"
-          style="background:none;border:none;color:var(--red);cursor:pointer;font-size:13px;padding:2px 4px;opacity:.55">✕</button>
-      </div></td>`;
+      <td><div class="status"><span class="dot ${dotCls}"></span> ${statusTxt}</div></td>`;
     tr.addEventListener('click', e => {
       if (e.target.closest('button')) return;
       openNeedDetail(n.club, posStr, n.budMin||'', n.budMax||'', contactStr, statusTxt, n.notes||'', n.id, n.dealType||'');
@@ -6767,9 +6796,11 @@ function _rebucketTasks() {
     const due = t.dueDate;
     if (due < today) {
       // Past due date → today + overdue
+      t.daysOverdue = Math.max(0, Math.floor((new Date(today) - new Date(due)) / 86400000));
       if (t.bucket !== 'today' || !t.overdue) { t.bucket = 'today'; t.overdue = true; changed = true; }
     } else if (due === today) {
       // Due today → today bucket (not overdue unless already marked)
+      t.daysOverdue = 0;
       if (t.bucket !== 'today') { t.bucket = 'today'; t.overdue = false; changed = true; }
     } else {
       // Future — re-slot into correct bucket based on days remaining
@@ -8545,7 +8576,7 @@ function deleteContact(id, btn) {
   // Capture name BEFORE filtering (for cascade)
   const contact = allContacts.find(c => c.id === id);
   const contactName = contact ? contact.name : '';
-  btn.closest('tr').remove();
+  if (btn) btn.closest('tr').remove(); else _renderContactsTable && _renderContactsTable();
   // Remove from unified array
   allContacts = allContacts.filter(c => c.id !== id);
   // Keep legacy arrays in sync
@@ -8673,7 +8704,7 @@ function deleteClub(id, btn) {
   if (!confirm('Remove this club? All contacts, mandates, and pitches referencing this club will be updated.')) return;
   const club = allClubs.find(c => c.id === id);
   const clubName = club ? club.name : '';
-  btn.closest('tr').remove();
+  if (btn) btn.closest('tr').remove(); else _renderClubsTable && _renderClubsTable();
   allClubs   = allClubs.filter(c => c.id !== id);
   clubsAdded = clubsAdded.filter(c => c.id !== id);
   _refreshClubDropdowns();
@@ -8757,6 +8788,74 @@ function closePlayerProfile() {
   document.getElementById('pp-drawer').classList.remove('open');
   _ppCurrentPlayer = null;
 }
+
+// ── Contact Detail Drawer ──────────────────────────────────
+let _cddCurrentId   = null;
+let _cddCurrentName = null;
+
+function openContactDetail(contactId) {
+  const c = allContacts.find(x => x.id === contactId);
+  if (!c) { showSnack('Contact not found', false); return; }
+  _cddCurrentId   = c.id;
+  _cddCurrentName = c.name;
+
+  const col = c.color || _avCol(c.name);
+  const ini = c.initials || _initials(c.name);
+  const av  = document.getElementById('cdd-avatar');
+  if (av) { av.textContent = ini; av.style.background = col; }
+
+  const setEl = (id, v) => { const e = document.getElementById(id); if (e) e.textContent = v || '—'; };
+  const setH  = (id, v) => { const e = document.getElementById(id); if (e) e.innerHTML  = v; };
+  setEl('cdd-name', c.name);
+  setEl('cdd-role', [c.role, c.club].filter(Boolean).join(' · ') || '—');
+
+  const stageEl = document.getElementById('cdd-stage');
+  if (stageEl) {
+    const dotColor = c.stageColor ? 'dot-' + c.stageColor : (c.isRich ? 'dot-green' : 'dot-navy');
+    stageEl.innerHTML = `<div class="status"><span class="dot ${dotColor}"></span> ${c.stage || c.status || 'New Contact'}</div>`;
+  }
+
+  setH('cdd-email',    c.email    ? `<a href="mailto:${c.email}">${c.email}</a>`               : '<span class="miss">Not recorded</span>');
+  setH('cdd-phone',    c.phone    ? c.phone                                                     : '<span class="miss">Not recorded</span>');
+  setH('cdd-wa',       c.wa       ? c.wa                                                        : '<span class="miss">Not recorded</span>');
+  setH('cdd-linkedin', c.linkedin ? `<a href="${c.linkedin}" target="_blank">View Profile</a>` : '<span class="miss">Not recorded</span>');
+
+  const notesWrap = document.getElementById('cdd-notes-wrap');
+  const notesEl   = document.getElementById('cdd-notes');
+  if (notesWrap && notesEl) {
+    if (c.notes) { notesEl.textContent = c.notes; notesWrap.style.display = ''; }
+    else          { notesWrap.style.display = 'none'; }
+  }
+
+  const pitchesWrap = document.getElementById('cdd-pitches-wrap');
+  const pitchesEl   = document.getElementById('cdd-pitches');
+  if (pitchesWrap && pitchesEl) {
+    const dotMap   = { sent:'amber', awaiting:'amber', feedback:'amber', interest:'green', negotiations:'green', done:'green', rejected:'red' };
+    const labelMap = { sent:'Sent', awaiting:'Awaiting Reply', feedback:'Feedback', interest:'Active Interest', negotiations:'Negotiating', done:'Done', rejected:'Not Interested' };
+    const cp = c.club
+      ? (typeof pitches !== 'undefined' ? pitches : []).filter(p =>
+          p.club.toLowerCase().includes(c.club.toLowerCase()) || c.club.toLowerCase().includes(p.club.toLowerCase()))
+      : [];
+    if (cp.length) {
+      pitchesEl.innerHTML = cp.map(p => `<div class="dl"><div class="dl-label">${p.player}</div><div class="dl-value"><div class="status"><span class="dot dot-${dotMap[p.stage]||'amber'}"></span> ${labelMap[p.stage]||p.stage}</div></div></div>`).join('');
+      pitchesWrap.style.display = '';
+    } else {
+      pitchesWrap.style.display = 'none';
+    }
+  }
+
+  const feedEl = document.getElementById('cdd-feed');
+  if (feedEl) _renderContactFeed(feedEl, c.name);
+
+  document.getElementById('cd-drawer-overlay').style.display = 'block';
+  document.getElementById('cd-detail-drawer').classList.add('open');
+}
+
+function closeContactDrawer() {
+  document.getElementById('cd-drawer-overlay').style.display = 'none';
+  document.getElementById('cd-detail-drawer').classList.remove('open');
+}
+// ──────────────────────────────────────────────────────────
 
 let _ppSelectedPrio = null;
 
@@ -9992,7 +10091,7 @@ function _appendNeedRow(n) {
 
 function deleteNeed(id, btn) {
   if (!confirm('Remove this club requirement?')) return;
-  btn.closest('tr').remove();
+  if (btn) btn.closest('tr').remove(); else _renderNeedsTable && _renderNeedsTable();
   allNeeds   = allNeeds.filter(n => n.id !== id);
   needsAdded = needsAdded.filter(n => n.id !== id);
   // Remove from dashboard needs grid if present
@@ -12226,17 +12325,17 @@ function renderRelationships() {
       const sub = e.role + (e.club ? ' · ' + e.club : '');
       const si = stageIdx[e.stage];
       return `<div class="k-card${e.hot?' hot':''}${e.flagged?' flagged':''}" id="rcard-${e.id}">
-        <div class="k-card-actions">
-          ${si > 0 ? `<button class="k-btn" title="Move left" onclick="relMove(${e.id},-1)">←</button>` : '<span class="k-btn-ph"></span>'}
-          ${si < REL_STAGES.length-1 ? `<button class="k-btn" title="Move right" onclick="relMove(${e.id},1)">→</button>` : '<span class="k-btn-ph"></span>'}
-          <button class="k-btn k-btn-edit" title="Edit" onclick="openRelDrawer(${e.id})">✎</button>
-          <button class="k-btn k-btn-del" title="Delete" onclick="relDelete(${e.id})">✕</button>
-        </div>
         <div class="k-name">${e.name}</div>
         <div class="k-sub">${sub}</div>
         <div class="k-footer">
           <div class="k-tag">${e.flag}</div>
           ${e.note ? `<div class="k-days" style="color:${noteColor(e.note)}">${e.note}</div>` : ''}
+        </div>
+        <div class="k-card-actions">
+          ${si > 0 ? `<button class="k-edit-btn" title="Move left" onclick="relMove(${e.id},-1)">←</button>` : '<span></span>'}
+          ${si < REL_STAGES.length-1 ? `<button class="k-edit-btn" title="Move right" onclick="relMove(${e.id},1)">→</button>` : '<span></span>'}
+          <button class="k-edit-btn" title="Edit" onclick="openRelDrawer(${e.id})">✎</button>
+          <button class="k-del-btn" title="Delete" onclick="relDelete(${e.id})">✕</button>
         </div>
       </div>`;
     }).join('');
@@ -16712,6 +16811,7 @@ window._regression = (function () {
     <div style="display:flex;gap:10px;margin-top:8px">
       <button class="btn btn-primary" style="flex:1" onclick="saveNeedDetail()">Save Changes</button>
       <button class="btn btn-outline" onclick="closeDrawer('need-detail')">Cancel</button>
+      <button class="btn btn-outline" title="Delete requirement" style="color:var(--red);border-color:var(--red);flex-shrink:0" onclick="if(_currentNeedId&&confirm('Delete this club requirement?')){closeDrawer('need-detail');deleteNeed(_currentNeedId,null)}">🗑</button>
     </div>
 
     <!-- Pitched players panel -->
