@@ -5278,6 +5278,10 @@ th.ds-sort:hover { background: rgba(30,58,95,.06); }
         </select>
       </div>
     </div>
+    <div class="field-row field">
+      <div><label class="field-label">Expected Price</label><input class="field-input" id="m-expected-price" placeholder="e.g. €2.5M" inputmode="numeric" oninput="_valInput(this)" onblur="_valBlur(this)"></div>
+      <div><label class="field-label">Salary (p/m)</label><input class="field-input" id="m-salary" placeholder="e.g. €80.000" inputmode="numeric" oninput="_valInput(this)" onblur="_valBlur(this)"></div>
+    </div>
     <div class="field"><label class="field-label">Contact Person <span class="req">*</span></label><input class="field-input" id="m-contact" placeholder="e.g. Rick Doyle · EAG / Agent name / Via player directly"></div>
     <div class="field"><label class="field-label">Player Profile / Notes</label><textarea class="field-textarea" id="m-notes" placeholder="Key strengths, playing style, clubs to target…" rows="3"></textarea></div>
   </div>
@@ -6328,17 +6332,33 @@ function _applyMobCardRow(tr, viewId) {
       gridColumn:'2', gridRow:'1 / span 3', paddingLeft:'8px' });
 
   } else if (viewId === 'view-mandates') {
-    // col1: Name / Position / Club    col2: Age / Value / Status
-    if (tds[0]) Object.assign(tds[0].style, { gridColumn:'1', gridRow:'1', fontSize:'14px', fontWeight:'700' });
-    if (tds[1]) Object.assign(tds[1].style, { gridColumn:'1', gridRow:'2', fontSize:'11px', color:'var(--text2)', marginTop:'4px' });
-    if (tds[2]) Object.assign(tds[2].style, { gridColumn:'2', gridRow:'2', fontSize:'11px', color:'var(--text3)', textAlign:'right', marginTop:'4px' });
-    if (tds[3]) Object.assign(tds[3].style, { gridColumn:'1', gridRow:'3', fontSize:'11px', color:'var(--text3)', marginTop:'2px' });
-    if (tds[4]) Object.assign(tds[4].style, { gridColumn:'2', gridRow:'3', fontSize:'11px', color:'var(--green)', fontWeight:'600', textAlign:'right', marginTop:'2px' });
-    if (tds[5]) tds[5].style.display = 'none';
-    if (tds[6]) {
-      Object.assign(tds[6].style, { display:'flex', alignItems:'center', justifyContent:'flex-end',
+    // 8-column layout: Priority | Player | Position | Age | Club | Value | Contact | Status
+    // col1: Player(row1) / Position(row2) / Club(row3)   col2: Status(row1) / Age(row2) / Value(row3)
+    if (tds[0]) tds[0].style.display = 'none'; // Priority hidden on mobile (left-border accent used)
+    if (tds[1]) Object.assign(tds[1].style, { gridColumn:'1', gridRow:'1', fontSize:'14px', fontWeight:'700', alignSelf:'center' });
+    if (tds[2]) Object.assign(tds[2].style, { gridColumn:'1', gridRow:'2', fontSize:'11px', color:'var(--text2)', marginTop:'4px' });
+    if (tds[3]) Object.assign(tds[3].style, { gridColumn:'2', gridRow:'2', fontSize:'11px', color:'var(--text3)', textAlign:'right', marginTop:'4px' });
+    if (tds[4]) Object.assign(tds[4].style, { gridColumn:'1', gridRow:'3', fontSize:'11px', color:'var(--text3)', marginTop:'2px' });
+    if (tds[5]) Object.assign(tds[5].style, { gridColumn:'2', gridRow:'3', fontSize:'11px', color:'var(--green)', fontWeight:'600', textAlign:'right', marginTop:'2px' });
+    if (tds[6]) tds[6].style.display = 'none'; // Contact hidden on mobile
+    if (tds[7]) {
+      Object.assign(tds[7].style, { display:'flex', alignItems:'center', justifyContent:'flex-end',
         gridColumn:'2', gridRow:'1', paddingLeft:'8px' });
-      tds[6].querySelectorAll('.suggest-btn,.pdr-btn,button').forEach(b => b.style.display = 'none');
+      tds[7].querySelectorAll('.suggest-btn,.pdr-btn,button').forEach(b => b.style.display = 'none');
+    }
+    // Fallback: 7-column legacy rows (static HTML before Firebase replaces them)
+    if (tds.length === 7) {
+      if (tds[0]) Object.assign(tds[0].style, { gridColumn:'1', gridRow:'1', fontSize:'14px', fontWeight:'700', alignSelf:'center' });
+      if (tds[1]) Object.assign(tds[1].style, { gridColumn:'1', gridRow:'2', fontSize:'11px', color:'var(--text2)', marginTop:'4px' });
+      if (tds[2]) Object.assign(tds[2].style, { gridColumn:'2', gridRow:'2', fontSize:'11px', color:'var(--text3)', textAlign:'right', marginTop:'4px' });
+      if (tds[3]) Object.assign(tds[3].style, { gridColumn:'1', gridRow:'3', fontSize:'11px', color:'var(--text3)', marginTop:'2px' });
+      if (tds[4]) Object.assign(tds[4].style, { gridColumn:'2', gridRow:'3', fontSize:'11px', color:'var(--green)', fontWeight:'600', textAlign:'right', marginTop:'2px' });
+      if (tds[5]) tds[5].style.display = 'none';
+      if (tds[6]) {
+        Object.assign(tds[6].style, { display:'flex', alignItems:'center', justifyContent:'flex-end',
+          gridColumn:'2', gridRow:'1', paddingLeft:'8px' });
+        tds[6].querySelectorAll('.suggest-btn,.pdr-btn,button').forEach(b => b.style.display = 'none');
+      }
     }
 
   } else if (viewId === 'view-clubs') {
@@ -9529,8 +9549,10 @@ function submitMandate() {
     else showSnack(`⚠ ${name} already exists as a mandate`, true);
     return;
   }
+  const expectedPrice = _normVal(document.getElementById('m-expected-price')?.value.trim()||'') || '';
+  const salary        = _normVal(document.getElementById('m-salary')?.value.trim()||'')        || '';
   const d = { id:'m_'+Date.now(), name, position:pos, pos, age, club:mClub, value:val, contact,
-               dotClass:'dot-amber', statusText:'New Mandate' };
+               expectedPrice, salary, dotClass:'dot-amber', statusText:'New Mandate' };
   allMandates.push(d);
   mandatesAdded.push(d); // legacy sync
   const _mSaveBtn = document.querySelector('#mandate-drawer .drawer-foot .btn-primary');
@@ -9538,7 +9560,7 @@ function submitMandate() {
   _renderMandatesTable();
   setTimeout(() => {
     closeDrawer('mandate');
-    ['m-name','m-age','m-club','m-val','m-contact','m-notes'].forEach(id => { const el=document.getElementById(id); if(el) el.value=''; });
+    ['m-name','m-age','m-club','m-val','m-expected-price','m-salary','m-contact','m-notes'].forEach(id => { const el=document.getElementById(id); if(el) el.value=''; });
     document.getElementById('m-pos').value='';
     showSnack(`✓ ${name} added · showing club suggestions`, false);
     if (window._DS && _mSaveBtn) _DS.btn(_mSaveBtn, 'default');
@@ -11710,7 +11732,14 @@ function addMandateRow(d) {
       });
     };
     const dNotesSub = d.notes ? `<div style="font-size:11px;color:var(--text3);margin-top:2px;max-width:220px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${d.notes}</div>` : '';
+    const _PRIO_MAP2 = { 1:{ label:'P1', bg:'#dc2626' }, 2:{ label:'P2', bg:'#d97706' }, 3:{ label:'P3', bg:'#64748b' } };
+    const _dp = (playerNotes[d.name] && playerNotes[d.name].priority) || null;
+    const _dpc = _dp ? _PRIO_MAP2[_dp] : null;
+    const dPrioHtml = _dpc
+      ? `<span style="display:inline-block;padding:2px 8px;border-radius:4px;background:${_dpc.bg};color:#fff;font-size:11px;font-weight:700">${_dpc.label}</span>`
+      : `<span style="color:var(--text3);font-size:12px">—</span>`;
     tr.innerHTML = `
+      <td>${dPrioHtml}</td>
       <td><strong>${d.name}</strong>${dNotesSub}</td>
       <td>${d.position||'—'}</td>
       <td>${d.age||'—'}</td>
@@ -14526,14 +14555,18 @@ function initMandateRows() {
     tr.dataset.suggestInit = '1';
     const cells = tr.querySelectorAll('td');
     if (cells.length < 2) return;
-    const name = cells[0]?.querySelector('strong')?.textContent?.trim() || '';
-    const pos  = cells[1]?.textContent?.trim() || '';
-    const age  = cells[2]?.textContent?.trim() || '';
-    const club = cells[3]?.textContent?.trim() || '';
-    const rawVal = cells[4]?.textContent?.trim() || '';
+    // Support both 8-column (Priority|Player|Pos|Age|Club|Val|Contact|Status) and legacy 7-column rows
+    const is8col = cells.length >= 8;
+    const nameEl = is8col ? cells[1]?.querySelector('strong') : cells[0]?.querySelector('strong');
+    const name = nameEl?.textContent?.trim() || '';
+    const pos  = is8col ? (cells[2]?.textContent?.trim() || '') : (cells[1]?.textContent?.trim() || '');
+    const age  = is8col ? (cells[3]?.textContent?.trim() || '') : (cells[2]?.textContent?.trim() || '');
+    const club = is8col ? (cells[4]?.textContent?.trim() || '') : (cells[3]?.textContent?.trim() || '');
+    const rawValCell = is8col ? cells[5] : cells[4];
+    const rawVal = rawValCell?.textContent?.trim() || '';
     const val  = _normVal(rawVal) || rawVal;
     // Normalise value cell display
-    if (cells[4] && val !== rawVal) cells[4].textContent = val;
+    if (rawValCell && val !== rawVal) rawValCell.textContent = val;
     // Replace last td with suggest button
     const lastTd = cells[cells.length - 1];
     const existingContent = lastTd.innerHTML;
@@ -14556,7 +14589,7 @@ function initMandateRows() {
     tr.onclick = null;
     tr.style.cursor = 'pointer';
     // clicking anywhere on row (except buttons) opens the unified player profile drawer
-    const src    = cells[5]?.textContent?.trim() || '';
+    const src    = is8col ? (cells[6]?.textContent?.trim() || '') : (cells[5]?.textContent?.trim() || '');
     const status = cells[cells.length-1]?.querySelector('.status')?.textContent?.trim() || '';
     tr.addEventListener('click', function(e) {
       if (e.target.closest('button')) return;
