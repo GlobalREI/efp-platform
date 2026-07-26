@@ -106,4 +106,69 @@ test.describe('EFP Regression Suite', () => {
     expect(appErrors).toHaveLength(0);
   });
 
+  test('Mobile viewport (390px iPhone) — all tests pass, no JS errors', async ({ browser }) => {
+    const context = await browser.newContext({
+      viewport: { width: 390, height: 844 },
+      userAgent: 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1',
+    });
+    const page = await context.newPage();
+
+    const mobileErrors = [];
+    page.on('pageerror', err => mobileErrors.push(err.message));
+
+    await page.goto(FILE_URL, { waitUntil: 'domcontentloaded' });
+    await page.waitForFunction(() => window.__EFP_TEST_DONE === true, { timeout: 30_000 });
+
+    // App JS errors (excluding external services)
+    const appErrors = mobileErrors.filter(e =>
+      !e.includes('firebase') && !e.includes('Firebase') &&
+      !e.includes('XMLHttpRequest') && !e.includes('net::ERR_') && !e.includes('Failed to fetch')
+    );
+    if (appErrors.length > 0) console.error('Mobile JS errors:', appErrors);
+    expect(appErrors).toHaveLength(0);
+
+    // Regression suite must still pass at mobile viewport
+    const results = await page.evaluate(() => window.__EFP_TEST_RESULTS);
+    expect(results).toBeTruthy();
+    if (results && !results.allPass) {
+      const failures = (results.results || []).filter(r => !r.ok);
+      console.error('Mobile regression failures:', failures.map(f => f.name + (f.why ? ' — ' + f.why : '')));
+    }
+    expect(results.allPass).toBe(true);
+
+    // Critical UI elements must be visible at 390px
+    const nav = page.locator('#bottom-nav, .bottom-nav, nav');
+    const hasNav = await nav.count();
+    if (hasNav > 0) await expect(nav.first()).toBeVisible();
+
+    await context.close();
+  });
+
+  test('Firebase load error — app renders offline state, no crash', async ({ page }) => {
+    const errors = [];
+    page.on('pageerror', err => errors.push(err.message));
+
+    // Block all Firebase network requests to simulate load failure
+    await page.route('**/*firebase*/**', route => route.abort());
+    await page.route('**/*.firebaseio.com/**', route => route.abort());
+
+    const normalUrl = 'file://' + path.resolve(__dirname, '../index.html');
+    await page.goto(normalUrl, { waitUntil: 'domcontentloaded' });
+    await page.waitForTimeout(3000);
+
+    // App must not crash with unhandled JS errors (Firebase errors OK)
+    const appErrors = errors.filter(e =>
+      !e.includes('firebase') && !e.includes('Firebase') &&
+      !e.includes('XMLHttpRequest') && !e.includes('net::ERR_') &&
+      !e.includes('Failed to fetch') && !e.includes('firebaseio')
+    );
+    if (appErrors.length > 0) console.error('Offline app errors:', appErrors);
+    expect(appErrors).toHaveLength(0);
+
+    // Navigation must still be usable
+    const navLinks = page.locator('.nav-item, #bottom-nav a, .sidebar-item');
+    const navCount = await navLinks.count();
+    expect(navCount).toBeGreaterThan(0);
+  });
+
 });
