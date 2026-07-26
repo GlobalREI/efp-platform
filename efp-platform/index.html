@@ -6413,6 +6413,9 @@ function _renderContactsTable() {
     const tbl = tbody.closest('table');
     if (tbl) { _DS.initTableSort(tbl); _DS.initTablePagination(tbl, 25); }
   }
+  // Re-apply search filter if user has typed something
+  const _csEl = document.getElementById('contacts-search');
+  if (_csEl && _csEl.value) filterContacts();
 }
 
 function _renderMandatesTable() {
@@ -8628,6 +8631,8 @@ function submitClub() {
   const club = { id:'cl_'+Date.now(), name, league, country,
     flag: country.includes('Spain')?'🇪🇸':country.includes('Germany')?'🇩🇪':country.includes('Italy')?'🇮🇹':country.includes('France')?'🇫🇷':country.includes('Netherlands')?'🇳🇱':country.includes('Belgium')?'🇧🇪':'🌍',
     status: 'New', isStatic: false };
+  const _clSaveBtn = document.querySelector('#club-drawer .btn-primary');
+  if (window._DS && _clSaveBtn) _DS.btn(_clSaveBtn, 'loading');
   allClubs.push(club);
   clubsAdded.push(club); // legacy sync
   if (allClubs.length > 1) {
@@ -8636,10 +8641,13 @@ function submitClub() {
     _appendClubRow(club); // fallback if migration hasn't run
   }
   _refreshClubDropdowns();
-  closeDrawer('club');
-  ['cl-name','cl-country','cl-league'].forEach(id => { const el=document.getElementById(id); if(el) el.value=''; });
-  showSnack(`✓ ${name} added to Clubs — available across all forms`, false);
   fbSave();
+  setTimeout(() => {
+    closeDrawer('club');
+    ['cl-name','cl-country','cl-league'].forEach(id => { const el=document.getElementById(id); if(el) el.value=''; });
+    showSnack(`✓ ${name} added to Clubs — available across all forms`, false);
+    if (window._DS && _clSaveBtn) _DS.btn(_clSaveBtn, 'default');
+  }, 350);
 }
 
 // Render entire clubs table from allClubs unified array
@@ -10214,10 +10222,15 @@ function saveNeedDetail() {
     showSnack('✓ Override saved for ' + club, false);
   }
 
+  const _ndIsEdit   = !!_currentNeedId;
+  const _ndSaveBtn  = document.querySelector('#need-detail-drawer .btn-primary');
+  if (window._DS && _ndSaveBtn) _DS.btn(_ndSaveBtn, 'loading');
   fbSave();
-  closeDrawer('need-detail');
-  if (!_currentNeedId) return;
-  showSnack('✓ Requirement updated', false);
+  setTimeout(() => {
+    closeDrawer('need-detail');
+    if (_ndIsEdit) showSnack('✓ Requirement updated', false);
+    if (window._DS && _ndSaveBtn) _DS.btn(_ndSaveBtn, 'default');
+  }, 350);
 }
 
 function pitchToNeedClub() {
@@ -10664,6 +10677,8 @@ function submitNewTask() {
   const text = document.getElementById('nt-text').value.trim();
   document.getElementById('nt-text').style.borderColor = text ? '' : 'var(--red)';
   if (!text) return;
+  const _ntSaveBtn = document.querySelector('#task-modal .btn-primary');
+  if (window._DS && _ntSaveBtn) _DS.btn(_ntSaveBtn, 'loading');
   const bucket  = document.getElementById('nt-bucket').value;
   const prio    = document.getElementById('nt-prio').value;
   const related = document.getElementById('nt-related').value.trim();
@@ -10693,8 +10708,11 @@ function submitNewTask() {
       if (allTasks.length > 1) fbSave();
     });
   }
-  document.getElementById('task-modal').style.display = 'none';
-  showSnack('✓ Task added', false);
+  setTimeout(() => {
+    document.getElementById('task-modal').style.display = 'none';
+    showSnack('✓ Task added', false);
+    if (window._DS && _ntSaveBtn) _DS.btn(_ntSaveBtn, 'default');
+  }, 350);
 }
 
 // ─── MANDATE METHOD PICKER ───
@@ -12404,9 +12422,14 @@ function saveRelEntry() {
     relEntries.push({ id: relNextId++, name, role, club, flag, stage, note, hot:false, flagged:false });
     showSnack(`✓ Added ${name}`, false);
   }
-  closeDrawer('rel');
-  renderRelationships();
+  const _relSaveBtn = document.querySelector('#rel-drawer .btn-primary');
+  if (window._DS && _relSaveBtn) _DS.btn(_relSaveBtn, 'loading');
   fbSave();
+  setTimeout(() => {
+    closeDrawer('rel');
+    renderRelationships();
+    if (window._DS && _relSaveBtn) _DS.btn(_relSaveBtn, 'default');
+  }, 350);
 }
 
 // ─── OCR / SCREENSHOT ENGINE ──────────────────────────────────────────────────
@@ -13301,10 +13324,15 @@ function submitPitch() {
   const posMatch   = playerOpt ? playerOpt.textContent.match(/—\s*([A-Z/]+)/) : null;
   const pos        = posMatch ? posMatch[1] : '';
 
-  closePitchDrawer();
-  addNewPitch(playerName, clubName.replace(/\s*\p{Emoji_Presentation}/gu,'').trim(), contact, flag, pos);
-  showSnack(`✓ Pitch created — ${playerName} → ${clubName}`, false);
-  go('pitches');
+  const _fpSaveBtn = document.querySelector('#pitch-drawer .btn-primary');
+  if (window._DS && _fpSaveBtn) _DS.btn(_fpSaveBtn, 'loading');
+  setTimeout(() => {
+    closePitchDrawer();
+    addNewPitch(playerName, clubName.replace(/\s*\p{Emoji_Presentation}/gu,'').trim(), contact, flag, pos);
+    showSnack(`✓ Pitch created — ${playerName} → ${clubName}`, false);
+    if (window._DS && _fpSaveBtn) _DS.btn(_fpSaveBtn, 'default');
+    go('pitches');
+  }, 350);
 }
 function saveDraft() {
   const player = document.getElementById('fp-player').value;
@@ -16420,6 +16448,131 @@ window._regression = (function () {
     _ok(_db.isClubDuplicate(name, 'other'), 'REG-029c Club still detected as duplicate when different name excluded');
   }
 
+  // ══════════════════════════════════════════════════════════════════════════
+  // PHASE 9 REGRESSION TESTS — UX Consistency fixes
+  // ══════════════════════════════════════════════════════════════════════════
+
+  // REG-030 — Phase 9.1: _rebucketTasks() computes daysOverdue correctly.
+  // Bug: daysOverdue was never set → "undefinedd overdue" label in task list.
+  function reg_030_daysOverdue_computed_by_rebucket() {
+    var pastDate = new Date(); pastDate.setDate(pastDate.getDate() - 3);
+    var past = pastDate.toISOString().slice(0, 10);
+    var todayDate = new Date().toISOString().slice(0, 10);
+    var t1 = { id:_id('t'), text:'Overdue task', done:false, dueDate:past,   bucket:'week', overdue:false };
+    var t2 = { id:_id('t'), text:'Today task',   done:false, dueDate:todayDate, bucket:'week', overdue:false };
+    TASKS.push(t1); TASKS.push(t2);
+    _rebucketTasks();
+    _ok(t1.overdue === true,   'REG-030a past-due task is marked overdue');
+    _ok(t1.daysOverdue >= 3,   'REG-030b daysOverdue >= 3 for 3-day-old task (got ' + t1.daysOverdue + ')');
+    _ok(t1.bucket === 'today', 'REG-030c past-due task moved to today bucket');
+    _ok(t2.overdue !== true,   'REG-030d today task not overdue');
+    _ok(t2.daysOverdue === 0,  'REG-030e daysOverdue === 0 for today task');
+    _ok(t2.bucket === 'today', 'REG-030f today task in today bucket');
+    TASKS.splice(TASKS.indexOf(t1), 1);
+    TASKS.splice(TASKS.indexOf(t2), 1);
+  }
+
+  // REG-031 — Phase 9.2: openContactDetail() populates contact drawer DOM.
+  // Fix: clicking a Contacts row now opens a detail drawer (not full profile).
+  function reg_031_openContactDetail_populates_drawer() {
+    if (typeof openContactDetail !== 'function') { _fail('REG-031', 'openContactDetail not defined'); return; }
+    var testName = _id('TestContact');
+    var c = { id:_id('c'), name:testName, role:'Scout', club:'Test FC', email:'test@efp.com' };
+    allContacts.push(c);
+    try {
+      openContactDetail(c.id);
+      var nameEl = document.getElementById('cdd-name');
+      var roleEl = document.getElementById('cdd-role');
+      var drawerEl = document.getElementById('cd-detail-drawer');
+      _ok(nameEl && nameEl.textContent === testName, 'REG-031a cdd-name shows contact name');
+      _ok(roleEl && roleEl.textContent.includes('Scout'), 'REG-031b cdd-role shows contact role');
+      _ok(drawerEl && drawerEl.classList.contains('open'), 'REG-031c contact drawer is open');
+    } finally {
+      if (typeof closeContactDrawer === 'function') closeContactDrawer();
+      var idx = allContacts.indexOf(c); if (idx >= 0) allContacts.splice(idx, 1);
+    }
+  }
+
+  // REG-032 — Phase 9.4: deleteContact(id, null) removes record without needing a table row.
+  // Fix: btn.closest('tr').remove() crashed when btn is null (called from drawer).
+  function reg_032_delete_contact_from_drawer_no_crash() {
+    if (typeof deleteContact !== 'function') { _fail('REG-032', 'deleteContact not defined'); return; }
+    var c = _contact('DelDrawer', 'Test');
+    var lenBefore = allContacts.length;
+    try {
+      deleteContact(c.id, null);  // null btn simulates drawer delete
+      _ok(allContacts.length === lenBefore - 1, 'REG-032a allContacts count decremented after drawer delete');
+      _ok(!allContacts.find(function(x){ return x.id === c.id; }), 'REG-032b contact no longer in allContacts');
+    } catch(e) {
+      _fail('REG-032c', 'deleteContact(id, null) threw: ' + e.message);
+    }
+  }
+
+  // REG-033 — Phase 9.3: all primary CTA buttons use "+ New [Entity]" label.
+  // Fix: old labels "+ Add Contact", "+ Add Club" etc normalised to "+ New".
+  function reg_033_cta_buttons_use_new_prefix() {
+    var required = [
+      '+ New Contact', '+ New Club', '+ New Mandate',
+      '+ New Club Need', '+ New Relationship', '+ New Task'
+    ];
+    var allBtns = Array.from(document.querySelectorAll('button'));
+    required.forEach(function(label) {
+      var found = allBtns.some(function(b){ return b.textContent.trim() === label; });
+      _ok(found, 'REG-033 CTA button exists: "' + label + '"');
+    });
+  }
+
+  // ══════════════════════════════════════════════════════════════════════════
+  // PHASE 10 RELIABILITY TESTS — required field validation
+  // ══════════════════════════════════════════════════════════════════════════
+
+  // P10-001 — submitClub blocks submit when required fields are empty.
+  function p10_001_submitClub_validates_required_fields() {
+    var nameEl = document.getElementById('cl-name');
+    var ctrEl  = document.getElementById('cl-country');
+    var leagEl = document.getElementById('cl-league');
+    if (!nameEl || !ctrEl || !leagEl) { _fail('P10-001', 'Club form fields not found in DOM'); return; }
+    var lenBefore = allClubs.length;
+    var savedName = nameEl.value; var savedCtr = ctrEl.value; var savedLeag = leagEl.value;
+    nameEl.value = ''; ctrEl.value = ''; leagEl.value = '';
+    submitClub();
+    _ok(allClubs.length === lenBefore, 'P10-001a submitClub blocked when all fields empty');
+    _ok(nameEl.style.borderColor.indexOf('red') >= 0, 'P10-001b cl-name shows red border');
+    // Restore
+    nameEl.value = savedName; ctrEl.value = savedCtr; leagEl.value = savedLeag;
+    nameEl.style.borderColor = ''; ctrEl.style.borderColor = ''; leagEl.style.borderColor = '';
+  }
+
+  // P10-002 — saveNeedDetail blocks submit when required fields are empty.
+  function p10_002_saveNeedDetail_validates_required_fields() {
+    var clubEl = document.getElementById('nd-club');
+    var posEl  = document.getElementById('nd-pos');
+    if (!clubEl || !posEl) { _fail('P10-002', 'Need form fields not found in DOM'); return; }
+    var lenBefore = allNeeds.length;
+    var savedClub = clubEl.value; var savedPos = posEl.value;
+    var savedNeedId = window._currentNeedId; window._currentNeedId = null;
+    clubEl.value = ''; posEl.value = '';
+    saveNeedDetail();
+    _ok(allNeeds.length === lenBefore, 'P10-002a saveNeedDetail blocked when club is empty');
+    // Restore
+    clubEl.value = savedClub; posEl.value = savedPos;
+    window._currentNeedId = savedNeedId;
+  }
+
+  // P10-003 — submitNewTask blocks submit when task text is empty.
+  function p10_003_submitNewTask_validates_required_fields() {
+    var textEl = document.getElementById('nt-text');
+    if (!textEl) { _fail('P10-003', 'Task text field not found in DOM'); return; }
+    var lenBefore = TASKS.length;
+    var savedVal = textEl.value;
+    textEl.value = '';
+    submitNewTask();
+    _ok(TASKS.length === lenBefore, 'P10-003a submitNewTask blocked when text is empty');
+    _ok(textEl.style.borderColor.indexOf('red') >= 0, 'P10-003b nt-text shows red border');
+    // Restore
+    textEl.value = savedVal; textEl.style.borderColor = '';
+  }
+
   // ── Master runner ────────────────────────────────────────────────────────
   var _regressionTests = [
     reg_020_ghost_data_empty_arrays,
@@ -16432,6 +16585,15 @@ window._regression = (function () {
     reg_027_club_delete_nullifies_need_club,
     reg_028_mandate_delete_archives_pitches,
     reg_029_club_duplicate_check_edit_mode,
+    // Phase 9 — UX Consistency
+    reg_030_daysOverdue_computed_by_rebucket,
+    reg_031_openContactDetail_populates_drawer,
+    reg_032_delete_contact_from_drawer_no_crash,
+    reg_033_cta_buttons_use_new_prefix,
+    // Phase 10 — Reliability
+    p10_001_submitClub_validates_required_fields,
+    p10_002_saveNeedDetail_validates_required_fields,
+    p10_003_submitNewTask_validates_required_fields,
   ];
   var _workflowTests = [
     wf_001_club_full_crud,       wf_002_contact_full_crud,
