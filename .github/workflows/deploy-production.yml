@@ -1,0 +1,72 @@
+# EFP Platform — Production Deploy
+#
+# The ONLY way to deploy to production.
+# Triggered manually from GitHub Actions UI — never on push.
+#
+# Flow:
+#   1. You go to Actions → "Deploy to Production" → Run workflow
+#   2. Tests re-run automatically
+#   3. GitHub pauses and asks a reviewer to approve
+#   4. Reviewer approves → Netlify production deploy fires
+#
+# Secrets required (already set up):
+#   NETLIFY_DEPLOY_HOOK — your existing Netlify production deploy hook
+#
+# GitHub setup needed (one-time, 2 minutes):
+#   Settings → Environments → New environment → name it "production"
+#   → Required reviewers → add your GitHub username → Save
+
+name: Deploy to Production
+
+on:
+  workflow_dispatch:
+    inputs:
+      release_notes:
+        description: "What's in this release?"
+        required: true
+        type: string
+
+jobs:
+
+  regression:
+    name: Pre-deploy Tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - run: npm test
+      - name: Upload artifacts on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: pre-deploy-report
+          path: playwright-report/
+          retention-days: 14
+
+  deploy:
+    name: Deploy → Production
+    runs-on: ubuntu-latest
+    needs: regression
+    environment: production
+
+    steps:
+      - name: Trigger Netlify production deploy
+        run: |
+          curl -s -o /dev/null -w "%{http_code}" \
+            -X POST "${{ secrets.NETLIFY_DEPLOY_HOOK }}" \
+          | grep -q "200\|201" \
+          && echo "✅ Production deploy triggered" \
+          || (echo "❌ Deploy hook failed" && exit 1)
+
+      - name: Summary
+        run: |
+          echo "## 🚀 Deployed to Production" >> $GITHUB_STEP_SUMMARY
+          echo "**Release:** ${{ github.event.inputs.release_notes }}" >> $GITHUB_STEP_SUMMARY
+          echo "**By:** ${{ github.actor }} at $(date -u '+%Y-%m-%d %H:%M UTC')" >> $GITHUB_STEP_SUMMARY
+          echo "**Commit:** ${{ github.sha }}" >> $GITHUB_STEP_SUMMARY
