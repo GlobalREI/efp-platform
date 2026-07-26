@@ -16495,16 +16495,21 @@ window._regression = (function () {
 
   // REG-032 — Phase 9.4: deleteContact(id, null) removes record without needing a table row.
   // Fix: btn.closest('tr').remove() crashed when btn is null (called from drawer).
+  // Note: deleteContact has a confirm() dialog — mock it to true in headless test environment.
   function reg_032_delete_contact_from_drawer_no_crash() {
     if (typeof deleteContact !== 'function') { _fail('REG-032', 'deleteContact not defined'); return; }
     var c = _contact('DelDrawer', 'Test');
     var lenBefore = allContacts.length;
+    var origConfirm = window.confirm;
+    window.confirm = function() { return true; }; // headless returns false by default
     try {
       deleteContact(c.id, null);  // null btn simulates drawer delete
       _ok(allContacts.length === lenBefore - 1, 'REG-032a allContacts count decremented after drawer delete');
       _ok(!allContacts.find(function(x){ return x.id === c.id; }), 'REG-032b contact no longer in allContacts');
     } catch(e) {
       _fail('REG-032c', 'deleteContact(id, null) threw: ' + e.message);
+    } finally {
+      window.confirm = origConfirm;
     }
   }
 
