@@ -2432,10 +2432,10 @@ th.ds-sort:hover { background: rgba(30,58,95,.06); }
 
       <!-- KPI Strip -->
       <div class="kpi-strip">
-        <div class="kpi-card" onclick="go('contacts')">
-          <div class="kpi-label">Active Contacts</div>
-          <div class="kpi-value navy">284</div>
-          <div class="kpi-trend up">+12 this month</div>
+        <div class="kpi-card" onclick="go('mandates')">
+          <div class="kpi-label">Player Mandates</div>
+          <div class="kpi-value navy" id="dash-mandates-val">—</div>
+          <div class="kpi-sub" id="dash-mandates-sub">Loading…</div>
         </div>
         <div class="kpi-card" onclick="go('pitches')">
           <div class="kpi-label">Active Pitches</div>
@@ -4094,9 +4094,9 @@ th.ds-sort:hover { background: rgba(30,58,95,.06); }
         <div id="nf-active-chips" style="margin-top:10px;display:flex;flex-wrap:wrap;gap:6px"></div>
       </div>
 
-      <div class="ai-note">
+      <div class="ai-note" id="needs-match-alerts-box">
         <div class="ai-note-label">Match Alerts</div>
-        <div class="ai-note-text"><strong>5 strong matches identified.</strong> Lee Tae Seok (LB, Austria Wien, €4.5M) is a direct fit for Club Brugge's LB need. Kasper Jörgensen fits HSV's RB need. Connor Barron fits Hertha BSC's midfield profile. Moses Usor / Samuel Adeniran fit SV Elversberg's striker need. Dom Ballard fits SC Heerenveen's striker search.</div>
+        <div class="ai-note-text" id="needs-match-alerts-text"><em style="color:var(--text3)">Run AI Matches to see live match alerts here.</em></div>
       </div>
 
       <div class="tabs">
@@ -6653,7 +6653,7 @@ function _renderNeedsTable() {
       <td><strong>${posStr}</strong></td>
       <td style="font-size:12px">${n.notes||''}</td>
       <td><strong style="color:var(--green)">${budStr}</strong></td>
-      <td><strong>Summer 2026</strong></td>
+      <td><strong>${n.window||'Summer 2026'}</strong></td>
       <td><div style="font-size:12px">${nContactHtml}</div></td>
       <td><div class="status"><span class="dot ${dotCls}"></span> ${statusTxt}</div></td>`;
     tr.addEventListener('click', e => {
@@ -7935,6 +7935,21 @@ function runMatchEngine() {
 
   fbSave();
   renderMatches();
+  _renderNeedMatchAlerts();
+}
+
+function _renderNeedMatchAlerts() {
+  const el = document.getElementById('needs-match-alerts-text');
+  if (!el) return;
+  const strong = (matchesData || []).filter(m => m.score >= 75 && m.status !== 'Not Relevant' && m.status !== 'Rejected');
+  if (!strong.length) {
+    el.innerHTML = '<em style="color:var(--text3)">No strong matches (75%+) yet — run AI Matches to refresh.</em>';
+    return;
+  }
+  const topLinks = strong.slice(0, 8).map(m =>
+    `<strong>${m.playerName}</strong> (${m.playerPos||'—'}) → ${m.clubName} <span style="color:var(--green);font-weight:700">${m.score}%</span>`
+  ).join(' &middot; ');
+  el.innerHTML = `<strong>${strong.length} strong match${strong.length !== 1 ? 'es' : ''} identified.</strong> ${topLinks}`;
 }
 
 function renderMatches() {
@@ -9303,6 +9318,20 @@ function archiveNeed(id) {
 }
 // ─────────────────────────────────────────────────────────────────────────────
 
+let _currentNeedPrio = null;
+function setNeedPrio(n, silent) {
+  _currentNeedPrio = n;
+  [1,2,3].forEach(i => {
+    const btn = document.getElementById('nd-needprio-' + i);
+    if (!btn) return;
+    const active = (i === n);
+    const colors = { 1:'#dc2626', 2:'#d97706', 3:'#6b7280' };
+    btn.style.borderColor = active ? colors[i] : 'var(--border)';
+    btn.style.background  = active ? (i===1?'#fef2f2':i===2?'#fffbeb':'#f9fafb') : 'var(--surface2)';
+    btn.style.color       = active ? colors[i] : 'var(--text)';
+  });
+}
+
 function setPPPrio(n, silent) {
   _ppSelectedPrio = n;
   [1,2,3].forEach(i => {
@@ -10496,7 +10525,7 @@ function _appendNeedRow(n) {
     <td><strong>${posStr}</strong></td>
     <td style="font-size:12px">${n.notes || ''}</td>
     <td><strong style="color:var(--green)">${budStr}</strong></td>
-    <td><strong>Summer 2026</strong></td>
+    <td><strong>${n.window||'Summer 2026'}</strong></td>
     <td><div style="font-size:12px">${nContactHtml}</div></td>
     <td><div style="display:flex;align-items:center;gap:6px">
       <div class="status"><span class="dot ${dotCls}"></span> ${statusTxt}</div>
@@ -10544,7 +10573,7 @@ function openNeedDetail(clubName, pos, budMin, budMax, contact, prio, notes, nee
   // Show "Open Profile" link if contact is pre-filled
   const ndCL = document.getElementById('nd-contact-link');
   if (ndCL) ndCL.style.display = (contact && contact !== '—') ? 'inline' : 'none';
-  // Set priority select
+  // Set urgency select
   const prioSel = document.getElementById('nd-prio');
   if (prioSel) {
     const match = ['Urgent','High','Medium','Low'].find(p => p.toLowerCase() === (prio||'').toLowerCase());
@@ -10552,6 +10581,11 @@ function openNeedDetail(clubName, pos, budMin, budMax, contact, prio, notes, nee
   }
   const dtSel = document.getElementById('nd-deal-type');
   if (dtSel) dtSel.value = dealType || 'either';
+  // Load needPrio (P1/P2/P3) and window from allNeeds
+  const _needObj = needId ? allNeeds.find(n => n.id === needId) : null;
+  setNeedPrio(_needObj?.needPrio || null);
+  const ndWin = document.getElementById('nd-window');
+  if (ndWin) ndWin.value = _needObj?.window || 'Summer 2026';
 
   // Archive button label
   const ndArchBtn = document.getElementById('nd-archive-btn');
@@ -10609,6 +10643,8 @@ function saveNeedDetail() {
   const prio     = document.getElementById('nd-prio').value;
   const notes    = document.getElementById('nd-notes').value.trim();
   const dealType = document.getElementById('nd-deal-type')?.value || 'either';
+  const window_  = document.getElementById('nd-window')?.value || 'Summer 2026';
+  const needPrio = _currentNeedPrio;
   // ── Required fields ──
   if (!club) { showSnack('⚠ Club is required', true); return; }
   if (!pos)  { showSnack('⚠ Position is required', true); return; }
@@ -10629,17 +10665,17 @@ function saveNeedDetail() {
     const idxAll = allNeeds.findIndex(n => n.id === _currentNeedId);
     if (idxAll >= 0) {
       allNeeds[idxAll] = { ...allNeeds[idxAll], club, pos, positions:[pos], budMin, budMax, contact, prio, notes, dealType,
-                            urgency: prio === 'Urgent' ? 'urgent' : 'open' };
+                            window: window_, needPrio, urgency: prio === 'Urgent' ? 'urgent' : 'open' };
     }
     // Also update needsAdded for legacy sync
     const idx = needsAdded.findIndex(n => n.id === _currentNeedId);
-    if (idx >= 0) needsAdded[idx] = { ...needsAdded[idx], club, pos, budMin, budMax, contact, prio, notes, dealType };
+    if (idx >= 0) needsAdded[idx] = { ...needsAdded[idx], club, pos, budMin, budMax, contact, prio, notes, dealType, window: window_, needPrio };
     // Re-render table so change is immediately visible
     _renderNeedsTable();
   } else {
     // Need is from seed/static — create new entry in allNeeds
     const newNeed = { id: 'n_' + Date.now(), club, pos, positions:[pos], budMin, budMax, contact, prio, notes, dealType,
-                       urgency: prio === 'Urgent' ? 'urgent' : 'open' };
+                       window: window_, needPrio, urgency: prio === 'Urgent' ? 'urgent' : 'open' };
     allNeeds.push(newNeed);
     needsAdded.push(newNeed);
     _renderNeedsTable();
@@ -13877,17 +13913,26 @@ function _updateNeedsSubtitle() {
 }
 
 function renderDashboard() {
-  // 1. Active Contacts — use unified allContacts post-migration, fallback to legacy
-  let totalContacts;
+  // 1. Player Mandates — live count from allMandates
+  const activeMandates = allMandates.filter(m => !m.archived);
+  const totalMandates  = activeMandates.length;
+  const p1Count = activeMandates.filter(m => {
+    const pn = playerNotes[m.name];
+    return pn && pn.priority === 1;
+  }).length;
+  const mVal = document.getElementById('dash-mandates-val');
+  const mSub = document.getElementById('dash-mandates-sub');
+  if (mVal) mVal.textContent = totalMandates;
+  if (mSub) mSub.textContent = p1Count ? `${p1Count} in focus (P1)` : (totalMandates ? 'Active mandates' : 'No mandates yet');
+
+  // Still compute contacts for follow-ups calculation below
   let _dashContacts;
   if (allContacts.length) {
     _dashContacts = allContacts.filter(c => !contactsDeleted.includes(c.id));
-    totalContacts = _dashContacts.length;
   } else {
     const allStaticContacts = Object.values(CONTACTS_DB).flat();
     const staticActive = allStaticContacts.filter(c => !contactsDeleted.includes(c.id));
     _dashContacts = [...staticActive, ...contactsAdded];
-    totalContacts = _dashContacts.length;
   }
 
   // 2. Active Pitches — not rejected
@@ -13914,11 +13959,7 @@ function renderDashboard() {
   const cards = document.querySelectorAll('#view-dashboard .kpi-card');
   if (!cards.length) return;
 
-  // Card 1: Active Contacts
-  const c1val = cards[0].querySelector('.kpi-value');
-  const c1sub = cards[0].querySelector('.kpi-trend, .kpi-sub');
-  if (c1val) c1val.textContent = totalContacts;
-  if (c1sub) c1sub.textContent = 'Across all clubs';
+  // Card 1: Player Mandates — already injected via dash-mandates-val/sub above
 
   // Card 2: Active Pitches
   const c2val = cards[1].querySelector('.kpi-value');
@@ -17365,7 +17406,31 @@ window._regression = (function () {
     </div>
     <div class="drawer-close" onclick="closeDrawer('need-detail')">✕</div>
   </div>
-  <div class="drawer-body">
+  <div class="drawer-body" style="padding-top:16px">
+
+    <!-- EFP Priority (P1/P2/P3) -->
+    <div style="margin-bottom:14px">
+      <label class="field-label">Priority</label>
+      <div style="display:flex;gap:8px">
+        <button type="button" id="nd-needprio-1" onclick="setNeedPrio(1)"
+          style="flex:1;padding:8px;border-radius:6px;border:2px solid var(--border);background:var(--surface2);
+                 font-size:13px;font-weight:700;cursor:pointer;transition:all 0.15s;color:var(--text)">
+          🔴 P1 — Focus
+        </button>
+        <button type="button" id="nd-needprio-2" onclick="setNeedPrio(2)"
+          style="flex:1;padding:8px;border-radius:6px;border:2px solid var(--border);background:var(--surface2);
+                 font-size:13px;font-weight:700;cursor:pointer;transition:all 0.15s;color:var(--text)">
+          🟡 P2 — Active
+        </button>
+        <button type="button" id="nd-needprio-3" onclick="setNeedPrio(3)"
+          style="flex:1;padding:8px;border-radius:6px;border:2px solid var(--border);background:var(--surface2);
+                 font-size:13px;font-weight:700;cursor:pointer;transition:all 0.15s;color:var(--text)">
+          ⚪ P3 — Watch
+        </button>
+      </div>
+    </div>
+
+    <div style="border-top:1px solid var(--border);padding-top:14px">
 
     <!-- Edit form -->
     <div class="field">
@@ -17386,18 +17451,31 @@ window._regression = (function () {
         <input class="field-input" id="nd-budmax" placeholder="e.g. €8,000,000" inputmode="numeric" oninput="_valInput(this)" onblur="_valBlur(this)">
       </div>
     </div>
+    <div class="field-row field">
+      <div>
+        <label class="field-label">Transfer Window</label>
+        <select class="field-select" id="nd-window">
+          <option>Summer 2025</option>
+          <option>Winter 2026</option>
+          <option selected>Summer 2026</option>
+          <option>Winter 2027</option>
+          <option>Summer 2027</option>
+          <option>Ongoing</option>
+        </select>
+      </div>
+      <div>
+        <label class="field-label">Urgency</label>
+        <select class="field-select" id="nd-prio">
+          <option>Urgent</option><option>High</option><option>Medium</option><option>Low</option>
+        </select>
+      </div>
+    </div>
     <div class="field">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">
         <label class="field-label" style="margin-bottom:0">Contact</label>
         <span id="nd-contact-link" style="display:none;font-size:11px;color:var(--navy);cursor:pointer;text-decoration:underline;text-underline-offset:2px" onclick="_openContactByName(document.getElementById('nd-contact').value.trim())">Open Profile →</span>
       </div>
       <input class="field-input" id="nd-contact" placeholder="e.g. David Verwilghen" oninput="document.getElementById('nd-contact-link').style.display=this.value.trim()?'inline':'none'">
-    </div>
-    <div class="field">
-      <label class="field-label">Priority</label>
-      <select class="field-select" id="nd-prio">
-        <option>Urgent</option><option>High</option><option>Medium</option><option>Low</option>
-      </select>
     </div>
     <div class="field">
       <label class="field-label">Deal Type</label>
@@ -17416,6 +17494,7 @@ window._regression = (function () {
       <button class="btn btn-outline" onclick="closeDrawer('need-detail')">Cancel</button>
       <button id="nd-archive-btn" class="btn btn-outline" title="Archive requirement" style="flex-shrink:0" onclick="if(_currentNeedId)archiveNeed(_currentNeedId)">📦</button>
       <button class="btn btn-outline" title="Delete requirement" style="color:var(--red);border-color:var(--red);flex-shrink:0" onclick="if(_currentNeedId&&confirm('Delete this club requirement?')){closeDrawer('need-detail');deleteNeed(_currentNeedId,null)}">🗑</button>
+    </div>
     </div>
 
     <!-- Pitched players panel -->
