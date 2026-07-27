@@ -3810,6 +3810,7 @@ th.ds-sort:hover { background: rgba(30,58,95,.06); }
           <div class="page-title">Clubs</div>
           <div class="page-subtitle" id="clubs-subtitle">European leagues · 129 clubs tracked</div>
         </div>
+        <input id="clubs-search" type="text" class="view-search" placeholder="🔍  Search club, league, country…" oninput="filterClubs(this.value)" style="width:240px">
         <button class="btn btn-primary btn-sm" onclick="openDrawer('club')">+ New Club</button>
       </div>
       <div class="panel">
@@ -3968,6 +3969,7 @@ th.ds-sort:hover { background: rgba(30,58,95,.06); }
           <div class="page-title">Player Mandates</div>
           <div class="page-subtitle" id="mandates-subtitle">29 active mandates · Summer 2026 window</div>
         </div>
+        <input id="mandates-search" type="text" class="view-search" placeholder="🔍  Search player, position, club…" oninput="filterMandates(this.value)" style="width:240px">
         <select class="btn btn-outline btn-sm" style="padding:5px 10px;font-size:12px;cursor:pointer" onchange="_sortMandates(this.value);this.blur()">
           <option value="default">Sort: Default</option>
           <option value="name-az">Name A–Z</option>
@@ -4788,13 +4790,14 @@ th.ds-sort:hover { background: rgba(30,58,95,.06); }
     </div>
     <div class="field"><label class="field-label">Website</label><input class="field-input" id="cl-web" placeholder="https://…"></div>
     <div class="field-row field">
-      <div><label class="field-label">Sporting Director</label><input class="field-input" id="cl-sd" placeholder="Name"></div>
-      <div><label class="field-label">Head of Recruitment</label><input class="field-input" id="cl-hor" placeholder="Name"></div>
+      <div><label class="field-label">Sporting Director</label><input class="field-input" id="cl-sd" placeholder="Name" autocomplete="off" oninput="_contactAC(this,'cl-contact-drop')" onfocus="_contactAC(this,'cl-contact-drop')" onblur="setTimeout(function(){var d=document.getElementById('cl-contact-drop');if(d)d.style.display='none'},200)"></div>
+      <div><label class="field-label">Head of Recruitment</label><input class="field-input" id="cl-hor" placeholder="Name" autocomplete="off" oninput="_contactAC(this,'cl-contact-drop')" onfocus="_contactAC(this,'cl-contact-drop')" onblur="setTimeout(function(){var d=document.getElementById('cl-contact-drop');if(d)d.style.display='none'},200)"></div>
     </div>
     <div class="field-row field">
-      <div><label class="field-label">CEO</label><input class="field-input" id="cl-ceo" placeholder="Name"></div>
-      <div><label class="field-label">Head Coach</label><input class="field-input" id="cl-coach" placeholder="Name"></div>
+      <div><label class="field-label">CEO</label><input class="field-input" id="cl-ceo" placeholder="Name" autocomplete="off" oninput="_contactAC(this,'cl-contact-drop')" onfocus="_contactAC(this,'cl-contact-drop')" onblur="setTimeout(function(){var d=document.getElementById('cl-contact-drop');if(d)d.style.display='none'},200)"></div>
+      <div><label class="field-label">Head Coach</label><input class="field-input" id="cl-coach" placeholder="Name" autocomplete="off" oninput="_contactAC(this,'cl-contact-drop')" onfocus="_contactAC(this,'cl-contact-drop')" onblur="setTimeout(function(){var d=document.getElementById('cl-contact-drop');if(d)d.style.display='none'},200)"></div>
     </div>
+    <div id="cl-contact-drop" style="display:none;position:fixed;background:var(--surface);border:1px solid var(--border);border-radius:8px;max-height:220px;overflow-y:auto;z-index:9999;box-shadow:0 4px 20px rgba(0,0,0,.18)"></div>
     <div class="field"><label class="field-label">Notes</label><textarea class="field-textarea" id="cl-notes" placeholder="Ownership, budget level, transfer approach…" rows="3"></textarea></div>
   </div>
   <div class="drawer-foot">
@@ -7973,7 +7976,7 @@ function globalSearch(q) {
     const country= cells[2]?.textContent?.trim() || '';
     const text   = (name + ' ' + league + ' ' + country).toLowerCase();
     if (text.includes(lq)) results.push({ type:'club', main: name, sub: league + ' · ' + country, tag:'Club',
-      action: () => { go('clubs'); setTimeout(() => { const s = document.getElementById('clubs-search'); if(s){s.value=name;filterClubs(name);} }, 100); } });
+      action: () => { go('clubs'); setTimeout(() => openClubEdit(name), 200); } });
   });
 
   // ── Contacts (from table rows) ──
@@ -7984,18 +7987,19 @@ function globalSearch(q) {
     const club  = cells[2]?.textContent?.trim() || '';
     const email = cells[4]?.textContent?.trim() || '';
     const text  = (name + ' ' + role + ' ' + club + ' ' + email).toLowerCase();
-    if (text.includes(lq)) results.push({ type:'contact', icon:'👤', main: name, sub: role + ' · ' + club, tag:'Contact', action: () => { go('contacts'); setTimeout(() => { const s = document.getElementById('contacts-search'); if(s){s.value=name;filterContacts();} }, 100); } });
+    const cId   = tr.dataset.contactId || '';
+    if (text.includes(lq)) results.push({ type:'contact', icon:'👤', main: name, sub: role + ' · ' + club, tag:'Contact',
+      action: () => { go('contacts'); setTimeout(() => { if (cId) openContactDetail(cId); else _openContactByName(name); }, 200); } });
   });
 
   // ── Player Mandates ──
-  document.querySelectorAll('#view-mandates .data-table tbody tr').forEach(tr => {
-    const cells = tr.querySelectorAll('td');
-    const name  = cells[0]?.querySelector('strong')?.textContent?.trim() || '';
-    const pos   = cells[1]?.textContent?.trim() || '';
-    const club  = cells[3]?.textContent?.trim() || '';
-    const val   = cells[4]?.textContent?.trim() || '';
-    const text  = (name + ' ' + pos + ' ' + club + ' ' + val).toLowerCase();
-    if (text.includes(lq)) results.push({ type:'mandate', icon:'⚽', main: name, sub: pos + ' · ' + club + ' · ' + val, tag:'Mandate', action: () => go('mandates') });
+  allMandates.forEach(m => {
+    const pos  = m.position || m.pos || '';
+    const club = m.club || '';
+    const val  = m.value || m.val || '';
+    const text = (m.name + ' ' + pos + ' ' + club + ' ' + val).toLowerCase();
+    if (text.includes(lq)) results.push({ type:'mandate', icon:'⚽', main: m.name, sub: pos + (club ? ' · ' + club : '') + (val ? ' · ' + val : ''), tag:'Mandate',
+      action: () => { go('mandates'); setTimeout(() => openPlayerProfile(m.name, { pos, age: m.age||'', club, val, contact: m.contact||'', statusText: m.statusText||'Active Mandate', expectedPrice: m.expectedPrice||'', salary: m.salary||'' }), 200); } });
   });
 
   // ── Pitches ──
