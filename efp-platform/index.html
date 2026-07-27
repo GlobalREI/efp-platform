@@ -6606,7 +6606,8 @@ function _renderNeedsTable() {
     tr.style.cursor = 'pointer';
     if (n.archived) tr.style.opacity = '0.55';
     // Support both CLUB_NEEDS_DB format (positions[]) and needsAdded format (pos string)
-    const posStr    = Array.isArray(n.positions) ? n.positions.join(' · ') : (n.pos || '—');
+    // Normalise to abbreviations so all entries display consistently
+    const posStr    = _normPos(Array.isArray(n.positions) ? n.positions.join(' · ') : (n.pos || '—'));
     const budStr    = (n.budget && n.budget !== '—' ? _normVal(n.budget) || n.budget : null)
                    || ((n.budMin||n.budMax) ? [_normVal(n.budMin)||n.budMin,_normVal(n.budMax)||n.budMax].filter(Boolean).join('–') : '—');
     const urgStr    = n.urgency || n.prio || 'open';
@@ -7146,6 +7147,37 @@ function _fmtEuro(num) {
 }
 
 // One-shot: any string → "€1.234.000" (European format) or original string if unparseable.
+// ─── POSITION NORMALISER ─────────────────────────────────────────────────────
+// Converts any position string (full text or abbrev) → canonical abbreviation(s)
+// e.g. "Right Winger · Central Mid" → "RW · CM"
+const _POS_MAP = {
+  // Full names → abbreviation
+  'goalkeeper':'GK','keeper':'GK',
+  'right back':'RB','right fullback':'RB','right-back':'RB',
+  'centre back':'CB','center back':'CB','central defender':'CB','centreback':'CB',
+  'left back':'LB','left fullback':'LB','left-back':'LB',
+  'defensive mid':'CDM','defensive midfielder':'CDM','defensive midfield':'CDM','holding mid':'CDM',
+  'central mid':'CM','central midfielder':'CM','central midfield':'CM','box to box':'CM',
+  'attacking mid':'CAM','attacking midfielder':'CAM','attacking midfield':'CAM','number 10':'CAM',
+  'right winger':'RW','right wing':'RW','right midfield':'RW',
+  'left winger':'LW','left wing':'LW','left midfield':'LW',
+  'second striker':'SS','shadow striker':'SS',
+  'centre forward':'ST','center forward':'ST','striker':'ST','number 9':'ST',
+  // Pass-through abbreviations already correct
+  'gk':'GK','rb':'RB','cb':'CB','lb':'LB','cdm':'CDM','dm':'CDM',
+  'cm':'CM','cam':'CAM','am':'CAM','rw':'RW','lw':'LW','ss':'SS','st':'ST',
+  'rcb':'RCB','lcb':'LCB','rwb':'RWB','lwb':'LWB','mf':'CM','winger':'W',
+};
+function _normPos(str) {
+  if (!str || str === '—') return str || '—';
+  // Split on common separators: ·, ,, /, |
+  const parts = String(str).split(/[·,\/\|]+/).map(s => s.trim()).filter(Boolean);
+  return parts.map(p => {
+    const key = p.toLowerCase().replace(/\s+/g, ' ').trim();
+    return _POS_MAP[key] || p; // return mapped abbrev or original if unknown
+  }).join(' · ');
+}
+
 // Ranges like "€5-6M" → "€5.000.000 – €6.000.000"
 function _normVal(str) {
   if (!str || str === '—') return str || '';
@@ -8386,7 +8418,43 @@ let needsAdded      = [];   // {id,club,pos,ageMin,ageMax,budMin,budMax,prio,con
 let playerNotes     = {};   // {[playerName]: {status, notes}} — editable player profile notes
 let clubData        = {};   // {[clubName]: {league,country,flag,status,notes,linkedContacts:[{name,role}]}}
 let logsAdded       = [   // {id,type,notes,date,duration,outcome,contact,club,source}
-  // ── Beeper-synced interactions (last synced 2026-07-18) ──
+  // ── Beeper-synced interactions (last synced 2026-07-27) ──
+  // JULY 27
+  { id:1753643700000, type:'whatsapp', contact:'Fynn Buggenthien', club:'Hamburger SV', date:'2026-07-27',
+    notes:'Fynn submitted EFP x Festy Ebosele x HSV pitch PDF in EFP internal group. Active multi-club outreach day across Germany and Turkey.',
+    outcome:'Festy Ebosele pitched to HSV — await response', source:'beeper-sync' },
+  { id:1753641590000, type:'whatsapp', contact:'Peer Jaekel', club:'1. FC Magdeburg', date:'2026-07-27',
+    notes:'Timo reaching out to schedule a call: "I hope you had a productive start to the week. Does Tuesday or Wednesday work for you? Best regards from Austria." Peer read the message (18:52).',
+    outcome:'Schedule call with Peer Jaekel at Magdeburg — Tue or Wed this week', source:'beeper-sync' },
+  { id:1753627836000, type:'whatsapp', contact:'Markus Pilawa', club:'Werder Bremen', date:'2026-07-27',
+    notes:'Timo: "Have you decided on striker yet?" Pilawa: "Immer noch offen" (Still open). Timo confirmed Tyler Bindon is more of a physically strong CB/RF type rather than a build-up player, acknowledging the profile mismatch Pilawa flagged.',
+    outcome:'Werder Bremen striker spot still open — revisit with a better-fit profile', source:'beeper-sync' },
+  { id:1753624220000, type:'whatsapp', contact:'Alex Kroes', club:'Ajax / LASK', date:'2026-07-27',
+    notes:'Alex counter-proposes Friday 9–10am or lunch 12–14 (Timo had suggested 11am). Meeting confirmed for Friday in Linz during LASK pre-season. On Usor: "Turkey very difficult, especially now that we lost Harakate with an ACL yesterday." Moussa Sylla also pitched to Alex as backup option for Turkish clubs.',
+    outcome:'Meeting Friday in Linz confirmed — prepare player proposals. Usor Turkey route blocked for now.', source:'beeper-sync' },
+  { id:1753621832000, type:'whatsapp', contact:'Caglar Meker', club:'Turkey (multi-club)', date:'2026-07-27',
+    notes:'Major Turkey push via EFP group. Caglar Meker confirmed needs: Basaksehir — striker + RW (left-foot) + U23 CB (most urgent: no6/8); Galatasaray — U23 backup striker (Osimhen backup). Konyaspor/Erzurum/Eyüpspor/Corum all need left back (Anton Donkor pitched at €200k). Fynn submitted: Samuel Adeniran x Basaksehir (2.5–3M, Timo confirmed), Christian Gomis x Basaksehir (offers above market value). Timo submitted: Moussa Sylla x Galatasaray + Besiktas. Fynn also submitted: Moses Usor x Galatasaray + Besiktas, Christian Gomis x Samsunspor.',
+    outcome:'Awaiting Turkey club responses on Adeniran, Gomis, Sylla, Usor, Donkor pitches', source:'beeper-sync' },
+  { id:1753620636000, type:'whatsapp', contact:'Romeo Castelen', club:'Club Brugge', date:'2026-07-27',
+    notes:'Tyler Bindon pitch outcome: Club Brugge gave negative feedback via Romeo (from "Victor"): "Looks predictable in possession, chooses to clear under pressure instead of playing out. In possession-loss lacks mobility and explosiveness to play with space behind. Since we play dominant, high-press football, we don\'t see him as an option." Romeo: "Ok let\'s move on to another profile." Timo then pitched a new player to Romeo for Brugge. Also checked: Is Bochum still looking for winger or only CB? Is NEC still looking?',
+    outcome:'Tyler Bindon rejected by Club Brugge — move to next candidate. Check Bochum/NEC needs.', source:'beeper-sync' },
+  { id:1753610348000, type:'whatsapp', contact:'Rick Pattenden', club:'Nottingham Forest', date:'2026-07-27',
+    notes:'Rick reviewing EFP Player List sent yesterday: "I\'m in the office now reviewing this but think we can do some good work here for sure." Timo: "Happy to have a chat later today or tomorrow to go through them with my head of football." Collaboration momentum strong after yesterday\'s call.',
+    outcome:'Schedule call with Rick + head of football to go through EFP player list', source:'beeper-sync' },
+  // JULY 26
+  { id:1753542514000, type:'whatsapp', contact:'Alex Kroes', club:'Ajax / LASK', date:'2026-07-26',
+    notes:'Alex arriving in Linz Thursday evening for LASK pre-season. Friday meeting proposed. Timo sent EFP_Player_List.pdf: "Hi Alex, as promised here the players we currently have direct access to. Looking forward to discussing further on Friday." Also discussed Levante as potential club for some players — Timo asked Alex about Levante connections.',
+    outcome:'Friday meeting in Linz with Alex Kroes — send updated player proposals', source:'beeper-sync' },
+  { id:1753518214000, type:'whatsapp', contact:'Markus Pilawa', club:'Werder Bremen', date:'2026-07-26',
+    notes:'Timo sent Tyler Bindon PDF with note: "Not sure if you\'re still looking for a profile if Karim leaves, but just spoke with Forest and Tyler came up — I think it\'s an extremely exciting profile." Pilawa responded: "Not yet clear if we\'d do anything. Prefer left-foot, good build-up. This player is RF and comes more from a defensive angle (per my data)." Pilawa also liked Timo\'s Skelly update (👍). Italy and Championship still interested in Skelly.',
+    outcome:'Tyler Bindon profile mismatch for Werder (RF, defensive) — keep Skelly alive for Werder', source:'beeper-sync' },
+  { id:1753514227000, type:'whatsapp', contact:'Rick Pattenden', club:'Nottingham Forest', date:'2026-07-26',
+    notes:'Timo morning outreach for 10-min call. Rick confirmed "ok to call you in one hour?" Call made at ~11am. Timo sent 3 Skelly Alvero PDFs: x PNE, x Middlesbrough, x WBA — identifying Championship clubs searching for a no.6. Voice note exchange. Later (19:11) sent EFP_Player_List.pdf with strict note: "for your eyes only for the basis of working together 🙏". Also mentioned Moussa Sylla (Schalke striker) as option.',
+    outcome:'Rick checking Championship clubs for Skelly. Player list shared confidentially — follow up on matches.', source:'beeper-sync' },
+  // JULY 25
+  { id:1753427246000, type:'whatsapp', contact:'Christian Weber', club:'SV Elversberg', date:'2026-07-25',
+    notes:'Follow-up on Tyler Bindon terms from Forest (sent July 25 morning): "He\'s 21 years old, has played over 100 senior games including being a top performer last season at a large Championship club, and featured in the World Cup. Asking price likely higher than TM market value but Forest remains open." Also added: currently earns £12k/week. Weber had reacted 👍 to the Forest availability update the previous evening.',
+    outcome:'Tyler Bindon follow-up sent to Elversberg — await feedback on price vs profile fit', source:'beeper-sync' },
   // JULY 18
   { id:1752836700000, type:'whatsapp', contact:'Romeo Castelen', club:'NEC Nijmegen', date:'2026-07-18',
     notes:'Romeo confirms Armstrong Oko-Flex (Levski Sofia, €2M release clause) fits NEC left winger need. Romeo: "I think this player fits perfect." NEC coach asked Romeo directly for a left winger. Romeo forwarded NEC scout list showing open positions including Links buiten.',
@@ -10069,7 +10137,7 @@ function openPdfExport() {
   const nList = document.getElementById('pdf-needs-list');
   nList.innerHTML = '';
   allNeeds.forEach((n, i) => {
-    const pos = Array.isArray(n.positions) ? n.positions.join(' · ') : (n.pos || '—');
+    const pos = _normPos(Array.isArray(n.positions) ? n.positions.join(' · ') : (n.pos || '—'));
     const bud = (n.budMin || n.budMax)
       ? [n.budMin, n.budMax].filter(Boolean).join('–')
       : (n.budget && n.budget !== '—' ? n.budget : '—');
@@ -10188,7 +10256,7 @@ function generatePdf() {
     body += `<div class="section">
       <div class="section-title">🎯 Club Needs (${selNeeds.length})</div>`;
     selNeeds.forEach(n => {
-      const pos  = Array.isArray(n.positions) ? n.positions.join(' · ') : (n.pos || '—');
+      const pos  = _normPos(Array.isArray(n.positions) ? n.positions.join(' · ') : (n.pos || '—'));
       const bud  = (n.budMin || n.budMax)
         ? [n.budMin, n.budMax].filter(Boolean).join('–')
         : (n.budget && n.budget !== '—' ? n.budget : '—');
@@ -10263,7 +10331,7 @@ function _appendNeedRow(n) {
   const budStr = (n.budMin || n.budMax)
     ? [_b(n.budMin), _b(n.budMax)].filter(Boolean).join('–')
     : (n.budget && n.budget !== '—' ? _b(n.budget) : '—');
-  const posStr = Array.isArray(n.positions) ? n.positions.join(' · ') : (n.pos || '—');
+  const posStr = _normPos(Array.isArray(n.positions) ? n.positions.join(' · ') : (n.pos || '—'));
   const urgStr = n.urgency || n.prio || 'open';
   const isUrgent = urgStr === 'urgent' || urgStr === 'Urgent';
   const dotCls = isUrgent ? 'dot-red' : 'dot-amber';
@@ -10310,6 +10378,7 @@ function deleteNeed(id, btn) {
   fbSave();
   renderDashboard();
   _updateNeedsSubtitle();
+  setTimeout(runMatchEngine, 400); // refresh AI Matches after need deleted
   showSnack('Requirement removed', false);
 }
 
@@ -12829,6 +12898,7 @@ function triggerSync() {
         _renderGlobalFeed();
         _renderDashFeed();
         changed += newEntries.length;
+        fbSave(); // persist merged Beeper entries so they survive refresh
       }
     }
 
