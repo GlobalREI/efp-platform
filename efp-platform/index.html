@@ -4432,6 +4432,12 @@ th.ds-sort:hover { background: rgba(30,58,95,.06); }
           <option>Contacted</option><option>Interested</option><option>Rejected</option><option>Closed</option>
           <option>Not Relevant</option>
         </select>
+        <select id="mf-priority" class="field-select" onchange="renderMatches()" style="width:130px;font-size:13px;padding:6px 10px">
+          <option value="">All priorities</option>
+          <option value="1">⭐ Priority 1</option>
+          <option value="2">🔵 Priority 2</option>
+          <option value="3">⚪ Priority 3</option>
+        </select>
         <div style="display:flex;align-items:center;gap:8px;margin-left:auto">
           <span style="font-size:12px;color:var(--text3)">Min score</span>
           <input type="range" id="mf-score" min="50" max="95" value="65" oninput="document.getElementById('mf-score-val').textContent=this.value+'%';renderMatches()" style="width:100px;accent-color:var(--accent)">
@@ -7834,6 +7840,7 @@ function renderMatches() {
   const fClub     = (document.getElementById('mf-club')?.value || '').toLowerCase();
   const fPos      = document.getElementById('mf-pos')?.value || '';
   const fStatus   = document.getElementById('mf-status')?.value || '';
+  const fPriority = document.getElementById('mf-priority')?.value || '';
 
   let filtered = matchesData.filter(m => {
     if (m.score < minScore) return false;
@@ -7843,6 +7850,10 @@ function renderMatches() {
     // Hide "Not Relevant" by default — only show when explicitly filtering for it
     if (!fStatus && m.status === 'Not Relevant') return false;
     if (fStatus && m.status !== fStatus) return false;
+    if (fPriority) {
+      const mPrio = playerNotes[m.playerName]?.priority;
+      if (!mPrio || String(mPrio) !== fPriority) return false;
+    }
     return true;
   });
 
