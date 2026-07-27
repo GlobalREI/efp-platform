@@ -8894,7 +8894,35 @@ let logsAdded       = [   // {id,type,notes,date,duration,outcome,contact,club,s
     outcome:'✅ CLOSED: Entrup → Eintracht Braunschweig (permanent). Deal confirmed.', source:'beeper-sync' },
 ];
 // ── Beeper PDF Pitch Alerts (appended by scheduled sync task) ──
-let pendingPitchAlerts = []; // {id, player, club, date, sender}
+let pendingPitchAlerts = [
+  // ── Manual 2-week backfill (Jul 23–27, 2026) ──
+  { id: 1785157911000, player: "Moussa Sylla", club: "Galatasaray", date: "2026-07-27", sender: "Timo" },
+  { id: 1785157826000, player: "Moussa Sylla", club: "Besiktas", date: "2026-07-27", sender: "Timo" },
+  { id: 1785183457000, player: "Kévin Monzialo", club: "Kocaelispor", date: "2026-07-27", sender: "Fynn" },
+  { id: 1785182681000, player: "Kévin Monzialo", club: "Erzurum", date: "2026-07-27", sender: "Fynn" },
+  { id: 1785179719000, player: "Art Smakaj", club: "Erzurum", date: "2026-07-27", sender: "Fynn" },
+  { id: 1785158917000, player: "Christian Gomis", club: "Basaksehir", date: "2026-07-27", sender: "Fynn" },
+  { id: 1785158906000, player: "Samuel Adeniran", club: "Basaksehir", date: "2026-07-27", sender: "Fynn" },
+  { id: 1785178500000, player: "Festy Ebosele", club: "HSV", date: "2026-07-27", sender: "Fynn" },
+  { id: 1785156900000, player: "Christian Gomis", club: "Samsunspor", date: "2026-07-27", sender: "Fynn" },
+  { id: 1785154036000, player: "Moses Usor", club: "Galatasaray", date: "2026-07-27", sender: "Fynn" },
+  { id: 1785153419000, player: "Moses Usor", club: "Besiktas", date: "2026-07-27", sender: "Fynn" },
+  { id: 1785066694000, player: "Tyler Bindon", club: "Club Brugge", date: "2026-07-26", sender: "Fynn" },
+  { id: 1785065642000, player: "Tyler Bindon", club: "PSV", date: "2026-07-26", sender: "Fynn" },
+  { id: 1785063125000, player: "Tyler Bindon", club: "Werder Bremen", date: "2026-07-26", sender: "Fynn" },
+  { id: 1785061126000, player: "Dompé", club: "Al-Taawoun FC", date: "2026-07-26", sender: "Fynn" },
+  { id: 1785059232000, player: "Skelly Alvero", club: "FC Middlesbrough", date: "2026-07-26", sender: "Fynn" },
+  { id: 1785058300000, player: "Skelly Alvero", club: "PNE", date: "2026-07-26", sender: "Fynn" },
+  { id: 1785014065000, player: "Skelly Alvero", club: "WBA", date: "2026-07-25", sender: "Fynn" },
+  { id: 1784999195000, player: "Moussa Sylla", club: "Trabzonspor", date: "2026-07-25", sender: "Fynn" },
+  { id: 1784994598000, player: "Christian Gomis", club: "Greuther Fürth", date: "2026-07-25", sender: "Fynn" },
+  { id: 1784922552000, player: "Tyler Bindon", club: "SV Elversberg", date: "2026-07-24", sender: "Fynn" },
+  { id: 1784920417000, player: "Othmane Maamma", club: "SGE (Eintracht Frankfurt)", date: "2026-07-24", sender: "Fynn" },
+  { id: 1784919958000, player: "Cedric Hatenboer", club: "SV Elversberg", date: "2026-07-24", sender: "Fynn" },
+  { id: 1784840758000, player: "Vitalie Becker", club: "UD Levante", date: "2026-07-23", sender: "Fynn" },
+  { id: 1784840291000, player: "Vitalie Becker", club: "RSCA (Anderlecht)", date: "2026-07-23", sender: "Fynn" },
+  { id: 1784840146000, player: "Vitalie Becker", club: "Club Brugge", date: "2026-07-23", sender: "Fynn" },
+]; // {id, player, club, date, sender}
 
 let tasksAdded      = [];   // {id,text,meta,prio,bucket,overdue} — user-created tasks only
 
