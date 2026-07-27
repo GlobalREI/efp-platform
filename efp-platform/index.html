@@ -3985,7 +3985,7 @@ th.ds-sort:hover { background: rgba(30,58,95,.06); }
       <div class="page-header">
         <div class="page-title-block">
           <div class="page-title">Player Mandates</div>
-          <div class="page-subtitle" id="mandates-subtitle">29 active mandates · Summer 2026 window</div>
+          <div class="page-subtitle" id="mandates-subtitle">— active mandates · Summer 2026 window</div>
         </div>
         <input id="mandates-search" type="text" class="view-search" placeholder="🔍  Search player, position, club…" oninput="filterMandates(this.value)" style="width:240px">
         <select class="btn btn-outline btn-sm" style="padding:5px 10px;font-size:12px;cursor:pointer" onchange="_sortMandates(this.value);this.blur()">
@@ -6135,6 +6135,7 @@ function efpInitFirebase() {
 
       // ── Sync Intelligence Banner ──
       if (d.syncLog) _checkSyncIntelligence(d.syncLog);
+      _checkPitchAlerts();
 
       // Update sync timestamp on every receive
       _fbSetSynced();
@@ -6516,7 +6517,7 @@ function _renderContactsTable() {
   // DS: sorting + pagination
   if (window._DS) {
     const tbl = tbody.closest('table');
-    if (tbl) { _DS.initTableSort(tbl); _DS.initTablePagination(tbl, 25); }
+    if (tbl) { _DS.initTableSort(tbl); _DS.initTablePagination(tbl, 50); }
   }
   // Re-apply search filter if user has typed something
   const _csEl = document.getElementById('contacts-search');
@@ -6594,7 +6595,7 @@ function _renderMandatesTable() {
   // DS: sorting + pagination
   if (window._DS) {
     const tbl = tbody.closest('table');
-    if (tbl) { _DS.initTableSort(tbl); _DS.initTablePagination(tbl, 25); }
+    if (tbl) { _DS.initTableSort(tbl); _DS.initTablePagination(tbl, 50); }
   }
   // Rebuild player dropdown
   const sel = document.getElementById('fp-player');
@@ -6668,7 +6669,7 @@ function _renderNeedsTable() {
   // DS: sorting + pagination
   if (window._DS) {
     const tbl = tbody.closest('table');
-    if (tbl) { _DS.initTableSort(tbl); _DS.initTablePagination(tbl, 25); }
+    if (tbl) { _DS.initTableSort(tbl); _DS.initTablePagination(tbl, 50); }
   }
   // Re-apply search if user has typed something
   const _nsEl = document.getElementById('needs-search');
@@ -6765,20 +6766,26 @@ function openSyncReview() {
       setTimeout(dismissSyncBanner, 800);
       return;
     }
-    listEl.innerHTML = _syncReviewItems.map(item => `
+    listEl.innerHTML = _syncReviewItems.map(item => {
+      const badge = item.type === 'club-need'
+        ? '<span style="font-size:10px;font-weight:700;padding:2px 7px;border-radius:4px;background:#EFF6FF;color:#1d4ed8">🏟 Club Need</span>'
+        : item.type === 'pitch-alert'
+        ? '<span style="font-size:10px;font-weight:700;padding:2px 7px;border-radius:4px;background:#FFF7ED;color:#c2410c">📄 Pitch Alert</span>'
+        : '<span style="font-size:10px;font-weight:700;padding:2px 7px;border-radius:4px;background:#F0FDF4;color:#15803d">⚽ Player Signal</span>';
+      const addLabel = item.type === 'pitch-alert' ? 'Add to Pitches' : 'Add';
+      return `
       <div style="border:1px solid var(--border);border-radius:10px;padding:14px 16px;display:flex;align-items:center;gap:12px">
         <div style="flex:1;min-width:0">
-          <div style="display:flex;align-items:center;gap:8px;margin-bottom:3px">
-            <span style="font-size:10px;font-weight:700;padding:2px 7px;border-radius:4px;${item.type === 'club-need' ? 'background:#EFF6FF;color:#1d4ed8' : 'background:#F0FDF4;color:#15803d'}">${item.type === 'club-need' ? '🏟 Club Need' : '⚽ Player Signal'}</span>
-          </div>
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:3px">${badge}</div>
           <div style="font-size:14px;font-weight:600;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${item.label}</div>
           ${item.detail ? `<div style="font-size:12px;color:var(--text3);margin-top:2px">${item.detail}</div>` : ''}
         </div>
         <div style="display:flex;gap:8px;flex-shrink:0">
-          <button onclick="_syncAddItem('${item.id}')" style="background:var(--navy);color:#fff;border:none;border-radius:7px;padding:6px 14px;font-size:12px;font-weight:600;cursor:pointer">Add</button>
+          <button onclick="_syncAddItem('${item.id}')" style="background:var(--navy);color:#fff;border:none;border-radius:7px;padding:6px 14px;font-size:12px;font-weight:600;cursor:pointer">${addLabel}</button>
           <button onclick="_syncIgnoreItem('${item.id}')" style="background:none;border:1px solid var(--border);border-radius:7px;padding:6px 12px;font-size:12px;color:var(--text3);cursor:pointer">Ignore</button>
         </div>
-      </div>`).join('');
+      </div>`;
+    }).join('');
     // Store renderList so item actions can re-render
     listEl._render = renderList;
   }
@@ -6822,6 +6829,46 @@ function _syncAddItem(id) {
       if (clubEl && data && data.club) clubEl.value = data.club;
       if (posEl  && data && data.pos)  posEl.value  = data.pos;
     }, 100);
+  } else if (item.type === 'pitch-alert') {
+    // Open pitch drawer pre-filled with detected player + club
+    go('pitches');
+    setTimeout(() => {
+      openPitchDrawer();
+      setTimeout(() => {
+        const { player, club } = item.data;
+        // Match player name to fp-player option by text content
+        const fpPlayer = document.getElementById('fp-player');
+        if (fpPlayer && player) {
+          const lp = player.toLowerCase();
+          let matched = false;
+          for (const opt of fpPlayer.options) {
+            const optName = opt.textContent.split(' — ')[0].trim().toLowerCase();
+            if (optName === lp) { fpPlayer.value = opt.value; matched = true; break; }
+          }
+          if (!matched) {
+            // Partial match fallback — first word of player name
+            const firstWord = lp.split(' ')[0];
+            for (const opt of fpPlayer.options) {
+              if (opt.textContent.toLowerCase().includes(firstWord)) {
+                fpPlayer.value = opt.value; break;
+              }
+            }
+          }
+        }
+        // Match club name to fp-club option by text content
+        const fpClub = document.getElementById('fp-club');
+        if (fpClub && club) {
+          const lc = club.toLowerCase();
+          for (const opt of fpClub.options) {
+            if (opt.textContent.toLowerCase().includes(lc)) {
+              fpClub.value = opt.value; break;
+            }
+          }
+        }
+        updateContacts();
+        updatePitchPreview();
+      }, 150);
+    }, 400);
   } else {
     // Navigate to mandates for manual add
     go('mandates');
@@ -6841,6 +6888,30 @@ function dismissSyncBanner() {
     localStorage.setItem('efp-sync-ignored', JSON.stringify(ignored));
     _syncReviewItems = [];
   }
+}
+
+function _checkPitchAlerts() {
+  if (!pendingPitchAlerts || !pendingPitchAlerts.length) return;
+  const ignored = JSON.parse(localStorage.getItem('efp-sync-ignored') || '[]');
+  pendingPitchAlerts.forEach(alert => {
+    const id = 'pitch_' + alert.id;
+    if (ignored.includes(id)) return;
+    if (_syncReviewItems.some(i => i.id === id)) return; // no duplicates
+    _syncReviewItems.push({
+      id,
+      type: 'pitch-alert',
+      label: `${alert.player} → ${alert.club}`,
+      detail: `PDF pitch detected via Beeper · ${alert.sender} · ${alert.date}`,
+      data: { player: alert.player, club: alert.club }
+    });
+  });
+  if (!_syncReviewItems.length) return;
+  const banner = document.getElementById('sync-intel-banner');
+  const textEl = document.getElementById('sync-intel-text');
+  if (!banner || !textEl) return;
+  const n = _syncReviewItems.length;
+  textEl.innerHTML = `<strong>${n} item${n > 1 ? 's' : ''} to review</strong> — add to your database or dismiss`;
+  banner.style.display = 'flex';
 }
 
 // Save all mutable data to Firebase
@@ -6888,9 +6959,11 @@ function fbSave() {
     allClubs,
   };
   if (window._DS) _DS.setSyncState('saving');
+  // Safety net: if Firebase doesn't respond in 12s, reset badge so it doesn't stick on "Saving…"
+  const _fbSaveGuard = setTimeout(() => { if (window._DS) _DS.setSyncState('idle'); }, 12000);
   _fbDb.ref('efp').update(payload)
-    .then(() => { _fbSetSynced(); if (window._DS) _DS.setSyncState('saved'); })
-    .catch(e => { console.warn('fbSave error:', e.message); if (window._DS) _DS.setSyncState('error'); });
+    .then(() => { clearTimeout(_fbSaveGuard); _fbSetSynced(); if (window._DS) _DS.setSyncState('saved'); })
+    .catch(e => { clearTimeout(_fbSaveGuard); console.warn('fbSave error:', e.message); if (window._DS) _DS.setSyncState('error'); });
 }
 
 document.addEventListener('DOMContentLoaded', efpAuthCheck);
@@ -8820,6 +8893,9 @@ let logsAdded       = [   // {id,type,notes,date,duration,outcome,contact,club,s
     notes:'DEAL CLOSED: Entrup signed with Eintracht Braunschweig (permanent transfer). Sandro Sitter confirmed: "Gut für Braunschweig. Bin gespannt wie er sich schlägt." Timo: "Onto the next 🙏"',
     outcome:'✅ CLOSED: Entrup → Eintracht Braunschweig (permanent). Deal confirmed.', source:'beeper-sync' },
 ];
+// ── Beeper PDF Pitch Alerts (appended by scheduled sync task) ──
+let pendingPitchAlerts = []; // {id, player, club, date, sender}
+
 let tasksAdded      = [];   // {id,text,meta,prio,bucket,overdue} — user-created tasks only
 
 // ── Unified single-source-of-truth arrays (Firebase-backed after migration) ──
@@ -8877,6 +8953,9 @@ function submitContact() {
     const li  = (document.getElementById('c-li')?.value||'').trim();
     if (idx !== -1) {
       allContacts[idx] = { ...allContacts[idx], name:`${first} ${last}`, role:pos, club, email, phone, wa, linkedin:li, notes, stage };
+      // Also keep contactsAdded in sync so _findContactByName sees latest data
+      const caIdx = contactsAdded.findIndex(x => x.id === editId);
+      if (caIdx !== -1) contactsAdded[caIdx] = { ...contactsAdded[caIdx], name:`${first} ${last}`, role:pos, club, email, phone, wa, linkedin:li, notes, stage };
     }
     if (drawer) delete drawer.dataset.editId;
     // Reset drawer title/button to "Add" mode
@@ -8890,6 +8969,12 @@ function submitContact() {
     closeDrawer('contact');
     showSnack('✓ Contact updated', false);
     fbSave(); renderDashboard(); _refreshAllInterconnections();
+    // Refresh any open contact views with the latest data
+    if (_cddCurrentId === editId) openContactDetail(editId);
+    const cpView = document.getElementById('view-contact-detail');
+    if (cpView && cpView.classList.contains('active') && idx !== -1) {
+      _openContactByName(allContacts[idx].name);
+    }
     return;
   }
   const wa  = (document.getElementById('c-wa')?.value||'').trim();
@@ -9073,7 +9158,7 @@ function _renderClubsTable() {
   // DS: sorting + pagination
   if (window._DS) {
     const tbl = tbody.closest('table');
-    if (tbl) { _DS.initTableSort(tbl); _DS.initTablePagination(tbl, 25); }
+    if (tbl) { _DS.initTableSort(tbl); _DS.initTablePagination(tbl, 50); }
   }
 }
 
@@ -10244,7 +10329,7 @@ function filterMandates(q) {
   });
   const sub = document.getElementById('mandates-subtitle');
   if (sub && q) sub.textContent = `${vis} mandate${vis !== 1 ? 's' : ''} matching "${document.getElementById('mandates-search').value}"`;
-  else if (sub) sub.textContent = allMandates.length + ' active mandates · Summer 2026 window';
+  else _updateMandateSubtitle();
 }
 
 function filterRel(q) {
@@ -13467,20 +13552,28 @@ function _openContactByName(rawName) {
   setEl('cd-name', c.name);
   setEl('cd-role', (c.role || '') + (c.club ? ' · ' + c.club : ''));
   setEl('cd-location-tag', c.club ? '🏟 ' + c.club : '📍 —');
+  const hasContactData = !!(c.email || c.phone || c.wa || c.linkedin);
   const dt = document.getElementById('cd-days-tag');
-  if (dt) { dt.textContent = '⏰ No contact data'; dt.style.color = 'var(--text3)'; dt.style.borderColor = ''; }
-  setEl('cd-score-tag', 'New Contact');
+  if (dt) {
+    if (hasContactData) { dt.textContent = '📋 User contact'; dt.style.color = 'var(--navy)'; dt.style.borderColor = 'var(--navy)'; }
+    else { dt.textContent = '⏰ No contact data'; dt.style.color = 'var(--text3)'; dt.style.borderColor = ''; }
+  }
+  const stageLabel = c.stage || 'New Contact';
+  const stageDot   = c.stage && c.stage !== 'New Contact' ? 'dot-green' : 'dot-navy';
+  setEl('cd-score-tag', stageLabel);
   const bar = document.getElementById('cd-score-bar');
   if (bar) bar.innerHTML = Array(10).fill('<div class="score-seg"></div>').join('');
-  setEl('cd-score-text', '— / 10 · New Contact');
+  setEl('cd-score-text', '— / 10 · ' + stageLabel);
   setEl('cd-last-contact', '—');
-  setEl('cd-next-followup', 'Reach out to build the relationship');
-  setH('cd-stage', '<div class="status"><span class="dot dot-navy"></span> New Contact</div>');
-  setH('cd-insight-text', 'User-added contact — full profile not yet available for <strong>' + c.name + '</strong>.');
-  setH('cd-email',     c.email    ? `<a>${c.email}</a>`    : '<span class="miss">Not recorded</span>');
-  setH('cd-phone',     c.phone    ? c.phone                : '<span class="miss">Not recorded</span>');
-  setH('cd-wa',        '<span class="miss">Not recorded</span>');
-  setH('cd-linkedin',  '<span class="miss">Not recorded</span>');
+  setEl('cd-next-followup', c.notes ? c.notes.split('.')[0] : 'Reach out to build the relationship');
+  setH('cd-stage', `<div class="status"><span class="dot ${stageDot}"></span> ${stageLabel}</div>`);
+  setH('cd-insight-text', hasContactData
+    ? 'User-added contact · ' + stageLabel + (c.club ? ' · ' + c.club : '')
+    : 'User-added contact — add contact details to track this relationship.');
+  setH('cd-email',     c.email    ? `<a href="mailto:${c.email}">${c.email}</a>` : '<span class="miss">Not recorded</span>');
+  setH('cd-phone',     c.phone    ? c.phone                                       : '<span class="miss">Not recorded</span>');
+  setH('cd-wa',        c.wa       ? c.wa                                           : '<span class="miss">Not recorded</span>');
+  setH('cd-linkedin',  c.linkedin ? `<a href="${c.linkedin}" target="_blank">View Profile</a>` : '<span class="miss">Not recorded</span>');
   setH('cd-assistant', '<span class="miss">Not recorded</span>');
   // Pitches to this club
   const pt = document.getElementById('cd-pitches-title');
@@ -13896,11 +13989,11 @@ function _renderDashNeeds() {
 }
 
 function _updateMandateSubtitle() {
-  const tbody = document.querySelector('#view-mandates .data-table tbody');
-  const sub   = document.getElementById('mandates-subtitle');
-  if (!sub || !tbody) return;
-  const count = tbody.querySelectorAll('tr').length;
-  sub.textContent = `${count} active mandates · Summer 2026 window`;
+  const sub = document.getElementById('mandates-subtitle');
+  if (!sub) return;
+  const active   = allMandates.filter(m => !m.archived).length;
+  const archived = allMandates.filter(m => m.archived).length;
+  sub.textContent = `${active} active mandate${active !== 1 ? 's' : ''}${archived ? ' · ' + archived + ' archived' : ''} · Summer 2026 window`;
 }
 
 function _updateNeedsSubtitle() {
