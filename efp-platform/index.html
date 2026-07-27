@@ -2400,11 +2400,29 @@ th.ds-sort:hover { background: rgba(30,58,95,.06); }
     </button>
   </div>
 
-  <!-- ── Sync Intelligence Banner ─────────────────────────────────────── -->
-  <div id="sync-intel-banner" style="display:none;background:linear-gradient(90deg,#1B3A6B,#2563EB);color:#fff;padding:10px 20px;font-size:13px;align-items:center;gap:12px;position:relative">
+  <!-- ── Sync Review Banner ─────────────────────────────────────────── -->
+  <div id="sync-intel-banner" style="display:none;background:linear-gradient(90deg,#1B3A6B,#2563EB);color:#fff;padding:10px 20px;font-size:13px;align-items:center;gap:12px">
     <span style="font-size:16px">🔔</span>
     <span id="sync-intel-text" style="flex:1"></span>
+    <button onclick="openSyncReview()" style="background:#fff;border:none;border-radius:5px;color:#1B3A6B;font-size:12px;font-weight:700;padding:5px 12px;cursor:pointer">Review →</button>
     <button onclick="dismissSyncBanner()" style="background:rgba(255,255,255,.2);border:none;border-radius:5px;color:#fff;font-size:12px;padding:4px 10px;cursor:pointer">Dismiss</button>
+  </div>
+
+  <!-- ── Sync Review Modal ───────────────────────────────────────────── -->
+  <div id="sync-review-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:3000;align-items:center;justify-content:center" onclick="if(event.target===this)closeSyncReview()">
+    <div style="background:var(--surface);border-radius:14px;width:560px;max-width:95vw;max-height:80vh;display:flex;flex-direction:column;box-shadow:0 20px 60px rgba(0,0,0,.25)">
+      <div style="padding:20px 24px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between">
+        <div>
+          <div style="font-size:16px;font-weight:700;color:var(--text)">Sync — Items to Review</div>
+          <div style="font-size:12px;color:var(--text3);margin-top:2px">Add to your database or ignore each item</div>
+        </div>
+        <button onclick="closeSyncReview()" style="background:none;border:none;font-size:18px;color:var(--text3);cursor:pointer">✕</button>
+      </div>
+      <div id="sync-review-list" style="overflow-y:auto;padding:16px 24px;flex:1;display:flex;flex-direction:column;gap:12px"></div>
+      <div style="padding:14px 24px;border-top:1px solid var(--border);display:flex;justify-content:flex-end">
+        <button onclick="closeSyncReview()" style="background:none;border:1px solid var(--border);border-radius:7px;padding:7px 16px;font-size:13px;cursor:pointer;color:var(--text2)">Close</button>
+      </div>
+    </div>
   </div>
 
   <div class="content">
@@ -6686,52 +6704,143 @@ function _editContact(id) {
   openDrawer('contact');
 }
 
-// ─── SYNC INTELLIGENCE BANNER ────────────────────────────────────────────────
+// ─── SYNC REVIEW BANNER ──────────────────────────────────────────────────────
+let _syncReviewItems = []; // {id, type:'club-need'|'mandate', label, detail, data}
+
 function _checkSyncIntelligence(syncLog) {
-  const banner  = document.getElementById('sync-intel-banner');
-  const textEl  = document.getElementById('sync-intel-text');
+  const banner = document.getElementById('sync-intel-banner');
+  const textEl = document.getElementById('sync-intel-text');
   if (!banner || !textEl) return;
 
-  // Don't re-show if already dismissed this session
-  const lastDismiss = sessionStorage.getItem('efp-sync-banner-dismissed');
-
-  // Collect all sync runs from the log
+  // Collect all sync runs
   const runs = ['morning', 'midday', 'evening'].map(k => syncLog[k]).filter(Boolean);
   if (!runs.length) return;
 
-  // Find the most recent run
   const latest = runs.sort((a, b) => (b.runAt || '').localeCompare(a.runAt || ''))[0];
   if (!latest || !latest.runAt) return;
 
-  // Don't show if dismissed after this run
-  if (lastDismiss && lastDismiss >= latest.runAt) return;
+  // Use localStorage so dismiss persists across sessions
+  const dismissedKey = 'efp-sync-dismissed-' + latest.runAt;
+  if (localStorage.getItem(dismissedKey)) return;
 
-  // Build intelligence summary
-  const items = [];
-  const feedback = (latest.newPitchFeedback || []).filter(f => f && (typeof f === 'string' ? f : f.player));
-  const needs    = (latest.newClubNeeds     || []).filter(Boolean);
-  const mandates = (latest.newPlayerOffersFromClubs || []).filter(Boolean);
-  const pitchSent= (latest.newPitchesSent   || []).filter(Boolean);
-  const urgent   = (latest.urgentItems      || []).filter(Boolean);
+  // Only collect actionable items: new club needs + mandate signals
+  const ignored = JSON.parse(localStorage.getItem('efp-sync-ignored') || '[]');
+  const rawNeeds    = (latest.newClubNeeds || []).filter(Boolean);
+  const rawMandates = (latest.newPlayerOffersFromClubs || []).filter(Boolean);
 
-  if (feedback.length)  items.push(`${feedback.length} pitch feedback${feedback.length > 1 ? 's' : ''}`);
-  if (needs.length)     items.push(`${needs.length} new club need${needs.length > 1 ? 's' : ''}`);
-  if (mandates.length)  items.push(`${mandates.length} new mandate${mandates.length > 1 ? 's' : ''} from clubs`);
-  if (pitchSent.length) items.push(`${pitchSent.length} pitch${pitchSent.length > 1 ? 'es' : ''} sent`);
-  if (urgent.length)    items.push(`${urgent.length} urgent item${urgent.length > 1 ? 's' : ''}`);
+  _syncReviewItems = [];
+  rawNeeds.forEach((n, i) => {
+    const id = 'need_' + latest.runAt + '_' + i;
+    if (!ignored.includes(id)) {
+      const label  = typeof n === 'string' ? n : (n.club || 'Unknown club');
+      const detail = typeof n === 'string' ? '' : [n.pos, n.budget].filter(Boolean).join(' · ');
+      _syncReviewItems.push({ id, type: 'club-need', label, detail, data: n });
+    }
+  });
+  rawMandates.forEach((m, i) => {
+    const id = 'mandate_' + latest.runAt + '_' + i;
+    if (!ignored.includes(id)) {
+      const label  = typeof m === 'string' ? m : (m.player || m.name || 'Unknown player');
+      const detail = typeof m === 'string' ? '' : [m.club, m.pos].filter(Boolean).join(' · ');
+      _syncReviewItems.push({ id, type: 'mandate', label, detail, data: m });
+    }
+  });
 
-  if (!items.length) return;
+  if (!_syncReviewItems.length) return;
 
-  const runTime = new Date(latest.runAt).toLocaleTimeString('en-GB', {hour:'2-digit', minute:'2-digit'});
-  textEl.innerHTML = `<strong>Sync found new intelligence</strong> (${runTime}): ${items.join(', ')}. <a href="#" onclick="go('activity');dismissSyncBanner();return false;" style="color:#93C5FD;text-decoration:underline">View Activity feed →</a>`;
+  const n = _syncReviewItems.length;
+  textEl.innerHTML = `<strong>Sync found ${n} item${n > 1 ? 's' : ''} to review</strong> — add to your database or dismiss`;
   banner.style.display = 'flex';
+}
+
+function openSyncReview() {
+  const modal   = document.getElementById('sync-review-modal');
+  const listEl  = document.getElementById('sync-review-list');
+  if (!modal || !listEl) return;
+
+  function renderList() {
+    if (!_syncReviewItems.length) {
+      listEl.innerHTML = '<div style="text-align:center;padding:32px;color:var(--text3);font-size:13px">All items reviewed — you\'re up to date ✓</div>';
+      // Auto-dismiss banner
+      setTimeout(dismissSyncBanner, 800);
+      return;
+    }
+    listEl.innerHTML = _syncReviewItems.map(item => `
+      <div style="border:1px solid var(--border);border-radius:10px;padding:14px 16px;display:flex;align-items:center;gap:12px">
+        <div style="flex:1;min-width:0">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:3px">
+            <span style="font-size:10px;font-weight:700;padding:2px 7px;border-radius:4px;${item.type === 'club-need' ? 'background:#EFF6FF;color:#1d4ed8' : 'background:#F0FDF4;color:#15803d'}">${item.type === 'club-need' ? '🏟 Club Need' : '⚽ Player Signal'}</span>
+          </div>
+          <div style="font-size:14px;font-weight:600;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${item.label}</div>
+          ${item.detail ? `<div style="font-size:12px;color:var(--text3);margin-top:2px">${item.detail}</div>` : ''}
+        </div>
+        <div style="display:flex;gap:8px;flex-shrink:0">
+          <button onclick="_syncAddItem('${item.id}')" style="background:var(--navy);color:#fff;border:none;border-radius:7px;padding:6px 14px;font-size:12px;font-weight:600;cursor:pointer">Add</button>
+          <button onclick="_syncIgnoreItem('${item.id}')" style="background:none;border:1px solid var(--border);border-radius:7px;padding:6px 12px;font-size:12px;color:var(--text3);cursor:pointer">Ignore</button>
+        </div>
+      </div>`).join('');
+    // Store renderList so item actions can re-render
+    listEl._render = renderList;
+  }
+
+  renderList();
+  modal.style.display = 'flex';
+}
+
+function closeSyncReview() {
+  const modal = document.getElementById('sync-review-modal');
+  if (modal) modal.style.display = 'none';
+}
+
+function _syncIgnoreItem(id) {
+  _syncReviewItems = _syncReviewItems.filter(i => i.id !== id);
+  // Persist ignored ID so it doesn't reappear
+  const ignored = JSON.parse(localStorage.getItem('efp-sync-ignored') || '[]');
+  ignored.push(id);
+  localStorage.setItem('efp-sync-ignored', JSON.stringify(ignored));
+  const listEl = document.getElementById('sync-review-list');
+  if (listEl && listEl._render) listEl._render();
+  // Update banner count
+  const textEl = document.getElementById('sync-intel-text');
+  if (textEl && _syncReviewItems.length) {
+    const n = _syncReviewItems.length;
+    textEl.innerHTML = `<strong>Sync found ${n} item${n > 1 ? 's' : ''} to review</strong> — add to your database or dismiss`;
+  }
+}
+
+function _syncAddItem(id) {
+  const item = _syncReviewItems.find(i => i.id === id);
+  if (!item) return;
+  closeSyncReview();
+  if (item.type === 'club-need') {
+    // Pre-fill club need drawer with what we know
+    const data = item.data;
+    openDrawer('req');
+    setTimeout(() => {
+      const clubEl = document.getElementById('r-club');
+      const posEl  = document.getElementById('r-pos');
+      if (clubEl && data && data.club) clubEl.value = data.club;
+      if (posEl  && data && data.pos)  posEl.value  = data.pos;
+    }, 100);
+  } else {
+    // Navigate to mandates for manual add
+    go('mandates');
+    setTimeout(() => showSnack(`Add mandate for: ${item.label}`, false), 400);
+  }
+  // Remove from review list
+  _syncIgnoreItem(id);
 }
 
 function dismissSyncBanner() {
   const banner = document.getElementById('sync-intel-banner');
   if (banner) banner.style.display = 'none';
-  // Remember dismissal for this session so it doesn't reappear on next Firebase tick
-  sessionStorage.setItem('efp-sync-banner-dismissed', new Date().toISOString());
+  // Mark all current items as ignored
+  if (_syncReviewItems.length) {
+    const ignored = JSON.parse(localStorage.getItem('efp-sync-ignored') || '[]');
+    _syncReviewItems.forEach(i => { if (!ignored.includes(i.id)) ignored.push(i.id); });
+    localStorage.setItem('efp-sync-ignored', JSON.stringify(ignored));
+    _syncReviewItems = [];
+  }
 }
 
 // Save all mutable data to Firebase
@@ -8311,6 +8420,18 @@ function openDrawer(key) {
     ov._dsClickBound = true;
     ov.addEventListener('click', function (e) {
       if (e.target === ov) closeDrawer(key);
+    });
+  }
+  // Always reset the Add Club form to blank when opening fresh
+  if (key === 'club') {
+    ['cl-name','cl-web','cl-sd','cl-hor','cl-ceo','cl-coach','cl-notes'].forEach(id => {
+      const el = document.getElementById(id); if (el) el.value = '';
+    });
+    ['cl-country','cl-league'].forEach(id => {
+      const el = document.getElementById(id); if (el) el.value = '';
+    });
+    ['cl-name','cl-country','cl-league','cl-web','cl-sd','cl-hor','cl-ceo','cl-coach'].forEach(id => {
+      const el = document.getElementById(id); if (el) el.style.borderColor = '';
     });
   }
 }
