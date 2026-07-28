@@ -8758,7 +8758,7 @@ let needsAdded      = [];   // {id,club,pos,ageMin,ageMax,budMin,budMax,prio,con
 let playerNotes     = {};   // {[playerName]: {status, notes}} — editable player profile notes
 let clubData        = {};   // {[clubName]: {league,country,flag,status,notes,linkedContacts:[{name,role}]}}
 let logsAdded       = [   // {id,type,notes,date,duration,outcome,contact,club,source}
-  // ── Beeper-synced interactions (last synced 2026-07-27) ──
+  // ── Beeper-synced interactions (last synced 2026-07-28) ──
   // JULY 27
   { id:1753643700000, type:'whatsapp', contact:'Fynn Buggenthien', club:'Hamburger SV', date:'2026-07-27',
     notes:'Fynn submitted EFP x Festy Ebosele x HSV pitch PDF in EFP internal group. Active multi-club outreach day across Germany and Turkey.',
@@ -8781,6 +8781,18 @@ let logsAdded       = [   // {id,type,notes,date,duration,outcome,contact,club,s
   { id:1753610348000, type:'whatsapp', contact:'Rick Pattenden', club:'Nottingham Forest', date:'2026-07-27',
     notes:'Rick reviewing EFP Player List sent yesterday: "I\'m in the office now reviewing this but think we can do some good work here for sure." Timo: "Happy to have a chat later today or tomorrow to go through them with my head of football." Collaboration momentum strong after yesterday\'s call.',
     outcome:'Schedule call with Rick + head of football to go through EFP player list', source:'beeper-sync' },
+  { id:1785189780000, type:'whatsapp', contact:'Timo / Fynn', club:'RSC Anderlecht', date:'2026-07-27',
+    notes:'Timo forwarded RSC Anderlecht\'s official transfer requirement brief to Fynn (sourced from David Verwilghen / Anderlecht). Priorities: RW and LW (dribbling, 1v1 threat, chance creation, decisive). Also seeking without major spend (free/loan): RCB (athletic, ball-winning, build-up), LB and RB (playmaking + solid). Depending on outgoing: DM (holding, tempo, build-up), technical/efficient striker.',
+    outcome:'Map EFP player pool against Anderlecht needs — RW/LW priority, RCB + fullbacks secondary', source:'beeper-sync' },
+  { id:1785170040000, type:'whatsapp', contact:'Alexandre Wacker', club:'', date:'2026-07-27',
+    notes:'Alexandre Wacker (Swiss contact) called Timo at 16:34 — incoming call, missed/unread. No recent text context. Message still unread.',
+    outcome:'Call back Alexandre Wacker', source:'beeper-sync' },
+  { id:1785154560000, type:'whatsapp', contact:'Sebastian Dirscherl', club:'Hamburger SV', date:'2026-07-27',
+    notes:'New contact outreach to Sebastian Dirscherl at HSV. Timo: "Moin Sebastian, Claus hat mich gebeten bei dir zu melden. Hast du 15min für mich heute?" Referred by Claus (HSV connection). No reply yet.',
+    outcome:'Await reply from Sebastian Dirscherl (HSV) — follow up Thursday if no response', source:'beeper-sync' },
+  { id:1785139200000, type:'whatsapp', contact:'Christian Weber', club:'SV Elversberg', date:'2026-07-27',
+    notes:'Timo followed up with Christian Weber to check if he had reviewed the Tyler Bindon and Cedric Hatenboer profiles sent July 24. Weber had reacted positively to Cedric\'s profile ("Ja das Profil passt"). Tyler\'s Anderlecht price expectation (~2.6M) may be too high for Elversberg.',
+    outcome:'Await Weber feedback on Tyler pricing and Cedric next steps', source:'beeper-sync' },
   // JULY 26
   { id:1753542514000, type:'whatsapp', contact:'Alex Kroes', club:'Ajax / LASK', date:'2026-07-26',
     notes:'Alex arriving in Linz Thursday evening for LASK pre-season. Friday meeting proposed. Timo sent EFP_Player_List.pdf: "Hi Alex, as promised here the players we currently have direct access to. Looking forward to discussing further on Friday." Also discussed Levante as potential club for some players — Timo asked Alex about Levante connections.',
@@ -8791,10 +8803,35 @@ let logsAdded       = [   // {id,type,notes,date,duration,outcome,contact,club,s
   { id:1753514227000, type:'whatsapp', contact:'Rick Pattenden', club:'Nottingham Forest', date:'2026-07-26',
     notes:'Timo morning outreach for 10-min call. Rick confirmed "ok to call you in one hour?" Call made at ~11am. Timo sent 3 Skelly Alvero PDFs: x PNE, x Middlesbrough, x WBA — identifying Championship clubs searching for a no.6. Voice note exchange. Later (19:11) sent EFP_Player_List.pdf with strict note: "for your eyes only for the basis of working together 🙏". Also mentioned Moussa Sylla (Schalke striker) as option.',
     outcome:'Rick checking Championship clubs for Skelly. Player list shared confidentially — follow up on matches.', source:'beeper-sync' },
+  { id:1785070920000, type:'whatsapp', contact:'Eliano Lußem', club:'Bayer Leverkusen', date:'2026-07-26',
+    notes:'Response to Jul 25 outreach — Leverkusen close to finalising LV: "sieht gut aus, wir sollten relativ bald Vollzug melden." Timo pitched two candidates: one slightly under budget (England), one at/above. Eliano had considered Archie Brown (Fenerbahce) and Alex Valle (Como) in the €15–20M range. Key scouting opinion on Joaquin Seys: "Sehr zuverlässig, reif für das Alter, Spielertyp vergleichbar mit Valle" — Timo strongly interested. Eliano keen to meet post-window for broader collaboration.',
+    outcome:'Leverkusen LV nearly resolved. Seys highly rated — pitch to other clubs. Schedule post-window meeting with Eliano.', source:'beeper-sync' },
+  { id:1785057900000, type:'whatsapp', contact:'Wout Pauwels', club:'SquadAssist', date:'2026-07-26',
+    notes:'SquadAssist resolved Jul 24 Dortmund model issue: system took manual squad modifications literally — with so few wingers remaining, predicted rank 11 (no comparable training case). Wout shared Trabzonspor contact for Fynn: Eren Mert — emert@trabzonspor.org.tr. Tyler Bindon height corrected in system: 180cm (not 185cm). 2 summer interns joining next week to improve model robustness.',
+    outcome:'Use Eren Mert at Trabzonspor. Note SquadAssist model unreliable on thin squad scenarios.', source:'beeper-sync' },
+  { id:1785054000000, type:'whatsapp', contact:'Caner (Turkish Agent)', club:'Turkey', date:'2026-07-26',
+    notes:'Intro call at ~15:00 CET following Jul 25 first contact via Simon Friis referral. Caner\'s agency confirmed open to collaboration — potential pipeline for EFP players into Turkish clubs. Caner called; Timo confirmed readiness.',
+    outcome:'Follow up with Caner — share player shortlist relevant for Turkish clubs', source:'beeper-sync' },
   // JULY 25
   { id:1753427246000, type:'whatsapp', contact:'Christian Weber', club:'SV Elversberg', date:'2026-07-25',
     notes:'Follow-up on Tyler Bindon terms from Forest (sent July 25 morning): "He\'s 21 years old, has played over 100 senior games including being a top performer last season at a large Championship club, and featured in the World Cup. Asking price likely higher than TM market value but Forest remains open." Also added: currently earns £12k/week. Weber had reacted 👍 to the Forest availability update the previous evening.',
     outcome:'Tyler Bindon follow-up sent to Elversberg — await feedback on price vs profile fit', source:'beeper-sync' },
+  { id:1784993000000, type:'whatsapp', contact:'Caner (Turkish Agent)', club:'Turkey', date:'2026-07-25',
+    notes:'New Turkish agent contact initiated via Simon Friis referral. Timo reached out: "We have several players considering Turkey as their next step but lack connections in the Turkish market — would you have time for a quick intro call?" Caner responded positively: "Nice to connect! Yes, we\'re open to collaborate. Call tomorrow 3pm European time?" Timo confirmed.',
+    outcome:'New contact: Caner (Turkish agent) — intro call Jul 26 15:00 CET', source:'beeper-sync' },
+  { id:1784985000000, type:'whatsapp', contact:'Eliano Lußem', club:'Bayer Leverkusen', date:'2026-07-25',
+    notes:'Timo outreach to Eliano Lußem (Bayer Leverkusen scout): "Seid ihr bei eurer LV-Suche schon fündig geworden? Ich habe gerade 2 Clubs die ebenfalls suchen — hast du Spieler die für euch nicht in Frage kommen aber europäisches Niveau haben?" Eliano replied following morning confirming Leverkusen close to finalising their LV.',
+    outcome:'Leverkusen LV search nearly resolved — check for surplus players they might release', source:'beeper-sync' },
+  { id:1784977000000, type:'whatsapp', contact:'Murat Amami', club:'', date:'2026-07-25',
+    notes:'Murat Amami (agent, represents Barkok among others) reconnected after a gap: "Hey Timo, wie geht\'s?" Timo updated on EFP: now independent, helping European clubs sell players, in Austria for pre-season meetings with sporting directors. Murat shared Ayoub Chaikhoun transfermarkt profile as a player of interest.',
+    outcome:'Reconnected with Murat Amami — review Chaikhoun profile, explore collaboration', source:'beeper-sync' },
+  // JULY 24
+  { id:1784919200000, type:'whatsapp', contact:'Christian Weber', club:'SV Elversberg', date:'2026-07-24',
+    notes:'3 EFP pitch PDFs sent to Christian Weber (SV Elversberg): Tyler Bindon, Cedric Hatenboer, Myron Boadu — all x SV Elversberg. Weber feedback across Jul 24-25: Cedric Hatenboer — "Ja das Profil passt" (profile fits); salary then confirmed at £12k/week. Tyler Bindon — price expectation ~2.6M (Anderlecht asking), likely too high. Myron Boadu (PSV) — "passt vom Werdegang und seiner Haltung nicht zu uns" (career path and mentality don\'t fit). Weber confirmed still looking for LV/IV/striker — loan or purchase possible.',
+    outcome:'Cedric Hatenboer progressing at Elversberg. Tyler too expensive. Myron Boadu rejected. Confirm Cedric salary/terms.', source:'beeper-sync' },
+  { id:1784908000000, type:'whatsapp', contact:'Wout Pauwels', club:'SquadAssist', date:'2026-07-24',
+    notes:'Timo flagged SquadAssist model inaccuracy: Othmane Maamma pitch for Borussia Dortmund showed system predicting Dortmund finishing 11th — "sounds beyond realistic, therefore the sporting impact is also unrealistic." Sent screenshot to Wout. Wout acknowledged and agreed to investigate.',
+    outcome:'SquadAssist model issue reported — wait for fix before using Dortmund sportive impact figures', source:'beeper-sync' },
   // JULY 18
   { id:1752836700000, type:'whatsapp', contact:'Romeo Castelen', club:'NEC Nijmegen', date:'2026-07-18',
     notes:'Romeo confirms Armstrong Oko-Flex (Levski Sofia, €2M release clause) fits NEC left winger need. Romeo: "I think this player fits perfect." NEC coach asked Romeo directly for a left winger. Romeo forwarded NEC scout list showing open positions including Links buiten.',
