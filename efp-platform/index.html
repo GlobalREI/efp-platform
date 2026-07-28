@@ -1335,6 +1335,7 @@ body {
   /* ── CONTENT ──────────────────────────────────────────────────────────── */
   .content {
     padding: 12px 12px;
+    padding-bottom: calc(76px + env(safe-area-inset-bottom, 0px)); /* clear fixed bottom nav (60px) + breathing room */
     overflow: visible;
     height: auto;
     max-width: 100vw;
@@ -8898,6 +8899,28 @@ let playerNotes     = {};   // {[playerName]: {status, notes}} — editable play
 let clubData        = {};   // {[clubName]: {league,country,flag,status,notes,linkedContacts:[{name,role}]}}
 let logsAdded       = [   // {id,type,notes,date,duration,outcome,contact,club,source}
   // ── Beeper-synced interactions (last synced 2026-07-28) ──
+  // JULY 28
+  { id:1785260066000, type:'whatsapp', contact:'Romeo Castelen', club:'Eredivisie (multi-club)', date:'2026-07-28',
+    notes:'Romeo shared fresh Eredivisie club needs this evening: Fortuna Sittard seeking a CB as priority; Feyenoord looking for wingers and possibly a LB; Heerenveen need a no.6 and a right winger (confirmed 1v1 type when Timo asked). Romeo also confirmed he will check on NEC\'s current needs. Timo immediately pitched Alexis Flips for Heerenveen/Feyenoord — available for free, had his best time on the wing (Transfermarkt profile shared); Romeo seen the message at 18:35.',
+    outcome:'Follow up with Romeo on Alexis Flips fit for Heerenveen RW; await NEC needs update from Romeo', source:'beeper-sync' },
+  { id:1785258743000, type:'whatsapp', contact:'Romeo Castelen', club:'Widzew Lodz / Jablonec', date:'2026-07-28',
+    notes:'In the EFP Transfer Window group, Romeo forwarded two new Eastern European club requests: Widzew Lodz (Poland) needs a winger for up to €500k transfer fee plus a young striker born 2006 or younger who is ready for first-team football. Jablonec (Czech Republic) is also looking for a winger. Earlier in the group (13:00), Romeo shared the profile of Ramiz Zerrouki (Transfermarkt). Timo had asked Romeo in the morning for any update from Twente on Geiger; Romeo replied via voice note (content not transcribed).',
+    outcome:'Check EFP pool for winger (≤€500k) and young striker (2006+) for Widzew Lodz; find winger option for Jablonec', source:'beeper-sync' },
+  { id:1785235587000, type:'whatsapp', contact:'Alex Kroes', club:'LASK', date:'2026-07-28',
+    notes:'Morning exchange with Alex Kroes about LASK squad planning. Alex confirmed LASK would consider a loan to cover the position vacated by Harakate\'s ACL injury ("Yes we do"). Timo pitched Christian Gomis — Alex had not seen him before ("Nope / Don\'t remember"), so Timo sent the Transfermarkt profile and promised to send the full report, which he delivered as "EFP x Christian Gomis x LASK.pdf" at 13:40; Alex reacted 🙏. Alex also invited Timo to watch the LASK evening match (Monza also attending); Timo still deciding whether he goes to Germany after.',
+    outcome:'Await Alex Kroes feedback on Christian Gomis for LASK loan spot. Timo may attend LASK match tonight.', source:'beeper-sync' },
+  { id:1785232900000, type:'whatsapp', contact:'Fynn Buggenthien', club:'SquadAssist', date:'2026-07-28',
+    notes:'Timo compiled and sent three structured development requests to Fynn for relay to Wout at SquadAssist: (1) Save Player Report Preferences — auto-save the selected Page 1/Page 2 attributes per player as defaults for future reports; (2) Improve Graph Editing Interface — display a full attribute table showing name, raw value, percentile, and ranking when editing; (3) Native Mobile Experience — make the mobile version feel native on iOS and Android with proper navigation, touch interactions, and full feature parity. Fynn also submitted the EFP x Christian Gomis x LASK PDF to the EFP internal group at 13:39.',
+    outcome:'Track SquadAssist implementation of three feature requests via Fynn / Wout Pauwels', source:'beeper-sync' },
+  { id:1785231928000, type:'whatsapp', contact:'Paul Secara', club:'Axria', date:'2026-07-28',
+    notes:'Paul Secara confirmed Wednesday availability for the call with Marc: after 1pm CET. He also shared an Edge Lofts performance update: unlevered IRR over a 4–5 year hold is 17%. Paul called Timo again at 17:04 (incoming call, currently unread). Context: Timo had asked Paul on July 27 to share the Axria IM in PowerPoint format and to set up a call with Marc regarding investor interest in Axria projects.',
+    outcome:'Call Paul Secara back — confirm Wednesday call with Marc after 1pm CET; note Edge Lofts 17% unlevered IRR', source:'beeper-sync' },
+  { id:1785228911000, type:'whatsapp', contact:'Rick Pattenden', club:'Nottingham Forest', date:'2026-07-28',
+    notes:'Timo sent a morning follow-up to Rick asking to go through the EFP player list together to identify players of interest and potential fits, so EFP can begin preparatory backend work. Rick had reviewed the list on July 27 and expressed strong enthusiasm ("think we can do some good work here for sure"). No reply from Rick yet as of this sync.',
+    outcome:'Await Rick\'s response — propose a call to review EFP player list and agree on first targets', source:'beeper-sync' },
+  { id:1785228315000, type:'whatsapp', contact:'Caglar Meker', club:'Turkey (multi-club)', date:'2026-07-28',
+    notes:'Two separate Turkey group threads on July 28: (1) Timo discussed an EFP player currently at Den Bosch who wants to move — active talks with a 2. Bundesliga club underway, and Timo confirmed the fee-split model with Simon Friis for any Turkish placement. (2) Caglar shared Adil Aouchiche (Schalke) as a target for Turkish clubs; Fynn flagged Schalke wants 5M+ and won\'t sell for 3–4M, making it difficult. Caglar identified Çorumspor and Samsunspor (to replace a player referred to as "Holse") as potential destinations; Fynn agreed to check Samsunspor feasibility.',
+    outcome:'Check Samsunspor interest in Aouchiche at 5M+; progress Den Bosch player discussions for Turkey and 2.Bundesliga', source:'beeper-sync' },
   // JULY 27
   { id:1785179700000, type:'whatsapp', contact:'Fynn Buggenthien', club:'Hamburger SV', date:'2026-07-27',
     notes:'Fynn submitted EFP x Festy Ebosele x HSV pitch PDF in EFP internal group. Active multi-club outreach day across Germany and Turkey.',
@@ -14658,6 +14681,8 @@ function go(view) {
   if (typeof mobBottomActive === 'function') mobBottomActive(view);
   // Auto-close sidebar on mobile after any navigation
   if (typeof mobCloseNav === 'function') mobCloseNav();
+  // Clear any stuck body overflow lock (e.g. drawer was open when navigation happened)
+  document.body.style.overflow = '';
   _updateTopbarActions(view);
 }
 
