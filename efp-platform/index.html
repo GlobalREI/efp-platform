@@ -6020,10 +6020,8 @@ function efpInitFirebase() {
           // Only re-render TASKS when data actually changed
           TASKS.length = 0;
           allTasks.forEach(t => TASKS.push(t));
-          // Re-merge user-created tasks that survive independently of allTasks
-          if (tasksAdded && tasksAdded.length) {
-            tasksAdded.forEach(ft => { if (ft && !TASKS.find(t => t.id === ft.id)) TASKS.push(ft); });
-          }
+          // Do NOT merge tasksAdded here — allTasks IS the canonical unified array.
+          // Merging tasksAdded would resurrect deleted tasks if Firebase sends stale data.
           _efpMigrated = true;
           setTimeout(() => { if (typeof renderTasks === 'function') renderTasks(); _renderDashTasks(); }, _fbFirstLoad ? 180 : 0);
         }
@@ -6240,13 +6238,13 @@ function efpInitFirebase() {
       }
 
       // ── User-created Tasks ──
+      // NOTE: do NOT push tasksAdded back into TASKS here.
+      // allTasks is the unified source of truth (includes user tasks after migration).
+      // Merging tasksAdded into TASKS on every Firebase event resurrects deleted tasks
+      // whenever Firebase sends a pre-deletion snapshot (race condition).
       if (d.tasksAdded) {
         tasksAdded = Array.isArray(d.tasksAdded) ? d.tasksAdded : Object.values(d.tasksAdded);
-        tasksAdded.forEach(ft => {
-          if (!TASKS.find(t => t.id === ft.id)) TASKS.push(ft);
-        });
-        if (typeof renderTasks === 'function') renderTasks();
-        _renderDashTasks();
+        // renderTasks() will be triggered by the allTasks _fbChanged block above if data changed
       }
 
       // ── Player Notes ──
@@ -9556,22 +9554,28 @@ function openPlayerProfile(playerName, data) {
   document.getElementById('pp-name').textContent = playerName;
   document.getElementById('pp-meta').textContent = 'View & edit mandate details';
 
-  // Populate editable fields
+  // Populate editable fields — ALWAYS prefer _ppCurrentMandate (live Firebase object) over
+  // the `data` snapshot, which may come from cell text in initMandateRows() and can be
+  // incomplete (e.g. no pos2, combined "CF / SS" position string, stale contact).
+  const _m = _ppCurrentMandate; // shorthand for the live allMandates entry
   document.getElementById('pp-edit-name').value   = playerName;
-  document.getElementById('pp-edit-pos').value    = data.pos    || '';
+  document.getElementById('pp-edit-pos').value    = (_m ? (_m.pos || _m.position || '') : (data.pos || '')).replace(/\s*\/\s*.+$/, ''); // strip " / pos2" if cell text bled in
   const _pp2el = document.getElementById('pp-edit-pos2');
-  if (_pp2el) _pp2el.value = data.pos2 || '';
-  document.getElementById('pp-edit-age').value    = (data.age && data.age !== '—') ? data.age : '';
-  document.getElementById('pp-edit-club').value   = (data.club  && data.club  !== '—') ? data.club  : '';
-  document.getElementById('pp-edit-val').value    = (data.val   && data.val   !== '—') ? data.val   : '';
-  document.getElementById('pp-edit-source').value = data.contact || data.source || '';
+  if (_pp2el) _pp2el.value                        = _m ? (_m.pos2 || '') : (data.pos2 || '');
+  const _rawAge  = _m ? _m.age  : data.age;
+  const _rawClub = _m ? _m.club : data.club;
+  const _rawVal  = _m ? (_m.value || _m.val) : data.val;
+  document.getElementById('pp-edit-age').value    = (_rawAge  && _rawAge  !== '—') ? _rawAge  : '';
+  document.getElementById('pp-edit-club').value   = (_rawClub && _rawClub !== '—') ? _rawClub : '';
+  document.getElementById('pp-edit-val').value    = (_rawVal  && _rawVal  !== '—') ? _rawVal  : '';
+  document.getElementById('pp-edit-source').value = _m ? (_m.contact || '') : (data.contact || data.source || '');
   const ppExpEl = document.getElementById('pp-edit-expected-price');
-  if (ppExpEl) ppExpEl.value = data.expectedPrice || '';
+  if (ppExpEl) ppExpEl.value = _m ? (_m.expectedPrice || '') : (data.expectedPrice || '');
   const ppSalEl = document.getElementById('pp-edit-salary');
-  if (ppSalEl) ppSalEl.value = data.salary || '';
+  if (ppSalEl) ppSalEl.value = _m ? (_m.salary || '') : (data.salary || '');
   // Archive button label
   const ppArchBtn = document.getElementById('pp-archive-btn');
-  if (ppArchBtn) ppArchBtn.title = data.archived ? 'Restore mandate' : 'Archive mandate';
+  if (ppArchBtn) ppArchBtn.title = (_m ? !!_m.archived : !!data.archived) ? 'Restore mandate' : 'Archive mandate';
 
   // Load saved notes/status/priority/dealType
   const saved = playerNotes[playerName] || {};
