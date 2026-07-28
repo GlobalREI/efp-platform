@@ -4727,7 +4727,7 @@ th.ds-sort:hover { background: rgba(30,58,95,.06); }
       <select class="field-select" id="fp-contact" onchange="updatePitchPreview()">
         <option value="">Select contact…</option>
       </select>
-      <div class="field-hint">Contacts are filtered by selected club.</div>
+      <div class="field-hint" id="fp-contact-hint">Contacts are filtered by selected club.</div>
     </div>
 
     <!-- Send method -->
@@ -4761,7 +4761,7 @@ th.ds-sort:hover { background: rgba(30,58,95,.06); }
     <div class="field-row field">
       <div>
         <label class="field-label">Asking Fee</label>
-        <input type="text" class="field-input" id="fp-fee" placeholder="e.g. €2,500,000" oninput="updatePitchPreview()">
+        <input type="text" class="field-input" id="fp-fee" placeholder="e.g. 2.500.000" oninput="_formatFeeInput(this);updatePitchPreview()">
       </div>
       <div>
         <label class="field-label">Deal Type</label>
@@ -4796,7 +4796,7 @@ th.ds-sort:hover { background: rgba(30,58,95,.06); }
   </div><!-- /drawer-body -->
 
   <div class="drawer-foot">
-    <button class="btn btn-primary" onclick="submitPitch()" style="flex:1">Send Pitch &amp; Add to Pipeline</button>
+    <button class="btn btn-primary" onclick="submitPitch()" style="flex:1">Add to Pipeline</button>
     <button class="btn btn-outline" onclick="saveDraft()">Save Draft</button>
     <button class="btn btn-outline" onclick="closePitchDrawer()">Cancel</button>
   </div>
@@ -14129,11 +14129,25 @@ function selectMethod(btn, val) {
 function updateContacts() {
   const club = document.getElementById('fp-club').value;
   const sel  = document.getElementById('fp-contact');
+  const hint = document.getElementById('fp-contact-hint');
   const contacts = _clubContacts(club);
   sel.innerHTML = '<option value="">Select contact…</option>' +
     contacts.map(c => `<option value="${c}">${c}</option>`).join('') +
     '<option value="__manual__">Enter manually…</option>';
+  if (hint) {
+    if (club && contacts.length === 0) {
+      hint.innerHTML = 'No contacts found for this club. <span onclick="closePitchDrawer();go(\'contacts\')" style="color:var(--accent);cursor:pointer;font-weight:600">Add a contact →</span>';
+    } else {
+      hint.textContent = 'Contacts are filtered by selected club.';
+    }
+  }
   updatePitchPreview();
+}
+function _formatFeeInput(el) {
+  const raw = el.value.replace(/[^\d]/g, '');
+  if (!raw) { el.value = ''; return; }
+  // European format: thousands separated by dots
+  el.value = parseInt(raw, 10).toLocaleString('de-DE');
 }
 function updatePitchPreview() {
   const player  = document.getElementById('fp-player').value;
@@ -14148,7 +14162,7 @@ function updatePitchPreview() {
   document.getElementById('prev-club').textContent    = _clubLabel(club) || '—';
   document.getElementById('prev-contact').textContent = contact || '—';
   document.getElementById('prev-method').textContent  = METHOD_LABELS[method] || '—';
-  document.getElementById('prev-fee').textContent     = fee || '—';
+  document.getElementById('prev-fee').textContent     = fee ? '€ ' + fee : '—';
 }
 function submitPitch() {
   const player  = document.getElementById('fp-player').value;
