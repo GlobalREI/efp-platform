@@ -14138,6 +14138,12 @@ function openPitchDrawer() {
   // Always reset submit button out of any leftover loading state
   const _sb = document.querySelector('#pitch-drawer .btn-primary');
   if (window._DS && _sb) _DS.btn(_sb, 'default');
+  // Portal typeahead dropdowns to <body> so they escape the drawer's CSS
+  // transform stacking context (transform creates a fixed-position containing block)
+  ['fp-club-dropdown','fp-contact-dropdown'].forEach(id => {
+    const dd = document.getElementById(id);
+    if (dd && dd.parentElement !== document.body) document.body.appendChild(dd);
+  });
 }
 function closePitchDrawer() {
   document.getElementById('pitch-overlay').classList.remove('open');
