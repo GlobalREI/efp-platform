@@ -5234,9 +5234,13 @@ th.ds-sort:hover { background: rgba(30,58,95,.06); }
       <div style="display:flex;gap:10px;margin-bottom:10px">
         <div style="flex:1">
           <label class="field-label">Position</label>
-          <input class="field-input" id="pp-edit-pos" placeholder="e.g. CM/CDM">
+          <input class="field-input" id="pp-edit-pos" placeholder="e.g. CM">
         </div>
-        <div style="flex:0 0 80px">
+        <div style="flex:1">
+          <label class="field-label">Secondary Position</label>
+          <input class="field-input" id="pp-edit-pos2" placeholder="e.g. CDM (optional)">
+        </div>
+        <div style="flex:0 0 72px">
           <label class="field-label">Age</label>
           <input class="field-input" id="pp-edit-age" placeholder="23" type="number" min="16" max="45">
         </div>
@@ -5377,7 +5381,7 @@ th.ds-sort:hover { background: rgba(30,58,95,.06); }
   <div class="drawer-body">
     <div class="field"><label class="field-label">Player Name <span class="req">*</span></label><input class="field-input" id="m-name" placeholder="Full name"></div>
     <div class="field-row field">
-      <div>
+      <div style="flex:1">
         <label class="field-label">Position <span class="req">*</span></label>
         <select class="field-select" id="m-pos">
           <option value="">Select…</option>
@@ -5386,7 +5390,16 @@ th.ds-sort:hover { background: rgba(30,58,95,.06); }
           <option>Right Winger</option><option>Left Winger</option><option>Second Striker</option><option>Centre Forward</option>
         </select>
       </div>
-      <div><label class="field-label">Age</label><input class="field-input" id="m-age" placeholder="e.g. 23" type="number" min="16" max="40"></div>
+      <div style="flex:1">
+        <label class="field-label">Secondary Position</label>
+        <select class="field-select" id="m-pos2">
+          <option value="">None</option>
+          <option>Goalkeeper</option><option>Right Back</option><option>Centre Back</option><option>Left Back</option>
+          <option>Defensive Mid</option><option>Central Mid</option><option>Attacking Mid</option>
+          <option>Right Winger</option><option>Left Winger</option><option>Second Striker</option><option>Centre Forward</option>
+        </select>
+      </div>
+      <div style="flex:0 0 76px"><label class="field-label">Age</label><input class="field-input" id="m-age" placeholder="e.g. 23" type="number" min="16" max="40"></div>
     </div>
     <div class="field-row field">
       <div><label class="field-label">Current Club</label><input class="field-input" id="m-club" list="efp-club-datalist" placeholder="Type to search clubs…" autocomplete="off"></div>
@@ -6671,6 +6684,8 @@ function _renderMandatesTable() {
     const dotClass  = m.dotClass || (m.id && m.id.startsWith('m_') ? 'dot-amber' : 'dot-green');
     const statusTxt = m.statusText || 'Active Mandate';
     const posStr    = m.position || m.pos || '—';
+    const pos2Str   = m.pos2 || '';
+    const posDisplay = pos2Str ? `${posStr} / ${pos2Str}` : posStr;
     const mClub = m.club || '—';
     const mContact = m.contact || '—';
     const mClubHtml = mClub !== '—'
@@ -6694,7 +6709,7 @@ function _renderMandatesTable() {
     tr.innerHTML = `
       <td>${prioHtml}</td>
       <td><strong>${m.name}</strong>${archivedTag}${mNotesSub}</td>
-      <td>${posStr}</td>
+      <td>${posDisplay}</td>
       <td>${m.age||'—'}</td>
       <td>${mClubHtml}</td>
       <td>${mValFmt}</td>
@@ -6703,7 +6718,7 @@ function _renderMandatesTable() {
     tr.onclick = e => {
       if (e.target.closest('button')) return;
       openPlayerProfile(m.name, {
-        pos: posStr, age: m.age||'', club: m.club||'',
+        pos: posStr, pos2: pos2Str, age: m.age||'', club: m.club||'',
         val: m.value||m.val||'', contact: m.contact||'', statusText: statusTxt, _tr: tr,
         expectedPrice: m.expectedPrice||'', salary: m.salary||'', archived: !!m.archived
       });
@@ -9514,6 +9529,8 @@ function openPlayerProfile(playerName, data) {
   // Populate editable fields
   document.getElementById('pp-edit-name').value   = playerName;
   document.getElementById('pp-edit-pos').value    = data.pos    || '';
+  const _pp2el = document.getElementById('pp-edit-pos2');
+  if (_pp2el) _pp2el.value = data.pos2 || '';
   document.getElementById('pp-edit-age').value    = (data.age && data.age !== '—') ? data.age : '';
   document.getElementById('pp-edit-club').value   = (data.club  && data.club  !== '—') ? data.club  : '';
   document.getElementById('pp-edit-val').value    = (data.val   && data.val   !== '—') ? data.val   : '';
@@ -9741,6 +9758,7 @@ function savePlayerProfile() {
   // Read all fields
   const newName          = document.getElementById('pp-edit-name').value.trim()           || _ppCurrentPlayer;
   const newPos           = document.getElementById('pp-edit-pos').value.trim();
+  const newPos2          = (document.getElementById('pp-edit-pos2')?.value || '').trim();
   const newAge           = document.getElementById('pp-edit-age').value.trim();
   const newClub          = document.getElementById('pp-edit-club').value.trim();
   const newVal           = _normVal(document.getElementById('pp-edit-val').value.trim()) || document.getElementById('pp-edit-val').value.trim();
@@ -9771,6 +9789,8 @@ function savePlayerProfile() {
     if (m) {
       m.name          = newName;
       m.position      = newPos;
+      m.pos           = newPos;
+      m.pos2          = newPos2;
       m.age           = newAge;
       m.club          = newClub;
       m.value         = newVal;
@@ -10258,6 +10278,7 @@ function submitMandate() {
   }
   const name    = document.getElementById('m-name').value.trim();
   const pos     = document.getElementById('m-pos').value;
+  const pos2    = document.getElementById('m-pos2')?.value || '';
   const contact = document.getElementById('m-contact')?.value.trim() || '';
   const age   = document.getElementById('m-age').value  || '—';
   const mClub = document.getElementById('m-club').value || '';
@@ -10276,7 +10297,7 @@ function submitMandate() {
   }
   const expectedPrice = _normVal(document.getElementById('m-expected-price')?.value.trim()||'') || '';
   const salary        = _normVal(document.getElementById('m-salary')?.value.trim()||'')        || '';
-  const d = { id:'m_'+Date.now(), name, position:pos, pos, age, club:mClub, value:val, contact,
+  const d = { id:'m_'+Date.now(), name, position:pos, pos, pos2, age, club:mClub, value:val, contact,
                expectedPrice, salary, dotClass:'dot-amber', statusText:'New Mandate' };
   allMandates.push(d);
   mandatesAdded.push(d); // legacy sync
@@ -10287,6 +10308,7 @@ function submitMandate() {
     closeDrawer('mandate');
     ['m-name','m-age','m-club','m-val','m-expected-price','m-salary','m-contact','m-notes'].forEach(id => { const el=document.getElementById(id); if(el) el.value=''; });
     document.getElementById('m-pos').value='';
+    const _mp2 = document.getElementById('m-pos2'); if (_mp2) _mp2.value = '';
     showSnack(`✓ ${name} added · showing club suggestions`, false);
     if (window._DS && _mSaveBtn) _DS.btn(_mSaveBtn, 'default');
     showMandateSuggestions(name, pos, age, val, mClub);
