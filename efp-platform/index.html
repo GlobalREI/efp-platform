@@ -14134,6 +14134,9 @@ function openPitchDrawer() {
   ['fp-report','fp-video','fp-stats'].forEach(id => document.getElementById(id).checked = false);
   updateContacts();
   document.getElementById('pitch-preview').style.display = 'none';
+  // Always reset submit button out of any leftover loading state
+  const _sb = document.querySelector('#pitch-drawer .btn-primary');
+  if (window._DS && _sb) _DS.btn(_sb, 'default');
 }
 function closePitchDrawer() {
   document.getElementById('pitch-overlay').classList.remove('open');
@@ -14183,6 +14186,8 @@ function _filterContactDropdown() {
   dropdown.style.top   = (rect.bottom + 2) + 'px';
   dropdown.style.width = rect.width + 'px';
   dropdown.style.display = '';
+  // Preview updates as you type (reads input text as fallback)
+  updatePitchPreview();
 }
 
 function _selectContact(name) {
@@ -14246,7 +14251,7 @@ function _formatFeeInput(el) {
 function updatePitchPreview() {
   const player  = document.getElementById('fp-player').value;
   const club    = document.getElementById('fp-club').value;
-  const contact = document.getElementById('fp-contact').value;
+  const contact = document.getElementById('fp-contact').value || document.getElementById('fp-contact-input')?.value.trim();
   const method  = document.getElementById('fp-method').value;
   const fee     = document.getElementById('fp-fee').value;
 
