@@ -4724,10 +4724,18 @@ th.ds-sort:hover { background: rgba(30,58,95,.06); }
     <!-- Contact -->
     <div class="field">
       <label class="field-label">Contact Person <span class="req">*</span></label>
-      <select class="field-select" id="fp-contact" onchange="updatePitchPreview()">
-        <option value="">Select contact…</option>
-      </select>
-      <div class="field-hint" id="fp-contact-hint">Contacts are filtered by selected club.</div>
+      <div style="position:relative" id="fp-contact-wrap">
+        <input type="text" class="field-input" id="fp-contact-input"
+               placeholder="Search all contacts…"
+               autocomplete="off"
+               oninput="_filterContactDropdown()"
+               onfocus="_filterContactDropdown()"
+               onblur="_hideContactDropdown()"
+               onkeydown="_contactKeyNav(event)">
+        <div id="fp-contact-dropdown" style="display:none;position:fixed;background:var(--surface);border:1px solid var(--border);border-radius:6px;box-shadow:0 4px 16px rgba(0,0,0,.14);max-height:220px;overflow-y:auto;z-index:9999"></div>
+      </div>
+      <input type="hidden" id="fp-contact" value="">
+      <div class="field-hint" id="fp-contact-hint">Search by name — agents and club contacts all included.</div>
     </div>
 
     <!-- Send method -->
@@ -9798,7 +9806,7 @@ function _applyPlayerNoteBadges() {
       statusCell.innerHTML = `<span class="dot ${dotClass}"></span> ${saved.status}`;
     }
 
-    // ── Priority: row left-border accent only (badge rendered in dedicated column by _renderMandatesTable) ──
+    // ── Priority: update badge column AND left-border accent ──
     const PRIO_CFG = {
       1: { label:'P1', solid:'#dc2626' },
       2: { label:'P2', solid:'#d97706' },
@@ -9808,9 +9816,19 @@ function _applyPlayerNoteBadges() {
     // Clean up any legacy badge markup from the old format
     tr.querySelectorAll('.pp-prio-badge, .pp-prio-tag').forEach(el => el.remove());
 
+    // Update the priority badge in td:first-child so it stays in sync with playerNotes
+    const prioCell = tr.querySelector('td:first-child');
+    if (prioCell) {
+      if (saved.priority && PRIO_CFG[saved.priority]) {
+        const cfg = PRIO_CFG[saved.priority];
+        prioCell.innerHTML = `<span style="display:inline-block;padding:2px 8px;border-radius:4px;background:${cfg.solid};color:#fff;font-size:11px;font-weight:700;letter-spacing:.03em">${cfg.label}</span>`;
+      } else {
+        prioCell.innerHTML = '<span style="color:var(--text3);font-size:12px">—</span>';
+      }
+    }
+
     if (saved.priority) {
       const cfg = PRIO_CFG[saved.priority];
-      // Row left-border accent via box-shadow (works with border-collapse)
       tr.style.boxShadow = `inset 3px 0 0 ${cfg.solid}`;
     } else {
       tr.style.boxShadow = '';
@@ -14104,10 +14122,12 @@ function openPitchDrawer() {
   document.getElementById('pitch-drawer').classList.add('open');
   document.body.style.overflow = 'hidden';
   // reset form
-  ['fp-player','fp-club','fp-contact','fp-method','fp-fee','fp-msg'].forEach(id => {
+  ['fp-player','fp-club','fp-contact','fp-contact-input','fp-method','fp-fee','fp-msg'].forEach(id => {
     const el = document.getElementById(id);
-    if (el) el.value = el.tagName === 'INPUT' ? '' : '';
+    if (el) el.value = '';
   });
+  const dd = document.getElementById('fp-contact-dropdown');
+  if (dd) dd.style.display = 'none';
   document.getElementById('fp-method').value = 'email';
   document.querySelectorAll('.method-btn').forEach(b => b.classList.remove('selected'));
   document.getElementById('meth-email').classList.add('selected');
@@ -14127,21 +14147,95 @@ function selectMethod(btn, val) {
   updatePitchPreview();
 }
 function updateContacts() {
-  const club = document.getElementById('fp-club').value;
-  const sel  = document.getElementById('fp-contact');
-  const hint = document.getElementById('fp-contact-hint');
-  const contacts = _clubContacts(club);
-  sel.innerHTML = '<option value="">Select contact…</option>' +
-    contacts.map(c => `<option value="${c}">${c}</option>`).join('') +
-    '<option value="__manual__">Enter manually…</option>';
-  if (hint) {
-    if (club && contacts.length === 0) {
-      hint.innerHTML = 'No contacts found for this club. <span onclick="closePitchDrawer();go(\'contacts\')" style="color:var(--accent);cursor:pointer;font-weight:600">Add a contact →</span>';
-    } else {
-      hint.textContent = 'Contacts are filtered by selected club.';
-    }
-  }
+  // Club changed — clear contact selection so user re-picks
+  const input  = document.getElementById('fp-contact-input');
+  const hidden = document.getElementById('fp-contact');
+  const dd     = document.getElementById('fp-contact-dropdown');
+  if (input)  input.value  = '';
+  if (hidden) hidden.value = '';
+  if (dd)     dd.style.display = 'none';
   updatePitchPreview();
+}
+
+function _filterContactDropdown() {
+  const input = document.getElementById('fp-contact-input');
+  const dropdown = document.getElementById('fp-contact-dropdown');
+  if (!input || !dropdown) return;
+  const query = input.value.trim().toLowerCase();
+  // Build name list from allContacts
+  const names = (allContacts || []).map(c => c.name || '').filter(Boolean);
+  // Deduplicate + sort
+  const unique = [...new Set(names)].sort((a, b) => a.localeCompare(b));
+  const filtered = query
+    ? unique.filter(n => n.toLowerCase().includes(query))
+    : unique.slice(0, 40);
+  if (!filtered.length) { dropdown.style.display = 'none'; return; }
+  dropdown.innerHTML = filtered.map(n =>
+    `<div class="fp-contact-opt" data-name="${n.replace(/"/g,'&quot;')}"
+      style="padding:9px 13px;cursor:pointer;font-size:13px;border-bottom:1px solid var(--border)"
+      onmousedown="event.preventDefault();_selectContact(this.dataset.name)"
+      onmouseover="this.style.background='var(--hover)'"
+      onmouseout="this.style.background=''">${n}</div>`
+  ).join('');
+  // Position fixed below input (escapes drawer overflow:auto)
+  const rect = input.getBoundingClientRect();
+  dropdown.style.left  = rect.left + 'px';
+  dropdown.style.top   = (rect.bottom + 2) + 'px';
+  dropdown.style.width = rect.width + 'px';
+  dropdown.style.display = '';
+}
+
+function _selectContact(name) {
+  const input  = document.getElementById('fp-contact-input');
+  const hidden = document.getElementById('fp-contact');
+  const dd     = document.getElementById('fp-contact-dropdown');
+  if (input)  input.value  = name;
+  if (hidden) hidden.value = name;
+  if (dd)     dd.style.display = 'none';
+  // Clear any error highlight
+  if (input) input.style.borderColor = '';
+  updatePitchPreview();
+}
+
+function _hideContactDropdown() {
+  setTimeout(() => {
+    const dd     = document.getElementById('fp-contact-dropdown');
+    const input  = document.getElementById('fp-contact-input');
+    const hidden = document.getElementById('fp-contact');
+    if (dd) dd.style.display = 'none';
+    // Allow free-typed name if it matches an existing contact, otherwise keep what was last _selectContact'd
+    if (input && hidden) {
+      const typed = input.value.trim();
+      const names = (allContacts || []).map(c => c.name || '');
+      const match = names.find(n => n.toLowerCase() === typed.toLowerCase());
+      if (match) { hidden.value = match; input.value = match; }
+      else if (!typed) { hidden.value = ''; }
+    }
+    updatePitchPreview();
+  }, 160);
+}
+
+function _contactKeyNav(e) {
+  const dropdown = document.getElementById('fp-contact-dropdown');
+  if (!dropdown || dropdown.style.display === 'none') return;
+  const items = Array.from(dropdown.querySelectorAll('.fp-contact-opt'));
+  const idx = items.findIndex(el => el.classList.contains('fp-contact-opt-active'));
+  if (e.key === 'ArrowDown') {
+    e.preventDefault();
+    const next = Math.min(idx + 1, items.length - 1);
+    items.forEach((el, i) => { el.classList.toggle('fp-contact-opt-active', i === next); el.style.background = i === next ? 'var(--hover)' : ''; });
+    items[next]?.scrollIntoView({ block: 'nearest' });
+  } else if (e.key === 'ArrowUp') {
+    e.preventDefault();
+    const prev = Math.max(idx - 1, 0);
+    items.forEach((el, i) => { el.classList.toggle('fp-contact-opt-active', i === prev); el.style.background = i === prev ? 'var(--hover)' : ''; });
+    items[prev]?.scrollIntoView({ block: 'nearest' });
+  } else if (e.key === 'Enter' && idx >= 0) {
+    e.preventDefault();
+    _selectContact(items[idx].dataset.name);
+  } else if (e.key === 'Escape') {
+    dropdown.style.display = 'none';
+  }
 }
 function _formatFeeInput(el) {
   const raw = el.value.replace(/[^\d]/g, '');
@@ -14167,18 +14261,18 @@ function updatePitchPreview() {
 function submitPitch() {
   const player  = document.getElementById('fp-player').value;
   const club    = document.getElementById('fp-club').value;
-  const contact = document.getElementById('fp-contact').value;
+  const contact = document.getElementById('fp-contact').value || document.getElementById('fp-contact-input')?.value.trim();
   if (!player || !club || !contact) {
     // highlight missing
     if (!player)  document.getElementById('fp-player').style.borderColor  = 'var(--red)';
     if (!club)    document.getElementById('fp-club').style.borderColor    = 'var(--red)';
-    if (!contact) document.getElementById('fp-contact').style.borderColor = 'var(--red)';
+    if (!contact) { const ci = document.getElementById('fp-contact-input'); if (ci) ci.style.borderColor = 'var(--red)'; }
     showSnack('Please fill in the required fields', false);
     return;
   }
   // Reset borders
-  ['fp-player','fp-club','fp-contact'].forEach(id =>
-    document.getElementById(id).style.borderColor = '');
+  ['fp-player','fp-club'].forEach(id => document.getElementById(id).style.borderColor = '');
+  const ci = document.getElementById('fp-contact-input'); if (ci) ci.style.borderColor = '';
 
   const playerName = PLAYER_LABELS[player] || player;
   const clubName   = _clubLabel(club) || club;
