@@ -4715,10 +4715,17 @@ th.ds-sort:hover { background: rgba(30,58,95,.06); }
     <!-- Club -->
     <div class="field">
       <label class="field-label">Target Club <span class="req">*</span></label>
-      <select class="field-select" id="fp-club" onchange="updatePitchPreview(); updateContacts()">
-        <option value="">Select club…</option>
-        <!-- populated dynamically by _refreshClubDropdowns() -->
-      </select>
+      <div style="position:relative" id="fp-club-wrap">
+        <input type="text" class="field-input" id="fp-club-input"
+               placeholder="Search clubs… e.g. RSC, Bayern, Ajax"
+               autocomplete="off"
+               oninput="_filterClubDropdown()"
+               onfocus="_filterClubDropdown()"
+               onblur="_hideClubDropdown()"
+               onkeydown="_clubKeyNav(event)">
+        <div id="fp-club-dropdown" style="display:none;position:fixed;background:var(--surface);border:1px solid var(--border);border-radius:6px;box-shadow:0 4px 16px rgba(0,0,0,.14);max-height:220px;overflow-y:auto;z-index:9999"></div>
+      </div>
+      <input type="hidden" id="fp-club" value="">
     </div>
 
     <!-- Contact -->
@@ -13688,15 +13695,7 @@ function _refreshClubDropdowns() {
     `<option value="${c.name}">${c.flag} ${c.name}${c.league ? ' · ' + c.league : ''}</option>`
   ).join('');
 
-  // ── #fp-club (pitch drawer) — <select> with key values for contact lookup ──
-  const fpClub = document.getElementById('fp-club');
-  if (fpClub) {
-    const cur = fpClub.value;
-    fpClub.innerHTML = '<option value="">Select club…</option>' +
-      clubs.map(c => `<option value="${c.key}">${c.flag} ${c.name}</option>`).join('');
-    if (cur) fpClub.value = cur;
-    updateContacts();
-  }
+  // #fp-club is now a hidden input with typeahead — no population needed here
 }
 
 // ─── DYNAMIC CLUB CONTACT COUNTS ────────────────────────────────────────────
@@ -14122,12 +14121,14 @@ function openPitchDrawer() {
   document.getElementById('pitch-drawer').classList.add('open');
   document.body.style.overflow = 'hidden';
   // reset form
-  ['fp-player','fp-club','fp-contact','fp-contact-input','fp-method','fp-fee','fp-msg'].forEach(id => {
+  ['fp-player','fp-club','fp-club-input','fp-contact','fp-contact-input','fp-method','fp-fee','fp-msg'].forEach(id => {
     const el = document.getElementById(id);
     if (el) el.value = '';
   });
-  const dd = document.getElementById('fp-contact-dropdown');
-  if (dd) dd.style.display = 'none';
+  ['fp-club-dropdown','fp-contact-dropdown'].forEach(id => {
+    const dd = document.getElementById(id);
+    if (dd) dd.style.display = 'none';
+  });
   document.getElementById('fp-method').value = 'email';
   document.querySelectorAll('.method-btn').forEach(b => b.classList.remove('selected'));
   document.getElementById('meth-email').classList.add('selected');
@@ -14242,6 +14243,90 @@ function _contactKeyNav(e) {
     dropdown.style.display = 'none';
   }
 }
+
+// ─── CLUB TYPEAHEAD (pitch form) ──────────────────────────────────────────────
+function _filterClubDropdown() {
+  const input    = document.getElementById('fp-club-input');
+  const dropdown = document.getElementById('fp-club-dropdown');
+  if (!input || !dropdown) return;
+  const query = input.value.trim().toLowerCase();
+  const clubs = _allClubs();
+  const filtered = query
+    ? clubs.filter(c =>
+        c.name.toLowerCase().includes(query) ||
+        (c.key    && c.key.toLowerCase().includes(query)) ||
+        (c.league && c.league.toLowerCase().includes(query))
+      )
+    : clubs.slice(0, 60);
+  if (!filtered.length) { dropdown.style.display = 'none'; updatePitchPreview(); return; }
+  dropdown.innerHTML = filtered.map(c => {
+    const label = (c.flag || '') + ' ' + c.name;
+    const league = c.league ? `<span style="color:var(--text3);font-size:11px;margin-left:6px">${c.league}</span>` : '';
+    return `<div class="fp-club-opt" data-key="${c.key}" data-label="${label.replace(/"/g,'&quot;')}"
+      style="padding:9px 13px;cursor:pointer;font-size:13px;border-bottom:1px solid var(--border)"
+      onmousedown="event.preventDefault();_selectClub(this.dataset.key,this.dataset.label)"
+      onmouseover="this.style.background='var(--hover)'"
+      onmouseout="this.style.background=''">${label}${league}</div>`;
+  }).join('');
+  const rect = input.getBoundingClientRect();
+  dropdown.style.left  = rect.left + 'px';
+  dropdown.style.top   = (rect.bottom + 2) + 'px';
+  dropdown.style.width = rect.width + 'px';
+  dropdown.style.display = '';
+  updatePitchPreview();
+}
+
+function _selectClub(key, label) {
+  const input  = document.getElementById('fp-club-input');
+  const hidden = document.getElementById('fp-club');
+  const dd     = document.getElementById('fp-club-dropdown');
+  if (input)  { input.value = label; input.style.borderColor = ''; }
+  if (hidden) hidden.value = key;
+  if (dd)     dd.style.display = 'none';
+  updateContacts();
+  updatePitchPreview();
+}
+
+function _hideClubDropdown() {
+  setTimeout(() => {
+    const dd     = document.getElementById('fp-club-dropdown');
+    const input  = document.getElementById('fp-club-input');
+    const hidden = document.getElementById('fp-club');
+    if (dd) dd.style.display = 'none';
+    // If hidden key is already set (from _selectClub), leave it
+    if (input && hidden && !hidden.value) {
+      const typed = input.value.trim().toLowerCase();
+      const match = _allClubs().find(c => c.name.toLowerCase() === typed);
+      if (match) { hidden.value = match.key; input.value = (match.flag || '') + ' ' + match.name; }
+      else if (!typed) hidden.value = '';
+    }
+    updatePitchPreview();
+  }, 160);
+}
+
+function _clubKeyNav(e) {
+  const dropdown = document.getElementById('fp-club-dropdown');
+  if (!dropdown || dropdown.style.display === 'none') return;
+  const items = Array.from(dropdown.querySelectorAll('.fp-club-opt'));
+  const idx = items.findIndex(el => el.classList.contains('fp-club-opt-active'));
+  if (e.key === 'ArrowDown') {
+    e.preventDefault();
+    const next = Math.min(idx + 1, items.length - 1);
+    items.forEach((el, i) => { el.classList.toggle('fp-club-opt-active', i === next); el.style.background = i === next ? 'var(--hover)' : ''; });
+    items[next]?.scrollIntoView({ block: 'nearest' });
+  } else if (e.key === 'ArrowUp') {
+    e.preventDefault();
+    const prev = Math.max(idx - 1, 0);
+    items.forEach((el, i) => { el.classList.toggle('fp-club-opt-active', i === prev); el.style.background = i === prev ? 'var(--hover)' : ''; });
+    items[prev]?.scrollIntoView({ block: 'nearest' });
+  } else if (e.key === 'Enter' && idx >= 0) {
+    e.preventDefault();
+    const el = items[idx];
+    _selectClub(el.dataset.key, el.dataset.label);
+  } else if (e.key === 'Escape') {
+    dropdown.style.display = 'none';
+  }
+}
 function _formatFeeInput(el) {
   const raw = el.value.replace(/[^\d]/g, '');
   if (!raw) { el.value = ''; return; }
@@ -14269,15 +14354,16 @@ function submitPitch() {
   const contact = document.getElementById('fp-contact').value || document.getElementById('fp-contact-input')?.value.trim();
   if (!player || !club || !contact) {
     // highlight missing
-    if (!player)  document.getElementById('fp-player').style.borderColor  = 'var(--red)';
-    if (!club)    document.getElementById('fp-club').style.borderColor    = 'var(--red)';
-    if (!contact) { const ci = document.getElementById('fp-contact-input'); if (ci) ci.style.borderColor = 'var(--red)'; }
+    if (!player) document.getElementById('fp-player').style.borderColor = 'var(--red)';
+    if (!club)   { const ci = document.getElementById('fp-club-input'); if (ci) ci.style.borderColor = 'var(--red)'; }
+    if (!contact){ const ci = document.getElementById('fp-contact-input'); if (ci) ci.style.borderColor = 'var(--red)'; }
     showSnack('Please fill in the required fields', false);
     return;
   }
   // Reset borders
-  ['fp-player','fp-club'].forEach(id => document.getElementById(id).style.borderColor = '');
-  const ci = document.getElementById('fp-contact-input'); if (ci) ci.style.borderColor = '';
+  document.getElementById('fp-player').style.borderColor = '';
+  const _cbi = document.getElementById('fp-club-input');    if (_cbi) _cbi.style.borderColor = '';
+  const _cci = document.getElementById('fp-contact-input'); if (_cci) _cci.style.borderColor = '';
 
   const playerName = PLAYER_LABELS[player] || player;
   const clubName   = _clubLabel(club) || club;
