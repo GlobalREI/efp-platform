@@ -1249,9 +1249,8 @@ body {
     flex-direction: column;
     width: 100% !important;
     max-width: 100vw;
-    min-height: 100vh;
-    overflow-x: hidden;
-    overflow-y: visible;
+    height: 100vh;          /* exact viewport height so .content flex:1 fills the rest */
+    overflow: hidden;        /* .content scrolls internally — body stays still */
     background: #fff;
   }
 
@@ -1336,8 +1335,10 @@ body {
   .content {
     padding: 12px 12px;
     padding-bottom: calc(76px + env(safe-area-inset-bottom, 0px)); /* clear fixed bottom nav (60px) + breathing room */
-    overflow: visible;
-    height: auto;
+    overflow-x: hidden;
+    overflow-y: auto;                    /* .content is the scroll container on mobile */
+    -webkit-overflow-scrolling: touch;   /* smooth momentum scroll on iOS */
+    min-height: 0;                       /* critical: allows flex:1 child to scroll within parent */
     max-width: 100vw;
     box-sizing: border-box;
   }
@@ -6750,6 +6751,9 @@ function _renderMandatesTable() {
       if (typeof PLAYER_LABELS !== 'undefined') PLAYER_LABELS[key] = m.name;
     });
   }
+  // Always re-initialize rows after a re-render so Suggest/PDF buttons, click handlers,
+  // and the frozen contact/source values all stay in sync with the freshly rendered data.
+  setTimeout(initMandateRows, 0);
 }
 
 function _renderNeedsTable() {
@@ -9538,13 +9542,16 @@ function deleteClub(id, btn) {
 }
 
 // ─── PLAYER PROFILE DRAWER ───
-let _ppCurrentPlayer = null; // name of open player
+let _ppCurrentPlayer  = null; // name of open player
+let _ppCurrentMandate = null; // direct reference to the allMandates object — avoids name-search race
 
 let _ppCurrentRow = null; // the TR element currently open
 
 function openPlayerProfile(playerName, data) {
-  _ppCurrentPlayer = playerName;
-  _ppCurrentRow    = data._tr || null;
+  _ppCurrentPlayer  = playerName;
+  _ppCurrentRow     = data._tr || null;
+  // Store direct object reference for reliable saves (no name-mismatch edge cases)
+  _ppCurrentMandate = allMandates.find(m => m.name === playerName) || null;
 
   document.getElementById('pp-name').textContent = playerName;
   document.getElementById('pp-meta').textContent = 'View & edit mandate details';
@@ -9618,7 +9625,8 @@ function openPlayerProfile(playerName, data) {
 function closePlayerProfile() {
   document.getElementById('pp-overlay').style.display = 'none';
   document.getElementById('pp-drawer').classList.remove('open');
-  _ppCurrentPlayer = null;
+  _ppCurrentPlayer  = null;
+  _ppCurrentMandate = null;
 }
 
 // ── Contact Detail Drawer ──────────────────────────────────
@@ -9806,23 +9814,25 @@ function savePlayerProfile() {
     (clubPitches || []).forEach(p => { if (p.player === _oldName) p.player = newName; });
   }
 
-  // Update mandatesAdded and allMandates arrays
-  [mandatesAdded, allMandates].forEach(arr => {
-    const m = arr.find(m => m.name === _ppCurrentPlayer || m.id === _ppCurrentPlayer);
-    if (m) {
-      m.name          = newName;
-      m.position      = newPos;
-      m.pos           = newPos;
-      m.pos2          = newPos2;
-      m.age           = newAge;
-      m.club          = newClub;
-      m.value         = newVal;
-      m.contact       = newSrc;
-      m.dealType      = dealType;
-      m.expectedPrice = newExpectedPrice;
-      m.salary        = newSalary;
-    }
-  });
+  // Update the mandate in allMandates — prefer direct reference (stored when drawer opened)
+  // to avoid name-mismatch edge cases on existing/imported mandates
+  const _applyMandateFields = m => {
+    m.name = newName; m.position = newPos; m.pos = newPos; m.pos2 = newPos2;
+    m.age = newAge; m.club = newClub; m.value = newVal; m.contact = newSrc;
+    m.dealType = dealType; m.expectedPrice = newExpectedPrice; m.salary = newSalary;
+  };
+  if (_ppCurrentMandate) {
+    _applyMandateFields(_ppCurrentMandate);
+    // Keep mandatesAdded in sync too (if this mandate lives there)
+    const _maMatch = mandatesAdded.find(m => m.id === _ppCurrentMandate.id || m.name === _ppCurrentPlayer);
+    if (_maMatch) _applyMandateFields(_maMatch);
+  } else {
+    // Fallback: search by name (for profiles opened from outside the mandates table)
+    [mandatesAdded, allMandates].forEach(arr => {
+      const m = arr.find(m => m.name === _ppCurrentPlayer || m.id === _ppCurrentPlayer);
+      if (m) _applyMandateFields(m);
+    });
+  }
 
   _ppCurrentPlayer = newName; // update to new name before re-render
   closePlayerProfile();       // close first — prevents Firebase onValue from re-opening drawer
