@@ -1900,6 +1900,97 @@ body {
   #ptr-dot.ptr-loading { border-color: var(--border); border-top-color: var(--accent); animation: ptr-spin .65s linear infinite; }
   #ptr-dot.ptr-loading svg { display: none; }
   @keyframes ptr-spin { to { transform: rotate(360deg); } }
+
+  /* ── AI MATCHES: single-column cards + full-width filters ─────────────── */
+  #matches-grid {
+    grid-template-columns: 1fr !important;
+    gap: 10px !important;
+  }
+  /* Filter panel: stack all inputs full-width */
+  #view-matches .panel {
+    flex-direction: column !important;
+    gap: 8px !important;
+  }
+  #view-matches .panel input,
+  #view-matches .panel select {
+    width: 100% !important;
+    box-sizing: border-box !important;
+    font-size: 16px !important; /* prevent iOS zoom */
+  }
+  /* Min-score row: keep label+slider+value together but full-width */
+  #view-matches .panel > div[style*="margin-left:auto"] {
+    margin-left: 0 !important;
+    width: 100% !important;
+    justify-content: space-between;
+  }
+  #view-matches .panel input[type="range"] {
+    flex: 1 !important;
+    width: auto !important;
+  }
+
+  /* ── ACTIVITY FEED: delete button always visible on mobile ────────────── */
+  .act-del-btn {
+    opacity: 1 !important;
+    right: 6px !important;
+    font-size: 13px !important;
+    color: var(--text2) !important;
+  }
+
+  /* ── SYNC INTEL BANNER: wrap gracefully on mobile ─────────────────────── */
+  #sync-intel-banner {
+    flex-wrap: wrap !important;
+    padding: 10px 14px !important;
+    gap: 8px !important;
+    font-size: 12px !important;
+  }
+  #sync-intel-text { flex: 1 1 100% !important; }
+  #sync-intel-banner button { flex: 1; font-size: 12px; padding: 7px 10px; min-height: 36px; }
+
+  /* ── SYNC REVIEW MODAL: bottom sheet on mobile ────────────────────────── */
+  #sync-review-modal {
+    align-items: flex-end !important;
+    justify-content: stretch !important;
+  }
+  #sync-review-modal > div {
+    width: 100vw !important;
+    max-width: 100vw !important;
+    border-radius: 16px 16px 0 0 !important;
+    max-height: 88vh !important;
+    padding-bottom: env(safe-area-inset-bottom, 0px) !important;
+  }
+  #sync-review-modal > div > div:first-child {
+    padding: 16px 16px 12px !important;
+  }
+  #sync-review-list { padding: 12px 16px !important; }
+  #sync-review-modal > div > div:last-child { padding: 12px 16px !important; }
+
+  /* ── MANDATE CARDS: left-border accent for priority ───────────────────── */
+  #view-mandates .data-table tr[data-priority="1"] {
+    border-left: 4px solid var(--amber, #d97706) !important;
+  }
+  #view-mandates .data-table tr[data-priority="2"] {
+    border-left: 4px solid var(--accent, #1B3A6B) !important;
+  }
+
+  /* ── TASK PERSON FILTER: pin to right, don't scroll away ─────────────── */
+  .task-tab-bar {
+    position: relative;
+    padding-right: 88px; /* room for person filter */
+  }
+  .task-person-filter {
+    position: absolute !important;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 0 6px;
+    background: var(--surface);
+    border-left: 1px solid var(--border);
+    z-index: 2;
+    flex-shrink: 0;
+  }
 }
 
 
@@ -2266,6 +2357,7 @@ th.ds-sort:hover { background: rgba(30,58,95,.06); }
     <span class="mbn-icon">⚡</span>
     <span>Home</span>
     <span class="mbn-badge" id="mbn-tasks-badge" style="display:none">0</span>
+    <span class="mbn-badge" id="mbn-sync-badge" style="display:none;background:var(--accent)">0</span>
   </button>
   <button class="mob-nav-btn" id="mbn-contacts" onclick="go('contacts');mobBottomActive('contacts')">
     <span class="mbn-icon">👤</span>
@@ -6583,6 +6675,7 @@ function _renderMandatesTable() {
     const prioHtml = _prioCfg
       ? `<span style="display:inline-block;padding:2px 8px;border-radius:4px;background:${_prioCfg.bg};color:#fff;font-size:11px;font-weight:700;letter-spacing:.03em">${_prioCfg.label}</span>`
       : `<span style="color:var(--text3);font-size:12px">—</span>`;
+    if (_prio) tr.dataset.priority = _prio; // used by mobile CSS for left-border accent
     tr.innerHTML = `
       <td>${prioHtml}</td>
       <td><strong>${m.name}</strong>${archivedTag}${mNotesSub}</td>
@@ -6764,6 +6857,9 @@ function _checkSyncIntelligence(syncLog) {
   const n = _syncReviewItems.length;
   textEl.innerHTML = `<strong>Sync found ${n} item${n > 1 ? 's' : ''} to review</strong> — add to your database or dismiss`;
   banner.style.display = 'flex';
+  // Update mobile bottom nav Home badge to surface sync review
+  const syncNavBadge = document.getElementById('mbn-sync-badge');
+  if (syncNavBadge) { syncNavBadge.textContent = n; syncNavBadge.style.display = ''; }
 }
 
 function openSyncReview() {
@@ -6936,6 +7032,8 @@ function _syncAddItem(id) {
 function dismissSyncBanner() {
   const banner = document.getElementById('sync-intel-banner');
   if (banner) banner.style.display = 'none';
+  const syncNavBadge = document.getElementById('mbn-sync-badge');
+  if (syncNavBadge) syncNavBadge.style.display = 'none';
   // Mark all current items as ignored
   if (_syncReviewItems.length) {
     const ignored = JSON.parse(localStorage.getItem('efp-sync-ignored') || '[]');
@@ -9048,7 +9146,11 @@ let logsAdded       = [   // {id,type,notes,date,duration,outcome,contact,club,s
     outcome:'✅ CLOSED: Entrup → Eintracht Braunschweig (permanent). Deal confirmed.', source:'beeper-sync' },
 ];
 // ── Beeper PDF Pitch Alerts (appended by scheduled sync task) ──
-let pendingContactAlerts = []; // {id, name, role, club, phone, notes, date} — appended by sync
+let pendingContactAlerts = [
+  // ── Manual backfill (Jul 25–27, 2026) ──
+  { id: 'sebastian-dirscherl-hsv', name: 'Sebastian Dirscherl', role: 'Director / Sporting', club: 'Hamburger SV', phone: '', notes: 'New outreach Jul 27 — referred by Claus (HSV connection). Timo initiated contact: "Moin Sebastian, Claus hat mich gebeten bei dir zu melden." Awaiting reply.', date: '2026-07-27' },
+  { id: 'caner-turkish-agent', name: 'Caner', role: 'Agent', club: 'Turkey', phone: '', notes: 'New contact Jul 25 via Simon Friis referral. Intro call Jul 26 ~15:00 CET — agency open to collaboration, potential pipeline for EFP players into Turkish clubs.', date: '2026-07-25' },
+]; // {id, name, role, club, phone, notes, date} — appended by sync
 let pendingClubAlerts   = []; // {id, name, notes, date} — appended by sync
 let pendingMandateAlerts = []; // {id, playerName, notes, date} — appended by sync
 let pendingPitchAlerts = [
