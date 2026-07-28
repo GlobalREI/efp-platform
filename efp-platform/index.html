@@ -8731,6 +8731,9 @@ function openDrawer(key) {
   ov.classList.add('open');
   drw.classList.add('open');
   document.body.style.overflow = 'hidden';
+  // ── Always reset any stuck button states from a previous submit ──
+  // This prevents the loading spinner from persisting across drawer open/close cycles
+  if (window._DS) drw.querySelectorAll('.btn-primary, .btn-outline').forEach(b => _DS.btn(b, 'default'));
   // Register with DS layer stack for ESC handling
   if (window._DS) _DS.pushLayer(key, function() { closeDrawer(key); });
   // Clicking the overlay background closes the drawer
@@ -11522,7 +11525,10 @@ function submitLog() {
 // ─── ADD TASK MODAL ───
 function openAddTaskModal() { openTaskModal(); } // alias used by dashboard button
 function openTaskModal() {
-  document.getElementById('task-modal').style.display = 'flex';
+  const _tm = document.getElementById('task-modal');
+  _tm.style.display = 'flex';
+  // Reset any stuck loading/success/error state on buttons
+  if (window._DS) _tm.querySelectorAll('.btn-primary, .btn-outline').forEach(b => _DS.btn(b, 'default'));
   document.getElementById('nt-text').value = '';
   document.getElementById('nt-related').value = '';
   document.getElementById('nt-notes').value = '';
