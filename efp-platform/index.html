@@ -9340,22 +9340,28 @@ function submitContact() {
   allContacts.push(c);
   contactsAdded.push(c); // keep legacy array in sync for backward compat
   const _cSaveBtn = document.querySelector('#contact-drawer .drawer-foot .btn-primary');
+  const _cResetBtn = () => { if (window._DS && _cSaveBtn) _DS.btn(_cSaveBtn, 'default'); };
   if (window._DS && _cSaveBtn) _DS.btn(_cSaveBtn, 'loading');
-  _renderContactsTable();
-  setTimeout(() => {
-    closeDrawer('contact');
-    // reset form
-    ['c-first','c-last','c-email','c-phone','c-wa','c-li','c-notes'].forEach(id => {
-      const el = document.getElementById(id); if(el) el.value='';
-    });
-    document.getElementById('c-position').value='';
-    document.getElementById('c-club').value='';
-    showSnack(`✓ ${first} ${last} added to Contacts`, false);
-    if (window._DS && _cSaveBtn) _DS.btn(_cSaveBtn, 'default');
-  }, 350);
-  fbSave();
-  renderDashboard();
-  _refreshAllInterconnections();  // propagate new contact across Clubs view, Needs links, etc.
+  try {
+    _renderContactsTable();
+    fbSave();
+    renderDashboard();
+    _refreshAllInterconnections();  // propagate new contact across Clubs view, Needs links, etc.
+    setTimeout(() => {
+      closeDrawer('contact');
+      ['c-first','c-last','c-email','c-phone','c-wa','c-li','c-notes'].forEach(id => {
+        const el = document.getElementById(id); if(el) el.value='';
+      });
+      document.getElementById('c-position').value='';
+      document.getElementById('c-club').value='';
+      showSnack(`✓ ${first} ${last} added to Contacts`, false);
+      _cResetBtn();
+    }, 350);
+  } catch(e) {
+    console.error('[EFP] submitContact error:', e);
+    _cResetBtn();
+    showSnack('Error saving contact. Please try again.', true);
+  }
 }
 
 function _resetContactDrawer() {
@@ -9457,26 +9463,40 @@ function submitClub() {
     showSnack(`⚠ "${name}" already exists in the database`, true);
     return;
   }
+  // Read all fields (website, staff, notes were previously ignored)
+  const website = (document.getElementById('cl-web')   ?.value || '').trim();
+  const sd      = (document.getElementById('cl-sd')    ?.value || '').trim();
+  const hor     = (document.getElementById('cl-hor')   ?.value || '').trim();
+  const ceo     = (document.getElementById('cl-ceo')   ?.value || '').trim();
+  const coach   = (document.getElementById('cl-coach') ?.value || '').trim();
+  const notes   = (document.getElementById('cl-notes') ?.value || '').trim();
   const club = { id:'cl_'+Date.now(), name, league, country,
     flag: country.includes('Spain')?'🇪🇸':country.includes('Germany')?'🇩🇪':country.includes('Italy')?'🇮🇹':country.includes('France')?'🇫🇷':country.includes('Netherlands')?'🇳🇱':country.includes('Belgium')?'🇧🇪':'🌍',
+    website, sportingDirector: sd, headOfRecruitment: hor, ceo, headCoach: coach, notes,
     status: 'New', isStatic: false };
   const _clSaveBtn = document.querySelector('#club-drawer .btn-primary');
+  const _clResetBtn = () => { if (window._DS && _clSaveBtn) _DS.btn(_clSaveBtn, 'default'); };
   if (window._DS && _clSaveBtn) _DS.btn(_clSaveBtn, 'loading');
-  allClubs.push(club);
-  clubsAdded.push(club); // legacy sync
-  if (allClubs.length > 1) {
-    _renderClubsTable(); // re-render to keep sorted order
-  } else {
-    _appendClubRow(club); // fallback if migration hasn't run
+  try {
+    allClubs.push(club);
+    clubsAdded.push(club); // legacy sync
+    if (allClubs.length > 1) {
+      _renderClubsTable(); // re-render to keep sorted order
+    } else {
+      _appendClubRow(club); // fallback if migration hasn't run
+    }
+    _refreshClubDropdowns();
+    fbSave();
+    setTimeout(() => {
+      closeDrawer('club');
+      showSnack(`✓ ${name} added to Clubs — available across all forms`, false);
+      _clResetBtn();
+    }, 350);
+  } catch(e) {
+    console.error('[EFP] submitClub error:', e);
+    _clResetBtn();
+    showSnack('Error saving club. Please try again.', true);
   }
-  _refreshClubDropdowns();
-  fbSave();
-  setTimeout(() => {
-    closeDrawer('club');
-    ['cl-name','cl-country','cl-league'].forEach(id => { const el=document.getElementById(id); if(el) el.value=''; });
-    showSnack(`✓ ${name} added to Clubs — available across all forms`, false);
-    if (window._DS && _clSaveBtn) _DS.btn(_clSaveBtn, 'default');
-  }, 350);
 }
 
 // Render entire clubs table from allClubs unified array
@@ -10351,20 +10371,27 @@ function submitMandate() {
   allMandates.push(d);
   mandatesAdded.push(d); // legacy sync
   const _mSaveBtn = document.querySelector('#mandate-drawer .drawer-foot .btn-primary');
+  const _mResetBtn = () => { if (window._DS && _mSaveBtn) _DS.btn(_mSaveBtn, 'default'); };
   if (window._DS && _mSaveBtn) _DS.btn(_mSaveBtn, 'loading');
-  _renderMandatesTable();
-  setTimeout(() => {
-    closeDrawer('mandate');
-    ['m-name','m-age','m-club','m-val','m-expected-price','m-salary','m-contact','m-notes'].forEach(id => { const el=document.getElementById(id); if(el) el.value=''; });
-    document.getElementById('m-pos').value='';
-    const _mp2 = document.getElementById('m-pos2'); if (_mp2) _mp2.value = '';
-    showSnack(`✓ ${name} added · showing club suggestions`, false);
-    if (window._DS && _mSaveBtn) _DS.btn(_mSaveBtn, 'default');
-    showMandateSuggestions(name, pos, age, val, mClub);
-  }, 350);
-  fbSave();
-  _updateMandateSubtitle();
-  _updateNeedsMatchAlerts(); // new mandate may create new club need matches
+  try {
+    _renderMandatesTable();
+    fbSave();
+    _updateMandateSubtitle();
+    _updateNeedsMatchAlerts(); // new mandate may create new club need matches
+    setTimeout(() => {
+      closeDrawer('mandate');
+      ['m-name','m-age','m-club','m-val','m-expected-price','m-salary','m-contact','m-notes'].forEach(id => { const el=document.getElementById(id); if(el) el.value=''; });
+      document.getElementById('m-pos').value='';
+      const _mp2 = document.getElementById('m-pos2'); if (_mp2) _mp2.value = '';
+      showSnack(`✓ ${name} added · showing club suggestions`, false);
+      _mResetBtn();
+      showMandateSuggestions(name, pos, age, val, mClub);
+    }, 350);
+  } catch(e) {
+    console.error('[EFP] submitMandate error:', e);
+    _mResetBtn();
+    showSnack('Error saving mandate. Please try again.', true);
+  }
 }
 
 // Delete mandate by id (all mandates now have ids after migration)
@@ -11155,13 +11182,20 @@ function saveNeedDetail() {
 
   const _ndIsEdit   = !!_currentNeedId;
   const _ndSaveBtn  = document.querySelector('#need-detail-drawer .btn-primary');
+  const _ndResetBtn = () => { if (window._DS && _ndSaveBtn) _DS.btn(_ndSaveBtn, 'default'); };
   if (window._DS && _ndSaveBtn) _DS.btn(_ndSaveBtn, 'loading');
-  fbSave();
-  setTimeout(() => {
-    closeDrawer('need-detail');
-    if (_ndIsEdit) showSnack('✓ Requirement updated', false);
-    if (window._DS && _ndSaveBtn) _DS.btn(_ndSaveBtn, 'default');
-  }, 350);
+  try {
+    fbSave();
+    setTimeout(() => {
+      closeDrawer('need-detail');
+      if (_ndIsEdit) showSnack('✓ Requirement updated', false);
+      _ndResetBtn();
+    }, 350);
+  } catch(e) {
+    console.error('[EFP] saveNeedDetail error:', e);
+    _ndResetBtn();
+    showSnack('Error saving requirement. Please try again.', true);
+  }
 }
 
 function pitchToNeedClub() {
@@ -11612,6 +11646,7 @@ function submitNewTask() {
   document.getElementById('nt-text').style.borderColor = text ? '' : 'var(--red)';
   if (!text) return;
   const _ntSaveBtn = document.querySelector('#task-modal .btn-primary');
+  const _ntResetBtn = () => { if (window._DS && _ntSaveBtn) _DS.btn(_ntSaveBtn, 'default'); };
   if (window._DS && _ntSaveBtn) _DS.btn(_ntSaveBtn, 'loading');
   const bucket  = document.getElementById('nt-bucket').value;
   const prio    = document.getElementById('nt-prio').value;
@@ -11643,9 +11678,11 @@ function submitNewTask() {
     });
   }
   setTimeout(() => {
-    document.getElementById('task-modal').style.display = 'none';
-    showSnack('✓ Task added', false);
-    if (window._DS && _ntSaveBtn) _DS.btn(_ntSaveBtn, 'default');
+    try {
+      document.getElementById('task-modal').style.display = 'none';
+      showSnack('✓ Task added', false);
+    } catch(e) { console.error('[EFP] submitNewTask close error:', e); }
+    _ntResetBtn();
   }, 350);
 }
 
@@ -13364,13 +13401,19 @@ function saveRelEntry() {
     showSnack(`✓ Added ${name}`, false);
   }
   const _relSaveBtn = document.querySelector('#rel-drawer .btn-primary');
+  const _relResetBtn = () => { if (window._DS && _relSaveBtn) _DS.btn(_relSaveBtn, 'default'); };
   if (window._DS && _relSaveBtn) _DS.btn(_relSaveBtn, 'loading');
-  fbSave();
-  setTimeout(() => {
-    closeDrawer('rel');
-    renderRelationships();
-    if (window._DS && _relSaveBtn) _DS.btn(_relSaveBtn, 'default');
-  }, 350);
+  try {
+    fbSave();
+    setTimeout(() => {
+      try { closeDrawer('rel'); renderRelationships(); } catch(e2) { console.error('[EFP] saveRelEntry close error:', e2); }
+      _relResetBtn();
+    }, 350);
+  } catch(e) {
+    console.error('[EFP] saveRelEntry error:', e);
+    _relResetBtn();
+    showSnack('Error saving. Please try again.', true);
+  }
 }
 
 // ─── OCR / SCREENSHOT ENGINE ──────────────────────────────────────────────────
@@ -14459,14 +14502,23 @@ function submitPitch() {
   const pos        = posMatch ? posMatch[1] : '';
 
   const _fpSaveBtn = document.querySelector('#pitch-drawer .btn-primary');
+  const _fpResetBtn = () => { if (window._DS && _fpSaveBtn) _DS.btn(_fpSaveBtn, 'default'); };
   if (window._DS && _fpSaveBtn) _DS.btn(_fpSaveBtn, 'loading');
-  setTimeout(() => {
-    closePitchDrawer();
-    addNewPitch(playerName, clubName.replace(/\s*\p{Emoji_Presentation}/gu,'').trim(), contact, flag, pos);
-    showSnack(`✓ Pitch created — ${playerName} → ${clubName}`, false);
-    if (window._DS && _fpSaveBtn) _DS.btn(_fpSaveBtn, 'default');
-    go('pitches');
-  }, 350);
+  try {
+    setTimeout(() => {
+      try {
+        closePitchDrawer();
+        addNewPitch(playerName, clubName.replace(/\s*\p{Emoji_Presentation}/gu,'').trim(), contact, flag, pos);
+        showSnack(`✓ Pitch created — ${playerName} → ${clubName}`, false);
+        go('pitches');
+      } catch(e2) { console.error('[EFP] submitPitch close error:', e2); }
+      _fpResetBtn();
+    }, 350);
+  } catch(e) {
+    console.error('[EFP] submitPitch error:', e);
+    _fpResetBtn();
+    showSnack('Error saving pitch. Please try again.', true);
+  }
 }
 function saveDraft() {
   const player = document.getElementById('fp-player').value;
