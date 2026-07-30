@@ -16507,7 +16507,10 @@ window._regression = (function () {
     var lenBefore = allClubs.length;
     var savedName = nameEl.value; var savedCtr = ctrEl.value; var savedLeag = leagEl.value;
     nameEl.value = ''; ctrEl.value = ''; leagEl.value = '';
+    // submitClub has a _requireFirebase() guard; set flag true so validation code runs
+    var _savedFb = _fbDataLoaded; _fbDataLoaded = true;
     submitClub();
+    _fbDataLoaded = _savedFb;
     _ok(allClubs.length === lenBefore, 'P10-001a submitClub blocked when all fields empty');
     _ok(nameEl.style.borderColor.indexOf('red') >= 0, 'P10-001b cl-name shows red border');
     // Restore
@@ -16524,7 +16527,10 @@ window._regression = (function () {
     var savedClub = clubEl.value; var savedPos = posEl.value;
     var savedNeedId = window._currentNeedId; window._currentNeedId = null;
     clubEl.value = ''; posEl.value = '';
+    // saveNeedDetail has a _requireFirebase() guard; set flag true so validation code runs
+    var _savedFb = _fbDataLoaded; _fbDataLoaded = true;
     saveNeedDetail();
+    _fbDataLoaded = _savedFb;
     _ok(allNeeds.length === lenBefore, 'P10-002a saveNeedDetail blocked when club is empty');
     // Restore
     clubEl.value = savedClub; posEl.value = savedPos;
@@ -16538,7 +16544,10 @@ window._regression = (function () {
     var lenBefore = TASKS.length;
     var savedVal = textEl.value;
     textEl.value = '';
+    // submitNewTask has a _requireFirebase() guard; set flag true so validation code runs
+    var _savedFb = _fbDataLoaded; _fbDataLoaded = true;
     submitNewTask();
+    _fbDataLoaded = _savedFb;
     _ok(TASKS.length === lenBefore, 'P10-003a submitNewTask blocked when text is empty');
     _ok(textEl.style.borderColor.indexOf('red') >= 0, 'P10-003b nt-text shows red border');
     // Restore
