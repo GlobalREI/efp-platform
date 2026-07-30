@@ -3803,7 +3803,16 @@ th.ds-sort:hover { background: rgba(30,58,95,.06); }
           <label class="field-label">Age</label>
           <input class="field-input" id="pp-edit-age" placeholder="23" type="number" min="16" max="45">
         </div>
+        <div style="flex:0 0 80px">
+          <label class="field-label">Height (cm)</label>
+          <input class="field-input" id="pp-edit-height" placeholder="185" type="number" min="150" max="220">
+        </div>
       </div>
+      <div style="display:flex;gap:8px;margin-bottom:4px;align-items:center">
+        <label class="field-label" style="margin:0;flex:1">Auto-fill from name</label>
+        <button type="button" class="btn btn-outline" onclick="_ppAutoFill()" style="font-size:11px;padding:2px 10px;height:28px;white-space:nowrap">🔍 Look up</button>
+      </div>
+      <div id="pp-autofill-status" style="display:none;font-size:11.5px;color:var(--text2);margin-bottom:8px;padding:6px 10px;background:var(--surface2);border-radius:6px;border:1px solid var(--border)"></div>
       <div style="display:flex;gap:10px;margin-bottom:10px">
         <div style="flex:1">
           <label class="field-label">Current Club</label>
@@ -3938,7 +3947,14 @@ th.ds-sort:hover { background: rgba(30,58,95,.06); }
     <div class="drawer-close" onclick="closeDrawer('mandate')">✕</div>
   </div>
   <div class="drawer-body">
-    <div class="field"><label class="field-label">Player Name <span class="req">*</span></label><input class="field-input" id="m-name" placeholder="Full name"></div>
+    <div class="field" style="margin-bottom:10px">
+      <label class="field-label">Player Name <span class="req">*</span></label>
+      <div style="display:flex;gap:8px;align-items:center">
+        <input class="field-input" id="m-name" placeholder="Full name" style="flex:1">
+        <button type="button" class="btn btn-outline" id="m-autofill-btn" onclick="_mandateAutoFill()" style="white-space:nowrap;flex-shrink:0;font-size:12px;padding:0 12px;height:36px">🔍 Look up</button>
+      </div>
+      <div id="m-autofill-status" style="display:none;font-size:11.5px;color:var(--text2);margin-top:5px;padding:6px 10px;background:var(--surface2);border-radius:6px;border:1px solid var(--border)"></div>
+    </div>
     <div class="field-row field">
       <div style="flex:1">
         <label class="field-label">Position <span class="req">*</span></label>
@@ -3959,6 +3975,7 @@ th.ds-sort:hover { background: rgba(30,58,95,.06); }
         </select>
       </div>
       <div style="flex:0 0 76px"><label class="field-label">Age</label><input class="field-input" id="m-age" placeholder="e.g. 23" type="number" min="16" max="40"></div>
+      <div style="flex:0 0 76px"><label class="field-label">Height (cm)</label><input class="field-input" id="m-height" placeholder="e.g. 185" type="number" min="150" max="220"></div>
     </div>
     <div class="field-row field">
       <div><label class="field-label">Current Club</label><input class="field-input" id="m-club" list="efp-club-datalist" placeholder="Type to search clubs…" autocomplete="off"></div>
@@ -8199,10 +8216,15 @@ function openPlayerProfile(playerName, data) {
   document.getElementById('pp-edit-club').value   = (_rawClub && _rawClub !== '—') ? _rawClub : '';
   document.getElementById('pp-edit-val').value    = (_rawVal  && _rawVal  !== '—') ? _rawVal  : '';
   document.getElementById('pp-edit-source').value = _m ? (_m.contact || '') : (data.contact || data.source || '');
+  const ppHtEl = document.getElementById('pp-edit-height');
+  if (ppHtEl) ppHtEl.value = _m ? (_m.height || '') : (data.height || '');
   const ppExpEl = document.getElementById('pp-edit-expected-price');
   if (ppExpEl) ppExpEl.value = _m ? (_m.expectedPrice || '') : (data.expectedPrice || '');
   const ppSalEl = document.getElementById('pp-edit-salary');
   if (ppSalEl) ppSalEl.value = _m ? (_m.salary || '') : (data.salary || '');
+  // Reset autofill status
+  const ppAfSt = document.getElementById('pp-autofill-status');
+  if (ppAfSt) { ppAfSt.style.display = 'none'; ppAfSt.textContent = ''; }
   // Archive button label
   const ppArchBtn = document.getElementById('pp-archive-btn');
   if (ppArchBtn) ppArchBtn.title = (_m ? !!_m.archived : !!data.archived) ? 'Restore mandate' : 'Archive mandate';
@@ -8425,6 +8447,7 @@ function savePlayerProfile() {
   const newPos           = document.getElementById('pp-edit-pos').value.trim();
   const newPos2          = (document.getElementById('pp-edit-pos2')?.value || '').trim();
   const newAge           = document.getElementById('pp-edit-age').value.trim();
+  const newHeight        = (document.getElementById('pp-edit-height')?.value || '').trim();
   const newClub          = document.getElementById('pp-edit-club').value.trim();
   const newVal           = _normVal(document.getElementById('pp-edit-val').value.trim()) || document.getElementById('pp-edit-val').value.trim();
   const newSrc           = document.getElementById('pp-edit-source').value.trim();
@@ -8452,7 +8475,7 @@ function savePlayerProfile() {
   // to avoid name-mismatch edge cases on existing/imported mandates
   const _applyMandateFields = m => {
     m.name = newName; m.position = newPos; m.pos = newPos; m.pos2 = newPos2;
-    m.age = newAge; m.club = newClub; m.value = newVal; m.contact = newSrc;
+    m.age = newAge; m.height = newHeight; m.club = newClub; m.value = newVal; m.contact = newSrc;
     m.dealType = dealType; m.expectedPrice = newExpectedPrice; m.salary = newSalary;
   };
   if (_ppCurrentMandate) {
@@ -8925,6 +8948,141 @@ function _applyContactClubTags() {
 }
 
 // ─── ADD MANDATE ───
+// ════════════════════════════════════════════════════════════════════════════
+// PLAYER AUTO-FILL  — TheSportsDB (free, no key, CORS-safe) + Wikipedia
+// ════════════════════════════════════════════════════════════════════════════
+
+/**
+ * Query TheSportsDB for a player by name, then optionally Wikipedia for a photo.
+ * Returns a data object: { name, age, height, nationality, position, club, photo, bio }
+ * Calls onResult(data) or onResult(null) on completion.
+ */
+function _autoFillPlayer(name, onResult) {
+  if (!name || name.length < 3) { onResult(null); return; }
+  const url = 'https://www.thesportsdb.com/api/v1/json/3/searchplayers.php?p=' + encodeURIComponent(name);
+  fetch(url)
+    .then(r => r.json())
+    .then(json => {
+      const players = json.player;
+      if (!players || !players.length) { onResult(null); return; }
+
+      // Best match: prefer exact name or first result
+      const lc = name.toLowerCase();
+      const p = players.find(x => (x.strPlayer||'').toLowerCase() === lc) || players[0];
+
+      // Parse height: TheSportsDB returns e.g. "6'1\" (185 cm)" → extract cm value
+      let heightCm = '';
+      if (p.strHeight) {
+        const cmMatch = p.strHeight.match(/\((\d+)\s*cm\)/i);
+        if (cmMatch) heightCm = cmMatch[1];
+        else { const numOnly = p.strHeight.match(/^(\d+)$/); if (numOnly) heightCm = numOnly[1]; }
+      }
+
+      // Parse age from date of birth
+      let age = '';
+      if (p.dateBorn) {
+        const born = new Date(p.dateBorn);
+        if (!isNaN(born)) {
+          const today = new Date();
+          age = String(today.getFullYear() - born.getFullYear() -
+            (today < new Date(today.getFullYear(), born.getMonth(), born.getDate()) ? 1 : 0));
+        }
+      }
+
+      // Map TheSportsDB position names to EFP positions
+      const posMap = {
+        'Goalkeeper':'Goalkeeper','GK':'Goalkeeper',
+        'Defender':'Centre Back','Centre Back':'Centre Back','Center Back':'Centre Back','CB':'Centre Back',
+        'Right Back':'Right Back','RB':'Right Back','Left Back':'Left Back','LB':'Left Back',
+        'Midfielder':'Central Mid','Central Midfield':'Central Mid','Central Midfielder':'Central Mid','CM':'Central Mid',
+        'Defensive Midfield':'Defensive Mid','CDM':'Defensive Mid','Defensive Midfielder':'Defensive Mid',
+        'Attacking Midfield':'Attacking Mid','CAM':'Attacking Mid','Attacking Midfielder':'Attacking Mid',
+        'Right Winger':'Right Winger','Right Wing':'Right Winger','RW':'Right Winger',
+        'Left Winger':'Left Winger','Left Wing':'Left Winger','LW':'Left Winger',
+        'Forward':'Centre Forward','Striker':'Centre Forward','Centre Forward':'Centre Forward','CF':'Centre Forward','ST':'Centre Forward',
+        'Second Striker':'Second Striker','SS':'Second Striker',
+      };
+      const rawPos  = (p.strPosition || '').split(',')[0].trim();
+      const mappedPos = posMap[rawPos] || '';
+
+      const data = {
+        name:        p.strPlayer         || name,
+        age:         age,
+        height:      heightCm,
+        nationality: p.strNationality    || '',
+        position:    mappedPos,
+        club:        p.strTeam           || '',
+        photo:       p.strThumb          || p.strCutout || '',
+        bio:         (p.strDescriptionEN || '').slice(0, 300),
+        source:      'TheSportsDB',
+      };
+      onResult(data);
+    })
+    .catch(() => onResult(null));
+}
+
+/** Show auto-fill status banner inside the add mandate drawer */
+function _setAutoFillStatus(elId, data) {
+  const el = document.getElementById(elId);
+  if (!el) return;
+  if (!data) {
+    el.style.display = 'block';
+    el.innerHTML = '⚠️ No player found. Please fill in the fields manually.';
+    return;
+  }
+  const found = [];
+  if (data.age)         found.push('Age: ' + data.age);
+  if (data.height)      found.push('Height: ' + data.height + ' cm');
+  if (data.nationality) found.push('Nationality: ' + data.nationality);
+  if (data.position)    found.push('Position: ' + data.position);
+  if (data.club)        found.push('Club: ' + data.club);
+  el.style.display = 'block';
+  el.innerHTML = found.length
+    ? '✅ Found: ' + found.join(' · ') + '<br><span style="color:var(--text3);font-size:11px">Review and edit before saving — some data may be outdated.</span>'
+    : '⚠️ Player found but no additional data available. Fill in manually.';
+}
+
+/** Auto-fill the Add Mandate drawer from TheSportsDB */
+function _mandateAutoFill() {
+  const name = document.getElementById('m-name')?.value.trim();
+  if (!name) { showSnack('Enter a player name first', true); return; }
+  const btn = document.getElementById('m-autofill-btn');
+  if (btn) { btn.disabled = true; btn.textContent = '⏳ Searching…'; }
+  _autoFillPlayer(name, function(data) {
+    if (btn) { btn.disabled = false; btn.textContent = '🔍 Look up'; }
+    _setAutoFillStatus('m-autofill-status', data);
+    if (!data) return;
+    // Pre-fill fields only if they're currently empty
+    const _fill = (id, val) => { const el = document.getElementById(id); if (el && !el.value && val) el.value = val; };
+    _fill('m-age',    data.age);
+    _fill('m-height', data.height);
+    _fill('m-nat',    data.nationality);
+    _fill('m-club',   data.club);
+    // Position: only set if dropdown currently blank
+    const posEl = document.getElementById('m-pos');
+    if (posEl && !posEl.value && data.position) {
+      // Try to match to an existing option
+      Array.from(posEl.options).forEach(o => { if (o.text === data.position) posEl.value = o.value; });
+    }
+  });
+}
+
+/** Auto-fill the Player Profile drawer from TheSportsDB */
+function _ppAutoFill() {
+  const name = document.getElementById('pp-edit-name')?.value.trim() || _ppCurrentPlayer;
+  if (!name) { showSnack('No player name to search', true); return; }
+  const ppAfSt = document.getElementById('pp-autofill-status');
+  if (ppAfSt) { ppAfSt.style.display = 'block'; ppAfSt.innerHTML = '⏳ Searching…'; }
+  _autoFillPlayer(name, function(data) {
+    _setAutoFillStatus('pp-autofill-status', data);
+    if (!data) return;
+    const _fill = (id, val) => { const el = document.getElementById(id); if (el && !el.value && val) el.value = val; };
+    _fill('pp-edit-age',    data.age);
+    _fill('pp-edit-height', data.height);
+    _fill('pp-edit-club',   data.club);
+  });
+}
+
 function submitMandate() {
   if (!_requireFirebase()) return;
   // DS validation
@@ -8948,9 +9106,11 @@ function submitMandate() {
   const pos     = document.getElementById('m-pos').value;
   const pos2    = document.getElementById('m-pos2')?.value || '';
   const contact = document.getElementById('m-contact')?.value.trim() || '';
-  const age   = document.getElementById('m-age').value  || '—';
-  const mClub = document.getElementById('m-club').value || '';
-  const val   = _normVal(document.getElementById('m-val').value) || '—';
+  const age    = document.getElementById('m-age').value    || '—';
+  const height = document.getElementById('m-height')?.value || '';
+  const nat    = document.getElementById('m-nat')?.value.trim()  || '';
+  const mClub  = document.getElementById('m-club').value || '';
+  const val    = _normVal(document.getElementById('m-val').value) || '—';
   // ── Impossible state guard: Mandate must belong to a Club ──
   if (!mClub || mClub === '—') {
     if (window._DS) _DS.showFieldError('m-club', 'Club is required — a mandate must belong to a club');
@@ -8965,7 +9125,8 @@ function submitMandate() {
   }
   const expectedPrice = _normVal(document.getElementById('m-expected-price')?.value.trim()||'') || '';
   const salary        = _normVal(document.getElementById('m-salary')?.value.trim()||'')        || '';
-  const d = { id:'m_'+Date.now(), name, position:pos, pos, pos2, age, club:mClub, value:val, contact,
+  const foot = document.getElementById('m-foot')?.value || '';
+  const d = { id:'m_'+Date.now(), name, position:pos, pos, pos2, age, height, nationality:nat, foot, club:mClub, value:val, contact,
                expectedPrice, salary, dotClass:'dot-amber', statusText:'New Mandate' };
   allMandates.push(d);
   mandatesAdded.push(d); // legacy sync
@@ -8979,9 +9140,10 @@ function submitMandate() {
     _updateNeedsMatchAlerts(); // new mandate may create new club need matches
     setTimeout(() => {
       closeDrawer('mandate');
-      ['m-name','m-age','m-club','m-val','m-expected-price','m-salary','m-contact','m-notes'].forEach(id => { const el=document.getElementById(id); if(el) el.value=''; });
+      ['m-name','m-age','m-height','m-club','m-nat','m-val','m-expected-price','m-salary','m-contact','m-notes'].forEach(id => { const el=document.getElementById(id); if(el) el.value=''; });
       document.getElementById('m-pos').value='';
       const _mp2 = document.getElementById('m-pos2'); if (_mp2) _mp2.value = '';
+      const _mSt = document.getElementById('m-autofill-status'); if (_mSt) { _mSt.style.display='none'; _mSt.textContent=''; }
       showSnack(`✓ ${name} added · showing club suggestions`, false);
       _mResetBtn();
       showMandateSuggestions(name, pos, age, val, mClub);
@@ -14335,6 +14497,10 @@ function openMandateDetail(name, pos, age, club, val, source, status, dealType) 
   document.getElementById('mandate-detail-drawer-title').textContent = name;
   const mdDT = document.getElementById('md-deal-type');
   if (mdDT) mdDT.value = dealType || 'either';
+  // Height — look up from live allMandates by name
+  const _mdM = allMandates.find(m => m.name === name);
+  const mdHtEl = document.getElementById('md-height');
+  if (mdHtEl) mdHtEl.value = _mdM ? (_mdM.height || '') : '';
 
   // ── Transfermarkt link ────────────────────────────────────────────────────
   _setMandateTmLink(name, club);
@@ -14407,11 +14573,12 @@ function addPitchForMandate() {
 function saveMandateDetail() {
   const name     = document.getElementById('md-name').value.trim();
   const dealType = document.getElementById('md-deal-type')?.value || 'either';
+  const mdHeight = document.getElementById('md-height')?.value || '';
   if (!name) return;
-  // Persist dealType onto mandate records
+  // Persist dealType + height onto mandate records
   [mandatesAdded, allMandates].forEach(arr => {
     const m = arr.find(m => m.name === name);
-    if (m) m.dealType = dealType;
+    if (m) { m.dealType = dealType; if (mdHeight) m.height = mdHeight; }
   });
   fbSave();
   showSnack('✓ Mandate updated', false);
@@ -16865,6 +17032,10 @@ window._regression = (function () {
       <div>
         <label class="field-label">Age</label>
         <input class="field-input" id="md-age" placeholder="e.g. 23" type="number" min="16" max="40">
+      </div>
+      <div>
+        <label class="field-label">Height (cm)</label>
+        <input class="field-input" id="md-height" placeholder="185" type="number" min="150" max="220">
       </div>
     </div>
     <div class="field-row field">
