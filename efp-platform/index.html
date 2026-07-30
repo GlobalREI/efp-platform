@@ -5741,6 +5741,16 @@ function fbSaveLater(delay) {
   _fbSaveTimer = setTimeout(function () { fbSave(); }, delay || 650);
 }
 
+// ── Firebase readiness guard ──────────────────────────────────────────────────
+// Call at the top of every submit function. Returns true if Firebase is ready
+// (data confirmed in memory), false if still connecting. When false, shows a
+// snack and blocks the submit so the user's data is never silently dropped.
+function _requireFirebase() {
+  if (_fbDataLoaded) return true;
+  showSnack('⏳ Still connecting to database — please wait a moment and try again.', true);
+  return false;
+}
+
 function fbSave() {
   if (!_fbDb) return;
   // Safety: never write to Firebase before we've confirmed real data is in memory.
@@ -7856,6 +7866,7 @@ function _initials(name) { return name.split(' ').map(w=>w[0]).join('').substrin
 
 // ─── ADD CONTACT ───
 function submitContact() {
+  if (!_requireFirebase()) return;
   // DS validation
   if (window._DS) {
     const ok = _DS.validateForm([
@@ -8035,6 +8046,7 @@ function _initContactDeleteBtns() {
 
 // ─── ADD CLUB ───
 function submitClub() {
+  if (!_requireFirebase()) return;
   const name    = document.getElementById('cl-name').value.trim();
   const country = document.getElementById('cl-country').value.trim();
   const league  = document.getElementById('cl-league').value.trim();
@@ -8914,6 +8926,7 @@ function _applyContactClubTags() {
 
 // ─── ADD MANDATE ───
 function submitMandate() {
+  if (!_requireFirebase()) return;
   // DS validation
   if (window._DS) {
     const ok = _DS.validateForm([
@@ -9719,6 +9732,7 @@ function openNeedDetail(clubName, pos, budMin, budMax, contact, prio, notes, nee
 }
 
 function saveNeedDetail() {
+  if (!_requireFirebase()) return;
   const club     = document.getElementById('nd-club').value.trim();
   const pos      = document.getElementById('nd-pos').value.trim();
   const budMin   = document.getElementById('nd-budmin').value.trim();
@@ -10228,6 +10242,7 @@ function openTaskModal() {
   if (assignee && window._efpUser) assignee.value = window._efpUser.id;
 }
 function submitNewTask() {
+  if (!_requireFirebase()) return;
   const text = document.getElementById('nt-text').value.trim();
   document.getElementById('nt-text').style.borderColor = text ? '' : 'var(--red)';
   if (!text) return;
@@ -11969,6 +11984,7 @@ function openRelDrawer(id, defaultStage) {
 }
 
 function saveRelEntry() {
+  if (!_requireFirebase()) return;
   const name  = document.getElementById('rel-name').value.trim();
   if (!name) { showSnack('⚠ Name is required', true); return; }
   const role  = document.getElementById('rel-role').value.trim();
@@ -13061,6 +13077,7 @@ function updatePitchPreview() {
   document.getElementById('prev-fee').textContent     = fee ? '€ ' + fee : '—';
 }
 function submitPitch() {
+  if (!_requireFirebase()) return;
   const player  = document.getElementById('fp-player').value;
   const club    = document.getElementById('fp-club').value;
   const contact = document.getElementById('fp-contact').value || document.getElementById('fp-contact-input')?.value.trim();
