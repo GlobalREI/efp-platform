@@ -5318,9 +5318,10 @@ function _renderMandatesTable() {
       if (typeof PLAYER_LABELS !== 'undefined') PLAYER_LABELS[key] = m.name;
     });
   }
-  // Always re-initialize rows after a re-render so Suggest/PDF buttons, click handlers,
-  // and the frozen contact/source values all stay in sync with the freshly rendered data.
-  setTimeout(initMandateRows, 0);
+  // Note: initMandateRows() is NOT called here — _renderMandatesTable already sets
+  // tr.onclick and tr.dataset.mandateId on every row it generates. Calling initMandateRows
+  // afterward wraps the last cell in a flex div (Suggest/PDF/✕ buttons) which inflates
+  // row height and re-adds the inline ✕ button that Phase 9.4 removed.
 }
 
 function _renderNeedsTable() {
@@ -5780,7 +5781,22 @@ function fbSave() {
   const _fbSaveGuard = setTimeout(() => { if (window._DS) _DS.setSyncState('idle'); }, 12000);
   _fbDb.ref('efp').update(payload)
     .then(() => { clearTimeout(_fbSaveGuard); _fbSetSynced(); if (window._DS) _DS.setSyncState('saved'); })
-    .catch(e => { clearTimeout(_fbSaveGuard); console.warn('fbSave error:', e.message); if (window._DS) _DS.setSyncState('error'); });
+    .catch(e => {
+      clearTimeout(_fbSaveGuard);
+      console.error('[EFP] fbSave FAILED:', e.code, e.message, e);
+      if (window._DS) _DS.setSyncState('error');
+      // Show visible snack so user knows their change wasn't saved
+      showSnack('⚠ Save failed — your change was NOT stored. Check your connection and try again.', true);
+      // Retry once after 5 s in case it was a transient network blip
+      setTimeout(function () {
+        if (_fbDataLoaded && _fbDb) {
+          console.warn('[EFP] fbSave retry…');
+          _fbDb.ref('efp').update(payload)
+            .then(() => { _fbSetSynced(); if (window._DS) _DS.setSyncState('saved'); showSnack('✓ Save recovered', false); })
+            .catch(e2 => { console.error('[EFP] fbSave retry also failed:', e2.message); });
+        }
+      }, 5000);
+    });
 }
 
 document.addEventListener('DOMContentLoaded', efpAuthCheck);
