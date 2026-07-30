@@ -1,0 +1,4 @@
+.DS_Store
+efp-platform/node_modules/
+efp-platform/playwright-report/
+efp-platform/test-results/
