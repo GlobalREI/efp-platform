@@ -9212,26 +9212,21 @@ function submitMandate() {
   const _mSaveBtn = document.querySelector('#mandate-drawer .drawer-foot .btn-primary');
   const _mResetBtn = () => { if (window._DS && _mSaveBtn) _DS.btn(_mSaveBtn, 'default'); };
   if (window._DS && _mSaveBtn) _DS.btn(_mSaveBtn, 'loading');
-  try {
-    _renderMandatesTable();
-    fbSave();
-    _updateMandateSubtitle();
-    _updateNeedsMatchAlerts(); // new mandate may create new club need matches
-    setTimeout(() => {
-      closeDrawer('mandate');
-      ['m-name','m-age','m-height','m-club','m-nat','m-val','m-expected-price','m-salary','m-contact','m-notes'].forEach(id => { const el=document.getElementById(id); if(el) el.value=''; });
-      document.getElementById('m-pos').value='';
-      const _mp2 = document.getElementById('m-pos2'); if (_mp2) _mp2.value = '';
-      const _mSt = document.getElementById('m-autofill-status'); if (_mSt) { _mSt.style.display='none'; _mSt.textContent=''; }
-      showSnack(`✓ ${name} added · showing club suggestions`, false);
-      _mResetBtn();
-      showMandateSuggestions(name, pos, age, val, mClub);
-    }, 350);
-  } catch(e) {
-    console.error('[EFP] submitMandate error:', e);
+  // Save to Firebase FIRST — render errors must not prevent the write
+  fbSave();
+  try { _renderMandatesTable(); } catch(e) { console.warn('[EFP] _renderMandatesTable error after mandate add:', e); }
+  try { _updateMandateSubtitle(); } catch(e) { console.warn('[EFP] _updateMandateSubtitle error:', e); }
+  try { _updateNeedsMatchAlerts(); } catch(e) { console.warn('[EFP] _updateNeedsMatchAlerts error:', e); }
+  setTimeout(() => {
+    closeDrawer('mandate');
+    ['m-name','m-age','m-height','m-club','m-nat','m-val','m-expected-price','m-salary','m-contact','m-notes'].forEach(id => { const el=document.getElementById(id); if(el) el.value=''; });
+    document.getElementById('m-pos').value='';
+    const _mp2 = document.getElementById('m-pos2'); if (_mp2) _mp2.value = '';
+    const _mSt = document.getElementById('m-autofill-status'); if (_mSt) { _mSt.style.display='none'; _mSt.textContent=''; }
+    showSnack(`✓ ${name} added · showing club suggestions`, false);
     _mResetBtn();
-    showSnack('Error saving mandate. Please try again.', true);
-  }
+    try { showMandateSuggestions(name, pos, age, val, mClub); } catch(e) { console.warn('[EFP] showMandateSuggestions error:', e); }
+  }, 350);
 }
 
 // Delete mandate by id (all mandates now have ids after migration)
@@ -9464,15 +9459,16 @@ function submitRequirement() {
                   window: window_, urgency: prio === 'Urgent' ? 'urgent' : 'open', contact, notes };
   allNeeds.push(need);
   needsAdded.push(need); // legacy sync
-  _renderNeedsTable();
+  // Save to Firebase FIRST — render errors must not prevent the write
+  fbSave();
+  try { _renderNeedsTable(); } catch(e) { console.warn('[EFP] _renderNeedsTable error after need add:', e); }
   closeDrawer('req');
   _resetReqDrawer();
   showSnack(`✓ Requirement added for ${club} (${pos})`, false);
-  fbSave();
   setTimeout(runMatchEngine, 400); // auto-update AI Matches
-  _refreshAllInterconnections();
-  renderDashboard();
-  _updateNeedsSubtitle();
+  try { _refreshAllInterconnections(); } catch(e) { console.warn('[EFP] _refreshAllInterconnections error:', e); }
+  try { renderDashboard(); } catch(e) { console.warn('[EFP] renderDashboard error:', e); }
+  try { _updateNeedsSubtitle(); } catch(e) { console.warn('[EFP] _updateNeedsSubtitle error:', e); }
 }
 
 // ── Club Needs structured filter ──
@@ -10446,22 +10442,22 @@ function submitLog() {
   const entry = { id: Date.now(), type, notes, date, duration, outcome, contact, club, source: 'manual' };
   logsAdded.unshift(entry);
 
-  // 1. Re-render contact detail feed using shared helper
-  const feed = document.getElementById('cd-feed');
-  if (feed && contact) _renderContactFeed(feed, contact);
+  // 1. Persist to Firebase FIRST — render errors must not prevent the write
+  fbSave();
 
-  // 2. Update cd-last-contact to "Today"
+  // 2. Re-render contact detail feed using shared helper
+  const feed = document.getElementById('cd-feed');
+  try { if (feed && contact) _renderContactFeed(feed, contact); } catch(e) { console.warn('[EFP] _renderContactFeed error:', e); }
+
+  // 3. Update cd-last-contact to "Today"
   const lc = document.getElementById('cd-last-contact');
   if (lc) { lc.textContent = 'Today'; lc.style.color = 'var(--green)'; }
   const dt = document.getElementById('cd-days-tag');
   if (dt) { dt.textContent = '⏰ Just contacted'; dt.style.color = 'var(--green)'; dt.style.borderColor = '#BBF7D0'; }
 
-  // 3. Re-render global activity feed
-  _renderGlobalFeed();
-  _renderDashFeed();
-
-  // 4. Persist to Firebase
-  fbSave();
+  // 4. Re-render global activity feed
+  try { _renderGlobalFeed(); } catch(e) { console.warn('[EFP] _renderGlobalFeed error:', e); }
+  try { _renderDashFeed(); } catch(e) { console.warn('[EFP] _renderDashFeed error:', e); }
 
   document.getElementById('log-modal').style.display = 'none';
   document.getElementById('log-notes').value = '';
@@ -11629,10 +11625,12 @@ function deletePitch(id) {
 function addNewPitch(player, club, contact, flag, pos) {
   const newId = Math.max(...pitches.map(p=>p.id), 0) + 1;
   pitches.push({ id:newId, player, club, contact, flag:flag||'🌍', pos:pos||'', stage:'sent', note:'Just now', noteColor:'var(--text3)', hot:false });
-  renderPitches(); fbSave();
+  // Save to Firebase FIRST — render errors must not prevent the write
+  fbSave();
+  try { renderPitches(); } catch(e) { console.warn('[EFP] renderPitches error after pitch add:', e); }
   showSnack(`✓ New pitch added: ${player} → ${club}`, false);
-  _refreshClubTableCounts();   // update clubs "Active Pitches" column instantly
-  _refreshMandatePitchBadges(); // update mandate pitch badges
+  try { _refreshClubTableCounts(); } catch(e) { console.warn('[EFP] _refreshClubTableCounts error:', e); }
+  try { _refreshMandatePitchBadges(); } catch(e) { console.warn('[EFP] _refreshMandatePitchBadges error:', e); }
 }
 
 // ─── KANBAN CARD INLINE EDIT HELPERS ──────────────────────────────────────────
