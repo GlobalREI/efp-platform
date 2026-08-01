@@ -273,7 +273,7 @@ body {
 .kpi-strip {
   display: grid;
   grid-template-columns: repeat(5, 1fr);
-  gap: 1px; background: var(--border);
+  gap: 0; background: var(--surface); border-bottom: 1px solid var(--border);
   border: 1px solid var(--border);
   border-radius: 8px; overflow: hidden;
   margin-bottom: 28px;
@@ -284,6 +284,7 @@ body {
   padding: 18px 20px; cursor: pointer;
   transition: background 0.1s;
 }
+.kpi-card + .kpi-card { border-left: 1px solid var(--border); }
 .kpi-card:hover { background: var(--surface2); }
 .kpi-label {
   font-size: 10.5px; font-weight: 500; color: var(--text3);
@@ -7552,6 +7553,16 @@ let playerNotes     = {};   // {[playerName]: {status, notes}} — editable play
 let clubData        = {};   // {[clubName]: {league,country,flag,status,notes,linkedContacts:[{name,role}]}}
 let logsAdded       = [   // {id,type,notes,date,duration,outcome,contact,club,source}
   // ── Beeper-synced interactions (last synced 2026-08-01) ──
+  // AUGUST 1
+  { id:1785568745000, type:'whatsapp', contact:'Alex Kroes', club:'LASK', date:'2026-08-01',
+    notes:'Morning thank-you exchange following the in-person LASK meeting on July 31. Timo sent a warm follow-up: great to catch up properly, impressed by the young ambitious team Alex has built at LASK, looking forward to next time. Alex replied positively: "was a good evening and a nice club so let us see when and how to do some business together as well!" Timo then pushed on Christian Gomis as their first potential deal, and Alex responded: "We dive deeper into him but not sure if the SD will put effort into him" — indicating the sporting director\'s buy-in is the key bottleneck for the Gomis deal to progress.',
+    outcome:'Follow up with Alex Kroes on Christian Gomis — clarify whether the sporting director will engage; consider providing additional materials or third-party endorsements to support the SD case at LASK', source:'beeper-sync' },
+  { id:1785569328000, type:'whatsapp', contact:'Fynn Buggenthien', club:'EFP / Anderlecht', date:'2026-08-01',
+    notes:'Active day between Timo and Fynn. Morning exchange of voice notes (content not transcribed) following the LASK meeting on July 31 — both were enthusiastic ("Tooooooop", 🚀 reactions), consistent with the planned LASK debrief. In the evening Timo checked in ("Wie Liefs?") and they exchanged multiple voice notes. They confirmed a call for Monday August 2 at noon. Timo also raised a new strategic idea: "wir können morgen auch sprechen ob es Sinn macht lushendry bei Anderlecht anzubieten" (also discuss tomorrow whether it makes sense to pitch Lushendry to Anderlecht) — this was prompted by Romeo Castelen flagging Lushendry as an ideal fit for Anderlecht\'s RB playmaking slot that same evening.',
+    outcome:'Noon call with Fynn on August 2 — debrief LASK meeting outcomes; discuss whether and how to pitch Lushendry to Anderlecht for their RB playmaking need', source:'beeper-sync' },
+  { id:1785608596000, type:'whatsapp', contact:'Romeo Castelen', club:'Anderlecht / Heerenveen', date:'2026-08-01',
+    notes:'Two topics on August 1 evening. (1) Anderlecht player search: Timo shared Anderlecht\'s current squad needs with Romeo — priority: RW and LW (dribbling, 1v1 threat, decisive); also required on free/loan basis: RCB (athletic, ball-winning, build-up), LB and RB (playmaking and solid); and conditional on outgoing transfers: DM (tempo-setter) and a technical striker. Romeo immediately flagged a player nicknamed "Lush" as a perfect fit for Anderlecht\'s RB playmaking profile: "Lush is that profile RB playmaking he is verry good on the ball." Romeo shared a player image and confirmed the club could send scouts to his game. Timo replied he will send materials. (2) Dennis / Heerenveen update: Romeo confirmed Heerenveen are seriously interested in a player named Dennis but remain cautious over injury risk. Romeo told the club he has been fully fit for a year and played for Aberdeen 6 months without problems. Heerenveen\'s board meets again Monday for a final discussion — early feedback is positive ("they say hé looks good"). Budget confirmed: Heerenveen can pay €400k+. Romeo and Timo agree a player call can be arranged if needed. Both agree Dennis should come for 1 year to the Eredivisie to play and regain momentum, then move up again.',
+    outcome:'Send Lushendry player materials to Romeo for Anderlecht scouting; await Heerenveen board decision on Dennis on Monday (€400k budget confirmed) — arrange player call if club requests one', source:'beeper-sync' },
   // JULY 31
   { id:1785535740000, type:'whatsapp', contact:'Fynn Buggenthien', club:'LASK', date:'2026-07-31',
     notes:'Late-night post-match debrief between Timo and Fynn after attending the LASK evening match on July 31. Timo revealed he deliberately held back from offering a player nicknamed "Bello" to LASK, wanting to assess the team\'s situation at the match first ("Gut das ich Bello noch nicht angeboten habe — wollte heute abwarten"). Key intel from the match: LASK had already spoken with someone at HSV ("hatten mit HSV Acko gesprochen") and have signed a new left back ("haben ja neuen LV geholt"). Despite that, the strategic view is that the player\'s momentum is right now ("sein Momentum ist jetzt") — Fynn suggests if LASK is clever they\'d use him to collect European minutes on the bench, and Timo sees clear fee potential ("dann schön das Geld einsammeln"). Fynn asked for a full debrief the next day.',
