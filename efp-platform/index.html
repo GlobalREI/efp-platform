@@ -7026,6 +7026,7 @@ function renderMatches() {
         <select class="match-status-sel" onchange="matchSetStatus('${m.id}',this.value)">${statusOpts}</select>
         <span style="font-size:11px;color:var(--text3);margin-left:4px">${date}</span>
         <div style="margin-left:auto;display:flex;gap:6px;align-items:center">
+          ${m.status !== 'Not Relevant' && m.status !== 'Rejected' ? `<button class="btn btn-xs" style="color:var(--text3);border:1px solid var(--border);background:transparent;opacity:.8" onclick="matchSetStatus('${m.id}','Not Relevant')" title="Not a realistic fit — dismiss this match">✕ Not a fit</button>` : ''}
           <button class="btn btn-outline btn-xs" onclick="matchAddTask('${m.id}')" title="Add to To-Do">📋 To-Do</button>
           ${pitchBtnHtml}
         </div>
