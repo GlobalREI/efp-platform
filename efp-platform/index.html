@@ -8041,23 +8041,15 @@ function submitContact() {
     const scoreVal = document.getElementById('c-score-val'); if(scoreVal) scoreVal.textContent='1 / 10';
   };
   if (window._DS && _cSaveBtn) _DS.btn(_cSaveBtn, 'loading');
-  try {
-    _renderContactsTable();
-    fbSave();
-    try { renderDashboard(); } catch(e2) { console.warn('[EFP] renderDashboard error after contact add:', e2); }
-    try { _refreshAllInterconnections(); } catch(e3) { console.warn('[EFP] _refreshAllInterconnections error:', e3); }
-    closeDrawer('contact');
-    _cResetFields();
-    showSnack(`✓ ${first} ${last} added to Contacts`, false);
-    _cResetBtn();
-  } catch(e) {
-    console.error('[EFP] submitContact error:', e);
-    // Contact IS saved in allContacts + Firebase — close and reset regardless
-    closeDrawer('contact');
-    _cResetFields();
-    _cResetBtn();
-    showSnack(`✓ ${first} ${last} added to Contacts`, false);
-  }
+  // Save to Firebase FIRST — render errors must not prevent the write
+  fbSave();
+  try { _renderContactsTable(); } catch(e2) { console.warn('[EFP] _renderContactsTable error after contact add:', e2); }
+  try { renderDashboard(); } catch(e2) { console.warn('[EFP] renderDashboard error after contact add:', e2); }
+  try { _refreshAllInterconnections(); } catch(e3) { console.warn('[EFP] _refreshAllInterconnections error:', e3); }
+  closeDrawer('contact');
+  _cResetFields();
+  showSnack(`✓ ${first} ${last} added to Contacts`, false);
+  _cResetBtn();
 }
 
 function _resetContactDrawer() {
@@ -8174,26 +8166,23 @@ function submitClub() {
   const _clSaveBtn = document.querySelector('#club-drawer .btn-primary');
   const _clResetBtn = () => { if (window._DS && _clSaveBtn) _DS.btn(_clSaveBtn, 'default'); };
   if (window._DS && _clSaveBtn) _DS.btn(_clSaveBtn, 'loading');
+  // Push data and save to Firebase FIRST — render errors must not prevent the write
+  allClubs.push(club);
+  clubsAdded.push(club); // legacy sync
+  fbSave();
   try {
-    allClubs.push(club);
-    clubsAdded.push(club); // legacy sync
     if (allClubs.length > 1) {
       _renderClubsTable(); // re-render to keep sorted order
     } else {
       _appendClubRow(club); // fallback if migration hasn't run
     }
-    _refreshClubDropdowns();
-    fbSave();
-    setTimeout(() => {
-      closeDrawer('club');
-      showSnack(`✓ ${name} added to Clubs — available across all forms`, false);
-      _clResetBtn();
-    }, 350);
-  } catch(e) {
-    console.error('[EFP] submitClub error:', e);
-    _clResetBtn();
-    showSnack('Error saving club. Please try again.', true);
-  }
+  } catch(e) { console.warn('[EFP] _renderClubsTable error after club add:', e); }
+  try { _refreshClubDropdowns(); } catch(e) { console.warn('[EFP] _refreshClubDropdowns error:', e); }
+  _clResetBtn();
+  setTimeout(() => {
+    closeDrawer('club');
+    showSnack(`✓ ${name} added to Clubs — available across all forms`, false);
+  }, 350);
 }
 
 // Render entire clubs table from allClubs unified array
