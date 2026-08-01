@@ -4486,6 +4486,7 @@ function _efpApplyUser(u) {
 let _fbDb = null;
 let _fbFirstLoad = true;
 let _fbDataLoaded = false; // blocks fbSave() until Firebase has confirmed real data is in memory
+let _fbLastSavedAt = 0;   // savedAt timestamp of the last snapshot we accepted — stale updates (savedAt < this) are ignored
 
 // Lightweight change detection: only re-render a table when its data actually changed.
 // Compares array length + first/last IDs — cheap enough to run on every Firebase update.
@@ -4526,6 +4527,21 @@ function efpInitFirebase() {
         fbSave();
         _fbFirstLoad = false;
         setTimeout(_migrateToFirebase, 1000);
+        return;
+      }
+
+      // ── Stale-snapshot guard ──────────────────────────────────────────────────
+      // Firebase can re-fire on('value') with old cached snapshots after a network
+      // reconnect, page focus, or immediately after our own write (echo).
+      // If this snapshot's savedAt is older than the last one we applied (or the
+      // last time WE saved), it would overwrite our fresh in-memory arrays with
+      // stale data — silently deleting everything the user just added.
+      // We accept a snapshot only when:
+      //   (a) it's the first load (_fbLastSavedAt === 0), OR
+      //   (b) it's newer than the last accepted/saved timestamp
+      if (_fbLastSavedAt > 0 && d.savedAt && d.savedAt < _fbLastSavedAt) {
+        console.warn('[EFP] ⚠ Ignoring stale Firebase snapshot (incoming savedAt:', d.savedAt,
+          '< _fbLastSavedAt:', _fbLastSavedAt, ') — this prevents data loss');
         return;
       }
 
@@ -4862,6 +4878,9 @@ function efpInitFirebase() {
       }
       _fbDataLoaded = true; // Firebase real data confirmed in memory — fbSave() now allowed
       _fbFirstLoad = false;
+      // Track the timestamp of the snapshot we just accepted so future snapshots can
+      // be compared against it (stale guard above).
+      if (d.savedAt) _fbLastSavedAt = d.savedAt;
       // ── Phase 4: Run orphan scan after every Firebase load ──
       // Runs async on the next tick so rendering is not blocked.
       if (window._db) setTimeout(function () { _db.scanOrphans(); }, 400);
@@ -5801,6 +5820,10 @@ function fbSave() {
     allTasks,
     allClubs,
   };
+  // Advance the stale-guard timestamp BEFORE the write so that when Firebase
+  // echoes our own save back via on('value'), it is treated as stale and ignored.
+  // Without this, our echo can race with the next user action and overwrite arrays.
+  _fbLastSavedAt = payload.savedAt;
   if (window._DS) _DS.setSyncState('saving');
   // Safety net: if Firebase doesn't respond in 12s, reset badge so it doesn't stick on "Saving…"
   const _fbSaveGuard = setTimeout(() => { if (window._DS) _DS.setSyncState('idle'); }, 12000);
