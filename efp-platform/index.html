@@ -5797,6 +5797,14 @@ function fbSave() {
   if (!_fbDataLoaded) { console.warn('[EFP] fbSave blocked — Firebase data not yet confirmed in memory'); return; }
   // ── Phase 4: Payload integrity gate ──
   if (window._db && !_db.validatePayload()) return;
+  // Sanitize matchesData — Firebase rejects any undefined property values.
+  // Mandates without a 'value'/'val' field produced playerVal:undefined which
+  // caused every fbSave() to fail silently after the match engine ran.
+  const _safeMatchesData = (matchesData || []).map(m => {
+    const c = { ...m };
+    Object.keys(c).forEach(k => { if (c[k] === undefined) c[k] = ''; });
+    return c;
+  });
   const payload = {
     pitches,
     clubPitches,
@@ -5810,7 +5818,7 @@ function fbSave() {
     clubsAdded,
     needsAdded,
     logsAdded,
-    matchesData,
+    matchesData:     _safeMatchesData,
     playerNotes,
     clubData,
     savedAt: Date.now(),
@@ -6819,7 +6827,7 @@ function runMatchEngine() {
   matchesData.forEach(m => { existing[m.id] = m; });
 
   // Merge allMandates + mandatesAdded (deduplicate by lowercase name)
-  const _toPlayer = m => ({ name:m.name, pos:m.position||m.pos||'', age:parseInt(m.age)||null, club:m.club, val:m.value||m.val, dealType: m.dealType || (playerNotes[m.name]?.dealType) || 'either' });
+  const _toPlayer = m => ({ name:m.name, pos:m.position||m.pos||'', age:parseInt(m.age)||null, club:m.club, val:m.value||m.val||'', dealType: m.dealType || (playerNotes[m.name]?.dealType) || 'either' });
   const _basePool = allMandates.length ? allMandates.map(_toPlayer) : MANDATES_DB.map(_toPlayer);
   const _addedPool = mandatesAdded.map(_toPlayer);
   const _seen = new Set(_basePool.map(p => (p.name||'').toLowerCase()));
@@ -6866,7 +6874,7 @@ function runMatchEngine() {
           playerName: player.name,
           playerPos:  player.pos,
           playerAge:  player.age,
-          playerVal:  player.val,
+          playerVal:  player.val || '',
           playerClub: player.club,
           clubName:   need.club,
           clubFlag:   need.flag,
