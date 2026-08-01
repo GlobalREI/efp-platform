@@ -1827,25 +1827,27 @@ body {
     padding: 0 !important; white-space: normal !important;
     min-width: 0; line-height: 1.35; overflow: hidden;
   }
-  /* td1: Club + league subtitle → col1 rows 1-2 */
-  #view-needs .data-table td:nth-child(1) { grid-column:1; grid-row:1 / span 2; font-size:14px; align-self:center; }
-  /* td2: Positions → col1 row3 */
-  #view-needs .data-table td:nth-child(2) { grid-column:1; grid-row:3; font-size:11px; color:var(--text2); margin-top:4px; }
-  /* td3: Notes → hidden */
-  #view-needs .data-table td:nth-child(3) { display:none !important; }
-  /* td4: Budget → col2 rows 2-3, green */
-  #view-needs .data-table td:nth-child(4) { grid-column:2; grid-row:2 / span 2; font-size:12px; font-weight:700; color:var(--green); text-align:right; align-self:center; padding-left:8px !important; }
-  /* td5: Window → hidden (always "Summer 2026") */
-  #view-needs .data-table td:nth-child(5) { display:none !important; }
-  /* td6: Contact → hidden */
+  /* td1: Priority badge → hidden on mobile */
+  #view-needs .data-table td:nth-child(1) { display:none !important; }
+  /* td2: Club + league subtitle → col1 rows 1-2 */
+  #view-needs .data-table td:nth-child(2) { grid-column:1; grid-row:1 / span 2; font-size:14px; align-self:center; }
+  /* td3: Positions → col1 row3 */
+  #view-needs .data-table td:nth-child(3) { grid-column:1; grid-row:3; font-size:11px; color:var(--text2); margin-top:4px; }
+  /* td4: Notes → hidden */
+  #view-needs .data-table td:nth-child(4) { display:none !important; }
+  /* td5: Budget → col2 rows 2-3, green */
+  #view-needs .data-table td:nth-child(5) { grid-column:2; grid-row:2 / span 2; font-size:12px; font-weight:700; color:var(--green); text-align:right; align-self:center; padding-left:8px !important; }
+  /* td6: Window → hidden (always "Summer 2026") */
   #view-needs .data-table td:nth-child(6) { display:none !important; }
-  /* td7: Status + delete → col2 row1, status only */
-  #view-needs .data-table td:nth-child(7) {
+  /* td7: Contact → hidden */
+  #view-needs .data-table td:nth-child(7) { display:none !important; }
+  /* td8: Status + delete → col2 row1, status only */
+  #view-needs .data-table td:nth-child(8) {
     grid-column:2; grid-row:1;
     display:flex !important; align-items:center; justify-content:flex-end;
     padding-left:8px !important;
   }
-  #view-needs .data-table td:nth-child(7) button { display:none !important; }
+  #view-needs .data-table td:nth-child(8) button { display:none !important; }
 
   /* ── CONTACT TAB BAR: swipe-scroll, don't squish ────────────────────── */
   .tabs { overflow-x: auto; -webkit-overflow-scrolling: touch; white-space: nowrap; scrollbar-width: none; }
@@ -2951,7 +2953,7 @@ th.ds-sort:hover { background: rgba(30,58,95,.06); }
       <div class="panel">
         <table class="data-table">
           <thead>
-            <tr><th class="ds-sort">Club</th><th class="ds-sort">Position(s)</th><th>Profile / Notes</th><th class="ds-sort">Budget</th><th>Window</th><th class="ds-sort">Contact</th><th class="ds-sort">Status</th></tr>
+            <tr><th class="ds-sort">Priority</th><th class="ds-sort">Club</th><th class="ds-sort">Position(s)</th><th>Profile / Notes</th><th class="ds-sort">Budget</th><th>Window</th><th class="ds-sort">Contact</th><th class="ds-sort">Status</th></tr>
           </thead>
           <tbody>
           </tbody>
@@ -4510,7 +4512,7 @@ function efpInitFirebase() {
       const skeletonTargets = [
         { sel: '#contacts-table-body',                   cols: 7 },
         { sel: '#view-mandates .data-table tbody',       cols: 7 },
-        { sel: '#view-needs .data-table tbody',          cols: 7 },
+        { sel: '#view-needs .data-table tbody',          cols: 8 },
         { sel: '#clubs-tbody',                           cols: 7 },
       ];
       skeletonTargets.forEach(function (t) {
@@ -5171,16 +5173,18 @@ function _applyMobCardRow(tr, viewId) {
 
   } else if (viewId === 'view-needs') {
     // col1: Club+league / Positions    col2: Status / Budget
-    if (tds[0]) Object.assign(tds[0].style, { gridColumn:'1', gridRow:'1 / span 2', fontSize:'14px', alignSelf:'center' });
-    if (tds[1]) Object.assign(tds[1].style, { gridColumn:'1', gridRow:'3', fontSize:'11px', color:'var(--text2)', marginTop:'4px' });
-    if (tds[2]) tds[2].style.display = 'none';
-    if (tds[3]) Object.assign(tds[3].style, { gridColumn:'2', gridRow:'2 / span 2', fontSize:'12px',
+    // td[0] = Priority badge → hide on mobile
+    if (tds[0]) tds[0].style.display = 'none';
+    if (tds[1]) Object.assign(tds[1].style, { gridColumn:'1', gridRow:'1 / span 2', fontSize:'14px', alignSelf:'center' });
+    if (tds[2]) Object.assign(tds[2].style, { gridColumn:'1', gridRow:'3', fontSize:'11px', color:'var(--text2)', marginTop:'4px' });
+    if (tds[3]) tds[3].style.display = 'none';
+    if (tds[4]) Object.assign(tds[4].style, { gridColumn:'2', gridRow:'2 / span 2', fontSize:'12px',
       fontWeight:'700', color:'var(--green)', textAlign:'right', alignSelf:'center', paddingLeft:'8px' });
-    [4,5].forEach(i => { if (tds[i]) tds[i].style.display = 'none'; });
-    if (tds[6]) {
-      Object.assign(tds[6].style, { display:'flex', alignItems:'center', justifyContent:'flex-end',
+    [5,6].forEach(i => { if (tds[i]) tds[i].style.display = 'none'; });
+    if (tds[7]) {
+      Object.assign(tds[7].style, { display:'flex', alignItems:'center', justifyContent:'flex-end',
         gridColumn:'2', gridRow:'1', paddingLeft:'8px' });
-      tds[6].querySelectorAll('button').forEach(b => b.style.display = 'none');
+      tds[7].querySelectorAll('button').forEach(b => b.style.display = 'none');
     }
   }
 }
@@ -5395,7 +5399,13 @@ function _renderNeedsTable() {
     const nContactHtml = (contactStr && contactStr !== '—')
       ? `<span class="feed-link" onclick="event.stopPropagation();_openContactByName('${contactStr.replace(/'/g,"\\'")}')">${contactStr}</span>`
       : '—';
+    // Priority badge (matches mandate table style)
+    const _NEED_PRIO_MAP = { 'Urgent':{ label:'P1', bg:'#dc2626' }, 'High':{ label:'P2', bg:'#d97706' }, 'Medium':{ label:'P3', bg:'#64748b' } };
+    const _nPrio = n.prio || (n.urgency === 'urgent' ? 'Urgent' : 'Medium');
+    const _nPrioCfg = _NEED_PRIO_MAP[_nPrio] || _NEED_PRIO_MAP['Medium'];
+    const needPrioHtml = `<span style="display:inline-block;padding:2px 8px;border-radius:4px;background:${_nPrioCfg.bg};color:#fff;font-size:11px;font-weight:700;letter-spacing:.03em">${_nPrioCfg.label}</span>`;
     tr.innerHTML = `
+      <td>${needPrioHtml}</td>
       <td><strong>${nClubHtml}</strong>${leagueSub}</td>
       <td><strong>${posStr}</strong></td>
       <td style="font-size:12px">${n.notes||''}</td>
@@ -6161,7 +6171,7 @@ function _renderDashTasks() {
     return;
   }
 
-  feed.innerHTML = sorted.slice(0, 7).map(t => {
+  feed.innerHTML = sorted.slice(0, 5).map(t => {
     const prioClass = t.prio === 'h' ? 'prio-h' : t.prio === 'm' ? 'prio-m' : 'prio-l';
     const prioTxt   = t.prio === 'h' ? 'High' : t.prio === 'm' ? 'Med' : 'Low';
     return `<div class="task-row" id="dtr-${t.id}" style="position:relative">
@@ -6174,8 +6184,8 @@ function _renderDashTasks() {
     </div>`;
   }).join('');
 
-  if (pending.length > 7) {
-    feed.innerHTML += `<div style="padding:10px 20px;font-size:12px;color:var(--text3);border-top:1px solid var(--border);cursor:pointer" onclick="go('tasks')">+${pending.length - 7} more tasks →</div>`;
+  if (pending.length > 5) {
+    feed.innerHTML += `<div style="padding:10px 20px;font-size:12px;color:var(--text3);border-top:1px solid var(--border);cursor:pointer" onclick="go('tasks')">+${pending.length - 5} more tasks →</div>`;
   }
 }
 
@@ -7162,9 +7172,9 @@ function globalSearch(q) {
   // ── Club Needs ──
   document.querySelectorAll('#view-needs .data-table tbody tr').forEach(tr => {
     const cells  = tr.querySelectorAll('td');
-    const club   = cells[0]?.querySelector('strong')?.textContent?.trim() || '';
-    const pos    = cells[1]?.textContent?.trim() || '';
-    const contact= cells[5]?.textContent?.trim() || '';
+    const club   = cells[1]?.querySelector('strong')?.textContent?.trim() || '';
+    const pos    = cells[2]?.textContent?.trim() || '';
+    const contact= cells[6]?.textContent?.trim() || '';
     const text   = (club + ' ' + pos + ' ' + contact).toLowerCase();
     if (text.includes(lq)) results.push({ type:'need', icon:'🎯', main: club, sub: pos.substring(0,40), tag:'Club Need', action: () => go('needs') });
   });
@@ -13420,40 +13430,31 @@ function _renderDashNeeds() {
   const grid = document.getElementById('dash-needs-grid');
   if (!grid) return;
 
-  // Combine static urgent/high needs with user-added needs
-  const urgentStatic = CLUB_NEEDS_DB.filter(n => n.urgency === 'urgent' || n.urgency === 'high').slice(0, 4);
-  const userAdded    = needsAdded.slice(-2); // show up to 2 newest user-added needs
-  const combined     = [...userAdded, ...urgentStatic].slice(0, 4);
+  // Use allNeeds (Firebase source of truth) — fall back to needsAdded if not loaded yet
+  const src = allNeeds.length ? allNeeds : needsAdded;
+  if (!src.length) return; // keep hardcoded placeholder HTML
 
-  if (!combined.length) return; // keep whatever was hardcoded
+  // Active (non-archived) only, sorted P1 (Urgent) first, then P2 (High), then rest
+  const _prioRank = { 'Urgent': 0, 'High': 1, 'Medium': 2 };
+  const active = src
+    .filter(n => !n.archived)
+    .sort((a, b) => (_prioRank[a.prio] ?? 99) - (_prioRank[b.prio] ?? 99));
 
-  // Only update if user has added needs — otherwise keep hardcoded HTML
-  if (!needsAdded.length) return;
+  // Fill up to 12 cards (3 rows × 4): P1 first, then P2 if slots remain
+  const display = active.slice(0, 12);
 
-  const newCells = needsAdded.map(n => {
-    const prio = n.prio || 'Medium';
-    const prioColor = prio === 'Urgent' ? 'var(--red)' : prio === 'High' ? 'var(--amber)' : 'var(--text2)';
-    const bud = n.budMax || n.budMin ? `${n.budMin||''}–${n.budMax||''}`.replace(/^–/,'') : '';
+  grid.innerHTML = display.map(n => {
+    const prio = n.prio || (n.urgency === 'urgent' ? 'Urgent' : 'High');
+    const prioColor = prio === 'Urgent' ? 'var(--red)' : prio === 'High' ? 'var(--amber,#d97706)' : 'var(--text3)';
+    const prioLabel = prio === 'Urgent' ? 'P1 · Focus' : prio === 'High' ? 'P2 · Active' : 'P3';
+    const bud = (n.budMax || n.budMin) ? [n.budMin, n.budMax].filter(Boolean).join('–') : '';
+    const flag = n.flag || '';
     return `<div class="need-cell" onclick="go('needs')" style="cursor:pointer">
-      <div class="need-club">${n.club}</div>
-      <div class="need-pos">${n.pos}</div>
-      <div class="need-meta">${bud ? bud + ' · ' : ''}${n.contact ? 'Contact: ' + n.contact : ''}<br><span style="color:${prioColor};font-weight:600">${prio}</span></div>
+      <div class="need-club">${n.club}${flag ? ' '+flag : ''}</div>
+      <div class="need-pos">${n.pos || (Array.isArray(n.positions) ? n.positions.join(' · ') : '')}</div>
+      <div class="need-meta">${bud ? bud + '<br>' : ''}${n.contact ? n.contact + ' · ' : ''}<span style="color:${prioColor};font-weight:600">${prioLabel}</span></div>
     </div>`;
   }).join('');
-
-  // Append new need cells (don't wipe existing hardcoded ones unless we have enough to fill)
-  const existingCells = grid.querySelectorAll('.need-cell[data-user-need]');
-  existingCells.forEach(c => c.remove());
-  grid.insertAdjacentHTML('afterbegin', needsAdded.map(n => {
-    const prio = n.prio || 'Medium';
-    const prioColor = prio === 'Urgent' ? 'var(--red)' : prio === 'High' ? 'var(--amber, #d97706)' : 'var(--text2)';
-    const bud = n.budMax || n.budMin ? (n.budMin||'') + (n.budMax ? '–'+n.budMax : '') : '';
-    return `<div class="need-cell" data-user-need="${n.id}" onclick="go('needs')" style="cursor:pointer">
-      <div class="need-club">${n.club}</div>
-      <div class="need-pos">${n.pos}</div>
-      <div class="need-meta">${bud ? bud + '<br>' : ''}${n.contact ? 'Contact: ' + n.contact + ' · ' : ''}<span style="color:${prioColor};font-weight:600">${prio}</span></div>
-    </div>`;
-  }).join(''));
 }
 
 function _updateMandateSubtitle() {
