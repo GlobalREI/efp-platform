@@ -4539,10 +4539,13 @@ function efpInitFirebase() {
       // stale data — silently deleting everything the user just added.
       // We accept a snapshot only when:
       //   (a) it's the first load (_fbLastSavedAt === 0), OR
-      //   (b) it's newer than the last accepted/saved timestamp
-      if (_fbLastSavedAt > 0 && d.savedAt && d.savedAt < _fbLastSavedAt) {
+      //   (b) it's strictly newer than the last accepted/saved timestamp
+      // NOTE: use <= (not <) so that Firebase re-firing with the SAME savedAt is also
+      // rejected — this covers the case where Firebase echoes the current DB state while
+      // the user has already added new items locally (debounce not yet fired).
+      if (_fbLastSavedAt > 0 && d.savedAt && d.savedAt <= _fbLastSavedAt) {
         console.warn('[EFP] ⚠ Ignoring stale Firebase snapshot (incoming savedAt:', d.savedAt,
-          '< _fbLastSavedAt:', _fbLastSavedAt, ') — this prevents data loss');
+          '<= _fbLastSavedAt:', _fbLastSavedAt, ') — this prevents data loss');
         return;
       }
 
