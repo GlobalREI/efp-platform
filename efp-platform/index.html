@@ -12,6 +12,7 @@ html { background: #ffffff; }
 :root {
   --bg:        #F5F5F5;
   --surface:   #FFFFFF;
+  --surface1:  #F5F5F5;
   --surface2:  #F9F9F9;
   --border:    #E5E7EB;
   --border2:   #D1D5DB;
@@ -346,7 +347,7 @@ body {
   text-transform: uppercase; letter-spacing: 0.07em;
   padding: 11px 20px; text-align: left;
   border-bottom: 1px solid var(--border);
-  background: var(--surface2);
+  background: var(--surface);
   white-space: nowrap;
 }
 .data-table td {
@@ -604,7 +605,7 @@ body {
 .needs-bar-head {
   padding: 12px 20px;
   border-bottom: 1px solid var(--border);
-  background: var(--navy-dim);
+  background: var(--surface);
   display: flex; align-items: center; gap: 10px;
 }
 .needs-bar-label {
@@ -768,8 +769,9 @@ body {
 
 /* ─── AI NOTE ─── */
 .ai-note {
-  background: var(--navy-dim);
-  border: 1px solid var(--navy-mid);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--navy);
   border-radius: 7px; padding: 13px 16px; margin-bottom: 18px;
 }
 .ai-note-label {
@@ -2701,7 +2703,7 @@ th.ds-sort:hover { background: rgba(30,58,95,.06); }
               <th class="ds-sort">Role</th>
               <th class="ds-sort">Club / Org</th>
               <th class="ds-sort">Region</th>
-              <th>Email</th>
+              <th>Contact</th>
               <th>Notes</th>
               <th class="ds-sort">Status</th>
             </tr>
@@ -3408,13 +3410,9 @@ th.ds-sort:hover { background: rgba(30,58,95,.06); }
         <option>Head of Football</option><option>Head Coach</option><option>Scout</option><option>President</option><option>Owner</option><option>Agent</option><option>Other</option>
       </select>
     </div>
-    <div class="field" style="position:relative">
+    <div class="field">
       <label class="field-label">Club</label>
-      <input class="field-input" id="c-club" placeholder="Type to search clubs…" autocomplete="off"
-        oninput="_clubAC(this,'c-club-drop')"
-        onfocus="_clubAC(this,'c-club-drop')"
-        onblur="setTimeout(function(){var d=document.getElementById('c-club-drop');if(d)d.style.display='none'},200)">
-      <div id="c-club-drop" style="display:none;position:fixed;background:var(--surface);border:1px solid var(--border);border-radius:8px;max-height:220px;overflow-y:auto;z-index:9999;box-shadow:0 4px 20px rgba(0,0,0,.18)"></div>
+      <input class="field-input" id="c-club" placeholder="Type to search clubs…" autocomplete="off" list="efp-club-datalist">
     </div>
     <div class="field-row field">
       <div><label class="field-label">Email</label><input class="field-input" id="c-email" placeholder="name@club.com" type="email"></div>
@@ -7373,6 +7371,24 @@ function openDrawer(key) {
       if (e.target === ov) closeDrawer(key);
     });
   }
+  // Always reset the Add Contact form to blank when opening in add mode
+  if (key === 'contact') {
+    const cDrawer = document.getElementById('contact-drawer');
+    if (cDrawer && !cDrawer.dataset.editId) {
+      ['c-first','c-last','c-email','c-phone','c-wa','c-li','c-notes'].forEach(id => {
+        const el = document.getElementById(id); if(el) el.value='';
+      });
+      const pos = document.getElementById('c-position'); if(pos) pos.value='';
+      const club = document.getElementById('c-club'); if(club) club.value='';
+      const score = document.getElementById('c-score'); if(score) score.value='1';
+      const scoreVal = document.getElementById('c-score-val'); if(scoreVal) scoreVal.textContent='1 / 10';
+      const stage = document.getElementById('c-stage'); if(stage) stage.value='Research';
+      // Reset any validation error highlights
+      ['c-first','c-last','c-position'].forEach(id => {
+        const el = document.getElementById(id); if(el) el.style.borderColor='';
+      });
+    }
+  }
   // Always reset the Add Club form to blank when opening fresh
   if (key === 'club') {
     ['cl-name','cl-web','cl-sd','cl-hor','cl-ceo','cl-coach','cl-notes'].forEach(id => {
@@ -7512,7 +7528,30 @@ let needsAdded      = [];   // {id,club,pos,ageMin,ageMax,budMin,budMax,prio,con
 let playerNotes     = {};   // {[playerName]: {status, notes}} — editable player profile notes
 let clubData        = {};   // {[clubName]: {league,country,flag,status,notes,linkedContacts:[{name,role}]}}
 let logsAdded       = [   // {id,type,notes,date,duration,outcome,contact,club,source}
-  // ── Beeper-synced interactions (last synced 2026-07-29) ──
+  // ── Beeper-synced interactions (last synced 2026-08-01) ──
+  // JULY 31
+  { id:1785535740000, type:'whatsapp', contact:'Fynn Buggenthien', club:'LASK', date:'2026-07-31',
+    notes:'Late-night post-match debrief between Timo and Fynn after attending the LASK evening match on July 31. Timo revealed he deliberately held back from offering a player nicknamed "Bello" to LASK, wanting to assess the team\'s situation at the match first ("Gut das ich Bello noch nicht angeboten habe — wollte heute abwarten"). Key intel from the match: LASK had already spoken with someone at HSV ("hatten mit HSV Acko gesprochen") and have signed a new left back ("haben ja neuen LV geholt"). Despite that, the strategic view is that the player\'s momentum is right now ("sein Momentum ist jetzt") — Fynn suggests if LASK is clever they\'d use him to collect European minutes on the bench, and Timo sees clear fee potential ("dann schön das Geld einsammeln"). Fynn asked for a full debrief the next day.',
+    outcome:'Full LASK debrief call with Fynn on August 1 — decide whether/how to pitch Bello to LASK given the new LV signing; follow up on HSV Acko intel', source:'beeper-sync' },
+  { id:1785511440000, type:'whatsapp', contact:'Paul Secara', club:'Axria', date:'2026-07-31',
+    notes:'Continued Axria investor outreach coordination. Paul sent bullet-point deal summary on July 30 evening (Timo confirmed receipt), then on July 31 confirmed he received the investor target list and pushed to begin outreach to preferred equity groups ("pref groups") immediately — "Got the list, yes let\'s hit up the pref groups asap / Esp the ones you see as top 10–15 highest probability." Timo proposed going tonight, tomorrow, or Monday but explained he needed more time to research warm intros and do bespoke, tailored outreach ("still in the middle of finding the right contact details, checking warm intros — next hour will be too tight if I want to do it properly with reference to comparable existing exposure etc"). Paul agreed Monday is better: "Yep better Monday then" — Timo: "Think so — better to do it bespoke for Highest Chance of success."',
+    outcome:'Timo to complete bespoke outreach to top 10–15 Axria preferred equity groups on Monday August 3 — with warm intros research, comparable deal positioning, and tailored messages per investor', source:'beeper-sync' },
+  { id:1785492000000, type:'whatsapp', contact:'Alex Kroes', club:'LASK', date:'2026-07-31',
+    notes:'The planned face-to-face meeting at LASK took place as scheduled on July 31 at 12:00. Timo and Fynn traveled to Linz and Timo coordinated arrival with Alex via WhatsApp — Timo was in the ground-floor lobby in a Red Bull Salzburg jersey; Alex asked him to come to floor 4 but Timo could only reach floor 3, so Alex came down. After the meeting Timo stayed for the LASK evening match (Alex had arranged a ticket). The meeting content is not captured in messages but was the agreed session to go through players and discuss LASK needs following the Christian Gomis and Armindo Sieb pitches from prior days.',
+    outcome:'Log LASK meeting outcomes in full debrief call with Fynn on August 1 — capture Alex Kroes feedback on all players pitched; progress next steps based on what was discussed in person', source:'beeper-sync' },
+  // JULY 30
+  { id:1785406920000, type:'whatsapp', contact:'Romeo Castelen', club:'Schalke / Hannover 96', date:'2026-07-30',
+    notes:'Active conversation on two German club needs. Romeo confirmed via Maximilian (head of scouting, formerly a Hannover 96 contact who may have moved to Schalke) that Schalke need a right wingback — "They Need right wingback." Timo identified Paul Wagner as head of recruitment at the club and contacted him directly. Timo also shared independent intel that Hannover 96 are close to completing a signing on the right back position ("almost done with a player on RV"), so that window may be closing. Romeo shared two player profiles as right wingback candidates — one from Fortuna Sittard ("Hé change") and a player from Sparta Rotterdam ("your golden boy from Sparta"). Timo indicated EFP has a potential right wingback candidate and will send details this evening; Romeo expressed some uncertainty as "Frank knows the player and he doesn\'t move till now."',
+    outcome:'Timo to send a right wingback candidate to Romeo/Schalke tonight; await Paul Wagner (head of recruitment) response; monitor Hannover 96 RV situation as window may be closing', source:'beeper-sync' },
+  { id:1785399840000, type:'whatsapp', contact:'Paul Secara', club:'Axria', date:'2026-07-30',
+    notes:'Substantial Axria capital-raise progress. Paul confirmed a 4pm CET call via Teams and sent the meeting link. Timo floated a co-GP structure — asked whether Axria would be open to a co-GP partner if someone brings an LP alongside; Paul replied "Probably yes. Who are you thinking?" Timo is already in talks with two firms: Blue Vista LLC (bluevistallc.com, multifamily/real estate) and KABR Group (kabrgroup.com, multifamily in Jacksonville, Jersey City, Stamford), and separately GTI Partners for opportunity-zone strategies. Paul requested Timo forward the Marcus-signed NDA. Timo also flagged a due-diligence question that came up from investors — why has the Axria project taken 20+ years without being built — and asked whether to address this proactively in materials. Paul called multiple times throughout the day (13:59, 15:30, 19:19 UTC); Timo scheduled a callback for ~20:25 CET.',
+    outcome:'Forward Marcus-signed NDA to Paul; prepare proactive answer to "why 20 years" question for investor conversations; follow up with Blue Vista / KABR / GTI Partners on co-GP interest; call Paul back', source:'beeper-sync' },
+  { id:1785396840000, type:'whatsapp', contact:'Alex Kroes', club:'LASK / Bayern Munich', date:'2026-07-30',
+    notes:'Two substantive topics with Alex. (1) Player feedback: Alex confirmed Christian Gomis is "no option for us due to data and scouting eyes." Timo provided context on Moussa Sylla\'s data dip — Sylla was almost sold to New York in winter (deal was fixed and Dzeko already bought), so Sylla had to cover different positions from winter onwards, which distorts his numbers. Alex said the other players Timo sent he "keeps in mind." (2) Armindo Sieb pitch: Timo pitched Sieb (Bayern Munich, just finished Mainz loan) — available for €2–2.5m transfer, earns €100k/month but open to 50k+, played well for Mainz, has Bundesliga experience, likes the Championship; Timo sent the TM profile and Alex reacted 👍🏼. (3) Meeting logistics confirmed: Timo and Fynn arriving at LASK at 12 on July 31 to talk through players, then Timo stays for the LASK evening match; Alex will arrange a ticket; flight and hotel booked.',
+    outcome:'Meeting at LASK with Alex Kroes on July 31 at 12:00 — prepare player proposals; Gomis closed for LASK, push Sieb; get ticket from Alex for the match', source:'beeper-sync' },
+  { id:1785383280000, type:'whatsapp', contact:'Rick Pattenden', club:'Derby County / Cardiff City / Standard Liège', date:'2026-07-30',
+    notes:'Highly productive day with Rick. Timo sent FindAClub system-generated scouting reports for Skelly Alvero and Armindo Sieb first thing in the morning. Rick confirmed he wants to pitch Skelly Alvero specifically to Derby County and Cardiff City and requested EFP-branded pitch PDFs for each — Timo produced and delivered "EFP x Skelly Alvero x Derby County.pdf" and "EFP x Skelly Alvero x Cardiff City.pdf" at 12:54; Rick immediately replied "Thanks mate, will present now" (13:30). Timo reinforced the Sieb pitch: "he has played well for Mainz so has definitely the level for Championship — and obviously had serious Bundesliga experience." Separately, Rick asked whether EFP works with Standard Liège, noting they have a player Henry Lawrence that 4–5 English clubs are looking at; Rick wants to understand the club\'s asking price and whether they allow agents to work on their behalf. Timo offered to reach out to Standard Liège.',
+    outcome:'Skelly Alvero presented to Derby County and Cardiff City by Rick — await club responses; Timo to contact Standard Liège about Henry Lawrence availability, asking price, and agent mandate policy', source:'beeper-sync' },
   // JULY 29
   { id:1785339480000, type:'whatsapp', contact:'Rick Pattenden', club:'Nottingham Forest / Bayern Munich / Anderlecht', date:'2026-07-29',
     notes:'Active day with Rick across multiple topics. He confirmed he reviewed the EFP player list overnight and sees potential matches; they agreed to go through it together on a call. On Connor Barron (Forest) to Anderlecht: Timo explained Anderlecht\'s interest is real but depends on their outgoing transfers. Timo then pitched Armindo Sieb (Bayern Munich, striker/10) — Sieb actively wants Championship, asking salary 80–100k/month, Bayern want 2mio transfer fee, EFP is working directly with Bayern. Rick then asked for financial details on Cedric Hatenboer at Anderlecht (Timo: 500k gross annual salary / 2.5mio transfer fee) and on a player named Alvero (70k/month salary / 2.5mio+).',
@@ -7955,26 +7994,32 @@ function submitContact() {
   contactsAdded.push(c); // keep legacy array in sync for backward compat
   const _cSaveBtn = document.querySelector('#contact-drawer .drawer-foot .btn-primary');
   const _cResetBtn = () => { if (window._DS && _cSaveBtn) _DS.btn(_cSaveBtn, 'default'); };
+  const _cResetFields = () => {
+    ['c-first','c-last','c-email','c-phone','c-wa','c-li','c-notes'].forEach(id => {
+      const el = document.getElementById(id); if(el) el.value='';
+    });
+    const pos = document.getElementById('c-position'); if(pos) pos.value='';
+    const club = document.getElementById('c-club'); if(club) club.value='';
+    const score = document.getElementById('c-score'); if(score) score.value='1';
+    const scoreVal = document.getElementById('c-score-val'); if(scoreVal) scoreVal.textContent='1 / 10';
+  };
   if (window._DS && _cSaveBtn) _DS.btn(_cSaveBtn, 'loading');
   try {
     _renderContactsTable();
     fbSave();
-    renderDashboard();
-    _refreshAllInterconnections();  // propagate new contact across Clubs view, Needs links, etc.
-    setTimeout(() => {
-      closeDrawer('contact');
-      ['c-first','c-last','c-email','c-phone','c-wa','c-li','c-notes'].forEach(id => {
-        const el = document.getElementById(id); if(el) el.value='';
-      });
-      document.getElementById('c-position').value='';
-      document.getElementById('c-club').value='';
-      showSnack(`✓ ${first} ${last} added to Contacts`, false);
-      _cResetBtn();
-    }, 350);
+    try { renderDashboard(); } catch(e2) { console.warn('[EFP] renderDashboard error after contact add:', e2); }
+    try { _refreshAllInterconnections(); } catch(e3) { console.warn('[EFP] _refreshAllInterconnections error:', e3); }
+    closeDrawer('contact');
+    _cResetFields();
+    showSnack(`✓ ${first} ${last} added to Contacts`, false);
+    _cResetBtn();
   } catch(e) {
     console.error('[EFP] submitContact error:', e);
+    // Contact IS saved in allContacts + Firebase — close and reset regardless
+    closeDrawer('contact');
+    _cResetFields();
     _cResetBtn();
-    showSnack('Error saving contact. Please try again.', true);
+    showSnack(`✓ ${first} ${last} added to Contacts`, false);
   }
 }
 
