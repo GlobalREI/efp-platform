@@ -3885,11 +3885,14 @@ th.ds-sort:hover { background: rgba(30,58,95,.06); }
     </div>
 
     <!-- Action buttons -->
-    <div style="display:flex;gap:8px;margin-bottom:18px">
+    <div style="display:flex;gap:8px;margin-bottom:10px">
       <button class="btn btn-primary" onclick="savePlayerProfile()" style="flex:1">Save Changes</button>
       <button class="btn btn-outline" onclick="closePlayerProfile();setTimeout(()=>showMandateSuggestions(document.getElementById('pp-edit-name').value,document.getElementById('pp-edit-pos').value,document.getElementById('pp-edit-age').value,document.getElementById('pp-edit-val').value,document.getElementById('pp-edit-club').value),100)">Suggest Clubs →</button>
       <button id="pp-archive-btn" class="btn btn-outline" onclick="archiveMandate()" title="Archive this mandate" style="flex-shrink:0">📦</button>
       <button class="btn btn-outline" onclick="deleteMandateFromDrawer()" title="Delete this mandate" style="color:var(--red);border-color:var(--red);flex-shrink:0">🗑</button>
+    </div>
+    <div style="margin-bottom:18px">
+      <button class="btn btn-outline" style="width:100%;justify-content:center;gap:6px;color:var(--accent);border-color:var(--accent)" onclick="goToPlayerMatches(document.getElementById('pp-edit-name').value)" title="Go to AI Matches filtered for this player">⚡ See AI Matches for this player →</button>
     </div>
 
     <!-- Pitch History -->
@@ -5327,6 +5330,7 @@ function _renderMandatesTable() {
       ? `<span style="display:inline-block;padding:2px 8px;border-radius:4px;background:${_prioCfg.bg};color:#fff;font-size:11px;font-weight:700;letter-spacing:.03em">${_prioCfg.label}</span>`
       : `<span style="color:var(--text3);font-size:12px">—</span>`;
     if (_prio) tr.dataset.priority = _prio; // used by mobile CSS for left-border accent
+    const safeName = m.name.replace(/'/g, "\\'");
     tr.innerHTML = `
       <td>${prioHtml}</td>
       <td><strong>${m.name}</strong>${archivedTag}${mNotesSub}</td>
@@ -5335,7 +5339,12 @@ function _renderMandatesTable() {
       <td>${mClubHtml}</td>
       <td>${mValFmt}</td>
       <td style="font-size:12px;color:var(--text2)">${mContactHtml}</td>
-      <td><div class="status"><span class="dot ${dotClass}"></span> ${statusTxt}</div></td>`;
+      <td>
+        <div style="display:flex;align-items:center;gap:6px">
+          <div class="status" style="flex:1"><span class="dot ${dotClass}"></span> ${statusTxt}</div>
+          <button class="btn btn-xs" style="padding:2px 6px;font-size:11px;color:var(--accent);border:1px solid var(--accent);background:transparent;border-radius:4px;white-space:nowrap;flex-shrink:0" onclick="event.stopPropagation();goToPlayerMatches('${safeName}')" title="View AI matches for ${m.name}">⚡ AI</button>
+        </div>
+      </td>`;
     tr.onclick = e => {
       if (e.target.closest('button')) return;
       openPlayerProfile(m.name, {
@@ -6839,6 +6848,16 @@ function _scoreMatch(player, need) {
 // Build unique match id
 function _matchId(playerName, clubName) {
   return 'mx_' + (playerName + '_' + clubName).toLowerCase().replace(/[^a-z0-9]/g,'_');
+}
+
+// Navigate to AI Matches view with a specific player pre-filtered
+function goToPlayerMatches(playerName) {
+  closePlayerProfile(); // close drawer if open (safe no-op if it isn't)
+  go('matches');
+  setTimeout(() => {
+    const el = document.getElementById('mf-player');
+    if (el) { el.value = playerName; renderMatches(); }
+  }, 80);
 }
 
 // Run the full matching engine
