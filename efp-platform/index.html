@@ -3794,11 +3794,21 @@ th.ds-sort:hover { background: rgba(30,58,95,.06); }
       <div style="display:flex;gap:10px;margin-bottom:10px">
         <div style="flex:1">
           <label class="field-label">Position</label>
-          <input class="field-input" id="pp-edit-pos" placeholder="e.g. CM">
+          <select class="field-select" id="pp-edit-pos">
+            <option value="">Select…</option>
+            <option>Goalkeeper</option><option>Right Back</option><option>Centre Back</option><option>Left Back</option>
+            <option>Defensive Mid</option><option>Central Mid</option><option>Attacking Mid</option>
+            <option>Right Winger</option><option>Left Winger</option><option>Second Striker</option><option>Centre Forward</option>
+          </select>
         </div>
         <div style="flex:1">
           <label class="field-label">Secondary Position</label>
-          <input class="field-input" id="pp-edit-pos2" placeholder="e.g. CDM (optional)">
+          <select class="field-select" id="pp-edit-pos2">
+            <option value="">None</option>
+            <option>Goalkeeper</option><option>Right Back</option><option>Centre Back</option><option>Left Back</option>
+            <option>Defensive Mid</option><option>Central Mid</option><option>Attacking Mid</option>
+            <option>Right Winger</option><option>Left Winger</option><option>Second Striker</option><option>Centre Forward</option>
+          </select>
         </div>
         <div style="flex:0 0 72px">
           <label class="field-label">Age</label>
@@ -6838,7 +6848,8 @@ function runMatchEngine() {
 
   // Merge allMandates + mandatesAdded (deduplicate by lowercase name)
   const _toPlayer = m => ({ name:m.name, pos:m.position||m.pos||'', age:parseInt(m.age)||null, club:m.club, val:m.value||m.val||'', dealType: m.dealType || (playerNotes[m.name]?.dealType) || 'either' });
-  const _basePool = allMandates.length ? allMandates.map(_toPlayer) : MANDATES_DB.map(_toPlayer);
+  // Exclude archived mandates from matching
+  const _basePool = allMandates.length ? allMandates.filter(m => !m.archived).map(_toPlayer) : MANDATES_DB.map(_toPlayer);
   const _addedPool = mandatesAdded.map(_toPlayer);
   const _seen = new Set(_basePool.map(p => (p.name||'').toLowerCase()));
   const allPlayers = [..._basePool, ..._addedPool.filter(p => !_seen.has((p.name||'').toLowerCase()))];
@@ -6852,12 +6863,14 @@ function runMatchEngine() {
     budMin:    n.budMin || '',
     budMax:    n.budMax || n.budget || '',
     contact:   n.contact || '',
-    urgency:   n.urgency || (n.prio === 'Urgent' ? 'urgent' : 'open'),
+    // P1 (Urgent) and P2 (High) both count as urgent for scoring; P3 (Medium) = open
+    urgency:   n.urgency || ((n.prio === 'Urgent' || n.prio === 'High') ? 'urgent' : 'open'),
     notes:     n.notes || '',
     dealType:  n.dealType || 'either'
   });
+  // Exclude archived needs from matching
   const _runNeeds = allNeeds.length
-    ? allNeeds.map(_normaliseNeed)
+    ? allNeeds.filter(n => !n.archived).map(_normaliseNeed)
     : [...CLUB_NEEDS_DB, ...needsAdded].map(_normaliseNeed);
 
   const newMatches = [];
@@ -6865,8 +6878,12 @@ function runMatchEngine() {
 
   allPlayers.forEach(player => {
     _runNeeds.forEach(need => {
-      // Don't match player's own club
-      if (player.club && need.club && player.club.toLowerCase().includes(need.club.toLowerCase().split(' ')[0].toLowerCase())) return;
+      // Don't match player against their own club — compare normalised full names (not just first word)
+      if (player.club && need.club) {
+        const _pc = player.club.toLowerCase().replace(/[^a-z0-9]/g,'');
+        const _nc = need.club.toLowerCase().replace(/[^a-z0-9]/g,'');
+        if (_pc && _nc && _pc.length > 3 && _nc.length > 3 && (_pc === _nc || _pc.includes(_nc) || _nc.includes(_pc))) return;
+      }
 
       const id = _matchId(player.name, need.club);
       if (seen.has(id)) return;
@@ -8280,6 +8297,30 @@ function deleteClub(id, btn) {
 let _ppCurrentPlayer  = null; // name of open player
 let _ppCurrentMandate = null; // direct reference to the allMandates object — avoids name-search race
 
+// Maps any stored position string (abbr or full name) → dropdown option value
+function _posToDropdown(pos) {
+  const _MAP = {
+    'GK':'Goalkeeper','GOALKEEPER':'Goalkeeper',
+    'RB':'Right Back','RIGHT BACK':'Right Back','RIGHT-BACK':'Right Back',
+    'CB':'Centre Back','CENTRE BACK':'Centre Back','CENTER BACK':'Centre Back','CENTERBACK':'Centre Back','CENTREBACK':'Centre Back',
+    'LB':'Left Back','LEFT BACK':'Left Back','LEFT-BACK':'Left Back',
+    'LV':'Left Back', // German
+    'RV':'Right Back', // German
+    'IV':'Centre Back', // German
+    'CDM':'Defensive Mid','DM':'Defensive Mid','DEFENSIVE MID':'Defensive Mid','DEFENSIVE MIDFIELDER':'Defensive Mid',
+    'CM':'Central Mid','CENTRAL MID':'Central Mid','CENTRAL MIDFIELDER':'Central Mid','ZM':'Central Mid',
+    'CAM':'Attacking Mid','AM':'Attacking Mid','ATTACKING MID':'Attacking Mid','ATTACKING MIDFIELDER':'Attacking Mid','OM':'Attacking Mid',
+    'RW':'Right Winger','RIGHT WINGER':'Right Winger','RIGHT WING':'Right Winger','RA':'Right Winger',
+    'LW':'Left Winger','LEFT WINGER':'Left Winger','LEFT WING':'Left Winger','LA':'Left Winger',
+    'WINGER':'Right Winger',
+    'SS':'Second Striker','SECOND STRIKER':'Second Striker',
+    'ST':'Centre Forward','CF':'Centre Forward','CENTRE FORWARD':'Centre Forward','CENTER FORWARD':'Centre Forward',
+    'STRIKER':'Centre Forward','FORWARD':'Centre Forward','FW':'Centre Forward',
+  };
+  const key = (pos || '').toUpperCase().trim().replace(/\s*\/\s*.+$/, ''); // strip secondary position
+  return _MAP[key] || pos || '';
+}
+
 let _ppCurrentRow = null; // the TR element currently open
 
 function openPlayerProfile(playerName, data) {
@@ -8296,9 +8337,9 @@ function openPlayerProfile(playerName, data) {
   // incomplete (e.g. no pos2, combined "CF / SS" position string, stale contact).
   const _m = _ppCurrentMandate; // shorthand for the live allMandates entry
   document.getElementById('pp-edit-name').value   = playerName;
-  document.getElementById('pp-edit-pos').value    = (_m ? (_m.pos || _m.position || '') : (data.pos || '')).replace(/\s*\/\s*.+$/, ''); // strip " / pos2" if cell text bled in
+  document.getElementById('pp-edit-pos').value    = _posToDropdown(_m ? (_m.pos || _m.position || '') : (data.pos || ''));
   const _pp2el = document.getElementById('pp-edit-pos2');
-  if (_pp2el) _pp2el.value                        = _m ? (_m.pos2 || '') : (data.pos2 || '');
+  if (_pp2el) _pp2el.value                        = _posToDropdown(_m ? (_m.pos2 || '') : (data.pos2 || ''));
   const _rawAge  = _m ? _m.age  : data.age;
   const _rawClub = _m ? _m.club : data.club;
   const _rawVal  = _m ? (_m.value || _m.val) : data.val;
@@ -9225,6 +9266,7 @@ function submitMandate() {
   if (window._DS && _mSaveBtn) _DS.btn(_mSaveBtn, 'loading');
   // Save to Firebase FIRST — render errors must not prevent the write
   fbSave();
+  setTimeout(runMatchEngine, 600); // auto-refresh AI Matches when new mandate added
   try { _renderMandatesTable(); } catch(e) { console.warn('[EFP] _renderMandatesTable error after mandate add:', e); }
   try { _updateMandateSubtitle(); } catch(e) { console.warn('[EFP] _updateMandateSubtitle error:', e); }
   try { _updateNeedsMatchAlerts(); } catch(e) { console.warn('[EFP] _updateNeedsMatchAlerts error:', e); }
@@ -13928,23 +13970,23 @@ const CLUB_NEEDS_DB = [
   { club:'Fortuna Sittard',     flag:'🇳🇱', league:'Eredivisie',           positions:['GK','RB','CB','LB','CDM','CM','CAM','LW','RW','ST'], budget:'—', contact:'Joris (via Romeo Castelen)', urgency:'open', notes:'Most positions open excl. CDM (6)' },
 ];
 
-// Maps a position string (e.g. "CM/CDM/CAM", "Left Winger", "ST/SS") → canonical tags
+// Maps a position string (e.g. "CM/CDM/CAM", "Left Winger", "ST/SS", "LV") → canonical tags
 function getPositionTags(posStr) {
   const p = (posStr || '').toUpperCase();
   const tags = new Set();
   if (/GK|GOAL/.test(p))                             tags.add('GK');
-  if (/\bCB\b|CENTRE.?BACK|CENTER.?BACK/.test(p))   tags.add('CB');
-  if (/\bRB\b|RIGHT.?BACK/.test(p))                 tags.add('RB');
-  if (/\bLB\b|LEFT.?BACK/.test(p))                  tags.add('LB');
+  if (/\bCB\b|CENTRE.?BACK|CENTER.?BACK|\bIV\b/.test(p))   tags.add('CB'); // IV = German Innenverteidiger
+  if (/\bRB\b|RIGHT.?BACK|\bRV\b/.test(p))          tags.add('RB'); // RV = German Rechtsverteidiger
+  if (/\bLB\b|LEFT.?BACK|\bLV\b/.test(p))           tags.add('LB'); // LV = German Linksverteidiger
   if (/\bRWB\b/.test(p))                            { tags.add('RB'); tags.add('RW'); }
   if (/\bLWB\b/.test(p))                            { tags.add('LB'); tags.add('LW'); }
   if (/CDM|DEFENSIVE.?MID|\bDM\b/.test(p))          tags.add('CDM');
-  if (/\bCM\b|CENTRAL.?MID/.test(p))                tags.add('CM');
-  if (/CAM|ATTACKING.?MID|\bAM\b/.test(p))          tags.add('CAM');
-  if (/\bRW\b|RIGHT.?WING/.test(p))                 tags.add('RW');
-  if (/\bLW\b|LEFT.?WING/.test(p))                  tags.add('LW');
+  if (/\bCM\b|CENTRAL.?MID|\bZM\b/.test(p))         tags.add('CM'); // ZM = German Zentraler Mittelfeldspieler
+  if (/CAM|ATTACKING.?MID|\bAM\b|\bOM\b/.test(p))   tags.add('CAM'); // OM = German Offensiver Mittelfeldspieler
+  if (/\bRW\b|RIGHT.?WING|\bRA\b/.test(p))          tags.add('RW'); // RA = German Rechtsaußen
+  if (/\bLW\b|LEFT.?WING|\bLA\b/.test(p))           tags.add('LW'); // LA = German Linksaußen
   if (/\bWINGER\b/.test(p))                         { tags.add('LW'); tags.add('RW'); }
-  if (/\bST\b|STRIKER|CENTRE.?FORWARD|CENTER.?FORWARD|\bCF\b/.test(p)) tags.add('ST');
+  if (/\bST\b|STRIKER|CENTRE.?FORWARD|CENTER.?FORWARD|\bCF\b|\bFW\b/.test(p)) tags.add('ST');
   if (/\bSS\b|SECOND.?STRIKER/.test(p))             { tags.add('ST'); tags.add('CAM'); }
   return tags;
 }
