@@ -10119,25 +10119,26 @@ function pitchToNeedClub() {
   }, 150);
 }
 
-// Wire click handlers on all need rows (static + dynamic)
+// Wire click handlers on all need rows (static + dynamic) — legacy alias
 function initNeedRows() {
   document.querySelectorAll('#view-needs .data-table tbody tr').forEach(tr => {
     if (tr.dataset.needInit) return;
     tr.dataset.needInit = '1';
     tr.style.cursor = 'pointer';
+    const needId = tr.dataset.needId || null;
+    const _n = needId ? allNeeds.find(x => x.id === needId) : null;
+    if (_n) return; // _renderNeedsTable already wired a correct click handler
 
-    const cells   = tr.querySelectorAll('td');
-    const club    = cells[0]?.querySelector('strong')?.textContent?.trim() || '';
-    const pos     = cells[1]?.textContent?.trim() || '';
-    const budget  = cells[3]?.textContent?.trim() || '';
-    const contact = cells[5]?.textContent?.trim() || '';
-    // Infer status/prio from status cell
-    const statusText = cells[6]?.textContent?.trim() || '';
+    // Fallback for legacy static rows — corrected cell indices (Priority col is [0])
+    const cells      = tr.querySelectorAll('td');
+    const club       = cells[1]?.querySelector('strong')?.textContent?.trim() || '';
+    const pos        = cells[2]?.textContent?.trim() || '';
+    const noteDiv    = cells[3]?.querySelector('div');
+    const notes      = noteDiv?.textContent?.trim() || cells[3]?.textContent?.trim() || '';
+    const budget     = cells[4]?.textContent?.trim() || '';
+    const contact    = cells[6]?.textContent?.trim() || '';
+    const statusText = cells[7]?.textContent?.trim() || '';
     const prio = statusText.toLowerCase().includes('urgent') ? 'Urgent' : statusText.toLowerCase().includes('high') ? 'High' : 'Medium';
-    // Notes from notes cell (may be plain text or wrapped in a div)
-    const noteDiv = cells[2]?.querySelector('div');
-    const notes   = noteDiv?.textContent?.trim() || cells[2]?.textContent?.trim() || '';
-    const needId  = tr.dataset.needId || null;
 
     tr.addEventListener('click', function(e) {
       if (e.target.closest('button')) return;
@@ -14464,37 +14465,61 @@ function showPDRNeed(club, positions, budget, contact, notes, status) {
   openDrawer('pdr');
 }
 
-// ─── INIT NEEDS ROWS (click → detail drawer + PDF → button) ─────────────────
+// ─── INIT NEEDS ROWS (PDF → button injection + click handler for legacy rows) ──
 function initNeedsRows() {
   const rows = document.querySelectorAll('#view-needs .data-table tbody tr');
   rows.forEach(tr => {
     if (tr.dataset.pdrInit) return;
     tr.dataset.pdrInit = '1';
     tr.style.cursor = 'pointer';
-    const cells = tr.querySelectorAll('td');
+    const needId = tr.dataset.needId || null;
+    const cells  = tr.querySelectorAll('td');
     if (cells.length < 4) return;
-    const club     = cells[0]?.querySelector('strong')?.textContent?.trim() || '';
-    const posRaw   = cells[1]?.querySelector('strong')?.textContent?.trim() || cells[1]?.textContent?.trim() || '';
-    const positions = posRaw.split(/[,×x\+]/i).map(s => s.trim()).filter(s => s.length > 0 && s.length < 20);
-    const rawBudget = cells[3]?.textContent?.trim().replace(/\s+/g,' ') || '—';
-    const budget = rawBudget === '—' ? '—' : rawBudget.split(/–/).map(p => _normVal(p.trim()) || p.trim()).join('–');
-    if (cells[3] && budget !== rawBudget) cells[3].textContent = budget;
-    const contact  = cells[5]?.textContent?.trim().replace(/\s+/g,' ') || '—';
-    const notes    = cells[2]?.querySelector('div')?.textContent?.trim() || cells[2]?.textContent?.trim() || '';
-    const statusEl = cells[cells.length-1]?.querySelector('.status');
-    const status   = statusEl ? statusEl.textContent.trim() : '';
-    const prio     = status.toLowerCase().includes('urgent') ? 'Urgent' : status.toLowerCase().includes('high') ? 'High' : 'Medium';
-    const needId   = tr.dataset.needId || null;
 
-    // Row click → open detail drawer
-    tr.addEventListener('click', function(e) {
-      if (e.target.closest('button')) return;
-      openNeedDetail(club, posRaw, '', budget !== '—' ? budget : '', contact, prio, notes, needId);
-    });
+    // ── Prefer live data from allNeeds (immune to column layout changes) ──────
+    const _n = needId ? allNeeds.find(x => x.id === needId) : null;
 
-    // Inject PDF → button into last cell
+    let club, posRaw, positions, budget, contact, prio, notes, status;
+    if (_n) {
+      // Row was rendered by _renderNeedsTable — read from the source object
+      club     = _n.club || '';
+      posRaw   = Array.isArray(_n.positions) ? _n.positions.join(' · ') : (_n.pos || '');
+      positions = Array.isArray(_n.positions) ? _n.positions : (posRaw ? posRaw.split(/[\s·,]+/).filter(Boolean) : []);
+      const bMin = _normVal(_n.budMin) || _n.budMin || '';
+      const bMax = _normVal(_n.budMax) || _n.budMax || '';
+      budget   = (bMin || bMax) ? [bMin, bMax].filter(Boolean).join('–') : (_normVal(_n.budget) || _n.budget || '—');
+      contact  = _n.contact || '—';
+      prio     = _n.prio || (_n.urgency === 'urgent' ? 'Urgent' : 'High');
+      notes    = _n.notes || '';
+      status   = prio;
+      // _renderNeedsTable already wired the correct click handler → do NOT add another one
+    } else {
+      // ── Fallback: legacy/static rows — read from cells with corrected indices ──
+      // Column order after Priority column was added:
+      // [0]=Priority [1]=Club [2]=Position [3]=Notes [4]=Budget [5]=Window [6]=Contact [7]=Status
+      club    = cells[1]?.querySelector('strong')?.textContent?.trim() || '';
+      posRaw  = cells[2]?.querySelector('strong')?.textContent?.trim() || cells[2]?.textContent?.trim() || '';
+      notes   = cells[3]?.querySelector('div')?.textContent?.trim()    || cells[3]?.textContent?.trim() || '';
+      const rawBudget = cells[4]?.textContent?.trim().replace(/\s+/g,' ') || '—';
+      budget  = rawBudget === '—' ? '—' : rawBudget.split(/–/).map(p => _normVal(p.trim()) || p.trim()).join('–');
+      if (cells[4] && budget !== rawBudget) cells[4].textContent = budget;
+      contact = cells[6]?.textContent?.trim().replace(/\s+/g,' ') || '—';
+      const statusEl = cells[cells.length-1]?.querySelector('.status');
+      status  = statusEl ? statusEl.textContent.trim() : '';
+      prio    = status.toLowerCase().includes('urgent') ? 'Urgent' : status.toLowerCase().includes('high') ? 'High' : 'Medium';
+      positions = posRaw.split(/[,×x\+·]/i).map(s => s.trim()).filter(s => s.length > 0 && s.length < 20);
+
+      // Add click handler only for legacy rows (dynamic rows already have one from _renderNeedsTable)
+      tr.addEventListener('click', function(e) {
+        if (e.target.closest('button')) return;
+        openNeedDetail(club, posRaw, '', budget !== '—' ? budget : '', contact, prio, notes, needId);
+      });
+    }
+
+    // ── Inject PDF → button into last cell (all rows) ─────────────────────────
     const lastTd = cells[cells.length - 1];
-    const existing = lastTd.innerHTML;
+    if (lastTd.querySelector('.pdr-btn')) return; // already injected
+    const existing    = lastTd.innerHTML;
     const clubSafe    = club.replace(/'/g,"\\'").replace(/"/g,'&quot;');
     const contactSafe = contact.replace(/'/g,"\\'").replace(/"/g,'&quot;');
     const notesSafe   = notes.replace(/'/g,"\\'").replace(/"/g,'&quot;').replace(/\n/g,' ');
