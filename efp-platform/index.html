@@ -2101,7 +2101,7 @@ tr:hover .pdr-btn     { opacity: 1; }
 @media print {
   :root { --bg:#fff; --surface0:#fff; --surface1:#f8f8f8; --surface2:#f0f0f0;
           --text1:#111; --text2:#333; --text3:#555; --border:#ddd;
-          --accent:#b45309; --green:#16a34a; }
+          --accent:#166534; --green:#166534; }
 
   /* Hide everything except the active view */
   .sidebar, .mob-bottom-nav, .topbar, #mob-nav-overlay,
@@ -2112,7 +2112,23 @@ tr:hover .pdr-btn     { opacity: 1; }
   .btn-primary, .btn-outline,
   .k-add-btn, .k-card-actions,
   #global-search-wrap,
-  #sync-badge  { display:none !important; }
+  #sync-badge,
+  /* Club Needs: hide UI chrome */
+  #sync-intel-banner,
+  #needs-search,
+  #needs-filter-panel,
+  #needs-filter-toggle,
+  #btn-archived-needs,
+  #needs-match-alerts-box  { display:none !important; }
+
+  /* Club Needs: hide Priority (col 1) and Contact (col 7) columns */
+  #view-needs .data-table th:nth-child(1),
+  #view-needs .data-table td:nth-child(1),
+  #view-needs .data-table th:nth-child(7),
+  #view-needs .data-table td:nth-child(7) { display:none !important; }
+
+  /* Strip link colours — all clickable names render as plain text in print */
+  .feed-link { color:#111 !important; text-decoration:none !important; }
 
   /* Full width for the active view */
   body, html  { width:100%; height:auto; overflow:visible; background:#fff; }
@@ -2120,10 +2136,11 @@ tr:hover .pdr-btn     { opacity: 1; }
   .content    { overflow:visible; height:auto; padding:16px 24px; }
   .view.active{ display:block !important; }
 
-  /* Tables — keep widths sane */
+  /* Tables — EFP dark green header */
   .data-table { width:100%; border-collapse:collapse; font-size:10pt; }
   .data-table th, .data-table td { padding:5px 8px; border:1px solid #ccc; }
-  .data-table thead { background:#f0f0f0 !important; -webkit-print-color-adjust:exact; }
+  .data-table thead { background:#166534 !important; -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+  .data-table thead th { color:#fff !important; border-color:#166534 !important; }
 
   /* Kanban: stack columns vertically so they fit */
   .kanban-wrap{ display:block !important; }
@@ -2132,16 +2149,16 @@ tr:hover .pdr-btn     { opacity: 1; }
   /* KPI strip — 2 columns */
   .kpi-strip  { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
 
-  /* Print header */
+  /* Print header — EFP dark green */
   .view.active::before {
     content: attr(data-print-title);
     display:block;
     font-size:18pt;
     font-weight:700;
-    color:#111;
+    color:#166534;
     margin-bottom:12px;
     padding-bottom:8px;
-    border-bottom:2px solid #b45309;
+    border-bottom:2px solid #166534;
   }
 
   /* Page breaks */
