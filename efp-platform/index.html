@@ -268,6 +268,8 @@ body {
   margin-bottom: 4px;
 }
 .page-subtitle { font-size: 12.5px; color: var(--text3); }
+/* In-view PDF button — hidden on desktop (topbar has it), shown on mobile */
+.view-pdf-btn { display: none; }
 
 /* ─── KPI STRIP ─── */
 .kpi-strip {
@@ -1271,6 +1273,8 @@ body {
   /* Hide header quick-action buttons — accessible inside each view */
   .topbar > .btn { display: none !important; }
   .topbar-title { font-size: 14px; min-width: 0; }
+  /* Show in-view PDF buttons on mobile (topbar PDF button is hidden) */
+  .view-pdf-btn { display: inline-flex !important; }
   .view-search { width: 100%; max-width: 100%; font-size: 14px; padding: 8px 12px; }
 
   /* ── MOBILE SEARCH OVERLAY ──────────────────────────────────────────────── */
@@ -2113,19 +2117,30 @@ tr:hover .pdr-btn     { opacity: 1; }
   .k-add-btn, .k-card-actions,
   #global-search-wrap,
   #sync-badge,
-  /* Club Needs: hide UI chrome */
+  /* Hide in-view PDF buttons (topbar PDF button handles desktop print) */
+  .view-pdf-btn { display:none !important; }
+
+  /* Club Needs & Mandates: hide UI chrome */
   #sync-intel-banner,
   #needs-search,
   #needs-filter-panel,
   #needs-filter-toggle,
   #btn-archived-needs,
-  #needs-match-alerts-box  { display:none !important; }
+  #needs-match-alerts-box,
+  #mandates-search,
+  #btn-archived-mandates  { display:none !important; }
 
   /* Club Needs: hide Priority (col 1) and Contact (col 7) columns */
   #view-needs .data-table th:nth-child(1),
   #view-needs .data-table td:nth-child(1),
   #view-needs .data-table th:nth-child(7),
   #view-needs .data-table td:nth-child(7) { display:none !important; }
+
+  /* Player Mandates: hide Priority (col 1) and Contact Person (col 7) columns */
+  #view-mandates .data-table th:nth-child(1),
+  #view-mandates .data-table td:nth-child(1),
+  #view-mandates .data-table th:nth-child(7),
+  #view-mandates .data-table td:nth-child(7) { display:none !important; }
 
   /* Strip link colours — all clickable names render as plain text in print */
   .feed-link { color:#111 !important; text-decoration:none !important; }
@@ -2889,6 +2904,7 @@ th.ds-sort:hover { background: rgba(30,58,95,.06); }
           <option value="prio">Priority</option>
         </select>
         <button id="btn-archived-mandates" class="btn btn-outline btn-sm" onclick="_toggleArchivedMandates()">Show Archived</button>
+        <button class="btn btn-outline btn-sm view-pdf-btn" onclick="exportPagePDF()" style="gap:4px;align-items:center"><span style="font-size:13px">⬇</span> PDF</button>
         <button class="btn btn-primary btn-sm" onclick="openMandateMethodPicker()">+ New Mandate</button>
       </div>
       <div class="panel">
@@ -2912,6 +2928,7 @@ th.ds-sort:hover { background: rgba(30,58,95,.06); }
         <input type="text" id="needs-search" class="view-search" placeholder="🔍  Search needs…" oninput="filterNeeds(this.value)">
         <button class="btn btn-outline btn-sm" id="needs-filter-toggle" onclick="toggleNeedsFilter()">⚙ Filter</button>
         <button id="btn-archived-needs" class="btn btn-outline btn-sm" onclick="_toggleArchivedNeeds()">Show Archived</button>
+        <button class="btn btn-outline btn-sm view-pdf-btn" onclick="exportPagePDF()" style="gap:4px;align-items:center"><span style="font-size:13px">⬇</span> PDF</button>
         <button class="btn btn-primary btn-sm" onclick="openDrawer('req')">+ New Club Need</button>
       </div>
 
