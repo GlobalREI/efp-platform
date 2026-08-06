@@ -4046,7 +4046,7 @@ th.ds-sort:hover { background: rgba(30,58,95,.06); }
       <div style="flex:0 0 76px"><label class="field-label">Height (cm)</label><input class="field-input" id="m-height" placeholder="e.g. 185" type="number" min="150" max="220"></div>
     </div>
     <div class="field-row field">
-      <div><label class="field-label">Current Club</label><input class="field-input" id="m-club" list="efp-club-datalist" placeholder="Type to search clubs…" autocomplete="off"></div>
+      <div><label class="field-label">Current Club</label><input class="field-input" id="m-club" placeholder="Type to search clubs…" autocomplete="off" oninput="_taClub(this)" onfocus="_taClub(this)" onblur="_taBlur()" onkeydown="_taKey(event)"></div>
       <div>
         <label class="field-label">Nationality</label>
         <input class="field-input" id="m-nat" placeholder="e.g. Dutch, EU passport">
@@ -4077,7 +4077,7 @@ th.ds-sort:hover { background: rgba(30,58,95,.06); }
       <div><label class="field-label">Expected Price</label><input class="field-input" id="m-expected-price" placeholder="e.g. €2.5M" inputmode="numeric" oninput="_valInput(this)" onblur="_valBlur(this)"></div>
       <div><label class="field-label">Salary (p/m)</label><input class="field-input" id="m-salary" placeholder="e.g. €80.000" inputmode="numeric" oninput="_valInput(this)" onblur="_valBlur(this)"></div>
     </div>
-    <div class="field"><label class="field-label">Contact Person <span class="req">*</span></label><input class="field-input" id="m-contact" placeholder="e.g. Rick Doyle · EAG / Agent name / Via player directly"></div>
+    <div class="field"><label class="field-label">Contact Person <span class="req">*</span></label><input class="field-input" id="m-contact" placeholder="Type to search contacts…" autocomplete="off" oninput="_taContact(this)" onfocus="_taContact(this)" onblur="_taBlur()" onkeydown="_taKey(event)"></div>
     <div class="field"><label class="field-label">Player Profile / Notes</label><textarea class="field-textarea" id="m-notes" placeholder="Key strengths, playing style, clubs to target…" rows="3"></textarea></div>
   </div>
   <div class="drawer-foot">
@@ -11560,7 +11560,9 @@ function renderBulkPreviewCards() {
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:8px">
         <div>
           <div style="font-size:10px;color:var(--text3);font-weight:600;letter-spacing:.05em;margin-bottom:3px">CURRENT CLUB</div>
-          <input class="field-input" id="bcard-club-${p._id}" value="${p.club||''}" placeholder="e.g. Club Brugge" style="font-size:12px;padding:5px 8px">
+          <input class="field-input" id="bcard-club-${p._id}" value="${p.club||''}" placeholder="Type to search clubs…" autocomplete="off"
+            oninput="_taClub(this)" onfocus="_taClub(this)" onblur="_taBlur()" onkeydown="_taKey(event)"
+            style="font-size:12px;padding:5px 8px">
         </div>
         <div>
           <div style="font-size:10px;color:var(--text3);font-weight:600;letter-spacing:.05em;margin-bottom:3px">DEAL TYPE</div>
@@ -11581,6 +11583,13 @@ function renderBulkPreviewCards() {
           <div style="font-size:10px;color:var(--text3);font-weight:600;letter-spacing:.05em;margin-bottom:3px">EXPECTED / ASKING PRICE</div>
           <input class="field-input" id="bcard-exp-${p._id}" value="${formattedExp}" placeholder="e.g. €2.5M" style="font-size:12px;padding:5px 8px">
         </div>
+      </div>
+
+      <div style="margin-bottom:8px">
+        <div style="font-size:10px;color:var(--text3);font-weight:600;letter-spacing:.05em;margin-bottom:3px">CONTACT PERSON</div>
+        <input class="field-input" id="bcard-contact-${p._id}" value="${p.contact||p.agent||''}" placeholder="Type to search contacts…" autocomplete="off"
+          oninput="_taContact(this)" onfocus="_taContact(this)" onblur="_taBlur()" onkeydown="_taKey(event)"
+          style="font-size:12px;padding:5px 8px;width:100%;box-sizing:border-box">
       </div>
 
       <div>
@@ -11606,7 +11615,9 @@ function approveBulkPlayer(id) {
   const deal   = (document.getElementById('bcard-deal-'  + id)?.value || '').trim();
   const notes  = (document.getElementById('bcard-notes-' + id)?.value || '').trim();
 
-  const contact = document.getElementById('bulk-source-club').value.trim() || '';
+  const cardContact   = (document.getElementById('bcard-contact-' + id)?.value || '').trim();
+  const globalContact = document.getElementById('bulk-source-club').value.trim() || '';
+  const contact = cardContact || globalContact;
   const mandate = {
     id: 'm_' + Date.now(),
     name:          p.name,
@@ -13468,6 +13479,99 @@ function _contactKeyNav(e) {
   } else if (e.key === 'Escape') {
     dropdown.style.display = 'none';
   }
+}
+
+// ══════════════════════════════════════════════════════════════════════════════
+// GENERIC REUSABLE TYPEAHEAD — one shared floating dropdown, works anywhere
+// Usage: oninput="_taClub(this)"  onfocus="_taClub(this)"  onblur="_taBlur()"
+//        onkeydown="_taKey(event)"
+// ══════════════════════════════════════════════════════════════════════════════
+let _taEl = null;          // the shared dropdown DOM element
+let _taCb = null;          // current select callback: (value, label) => void
+let _taCloseTimer = null;  // pending close timer
+
+function _taGetEl() {
+  if (!_taEl) {
+    _taEl = document.createElement('div');
+    _taEl.id = 'efp-ta-dd';
+    _taEl.style.cssText = 'display:none;position:fixed;background:var(--surface);border:1px solid var(--border);border-radius:8px;box-shadow:0 4px 20px rgba(0,0,0,.15);max-height:220px;overflow-y:auto;z-index:99999';
+    document.body.appendChild(_taEl);
+  }
+  return _taEl;
+}
+
+function _taOpen(inputEl, items, cb) {
+  // items: [{label, sub, value}]
+  clearTimeout(_taCloseTimer);
+  _taCb = cb;
+  const dd = _taGetEl();
+  if (!items.length) { dd.style.display = 'none'; return; }
+  dd.innerHTML = items.map((item, i) =>
+    `<div class="efp-ta-opt" data-i="${i}" data-v="${(item.value||item.label).replace(/"/g,'&quot;')}"
+      style="padding:9px 13px;cursor:pointer;font-size:13px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:6px"
+      onmousedown="event.preventDefault();_taPick(${i})"
+      onmouseover="this.style.background='var(--hover)'"
+      onmouseout="this.style.background=''"
+    ><span>${item.label}</span>${item.sub?`<span style="color:var(--text3);font-size:11px">${item.sub}</span>`:''}</div>`
+  ).join('');
+  const rect = inputEl.getBoundingClientRect();
+  dd.style.left  = rect.left  + 'px';
+  dd.style.top   = (rect.bottom + 2) + 'px';
+  dd.style.width = Math.max(rect.width, 220) + 'px';
+  dd.style.display = '';
+}
+
+function _taPick(i) {
+  const opt = _taGetEl().querySelectorAll('.efp-ta-opt')[i];
+  if (opt && _taCb) _taCb(opt.dataset.v, opt.querySelector('span').textContent);
+  _taGetEl().style.display = 'none';
+}
+
+function _taBlur() {
+  clearTimeout(_taCloseTimer);
+  _taCloseTimer = setTimeout(() => { if (_taEl) _taEl.style.display = 'none'; }, 180);
+}
+
+function _taFocus() { clearTimeout(_taCloseTimer); }
+
+function _taKey(e) {
+  const dd = _taEl;
+  if (!dd || dd.style.display === 'none') return;
+  const opts = Array.from(dd.querySelectorAll('.efp-ta-opt'));
+  const cur  = opts.findIndex(o => o.classList.contains('ta-active'));
+  if (e.key === 'ArrowDown') {
+    e.preventDefault();
+    const n = Math.min(cur + 1, opts.length - 1);
+    opts.forEach((o, i) => { o.classList.toggle('ta-active', i===n); o.style.background = i===n ? 'var(--hover)' : ''; });
+    opts[n]?.scrollIntoView({ block:'nearest' });
+  } else if (e.key === 'ArrowUp') {
+    e.preventDefault();
+    const p = Math.max(cur - 1, 0);
+    opts.forEach((o, i) => { o.classList.toggle('ta-active', i===p); o.style.background = i===p ? 'var(--hover)' : ''; });
+    opts[p]?.scrollIntoView({ block:'nearest' });
+  } else if (e.key === 'Enter' && cur >= 0) {
+    e.preventDefault(); _taPick(cur);
+  } else if (e.key === 'Escape') {
+    dd.style.display = 'none';
+  }
+}
+
+// ── Club typeahead (generic) ───────────────────────────────────────────────
+function _taClub(inputEl) {
+  _taFocus();
+  const q = inputEl.value.trim().toLowerCase();
+  const clubs = _allClubs();
+  const hits = (q ? clubs.filter(c => c.name.toLowerCase().includes(q) || (c.league||'').toLowerCase().includes(q)) : clubs).slice(0, 60);
+  _taOpen(inputEl, hits.map(c => ({ label:(c.flag||'')+' '+c.name, sub:c.league||'', value:c.name })), v => { inputEl.value = v; });
+}
+
+// ── Contact typeahead (generic) ────────────────────────────────────────────
+function _taContact(inputEl) {
+  _taFocus();
+  const q = inputEl.value.trim().toLowerCase();
+  const names = [...new Set((allContacts||[]).map(c=>c.name||'').filter(Boolean))].sort((a,b)=>a.localeCompare(b));
+  const hits = (q ? names.filter(n => n.toLowerCase().includes(q)) : names).slice(0, 40);
+  _taOpen(inputEl, hits.map(n => ({ label:n, value:n })), v => { inputEl.value = v; });
 }
 
 // ─── CLUB TYPEAHEAD (pitch form) ──────────────────────────────────────────────
