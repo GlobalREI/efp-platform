@@ -3667,7 +3667,7 @@ th.ds-sort:hover { background: rgba(30,58,95,.06); }
 </div>
 
 <!-- ══ BULK MANDATE IMPORT MODAL ══ -->
-<div class="modal-bg" id="bulk-import-modal" onclick="closeModal('bulk-import-modal',event)" style="display:none;align-items:flex-start;padding-top:40px">
+<div class="modal-bg" id="bulk-import-modal" style="display:none;align-items:flex-start;padding-top:40px">
   <div class="modal" style="width:640px;max-height:85vh;overflow-y:auto">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;padding-bottom:14px;border-bottom:1px solid var(--border)">
       <div>
@@ -11525,7 +11525,7 @@ function renderBulkPreviewCards() {
     const tmUrl = _tmSearchUrl(p.name);
     const tmLink = tmUrl ? `<a href="${tmUrl}" target="_blank" rel="noopener" style="font-size:11px;color:#1d6f42;text-decoration:none;font-weight:600">⚽ Transfermarkt</a>` : '';
     const posOptions = ['','Goalkeeper','Right Back','Centre Back','Left Back','Defensive Mid','Central Mid','Attacking Mid','Right Winger','Left Winger','Second Striker','Centre Forward'];
-    const posHtml = posOptions.map(o => `<option value="${o}" ${(p.position||''===o)?'selected':''}>${o||'Select…'}</option>`).join('');
+    const normalizedPos = mapPosition(p.position || ''); // converts "CB" → "Centre Back" etc.
     // Normalise deal type to one of our three values
     const rawDeal = (p.deal_type||p.availability||'').toLowerCase();
     const dealVal = rawDeal.includes('loan') ? 'Loan' : rawDeal.includes('permanent') ? 'Permanent' : 'Flexible';
@@ -11544,7 +11544,7 @@ function renderBulkPreviewCards() {
         <div>
           <div style="font-size:10px;color:var(--text3);font-weight:600;letter-spacing:.05em;margin-bottom:3px">POSITION</div>
           <select class="field-select" id="bcard-pos-${p._id}" style="font-size:12px;padding:5px 8px;width:100%">
-            ${posOptions.map(o => `<option value="${o}"${(p.position||'')==o?' selected':''}>${o||'Select…'}</option>`).join('')}
+            ${posOptions.map(o => `<option value="${o}"${normalizedPos===o?' selected':''}>${o||'Select…'}</option>`).join('')}
           </select>
         </div>
         <div>
@@ -11610,7 +11610,7 @@ function approveBulkPlayer(id) {
   const mandate = {
     id: 'm_' + Date.now(),
     name:          p.name,
-    position:      pos    || p.position || '',
+    position:      mapPosition(pos || p.position || ''),
     age:           age    || p.age      || '',
     height:        height || p.height   || '',
     club:          club   || p.club     || '',
