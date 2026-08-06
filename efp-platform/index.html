@@ -11524,41 +11524,65 @@ function renderBulkPreviewCards() {
     card.style.cssText = 'border:1px solid var(--border);border-radius:10px;padding:14px 16px;background:var(--surface2);transition:background 0.2s';
     const tmUrl = _tmSearchUrl(p.name);
     const tmLink = tmUrl ? `<a href="${tmUrl}" target="_blank" rel="noopener" style="font-size:11px;color:#1d6f42;text-decoration:none;font-weight:600">⚽ Transfermarkt</a>` : '';
+    const posOptions = ['','Goalkeeper','Right Back','Centre Back','Left Back','Defensive Mid','Central Mid','Attacking Mid','Right Winger','Left Winger','Second Striker','Centre Forward'];
+    const posHtml = posOptions.map(o => `<option value="${o}" ${(p.position||''===o)?'selected':''}>${o||'Select…'}</option>`).join('');
+    // Normalise deal type to one of our three values
+    const rawDeal = (p.deal_type||p.availability||'').toLowerCase();
+    const dealVal = rawDeal.includes('loan') ? 'Loan' : rawDeal.includes('permanent') ? 'Permanent' : 'Flexible';
+    const formattedVal = _normVal(p.value||'') || (p.value||'');
+    const formattedExp = _normVal(p.expectedPrice||p.asking_price||p.transfer_fee||'') || '';
     card.innerHTML = `
       <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:10px">
         <div>
           <div style="font-size:14px;font-weight:700;color:var(--text)">${p.name}</div>
           <div style="font-size:11px;color:var(--text3);margin-top:2px">${[p.club, p.nationality].filter(Boolean).join(' · ')}${p.eu_passport ? ' 🇪🇺' : ''}</div>
         </div>
-        <div style="display:flex;gap:8px;align-items:center">
-          ${tmLink}
-          <button class="btn btn-outline btn-xs" id="bulk-approve-btn-${p._id}" onclick="approveBulkPlayer('${p._id}')">+ Add</button>
-        </div>
+        <button class="btn btn-outline btn-xs" id="bulk-approve-btn-${p._id}" onclick="approveBulkPlayer('${p._id}')">+ Add</button>
       </div>
-      <div class="bcard-grid3" style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-bottom:8px">
+
+      <div style="display:grid;grid-template-columns:1.4fr 0.8fr 0.8fr;gap:6px;margin-bottom:8px">
         <div>
           <div style="font-size:10px;color:var(--text3);font-weight:600;letter-spacing:.05em;margin-bottom:3px">POSITION</div>
-          <input class="field-input" id="bcard-pos-${p._id}" value="${p.position||''}" placeholder="e.g. CM" style="font-size:12px;padding:5px 8px">
+          <select class="field-select" id="bcard-pos-${p._id}" style="font-size:12px;padding:5px 8px;width:100%">
+            ${posOptions.map(o => `<option value="${o}"${(p.position||'')==o?' selected':''}>${o||'Select…'}</option>`).join('')}
+          </select>
         </div>
         <div>
           <div style="font-size:10px;color:var(--text3);font-weight:600;letter-spacing:.05em;margin-bottom:3px">AGE</div>
           <input class="field-input" id="bcard-age-${p._id}" value="${p.age||''}" placeholder="e.g. 23" style="font-size:12px;padding:5px 8px">
         </div>
         <div>
-          <div style="font-size:10px;color:var(--text3);font-weight:600;letter-spacing:.05em;margin-bottom:3px">VALUE</div>
-          <input class="field-input" id="bcard-val-${p._id}" value="${p.value||''}" placeholder="e.g. €3M" style="font-size:12px;padding:5px 8px">
+          <div style="font-size:10px;color:var(--text3);font-weight:600;letter-spacing:.05em;margin-bottom:3px">HEIGHT (cm)</div>
+          <input class="field-input" id="bcard-height-${p._id}" value="${p.height||''}" placeholder="e.g. 184" style="font-size:12px;padding:5px 8px">
         </div>
       </div>
-      <div class="bcard-grid2" style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:8px">
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:8px">
         <div>
           <div style="font-size:10px;color:var(--text3);font-weight:600;letter-spacing:.05em;margin-bottom:3px">CURRENT CLUB</div>
           <input class="field-input" id="bcard-club-${p._id}" value="${p.club||''}" placeholder="e.g. Club Brugge" style="font-size:12px;padding:5px 8px">
         </div>
         <div>
           <div style="font-size:10px;color:var(--text3);font-weight:600;letter-spacing:.05em;margin-bottom:3px">DEAL TYPE</div>
-          <input class="field-input" id="bcard-deal-${p._id}" value="${p.deal_type||p.availability||''}" placeholder="Permanent / Loan / Flexible" style="font-size:12px;padding:5px 8px">
+          <select class="field-select" id="bcard-deal-${p._id}" style="font-size:12px;padding:5px 8px;width:100%">
+            <option value="Flexible"${dealVal==='Flexible'?' selected':''}>Flexible (Loan or Permanent)</option>
+            <option value="Permanent"${dealVal==='Permanent'?' selected':''}>Permanent</option>
+            <option value="Loan"${dealVal==='Loan'?' selected':''}>Loan</option>
+          </select>
         </div>
       </div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:8px">
+        <div>
+          <div style="font-size:10px;color:var(--text3);font-weight:600;letter-spacing:.05em;margin-bottom:3px">MARKET VALUE</div>
+          <input class="field-input" id="bcard-val-${p._id}" value="${formattedVal}" placeholder="e.g. €3M" style="font-size:12px;padding:5px 8px">
+        </div>
+        <div>
+          <div style="font-size:10px;color:var(--text3);font-weight:600;letter-spacing:.05em;margin-bottom:3px">EXPECTED / ASKING PRICE</div>
+          <input class="field-input" id="bcard-exp-${p._id}" value="${formattedExp}" placeholder="e.g. €2.5M" style="font-size:12px;padding:5px 8px">
+        </div>
+      </div>
+
       <div>
         <div style="font-size:10px;color:var(--text3);font-weight:600;letter-spacing:.05em;margin-bottom:3px">NOTES</div>
         <textarea id="bcard-notes-${p._id}" rows="2" style="width:100%;padding:5px 8px;border:1px solid var(--border);border-radius:6px;font-size:12px;font-family:inherit;resize:vertical;background:var(--surface);color:var(--text);box-sizing:border-box" placeholder="Conditions, salary cap, loan-with-option details…">${[p.notes, p.strengths ? 'Profile: '+p.strengths : ''].filter(Boolean).join('\n')}</textarea>
@@ -11573,24 +11597,28 @@ function approveBulkPlayer(id) {
   if (!p || p._approved) return;
 
   // Read live edits from card inputs
-  const pos   = (document.getElementById('bcard-pos-'  + id)?.value || '').trim();
-  const age   = (document.getElementById('bcard-age-'  + id)?.value || '').trim();
-  const val   = (document.getElementById('bcard-val-'  + id)?.value || '').trim();
-  const club  = (document.getElementById('bcard-club-' + id)?.value || '').trim();
-  const deal  = (document.getElementById('bcard-deal-' + id)?.value || '').trim();
-  const notes = (document.getElementById('bcard-notes-'+ id)?.value || '').trim();
+  const pos    = (document.getElementById('bcard-pos-'   + id)?.value || '').trim();
+  const age    = (document.getElementById('bcard-age-'   + id)?.value || '').trim();
+  const height = (document.getElementById('bcard-height-'+ id)?.value || '').trim();
+  const val    = (document.getElementById('bcard-val-'   + id)?.value || '').trim();
+  const exp    = (document.getElementById('bcard-exp-'   + id)?.value || '').trim();
+  const club   = (document.getElementById('bcard-club-'  + id)?.value || '').trim();
+  const deal   = (document.getElementById('bcard-deal-'  + id)?.value || '').trim();
+  const notes  = (document.getElementById('bcard-notes-' + id)?.value || '').trim();
 
   const contact = document.getElementById('bulk-source-club').value.trim() || '';
   const mandate = {
     id: 'm_' + Date.now(),
-    name:     p.name,
-    position: pos   || p.position || '',
-    age:      age   || p.age      || '',
-    club:     club  || p.club     || '',
-    value:    _normVal(val) || val || p.value || '',
-    notes:    notes,
-    contact:  contact,
-    availability: deal || p.availability || ''
+    name:          p.name,
+    position:      pos    || p.position || '',
+    age:           age    || p.age      || '',
+    height:        height || p.height   || '',
+    club:          club   || p.club     || '',
+    value:         _normVal(val) || val || p.value || '',
+    expectedPrice: _normVal(exp) || exp || '',
+    notes:         notes,
+    contact:       contact,
+    availability:  deal   || p.availability || ''
   };
 
   mandatesAdded.push(mandate);
