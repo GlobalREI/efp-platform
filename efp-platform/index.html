@@ -1470,8 +1470,26 @@ body {
   .rel-row       { padding: 12px 14px; gap: 10px; }
   .rel-name      { font-size: 13px; }
 
-  /* Task rows */
-  .task-row      { padding: 11px 14px; min-height: 52px; }
+  /* ── TASK ROWS: text full width, actions wrap to second line ───────────── */
+  .task-row {
+    flex-wrap: wrap;
+    padding: 13px 14px;
+    gap: 6px 10px;
+    align-items: flex-start;
+  }
+  /* Action buttons: break onto own line, indent past checkbox */
+  .task-actions {
+    flex-basis: 100%;
+    padding-left: 25px;
+    opacity: 1 !important;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 2px;
+  }
+  .task-move-btn { font-size: 11.5px; padding: 5px 12px; border-radius: 6px; }
+  /* Dashboard mini widget: keep single-line, hide actions */
+  .dash-tasks-top .task-row  { flex-wrap: nowrap; padding: 10px 14px; }
+  .dash-tasks-top .task-actions { display: none !important; }
 
   /* Section headers */
   .section-head  { padding: 12px 14px 8px; }
@@ -7371,11 +7389,22 @@ function exportPagePDF() {
   document.querySelectorAll('.drawer-overlay, .overlay').forEach(o => { o.classList.remove('open'); o.style.display = 'none'; });
   document.querySelectorAll('.drawer').forEach(d => { d.classList.remove('open'); });
 
+  // On mobile, overflow:hidden on .main and .content clips the page — lift it so all rows print
+  const main    = document.querySelector('.main');
+  const content = document.querySelector('.content');
+  const prevMainOverflow    = main    ? main.style.overflow    : '';
+  const prevContentOverflow = content ? content.style.overflow : '';
+  const prevContentHeight   = content ? content.style.height   : '';
+  if (main)    { main.style.overflow = 'visible'; }
+  if (content) { content.style.overflow = 'visible'; content.style.height = 'auto'; }
+
   window.print();
 
-  // Restore overlays after print dialog closes
+  // Restore after print dialog closes
   setTimeout(() => {
     document.querySelectorAll('.drawer-overlay, .overlay').forEach(o => { o.style.display = ''; });
+    if (main)    main.style.overflow    = prevMainOverflow;
+    if (content) { content.style.overflow = prevContentOverflow; content.style.height = prevContentHeight; }
   }, 500);
 }
 
@@ -7647,7 +7676,26 @@ let needsAdded      = [];   // {id,club,pos,ageMin,ageMax,budMin,budMax,prio,con
 let playerNotes     = {};   // {[playerName]: {status, notes}} — editable player profile notes
 let clubData        = {};   // {[clubName]: {league,country,flag,status,notes,linkedContacts:[{name,role}]}}
 let logsAdded       = [   // {id,type,notes,date,duration,outcome,contact,club,source}
-  // ── Beeper-synced interactions (last synced 2026-08-04) ──
+  // ── Beeper-synced interactions (last synced 2026-08-05) ──
+  // AUGUST 5
+  { id:1786003620000, type:'whatsapp', contact:'Rick Pattenden', club:'Nottingham Forest', date:'2026-08-05',
+    notes:'Timo updated Rick that FC Bayern will want to finalise a transfer soon — asked if Rick has any English club bites. Timo also flagged a 20-year-old Danish striker available for 6-7m and offered him to Rick\'s Championship contacts.',
+    outcome:'Await Rick\'s feedback on Bayern player and Danish striker from Championship connections', source:'beeper-sync' },
+  { id:1786016040000, type:'whatsapp', contact:'Alex Kroes', club:'LASK', date:'2026-08-05',
+    notes:'Timo asked Alex for any follow-up from Lecce. Alex confirmed Lecce has not responded — they are trying to sign a player from FC Basel. On squad needs, Alex confirmed LASK still only have the striker position left to fill.',
+    outcome:'Lecce lead closed for now; continue striker search for LASK', source:'beeper-sync' },
+  { id:1786023780000, type:'whatsapp', contact:'Sebastian Dirscherl', club:'HSV', date:'2026-08-05',
+    notes:'Sebastian confirmed previously shared profiles are not relevant for HSV. Timo pitched Lushendry Martes as a high-development-potential investment profile (direct access to club and agent; Claus had already made enquiries). Sebastian noted the transfer fee is a problem and HSV need a top-level solution on the right flank — they already have Jatta as an established option there.',
+    outcome:'Martes not the right fit currently; EFP to identify right-side profiles with lower transfer fee for HSV', source:'beeper-sync' },
+  { id:1786029240000, type:'whatsapp', contact:'Caglar Meker', club:'Galatasaray / Besiktas / Basaksehir', date:'2026-08-05',
+    notes:'Fynn shared Dennis Geiger profile with the Turkey group (experienced Bundesliga deep-lying playmaker / no.6-8, available for a small fee of 200-300k) for potential placement at a Turkish club.',
+    outcome:'Await feedback from Caglar and Caner on Geiger fit for Turkish club needs', source:'beeper-sync' },
+  { id:1786031220000, type:'whatsapp', contact:'Romeo Castelen', club:'Twente / NEC / Club Brugge', date:'2026-08-05',
+    notes:'Timo pitched Linton Maina to Romeo for Twente at 2-2.5m; Romeo expressed doubt that Twente would spend 2.5m given the player\'s age and limited resell potential. Dennis Geiger profile shared for NEC. Romeo confirmed both NEC and Feyenoord are still actively looking for a winger. On Club Brugge: Trisoldi most likely staying — club rejected a €35m offer and is waiting for a jackpot bid.',
+    outcome:'Linton Maina-Twente link unlikely at current price; NEC and Feyenoord winger searches active — identify winger candidates; Trisoldi not available from Brugge', source:'beeper-sync' },
+  { id:1786037580000, type:'whatsapp', contact:'Fynn Buggenthien', club:'EFP / West Brom / Leipzig', date:'2026-08-05',
+    notes:'Fynn identified West Brom as actively looking for a classic winger with speed (max €5m transfer fee). Fynn flagged El Chadaille Bitshiabu (left-footed CB, Leipzig) as a target for Galatasaray and Besiktas. Fynn also noted Arthur Vermeeren should leave Leipzig and is targeting a DM/6 role in Saudi Arabia.',
+    outcome:'EFP to find winger options for West Brom (max 5m); pitch Bitshiabu to Turkish clubs; explore Vermeeren Saudi route via Middle East contacts', source:'beeper-sync' },
   // AUGUST 4
   { id:1785848765000, type:'whatsapp', contact:'Rick Pattenden', club:'Nottingham Forest', date:'2026-08-04',
     notes:'Timo updated Rick that Anderlecht confirmed they will keep Moussa Ndiaye — he is doing very well in preseason and most likely staying. Timo also flagged that EFP\'s player database has grown to approximately 50 players (5 new additions). Timo asked Rick for specific requirements from his English Championship club contacts so he can filter EFP\'s player pool and send targeted profiles.',
