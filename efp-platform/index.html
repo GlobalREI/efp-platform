@@ -2961,7 +2961,7 @@ th.ds-sort:hover { background: rgba(30,58,95,.06); }
               <option value="">All positions</option>
               <option>GK</option><option>RB</option><option>CB</option><option>LB</option>
               <option>CDM</option><option>CM</option><option>CAM</option>
-              <option>RW</option><option>LW</option><option>SS</option><option>ST</option>
+              <option>RW</option><option>LW</option><option>SS</option><option>CF</option>
             </select>
           </div>
           <div style="flex:1;min-width:130px">
@@ -3152,7 +3152,7 @@ th.ds-sort:hover { background: rgba(30,58,95,.06); }
           <option value="">All positions</option>
           <option>GK</option><option>CB</option><option>RB</option><option>LB</option>
           <option>CDM</option><option>CM</option><option>CAM</option>
-          <option>RW</option><option>LW</option><option>ST</option>
+          <option>RW</option><option>LW</option><option>CF</option>
         </select>
         <select id="mf-status"  class="field-select" onchange="renderMatches()" style="width:130px;font-size:13px;padding:6px 10px">
           <option value="">All statuses</option>
@@ -3291,8 +3291,8 @@ th.ds-sort:hover { background: rgba(30,58,95,.06); }
         <optgroup label="─── LASK">
         <option value="kasper-jorgensen">Kasper Jörgensen — RWB/RB · €2.5M</option>
         <option value="melayro-bogarde">Melayro Bogarde — CDM · €7M</option>
-        <option value="moses-usor">Moses Usor — ST/SS · €6M</option>
-        <option value="samuel-adeniran">Samuel Adeniran — ST · €3M</option>
+        <option value="moses-usor">Moses Usor — CF/SS · €6M</option>
+        <option value="samuel-adeniran">Samuel Adeniran — CF · €3M</option>
         <option value="christoph-lang">Christoph Lang — AM · €350k</option>
         <option value="art-smakaj">Art Smakaj — CDM · €300k</option>
         <option value="george-bello">George Bello — LB/LWB · €1.4M</option>
@@ -4129,7 +4129,7 @@ th.ds-sort:hover { background: rgba(30,58,95,.06); }
         <button type="button" class="pos-chip-btn" onclick="rTogglePos('RW')">RW</button>
         <button type="button" class="pos-chip-btn" onclick="rTogglePos('LW')">LW</button>
         <button type="button" class="pos-chip-btn" onclick="rTogglePos('SS')">SS</button>
-        <button type="button" class="pos-chip-btn" onclick="rTogglePos('ST')">ST</button>
+        <button type="button" class="pos-chip-btn" onclick="rTogglePos('CF')">CF</button>
       </div>
     </div>
     <div class="field-row field">
@@ -6327,10 +6327,10 @@ const _POS_MAP = {
   'right winger':'RW','right wing':'RW','right midfield':'RW',
   'left winger':'LW','left wing':'LW','left midfield':'LW',
   'second striker':'SS','shadow striker':'SS',
-  'centre forward':'ST','center forward':'ST','striker':'ST','number 9':'ST',
+  'centre forward':'CF','center forward':'CF','striker':'CF','number 9':'CF',
   // Pass-through abbreviations already correct
   'gk':'GK','rb':'RB','cb':'CB','lb':'LB','cdm':'CDM','dm':'CDM',
-  'cm':'CM','cam':'CAM','am':'CAM','rw':'RW','lw':'LW','ss':'SS','st':'ST',
+  'cm':'CM','cam':'CAM','am':'CAM','rw':'RW','lw':'LW','ss':'SS','st':'CF','cf':'CF',
   'rcb':'RCB','lcb':'LCB','rwb':'RWB','lwb':'LWB','mf':'CM','winger':'W',
 };
 function _normPos(str) {
@@ -14126,26 +14126,26 @@ function initContactTableClicks() {
 // ═══════════════════════════════════════════════════════════════════════════
 
 const CLUB_NEEDS_DB = [
-  { club:'Club Brugge',         flag:'🇧🇪', league:'Jupiler Pro',         positions:['GK','CB','LB','CDM','RW','LW','ST'],    budget:'€10M',  contact:'Via Romeo Castelen',            urgency:'urgent', notes:'"Zuidam" project · 8 positions open' },
+  { club:'Club Brugge',         flag:'🇧🇪', league:'Jupiler Pro',         positions:['GK','CB','LB','CDM','RW','LW','CF'],    budget:'€10M',  contact:'Via Romeo Castelen',            urgency:'urgent', notes:'"Zuidam" project · 8 positions open' },
   { club:'RSC Anderlecht',      flag:'🇧🇪', league:'Belgian Pro League',   positions:['CB','RW','LW','LB','CDM','CM','CAM'],   budget:'—',     contact:'David Verwilghen',              urgency:'urgent', notes:'Priority: CB, RW, LW · conditional: LB/DM/CM' },
   { club:'PSV Eindhoven',       flag:'🇳🇱', league:'Eredivisie',           positions:['CB','LW','RW','CDM'],                   budget:'—',     contact:'Thomas Schaling',               urgency:'urgent', notes:'Winger: goal threat not just pace · CDM (6)' },
   { club:'Feyenoord Rotterdam', flag:'🇳🇱', league:'Eredivisie',           positions:['LW','RW'],                              budget:'—',     contact:'Dévy Rigaux',                   urgency:'open',   notes:'Age / budget TBC — follow up' },
   { club:'VfB Stuttgart',       flag:'🇩🇪', league:'Bundesliga',           positions:['CM'],                                   budget:'€10M',  contact:'Fynn Buggenthien',              urgency:'urgent', notes:'Age 21–25 · Stiller replacement (8)' },
-  { club:'Hertha BSC',          flag:'🇩🇪', league:'2. Bundesliga',        positions:['CB','LW','ST'],                         budget:'—',     contact:'Leonmüller',                    urgency:'open',   notes:'Three positions needed' },
+  { club:'Hertha BSC',          flag:'🇩🇪', league:'2. Bundesliga',        positions:['CB','LW','CF'],                         budget:'—',     contact:'Leonmüller',                    urgency:'open',   notes:'Three positions needed' },
   { club:'VfL Bochum',          flag:'🇩🇪', league:'2. Bundesliga',        positions:['CB','LW','RW'],                         budget:'—',     contact:'—',                             urgency:'open',   notes:'CB: leadership profile · Wingers: speed, 1v1' },
-  { club:'SV Elversberg',       flag:'🇩🇪', league:'2. Bundesliga',        positions:['ST','CB'],                              budget:'—',     contact:'Christian Weber',               urgency:'open',   notes:'' },
-  { club:'FC Köln',             flag:'🇩🇪', league:'2. Bundesliga',        positions:['ST','LB'],                              budget:'—',     contact:'Gabor Ruhr',                    urgency:'open',   notes:'' },
+  { club:'SV Elversberg',       flag:'🇩🇪', league:'2. Bundesliga',        positions:['CF','CB'],                              budget:'—',     contact:'Christian Weber',               urgency:'open',   notes:'' },
+  { club:'FC Köln',             flag:'🇩🇪', league:'2. Bundesliga',        positions:['CF','LB'],                              budget:'—',     contact:'Gabor Ruhr',                    urgency:'open',   notes:'' },
   { club:'SV Werder Bremen',    flag:'🇩🇪', league:'Bundesliga',           positions:['RB'],                                   budget:'—',     contact:'Alex Kroes / Markus Pilawa',    urgency:'open',   notes:'4-back system' },
-  { club:'1. FC Heidenheim',    flag:'🇩🇪', league:'Bundesliga',           positions:['ST'],                                   budget:'—',     contact:'Fynn Buggenthien',              urgency:'open',   notes:'Typical 9, in-box finisher' },
-  { club:'Greuther Fürth',      flag:'🇩🇪', league:'3. Liga',              positions:['LW','RW','ST'],                         budget:'—',     contact:'Sandro Sitter',                 urgency:'open',   notes:'' },
-  { club:'US Lecce',            flag:'🇮🇹', league:'Serie A',              positions:['GK','RB','CB','LB','LW','RW','ST'],     budget:'—',     contact:'Via Alex Kroes',                urgency:'open',   notes:'' },
+  { club:'1. FC Heidenheim',    flag:'🇩🇪', league:'Bundesliga',           positions:['CF'],                                   budget:'—',     contact:'Fynn Buggenthien',              urgency:'open',   notes:'Typical 9, in-box finisher' },
+  { club:'Greuther Fürth',      flag:'🇩🇪', league:'3. Liga',              positions:['LW','RW','CF'],                         budget:'—',     contact:'Sandro Sitter',                 urgency:'open',   notes:'' },
+  { club:'US Lecce',            flag:'🇮🇹', league:'Serie A',              positions:['GK','RB','CB','LB','LW','RW','CF'],     budget:'—',     contact:'Via Alex Kroes',                urgency:'open',   notes:'' },
   { club:'Ipswich Town',        flag:'🏴󠁧󠁢󠁥󠁮󠁧󠁿', league:'Premier League',        positions:['CB','LW','RW'],                         budget:'—',     contact:'Dmitri Halajko',                urgency:'open',   notes:'CB key signing · Wingers ×2' },
-  { club:'SC Heerenveen',       flag:'🇳🇱', league:'Eredivisie',           positions:['ST'],                                   budget:'—',     contact:'—',                             urgency:'open',   notes:'' },
+  { club:'SC Heerenveen',       flag:'🇳🇱', league:'Eredivisie',           positions:['CF'],                                   budget:'—',     contact:'—',                             urgency:'open',   notes:'' },
   { club:'FC Twente',           flag:'🇳🇱', league:'Eredivisie',           positions:['RW'],                                   budget:'—',     contact:'Via Romeo Castelen',            urgency:'open',   notes:'Fast / pace profile' },
-  { club:'LASK',                flag:'🇦🇹', league:'Austrian Bundesliga',  positions:['ST'],                                   budget:'—',     contact:'Alex Kroes',                    urgency:'open',   notes:'Tall, typical 9' },
+  { club:'LASK',                flag:'🇦🇹', league:'Austrian Bundesliga',  positions:['CF'],                                   budget:'—',     contact:'Alex Kroes',                    urgency:'open',   notes:'Tall, typical 9' },
   { club:'CSKA 1948',           flag:'🇧🇬', league:'Bulgarian A PFG',      positions:['LB'],                                   budget:'—',     contact:'Kristiyan Nikolov',             urgency:'open',   notes:'U25, athletic profile' },
-  { club:'Ajax Amsterdam',      flag:'🇳🇱', league:'Eredivisie',           positions:['ST'],                                   budget:'—',     contact:'—',                             urgency:'open',   notes:'Tall number 9' },
-  { club:'Fortuna Sittard',     flag:'🇳🇱', league:'Eredivisie',           positions:['GK','RB','CB','LB','CDM','CM','CAM','LW','RW','ST'], budget:'—', contact:'Joris (via Romeo Castelen)', urgency:'open', notes:'Most positions open excl. CDM (6)' },
+  { club:'Ajax Amsterdam',      flag:'🇳🇱', league:'Eredivisie',           positions:['CF'],                                   budget:'—',     contact:'—',                             urgency:'open',   notes:'Tall number 9' },
+  { club:'Fortuna Sittard',     flag:'🇳🇱', league:'Eredivisie',           positions:['GK','RB','CB','LB','CDM','CM','CAM','LW','RW','CF'], budget:'—', contact:'Joris (via Romeo Castelen)', urgency:'open', notes:'Most positions open excl. CDM (6)' },
 ];
 
 // Maps a position string (e.g. "CM/CDM/CAM", "Left Winger", "ST/SS", "LV") → canonical tags
@@ -14164,8 +14164,8 @@ function getPositionTags(posStr) {
   if (/\bRW\b|RIGHT.?WING|\bRA\b/.test(p))          tags.add('RW'); // RA = German Rechtsaußen
   if (/\bLW\b|LEFT.?WING|\bLA\b/.test(p))           tags.add('LW'); // LA = German Linksaußen
   if (/\bWINGER\b/.test(p))                         { tags.add('LW'); tags.add('RW'); }
-  if (/\bST\b|STRIKER|CENTRE.?FORWARD|CENTER.?FORWARD|\bCF\b|\bFW\b/.test(p)) tags.add('ST');
-  if (/\bSS\b|SECOND.?STRIKER/.test(p))             { tags.add('ST'); tags.add('CAM'); }
+  if (/\bST\b|\bCF\b|STRIKER|CENTRE.?FORWARD|CENTER.?FORWARD|\bFW\b/.test(p)) tags.add('CF');
+  if (/\bSS\b|SECOND.?STRIKER/.test(p))             { tags.add('CF'); tags.add('CAM'); }
   return tags;
 }
 
@@ -14429,8 +14429,8 @@ const MANDATES_DB = [
   { name:'Lee Tae Seok',      pos:'LB',         age:23, club:'FK Austria Wien',       val:'€4.5M'    },
   { name:'Kasper Jörgensen',  pos:'RWB/RB',     age:26, club:'LASK',                 val:'€2.5M'    },
   { name:'Melayro Bogarde',   pos:'CDM',        age:24, club:'LASK',                 val:'€7M'      },
-  { name:'Moses Usor',        pos:'ST/SS',      age:24, club:'LASK',                 val:'€6M'      },
-  { name:'Samuel Adeniran',   pos:'ST',         age:27, club:'LASK',                 val:'€3M'      },
+  { name:'Moses Usor',        pos:'CF/SS',      age:24, club:'LASK',                 val:'€6M'      },
+  { name:'Samuel Adeniran',   pos:'CF',         age:27, club:'LASK',                 val:'€3M'      },
   { name:'Christoph Lang',    pos:'AM/Winger',  age:24, club:'LASK',                 val:'€350k'    },
   { name:'Art Smakaj',        pos:'CDM',        age:23, club:'LASK',                 val:'€300k'    },
   { name:'George Bello',      pos:'LB/LWB',     age:24, club:'LASK',                 val:'€1.4M'    },
@@ -14443,10 +14443,10 @@ const MANDATES_DB = [
   { name:'Oliver Sonne',      pos:'RB',         age:25, club:'Burnley FC',            val:'€4M'      },
   { name:'Slawomir Abramowicz',pos:'GK',        age:21, club:'Jagiellonia Bialystok',val:'€4M'      },
   { name:'Juho Kilo',         pos:'CM/CDM',     age:24, club:'ADO Den Haag',          val:'€750k'    },
-  { name:'Noah Botic',        pos:'ST',         age:24, club:'FK Austria Wien',       val:'—'        },
+  { name:'Noah Botic',        pos:'CF',         age:24, club:'FK Austria Wien',       val:'—'        },
   { name:'Moritz Wels',       pos:'RW/AM',      age:21, club:'FK Austria Wien',       val:'€1.5M'    },
   { name:'Abdoulaye Kanté',   pos:'CF',         age:20, club:'FK Austria Wien',       val:'€500k'    },
-  { name:'Kelvin Boateng',    pos:'ST',         age:26, club:'FK Austria Wien',       val:'€1.25M'   },
+  { name:'Kelvin Boateng',    pos:'CF',         age:26, club:'FK Austria Wien',       val:'€1.25M'   },
   { name:'Kang-hee Lee',      pos:'CDM',        age:24, club:'FK Austria Wien',       val:'€1.5M'    },
   { name:'Jordan Lotomba',    pos:'RB',         age:27, club:'Feyenoord Rotterdam',   val:'€2.75M'   },
   { name:'Dom Ballard',       pos:'CF',         age:21, club:'Leyton Orient',         val:'€5.85M'   },
