@@ -3890,6 +3890,32 @@ th.ds-sort:hover { background: rgba(30,58,95,.06); }
       </div>
       <div style="display:flex;gap:10px;margin-bottom:10px">
         <div style="flex:1">
+          <label class="field-label">Nationality</label>
+          <input class="field-input" id="pp-edit-nat" placeholder="e.g. Dutch, EU passport">
+        </div>
+        <div style="flex:1">
+          <label class="field-label">Preferred Foot</label>
+          <select class="field-select" id="pp-edit-foot">
+            <option value="">—</option>
+            <option>Right</option><option>Left</option><option>Both</option>
+          </select>
+        </div>
+      </div>
+      <div style="display:flex;gap:10px;margin-bottom:10px">
+        <div style="flex:1">
+          <label class="field-label">Contract Expires</label>
+          <input class="field-input" id="pp-edit-contract" placeholder="e.g. Jun 2026">
+        </div>
+        <div style="flex:1">
+          <label class="field-label">Mandate Type</label>
+          <select class="field-select" id="pp-edit-mandate-type">
+            <option value="">—</option>
+            <option>Exclusive</option><option>Non-exclusive</option><option>Co-agent</option>
+          </select>
+        </div>
+      </div>
+      <div style="display:flex;gap:10px;margin-bottom:10px">
+        <div style="flex:1">
           <label class="field-label">Expected Price</label>
           <input class="field-input" id="pp-edit-expected-price" placeholder="e.g. €2.5M" inputmode="numeric" oninput="_valInput(this)" onblur="_valBlur(this)">
         </div>
@@ -8514,6 +8540,14 @@ function openPlayerProfile(playerName, data) {
   if (ppExpEl) ppExpEl.value = _m ? (_m.expectedPrice || '') : (data.expectedPrice || '');
   const ppSalEl = document.getElementById('pp-edit-salary');
   if (ppSalEl) ppSalEl.value = _m ? (_m.salary || '') : (data.salary || '');
+  const ppNatEl = document.getElementById('pp-edit-nat');
+  if (ppNatEl) ppNatEl.value = _m ? (_m.nat || _m.nationality || '') : (data.nat || '');
+  const ppFootEl = document.getElementById('pp-edit-foot');
+  if (ppFootEl) ppFootEl.value = _m ? (_m.foot || '') : (data.foot || '');
+  const ppContractEl = document.getElementById('pp-edit-contract');
+  if (ppContractEl) ppContractEl.value = _m ? (_m.contract || '') : (data.contract || '');
+  const ppMTypeEl = document.getElementById('pp-edit-mandate-type');
+  if (ppMTypeEl) ppMTypeEl.value = _m ? (_m.type || _m.mandateType || '') : (data.type || '');
   // Reset autofill status
   const ppAfSt = document.getElementById('pp-autofill-status');
   if (ppAfSt) { ppAfSt.style.display = 'none'; ppAfSt.textContent = ''; }
@@ -8765,10 +8799,16 @@ function savePlayerProfile() {
 
   // Update the mandate in allMandates — prefer direct reference (stored when drawer opened)
   // to avoid name-mismatch edge cases on existing/imported mandates
+  const newNat      = (document.getElementById('pp-edit-nat')?.value || '').trim();
+  const newFoot     = (document.getElementById('pp-edit-foot')?.value || '').trim();
+  const newContract = (document.getElementById('pp-edit-contract')?.value || '').trim();
+  const newMType    = (document.getElementById('pp-edit-mandate-type')?.value || '').trim();
+
   const _applyMandateFields = m => {
     m.name = newName; m.position = newPos; m.pos = newPos; m.pos2 = newPos2;
     m.age = newAge; m.height = newHeight; m.club = newClub; m.value = newVal; m.contact = newSrc;
     m.dealType = dealType; m.expectedPrice = newExpectedPrice; m.salary = newSalary;
+    m.nat = newNat; m.foot = newFoot; m.contract = newContract; m.type = newMType;
   };
   if (_ppCurrentMandate) {
     _applyMandateFields(_ppCurrentMandate);
