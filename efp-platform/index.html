@@ -11364,7 +11364,9 @@ function confirmImport() {
   document.getElementById('mandate-import-modal').style.display = 'none';
   const data = { ...currentImportData, contact: contactPerson };
   const normValue = _normVal(data.value) || data.value;
-  mandatesAdded.push({ id:'m_'+Date.now(), name:data.name, position:data.position, age:data.age, club:data.club, value:normValue, contact:contactPerson });
+  const _importedMandate = { id:'m_'+Date.now(), name:data.name, position:data.position, age:data.age, club:data.club, value:normValue, contact:contactPerson };
+  allMandates.push(_importedMandate);   // ← must be in allMandates so fbSave() persists it
+  mandatesAdded.push(_importedMandate); // legacy sync
   addMandateRow({ ...data, value: normValue });
   fbSave();
   showSnack('✓ ' + data.name + ' added to Player Mandates', false);
@@ -11715,7 +11717,8 @@ function approveBulkPlayer(id) {
     availability:  deal   || p.availability || ''
   };
 
-  mandatesAdded.push(mandate);
+  allMandates.push(mandate);   // ← must be in allMandates so fbSave() persists it
+  mandatesAdded.push(mandate); // legacy sync
   addMandateRow(mandate);
   fbSave();
   showSnack('✓ ' + p.name + ' added', false);
