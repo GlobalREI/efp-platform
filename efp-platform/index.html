@@ -4008,7 +4008,7 @@ th.ds-sort:hover { background: rgba(30,58,95,.06); }
 </div>
 
 <!-- ══ ADD MANDATE DRAWER ══ -->
-<div class="drawer-overlay" id="mandate-overlay" onclick="closeDrawer('mandate')"></div>
+<div class="drawer-overlay" id="mandate-overlay"></div>
 <div class="drawer" id="mandate-drawer">
   <div class="drawer-head">
     <div><div class="drawer-title">Add Player Mandate</div><div class="drawer-sub">Register a player you represent for transfer</div></div>
@@ -6346,13 +6346,22 @@ function _normPos(str) {
 // Ranges like "€5-6M" → "€5.000.000 – €6.000.000"
 function _normVal(str) {
   if (!str || str === '—') return str || '';
-  // Detect range before falling through to single-value parse
   let s = String(str).replace(/\s/g, '').toLowerCase().replace(/[€$£,]/g, '');
+  // ① Trailing-suffix range: "1–9M", "750–3k" (shared suffix at end)
   const rangeMatch = s.match(/^([\d.]+)[–\-]([\d.]+)\s*(m(?:il(?:lion)?)?|k(?:ilo?)?)?$/);
   if (rangeMatch) {
     const mult = rangeMatch[3]?.startsWith('m') ? 1e6 : rangeMatch[3]?.startsWith('k') ? 1e3 : 1;
     const lo = Math.round(parseFloat(rangeMatch[1]) * mult);
     const hi = Math.round(parseFloat(rangeMatch[2]) * mult);
+    if (lo > 0 && hi > 0) return _fmtEuro(lo) + ' – ' + _fmtEuro(hi);
+  }
+  // ② Per-part-suffix range: "1M–9M", "750k–3M" (each part has its own suffix)
+  const ppMatch = s.match(/^([\d.]+)(m(?:il(?:lion)?)?|k(?:ilo?)?)?\s*[–\-]\s*([\d.]+)(m(?:il(?:lion)?)?|k(?:ilo?)?)?$/);
+  if (ppMatch && (ppMatch[2] || ppMatch[4])) {
+    const m1 = ppMatch[2]?.startsWith('m') ? 1e6 : ppMatch[2]?.startsWith('k') ? 1e3 : 1;
+    const m2 = ppMatch[4]?.startsWith('m') ? 1e6 : ppMatch[4]?.startsWith('k') ? 1e3 : 1;
+    const lo = Math.round(parseFloat(ppMatch[1]) * m1);
+    const hi = Math.round(parseFloat(ppMatch[3]) * m2);
     if (lo > 0 && hi > 0) return _fmtEuro(lo) + ' – ' + _fmtEuro(hi);
   }
   const n = _parseValToNum(str);
