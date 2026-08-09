@@ -5412,10 +5412,10 @@ function _renderMandatesTable() {
   });
   _updateMandateSubtitle();
   _applyMobCards('view-mandates');
-  // DS: sorting + pagination
+  // DS: sorting only — no pagination, show all mandates
   if (window._DS) {
     const tbl = tbody.closest('table');
-    if (tbl) { _DS.initTableSort(tbl); _DS.initTablePagination(tbl, 50); }
+    if (tbl) { _DS.initTableSort(tbl); }
   }
   // Rebuild player dropdown
   const sel = document.getElementById('fp-player');
