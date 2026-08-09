@@ -5421,9 +5421,12 @@ function _renderMandatesTable() {
       <td>${mValFmt}</td>
       <td style="font-size:12px;color:var(--text2)">${mContactHtml}</td>
       <td>
-        <div style="display:flex;align-items:center;gap:6px">
-          <div class="status" style="flex:1"><span class="dot ${dotClass}"></span> ${statusTxt}</div>
-          <button class="btn btn-xs" style="padding:2px 6px;font-size:11px;color:var(--accent);border:1px solid var(--accent);background:transparent;border-radius:4px;white-space:nowrap;flex-shrink:0" onclick="event.stopPropagation();goToPlayerMatches('${safeName}')" title="View AI matches for ${m.name}">⚡ AI</button>
+        <div style="display:flex;align-items:center;gap:10px">
+          <div class="status" style="flex:1;min-width:0"><span class="dot ${dotClass}"></span> ${statusTxt}</div>
+          <button onclick="event.stopPropagation();goToPlayerMatches('${safeName}')" title="View AI matches for ${m.name}"
+            style="flex-shrink:0;padding:4px 11px;font-size:11px;font-weight:600;letter-spacing:.03em;color:var(--accent);border:1.5px solid var(--accent);background:transparent;border-radius:20px;cursor:pointer;white-space:nowrap;line-height:1.4;transition:background .15s,color .15s"
+            onmouseover="this.style.background='var(--accent)';this.style.color='#fff'"
+            onmouseout="this.style.background='transparent';this.style.color='var(--accent)'">⚡ AI</button>
         </div>
       </td>`;
     tr.onclick = e => {
@@ -5441,7 +5444,14 @@ function _renderMandatesTable() {
   // DS: sorting only — no pagination, show all mandates
   if (window._DS) {
     const tbl = tbody.closest('table');
-    if (tbl) { _DS.initTableSort(tbl); }
+    if (tbl) {
+      // Remove any leftover paginator DOM (from browser-cached old code)
+      if (tbl._dsPgEl) { tbl._dsPgEl.remove(); tbl._dsPgEl = null; }
+      tbl._dsPageSize = null; tbl._dsPage = null;
+      // Show all rows explicitly (in case browser cached version hid some)
+      tbl.querySelectorAll('tbody tr').forEach(r => { r.style.display = ''; });
+      _DS.initTableSort(tbl);
+    }
   }
   // Rebuild player dropdown
   const sel = document.getElementById('fp-player');
