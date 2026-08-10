@@ -2916,6 +2916,12 @@ th.ds-sort:hover { background: rgba(30,58,95,.06); }
           <div class="page-subtitle" id="mandates-subtitle">— active mandates · Summer 2026 window</div>
         </div>
         <input id="mandates-search" type="text" class="view-search" placeholder="🔍  Search player, position, club…" oninput="filterMandates(this.value)" style="width:240px">
+        <select id="mandates-pos-filter" class="btn btn-outline btn-sm" style="padding:5px 10px;font-size:12px;cursor:pointer" onchange="filterMandates(document.getElementById('mandates-search').value);this.blur()">
+          <option value="">All Positions</option>
+          <option>GK</option><option>CB</option><option>RB</option><option>LB</option>
+          <option>RWB</option><option>LWB</option><option>CDM</option><option>CM</option>
+          <option>CAM</option><option>RW</option><option>LW</option><option>ST</option><option>CF</option><option>SS</option>
+        </select>
         <select class="btn btn-outline btn-sm" style="padding:5px 10px;font-size:12px;cursor:pointer" onchange="_sortMandates(this.value);this.blur()">
           <option value="default">Sort: Default</option>
           <option value="name-az">Name A–Z</option>
@@ -6869,7 +6875,9 @@ function _scoreMatch(player, need) {
 
   // ── 1. Position (0–40 pts) ──────────────────────────────────────────
   const playerTags = getPositionTags(player.pos);
-  const needTags   = new Set(need.positions);
+  // Normalise need positions through getPositionTags so "ST" → "CF", "Striker" → "CF", etc.
+  // This fixes mismatches where player.pos="ST" (→ tag "CF") never matched needTags={"ST"}
+  const needTags   = new Set((need.positions || []).flatMap(p => [...getPositionTags(p)]));
   const overlap    = [...playerTags].filter(t => needTags.has(t));
   if (overlap.length > 0) {
     const pts = overlap.length >= 2 ? 40 : 35;
@@ -9843,14 +9851,23 @@ function filterClubs(q) {
 
 function filterMandates(q) {
   q = (q || '').toLowerCase();
+  const posFilter = (document.getElementById('mandates-pos-filter')?.value || '').trim();
   let vis = 0;
   document.querySelectorAll('#view-mandates .data-table tbody tr').forEach(tr => {
-    const show = !q || tr.textContent.toLowerCase().includes(q);
+    const textMatch = !q || tr.textContent.toLowerCase().includes(q);
+    let posMatch = true;
+    if (posFilter) {
+      const posCell = (tr.cells[2]?.textContent || '').trim();
+      const pTags = getPositionTags(posCell);
+      const fTags = getPositionTags(posFilter);
+      posMatch = [...fTags].some(t => pTags.has(t));
+    }
+    const show = textMatch && posMatch;
     if (show) { tr.classList.remove('mob-hidden'); tr.style.removeProperty('display'); _mobShowRow(tr, 'view-mandates'); vis++; }
     else { tr.classList.add('mob-hidden'); tr.style.setProperty('display', 'none', 'important'); }
   });
   const sub = document.getElementById('mandates-subtitle');
-  if (sub && q) sub.textContent = `${vis} mandate${vis !== 1 ? 's' : ''} matching "${document.getElementById('mandates-search').value}"`;
+  if (sub && (q || posFilter)) sub.textContent = `${vis} mandate${vis !== 1 ? 's' : ''} found`;
   else _updateMandateSubtitle();
 }
 
