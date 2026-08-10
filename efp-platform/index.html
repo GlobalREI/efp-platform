@@ -3666,7 +3666,8 @@ th.ds-sort:hover { background: rgba(30,58,95,.06); }
       <div class="import-preview" id="import-preview-data"></div>
       <div style="margin-top:14px">
         <label style="font-size:10.5px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.04em;display:block;margin-bottom:5px">Contact Person <span style="color:var(--red)">*</span></label>
-        <input class="field-input" id="import-contact-person" placeholder="e.g. Rick Doyle · EAG / Agent name / Player directly" style="width:100%;box-sizing:border-box;font-size:13px">
+        <input class="field-input" id="import-contact-person" placeholder="Type to search contacts…" style="width:100%;box-sizing:border-box;font-size:13px" autocomplete="off"
+          oninput="_taContact(this)" onfocus="_taContact(this)" onblur="_taBlur()" onkeydown="_taKey(event)">
         <div id="import-contact-error" style="font-size:11px;color:var(--red);margin-top:3px;display:none">Contact person is required before adding</div>
       </div>
       <div style="display:flex;gap:8px;margin-top:14px">
@@ -3947,11 +3948,8 @@ th.ds-sort:hover { background: rgba(30,58,95,.06); }
       </div>
       <div class="field" style="margin-bottom:10px;position:relative">
         <label class="field-label">Source / Via</label>
-        <input class="field-input" id="pp-edit-source" placeholder="Type a contact name…" autocomplete="off"
-          oninput="_contactAC(this,'pp-source-drop')"
-          onfocus="_contactAC(this,'pp-source-drop')"
-          onblur="setTimeout(function(){var d=document.getElementById('pp-source-drop');if(d)d.style.display='none'},200)">
-        <div id="pp-source-drop" style="display:none;position:fixed;background:var(--surface);border:1px solid var(--border);border-radius:8px;max-height:220px;overflow-y:auto;z-index:9999;box-shadow:0 4px 20px rgba(0,0,0,.18)"></div>
+        <input class="field-input" id="pp-edit-source" placeholder="Type to search contacts…" autocomplete="off"
+          oninput="_taContact(this)" onfocus="_taContact(this)" onblur="_taBlur()" onkeydown="_taKey(event)">
       </div>
 
       <!-- Status -->
