@@ -10332,11 +10332,15 @@ function openNeedDetail(clubName, pos, budMin, budMax, contact, prio, notes, nee
   }
   const dtSel = document.getElementById('nd-deal-type');
   if (dtSel) dtSel.value = dealType || 'either';
-  // Load needPrio (P1/P2/P3) and window from allNeeds
+  // Load needPrio (P1/P2/P3), window, and age range from allNeeds
   const _needObj = needId ? allNeeds.find(n => n.id === needId) : null;
   setNeedPrio(_needObj?.needPrio || null);
   const ndWin = document.getElementById('nd-window');
   if (ndWin) ndWin.value = _needObj?.window || 'Summer 2026';
+  const ndAgeMin = document.getElementById('nd-agemin');
+  const ndAgeMax = document.getElementById('nd-agemax');
+  if (ndAgeMin) ndAgeMin.value = _needObj?.ageMin || '';
+  if (ndAgeMax) ndAgeMax.value = _needObj?.ageMax || '';
 
   // Archive button label
   const ndArchBtn = document.getElementById('nd-archive-btn');
@@ -10397,6 +10401,8 @@ function saveNeedDetail() {
   const dealType = document.getElementById('nd-deal-type')?.value || 'either';
   const window_  = document.getElementById('nd-window')?.value || 'Summer 2026';
   const needPrio = _currentNeedPrio;
+  const ageMin   = document.getElementById('nd-agemin')?.value.trim() || '';
+  const ageMax   = document.getElementById('nd-agemax')?.value.trim() || '';
   // ── Required fields ──
   if (!club) { showSnack('⚠ Club is required', true); return; }
   if (!pos)  { showSnack('⚠ Position is required', true); return; }
@@ -10416,17 +10422,17 @@ function saveNeedDetail() {
     // Update in unified allNeeds array
     const idxAll = allNeeds.findIndex(n => n.id === _currentNeedId);
     if (idxAll >= 0) {
-      allNeeds[idxAll] = { ...allNeeds[idxAll], club, pos, positions:[pos], budMin, budMax, contact, prio, notes, dealType,
+      allNeeds[idxAll] = { ...allNeeds[idxAll], club, pos, positions:[pos], budMin, budMax, ageMin, ageMax, contact, prio, notes, dealType,
                             window: window_, needPrio, urgency: prio === 'Urgent' ? 'urgent' : 'open' };
     }
     // Also update needsAdded for legacy sync
     const idx = needsAdded.findIndex(n => n.id === _currentNeedId);
-    if (idx >= 0) needsAdded[idx] = { ...needsAdded[idx], club, pos, budMin, budMax, contact, prio, notes, dealType, window: window_, needPrio };
+    if (idx >= 0) needsAdded[idx] = { ...needsAdded[idx], club, pos, budMin, budMax, ageMin, ageMax, contact, prio, notes, dealType, window: window_, needPrio };
     // Re-render table so change is immediately visible
     _renderNeedsTable();
   } else {
     // Need is from seed/static — create new entry in allNeeds
-    const newNeed = { id: 'n_' + Date.now(), club, pos, positions:[pos], budMin, budMax, contact, prio, notes, dealType,
+    const newNeed = { id: 'n_' + Date.now(), club, pos, positions:[pos], budMin, budMax, ageMin, ageMax, contact, prio, notes, dealType,
                        window: window_, needPrio, urgency: prio === 'Urgent' ? 'urgent' : 'open' };
     allNeeds.push(newNeed);
     needsAdded.push(newNeed);
@@ -17660,6 +17666,16 @@ window._regression = (function () {
       <div>
         <label class="field-label">Budget max <span style="color:var(--red)">*</span></label>
         <input class="field-input" id="nd-budmax" placeholder="e.g. €8,000,000" inputmode="numeric" oninput="_valInput(this)" onblur="_valBlur(this)">
+      </div>
+    </div>
+    <div class="field-row field">
+      <div>
+        <label class="field-label">Age Min</label>
+        <input class="field-input" id="nd-agemin" placeholder="e.g. 20" type="number" min="15" max="45">
+      </div>
+      <div>
+        <label class="field-label">Age Max</label>
+        <input class="field-input" id="nd-agemax" placeholder="e.g. 27" type="number" min="15" max="45">
       </div>
     </div>
     <div class="field-row field">
