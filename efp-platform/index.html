@@ -5577,10 +5577,11 @@ function _renderNeedsTable() {
     const nContactHtml = (contactStr && contactStr !== '—')
       ? `<span class="feed-link" onclick="event.stopPropagation();_openContactByName('${contactStr.replace(/'/g,"\\'")}')">${contactStr}</span>`
       : '—';
-    // Priority badge (matches mandate table style)
-    const _NEED_PRIO_MAP = { 'Urgent':{ label:'P1', bg:'#dc2626' }, 'High':{ label:'P2', bg:'#d97706' }, 'Medium':{ label:'P3', bg:'#64748b' } };
-    const _nPrio = n.prio || (n.urgency === 'urgent' ? 'Urgent' : 'Medium');
-    const _nPrioCfg = _NEED_PRIO_MAP[_nPrio] || _NEED_PRIO_MAP['Medium'];
+    // Priority badge — use needPrio (1/2/3 buttons) when explicitly set, else derive from urgency
+    const _NEED_PRIO_STYLES = { 1:{ label:'P1', bg:'#dc2626' }, 2:{ label:'P2', bg:'#d97706' }, 3:{ label:'P3', bg:'#64748b' } };
+    const _URGENCY_TO_PRIO  = { 'Urgent':1, 'urgent':1, 'High':2, 'high':2, 'Medium':3, 'medium':3, 'Low':3, 'low':3 };
+    const _nPrioNum = n.needPrio || _URGENCY_TO_PRIO[n.prio || n.urgency] || 1;
+    const _nPrioCfg = _NEED_PRIO_STYLES[_nPrioNum] || _NEED_PRIO_STYLES[1];
     const needPrioHtml = `<span style="display:inline-block;padding:2px 8px;border-radius:4px;background:${_nPrioCfg.bg};color:#fff;font-size:11px;font-weight:700;letter-spacing:.03em">${_nPrioCfg.label}</span>`;
     tr.innerHTML = `
       <td>${needPrioHtml}</td>
@@ -5608,6 +5609,17 @@ function _renderNeedsTable() {
   // Re-apply search if user has typed something
   const _nsEl = document.getElementById('needs-search');
   if (_nsEl && _nsEl.value) filterNeeds(_nsEl.value);
+  // Update tab counts dynamically from actual data (replaces hardcoded counts in HTML)
+  const _visNeeds = _showArchivedNeeds ? allNeeds : allNeeds.filter(n => !n.archived);
+  const _cAll     = _visNeeds.length;
+  const _cSummer  = _visNeeds.filter(n => (n.window || 'Summer 2026').includes('Summer 2026')).length;
+  const _cOngoing = _visNeeds.filter(n => (n.window || '').toLowerCase().includes('ongoing')).length;
+  const _tabAll = document.querySelector('#view-needs .tab[onclick*=",\'all\'"]') || document.querySelector('#view-needs .tab[onclick*="all"]');
+  const _tabSum = document.querySelector('#view-needs .tab[onclick*="summer"]');
+  const _tabOng = document.querySelector('#view-needs .tab[onclick*="ongoing"]');
+  if (_tabAll) _tabAll.textContent = `All (${_cAll})`;
+  if (_tabSum) _tabSum.textContent = `Summer 2026 (${_cSummer})`;
+  if (_tabOng) _tabOng.textContent = `Ongoing (${_cOngoing})`;
 }
 
 // Quick edit for a contact by id (pre-fills the add-contact drawer)
