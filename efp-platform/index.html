@@ -7,7 +7,7 @@
 <title>EFP — European Football Partners</title>
 <style>
 * { box-sizing: border-box; }
-html { background: #ffffff; }
+html { background: #ffffff; overscroll-behavior: none; }
 
 :root {
   --bg:        #F5F5F5;
@@ -250,7 +250,7 @@ body {
 .btn-sm { padding: 5px 11px; font-size: 12px; }
 
 /* ─── CONTENT ─── */
-.content { flex: 1; overflow-y: auto; padding: 28px 32px; background: var(--surface); }
+.content { flex: 1; overflow-y: auto; padding: 28px 32px; background: var(--surface); overscroll-behavior: none; }
 .view { display: none; }
 .view.active { display: block; }
 
@@ -1228,7 +1228,7 @@ body {
     min-height: 100vh;
     background: #fff !important;     /* force white — no grey bleed-through */
     overscroll-behavior-x: none;
-    overscroll-behavior-y: contain;  /* suppress pull-to-refresh spinner */
+    overscroll-behavior-y: none;  /* suppress pull-to-refresh / page reload */
   }
 
   /* Utility: reliably hide a row even when _applyMobCardRow has set display:grid */
@@ -2970,9 +2970,16 @@ th.ds-sort:hover { background: rgba(30,58,95,.06); }
             <label style="font-size:10.5px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:.05em;display:block;margin-bottom:5px">Position</label>
             <select id="nf-pos" style="width:100%;padding:6px 10px;border:1px solid var(--border);border-radius:6px;background:var(--surface2);font-size:13px;color:var(--text)">
               <option value="">All positions</option>
-              <option>GK</option><option>RB</option><option>CB</option><option>LB</option>
-              <option>CDM</option><option>CM</option><option>CAM</option>
-              <option>RW</option><option>LW</option><option>SS</option><option>CF</option>
+              <option>GK</option>
+              <option>RB</option><option>LB</option><option>RWB</option><option>LWB</option>
+              <option>CB</option><option>RCB</option><option>LCB</option>
+              <option>DM</option><option>RDM</option><option>LDM</option>
+              <option>CM</option><option>RCM</option><option>LCM</option>
+              <option>RM</option><option>LM</option>
+              <option>AM</option><option>RAM</option><option>LAM</option>
+              <option>RW</option><option>LW</option>
+              <option>RF</option><option>LF</option>
+              <option>CF</option><option>ST</option><option>SS</option>
             </select>
           </div>
           <div style="flex:1;min-width:130px">
@@ -3002,11 +3009,6 @@ th.ds-sort:hover { background: rgba(30,58,95,.06); }
           </div>
         </div>
         <div id="nf-active-chips" style="margin-top:10px;display:flex;flex-wrap:wrap;gap:6px"></div>
-      </div>
-
-      <div class="ai-note" id="needs-match-alerts-box">
-        <div class="ai-note-label">Match Alerts</div>
-        <div class="ai-note-text" id="needs-match-alerts-text"><em style="color:var(--text3)">Run AI Matches to see live match alerts here.</em></div>
       </div>
 
       <div class="tabs">
@@ -5609,6 +5611,15 @@ function _renderNeedsTable() {
   // Re-apply search if user has typed something
   const _nsEl = document.getElementById('needs-search');
   if (_nsEl && _nsEl.value) filterNeeds(_nsEl.value);
+  // Re-apply structured filter if any filter is active (prevents Firebase re-render from wiping filter)
+  const _nfPosEl = document.getElementById('nf-pos');
+  const _nfPrioEl = document.getElementById('nf-prio');
+  const _nfBudgetEl = document.getElementById('nf-budget');
+  const _nfAgeEl = document.getElementById('nf-age');
+  if ((_nfPosEl && _nfPosEl.value) || (_nfPrioEl && _nfPrioEl.value) ||
+      (_nfBudgetEl && _nfBudgetEl.value) || (_nfAgeEl && _nfAgeEl.value)) {
+    try { applyNeedsFilter(); } catch(e) { console.warn('[EFP] applyNeedsFilter re-apply error:', e); }
+  }
   // Update tab counts dynamically from actual data (replaces hardcoded counts in HTML)
   const _visNeeds = _showArchivedNeeds ? allNeeds : allNeeds.filter(n => !n.archived);
   const _cAll     = _visNeeds.length;
@@ -6060,6 +6071,31 @@ function fbSave() {
 }
 
 document.addEventListener('DOMContentLoaded', efpAuthCheck);
+
+// ─── Prevent pull-to-refresh page reload on iOS / Chrome Android ───────────
+// CSS overscroll-behavior:none covers modern browsers; this JS guard covers iOS < 16
+(function _blockPullToRefresh() {
+  let _lastTouchY = 0;
+  document.addEventListener('touchstart', function(e) {
+    _lastTouchY = e.touches[0].pageY;
+  }, { passive: true });
+  document.addEventListener('touchmove', function(e) {
+    // Find the nearest scrollable ancestor
+    let el = e.target;
+    while (el && el !== document.documentElement) {
+      const st = window.getComputedStyle(el);
+      const oy = st.overflowY;
+      if (oy === 'auto' || oy === 'scroll') break;
+      el = el.parentElement;
+    }
+    const scrollEl = (el && el !== document.documentElement) ? el : (document.querySelector('.content') || document.scrollingElement);
+    const atTop = scrollEl ? scrollEl.scrollTop <= 0 : window.scrollY <= 0;
+    const pullDown = e.touches[0].pageY > _lastTouchY;
+    if (atTop && pullDown) {
+      e.preventDefault();  // blocks pull-to-refresh
+    }
+  }, { passive: false });
+})();
 
 // ─── TASK DATA ───
 let TASKS = [
@@ -7803,7 +7839,7 @@ let needsAdded      = [];   // {id,club,pos,ageMin,ageMax,budMin,budMax,prio,con
 let playerNotes     = {};   // {[playerName]: {status, notes}} — editable player profile notes
 let clubData        = {};   // {[clubName]: {league,country,flag,status,notes,linkedContacts:[{name,role}]}}
 let logsAdded       = [   // {id,type,notes,date,duration,outcome,contact,club,source}
-  // ── Beeper-synced interactions (last synced 2026-08-12) ──
+  // ── Beeper-synced interactions (last synced 2026-08-13) ──
   // AUGUST 12
   { id:1786508039000, type:'whatsapp', contact:'Fynn Buggenthien', club:'', date:'2026-08-12',
     notes:'Timo and Fynn are staying together at a hotel in Stuttgart ahead of the 14:00 in-person meeting at VFL Stuttgart. At 04:13am Timo sent outreach messages to Hoffenheim, Leverkusen and Dortmund. During morning coordination around 6am they discussed adding Osnabrück to the return itinerary, though relevance is uncertain. Timo noted he only slept 3 hours.',
@@ -7811,6 +7847,24 @@ let logsAdded       = [   // {id,type,notes,date,duration,outcome,contact,club,s
   { id:1786508544000, type:'whatsapp', contact:'Daniel Ebbert', club:'VFL Stuttgart', date:'2026-08-12',
     notes:'Timo sent Daniel a morning message ahead of today\'s confirmed in-person meeting at VFL Stuttgart, asking whether the club\'s office is located at the stadium or at a separate administrative building. Signed off with "Bis nachher" (see you later).',
     outcome:'In-person meeting at VFL Stuttgart proceeds at 14:00 today — final logistics confirmed.', source:'beeper-sync' },
+  { id:1786525962000, type:'whatsapp', contact:'Daniel Ebbert', club:'VFL Stuttgart', date:'2026-08-12',
+    notes:'Daniel replied to Timo\'s question about the office location: sent a photo and confirmed "Sind in der Geschäftsstelle" (We are at the business office) — separate from the stadium — and added "Danke Timo, bis später!" Timo replied "Top - bis später." Meeting location fully confirmed ahead of the 14:00 appointment.',
+    outcome:'Meeting location confirmed as the Geschäftsstelle; Timo and Fynn en route to VFL Stuttgart for the 14:00 in-person meeting.', source:'beeper-sync' },
+  { id:1786531267000, type:'whatsapp', contact:'Romeo Castelen', club:'Sparta Rotterdam / NEC', date:'2026-08-12',
+    notes:'Timo shared fresh intel on Valentin Antov (CB): returned to fitness at end of last season and is back in pre-season training, but his club considers him "on his way out" and is deliberately not playing him — making him a realistic loan/transfer candidate. Timo then asked Romeo to clarify NEC\'s full positional need: whether it is only 2 CBs and a 6/8, or also a winger. Timo also asked if PSV is still looking for a CB; Romeo replied "PSV I must ask, I am not sure" and Timo noted he had already spoken to PSV directly.',
+    outcome:'Romeo to confirm PSV CB interest; clarify NEC winger requirement; Valentin Antov flagged as available CB candidate.', source:'beeper-sync' },
+  { id:1786536096000, type:'whatsapp', contact:'Fynn Buggenthien', club:'', date:'2026-08-12',
+    notes:'Timo forwarded two new player mandates to Fynn around midday: (1) "Artur" — a first-team n6/defensive midfielder who needs to be moved from his current club; (2) Lorenzo Anghele (21, Juventus Next Gen, Italy U20 n10 / attacking midfielder), with his Transfermarkt profile and a Performance Profile PDF. Fynn had also shared Ludovit Reis\'s (HSV) full performance data at 09:02 UTC as part of ongoing scouting work.',
+    outcome:'Fynn to assess Anghele and Artur mandates for EFP club contacts; Ludovit Reis added to player radar.', source:'beeper-sync' },
+  { id:1786537213000, type:'whatsapp', contact:'Rick Pattenden', club:'Agent — Nottingham Forest / Burnley', date:'2026-08-12',
+    notes:'Timo sent Rick the EFP x Jens Odgaard x FC Burnley pitch deck and also shared Moussa Sylla\'s Transfermarkt profile as a CF alternative. Rick provided negative feedback on two players: (1) Skelly Alvero — "most clubs seemed to not think he is suited for the Championship"; (2) Burnley — "looking for a younger profile ideally," signalling Odgaard is too old or expensive for their €5–6M budget.',
+    outcome:'Odgaard-Burnley lead closed (age and profile mismatch); Skelly Alvero not Championship-suited per market feedback; Moussa Sylla to be formally pitched; find younger CF profiles for Burnley.', source:'beeper-sync' },
+  { id:1786549259000, type:'whatsapp', contact:'Alex Kroes', club:'Ajax / LASK / Lecce', date:'2026-08-12',
+    notes:'Alex forwarded internal scouting intelligence about an unnamed player under consideration: "Problem is the character… not good person, not good professional and hard worker — still resting on his talent, when you see the last loan clubs / nobody wanted him longer. Heard is making problems in every locker room he has been." Timo responded with context: the player had documented salary problems in Turkey (filed a FIFA complaint after 14 weeks unpaid) and on a Scotland loan he was injured in May so the club did not trigger the €8M option — but stressed that everyone who communicates with the player directly reports no issues.',
+    outcome:'Character intelligence noted; Timo to ensure direct player communication before progressing any deal; Alex and Timo to reassess placement in light of intel.', source:'beeper-sync' },
+  { id:1786565302000, type:'whatsapp', contact:'Romeo Castelen', club:'NEC / Sparta Rotterdam', date:'2026-08-12',
+    notes:'Romeo confirmed the NEC head coach has already been briefed on Dennis Geiger, and added "if Dennis himself texts the coach also is perfect" — coach is receptive and a direct player outreach could seal the deal. Romeo called Timo (17:37 UTC) and afterwards shared the contact card for Carlos Aalbers (agent). After a Timo voice message at 20:05 UTC, Romeo confirmed "10:30 is good" for a meeting on 13 August.',
+    outcome:'Dennis Geiger to reach out directly to NEC coach; Carlos Aalbers agent contact received; meeting confirmed for 13.08 at 10:30.', source:'beeper-sync' },
   // AUGUST 11
   { id:1786535300000, type:'whatsapp', contact:'Fynn Buggenthien', club:'', date:'2026-08-11',
     notes:'Timo and Fynn coordinated travel to Borussia Mönchengladbach for a scouting visit (Timo landing ~14:10 local). Timo shared Tomas Cvancara\'s Transfermarkt profile and proposed him as a loan option for LASK — "leihen für lask?". Fynn confirmed he knows Cvancara and said "Ja auf jeden Fall" (definitely interesting) but noted he earns "locker 2+" (easily €2M+), which may be a salary obstacle for LASK.',
@@ -9901,7 +9955,18 @@ function applyNeedsFilter() {
   rows.forEach(tr => {
     const text = tr.textContent.toLowerCase();
     let show = true;
-    if (posQ   && !text.includes(posQ))  show = false;
+    if (posQ) {
+      // Use data-based position matching so the 26-code filter is exact
+      const needId = tr.dataset.needId;
+      const need   = allNeeds.find(n => n.id === needId);
+      if (need) {
+        const posStr = _normPos(Array.isArray(need.positions) ? need.positions.join(' ') : (need.pos || ''));
+        const posTokens = posStr.toLowerCase().split(/[\s·,\/]+/).map(s => s.trim()).filter(Boolean);
+        if (!posTokens.includes(posQ)) show = false;
+      } else if (!text.includes(posQ)) {
+        show = false;
+      }
+    }
     if (prioQ  && !text.includes(prioQ)) show = false;
     if (budgetQ) {
       // Try to extract budget number from row
