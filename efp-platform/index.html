@@ -3136,6 +3136,8 @@ th.ds-sort:hover { background: rgba(30,58,95,.06); }
           <option value="call">Call</option>
           <option value="email">Email</option>
           <option value="meeting">Meeting</option>
+          <option value="note">Note</option>
+          <option value="pitch">Pitch</option>
         </select>
         <input id="af-search" type="text" class="input" placeholder="Search person or club…" style="width:200px;height:34px;font-size:12px;" oninput="applyActivityFilter()">
       </div>
@@ -7839,7 +7841,68 @@ let needsAdded      = [];   // {id,club,pos,ageMin,ageMax,budMin,budMax,prio,con
 let playerNotes     = {};   // {[playerName]: {status, notes}} — editable player profile notes
 let clubData        = {};   // {[clubName]: {league,country,flag,status,notes,linkedContacts:[{name,role}]}}
 let logsAdded       = [   // {id,type,notes,date,duration,outcome,contact,club,source}
-  // ── Beeper-synced interactions (last synced 2026-08-13) ──
+  // ── Beeper-synced interactions (last synced 2026-08-17) ──
+  // AUGUST 17
+  { id:1786948055000, type:'whatsapp', contact:'Theo Janssen', club:'', date:'2026-08-17',
+    notes:'Theo replied "Thank you my friend" to Timo\'s congratulations from Aug 16 on his team\'s first win of the new season.',
+    outcome:'Relationship maintained; warm social exchange.', source:'beeper-sync' },
+  { id:1786959988000, type:'whatsapp', contact:'Romeo Castelen', club:'NEC', date:'2026-08-17',
+    notes:'Active transfer discussion on two deals. (1) Melle Meulensteen: Timo\'s friend is his agent; club selling price worst case 150k or free, clause at 2m, realistic exit ~1.7m; Romeo knows the CEO very well and said "we can work." (2) Jens Odgaard: Timo shared Transfermarkt link and asked Romeo for ideas — loan at 500k–1m salary + 8m purchase option; Romeo is checking. Timo also asked Romeo about connections in Poland, Czech Republic, Belgium, and Scotland for future deal flow.',
+    outcome:'Romeo checking Odgaard loan options and exploring new market contacts; Meulensteen deal progressing via CEO relationship.', source:'beeper-sync' },
+  { id:1786964930000, type:'whatsapp', contact:'Rick Pattenden', club:'', date:'2026-08-17',
+    notes:'Timo reached out to Rick with the Jens Odgaard loan profile: salary 500k–750k net, purchase option at 8m. Asked if Rick has ideas or interest from any clubs.',
+    outcome:'Awaiting response from Rick on Odgaard loan.', source:'beeper-sync' },
+  { id:1786967050000, type:'whatsapp', contact:'Caglar Meker', club:'Kasimpasa', date:'2026-08-17',
+    notes:'Turkey group discussion. Kasimpasa profile shared: CB right-footed, transfer fee up to 2–2.5m, salary 600k net. Fynn proposed Valentin Antov — available, 100% fit, close to Kasimpasa profile. Caglar noted that Marinho\'s agent goes direct with clubs and is a problem. Fynn confirmed EFP is speaking with Monza directly on Antov and that the agent situation is not a blocker for now.',
+    outcome:'Valentin Antov actively proposed to Kasimpasa; EFP working Monza angle directly. Awaiting Caglar\'s feedback on feasibility.', source:'beeper-sync' },
+  { id:1786968121000, type:'whatsapp', contact:'Markus Pilawa', club:'Werder Bremen', date:'2026-08-17',
+    notes:'Timo messaged Markus asking who to contact regarding Justin Njinmah, or whether a deal is already done. Timo has an English club looking for that profile and wants to know salary expectations.',
+    outcome:'Awaiting response from Werder Bremen on Njinmah availability and terms.', source:'beeper-sync' },
+  { id:1786968559000, type:'whatsapp', contact:'Fynn Buggenthien', club:'EFP internal', date:'2026-08-17',
+    notes:'Internal strategy discussion on player placements and market expansion. Discussed Bojan Miovski (Rangers, earns 25k/pw — Rangers open to letting him go) and Clinton Nsiala (10k/pw). Markets confirmed for current searches: Belgium and Scotland primary; Poland, Czech Republic, and Greece also on radar. Fynn confirmed market coverage across these regions.',
+    outcome:'Team aligned on target markets and player profiles for active searches.', source:'beeper-sync' },
+  // AUGUST 16
+  { id:1786901578000, type:'whatsapp', contact:'Fynn Buggenthien', club:'EFP internal', date:'2026-08-16',
+    notes:'Fynn shared the EFP x Josha Vagnoman x SL Benfica PDF in the internal group, confirming team alignment on the Vagnoman-to-Benfica pitch coordinated with Timo\'s parallel outreach to Alex Kroes at Ajax. The profile document was distributed internally ahead of sending externally.',
+    outcome:'Internal team fully aligned on Vagnoman pitch to Benfica; material ready for club-level distribution.', source:'beeper-sync' },
+  { id:1786911284000, type:'whatsapp', contact:'Romeo Castelen', club:'NEC', date:'2026-08-16',
+    notes:'Timo followed up with Romeo asking whether the NEC coach had given any feedback on Hyeok-kyu Kwon and whether Thomas should call Carlos directly if no reply came by the next day. Romeo relayed that the NEC coach had instructed the club to wait until Monday before making a decision.',
+    outcome:'No further action before Monday — waiting on NEC coach\'s call on Kwon.', source:'beeper-sync' },
+  { id:1786867975000, type:'whatsapp', contact:'Theo Janssen', club:'', date:'2026-08-16',
+    notes:'Timo reached out to congratulate Theo on his team\'s first win of the new season, noting it looked like a strong start. Theo replied warmly thanking Timo.',
+    outcome:'Relationship maintained; no immediate business action required.', source:'beeper-sync' },
+  // AUGUST 15
+  { id:1786766585000, type:'whatsapp', contact:'Owen Coyle', club:'Nottingham Forest', date:'2026-08-15',
+    notes:'Timo asked Owen Coyle whether Tyler Bindon\'s deal had already been concluded at Nottingham Forest, mentioning he had received a call about a similar defender profile. Owen confirmed Forest is still exploring all options for Tyler and no deal has been agreed yet.',
+    outcome:'Tyler Bindon remains available; Timo to continue monitoring and matching any incoming interest.', source:'beeper-sync' },
+  { id:1786786666000, type:'whatsapp', contact:'Romeo Castelen', club:'NEC/KSC', date:'2026-08-15',
+    notes:'KSC called Timo looking for a solution for Hyeok-kyu Kwon, a physical defensive midfielder available for 200–250k with a salary of 20k/month. Timo shared Kwon\'s profile with Romeo and asked about NEC\'s interest. Romeo noted the non-EU passport could be a hurdle at NEC level but offered to contact the director directly. Timo confirmed Kwon can be placed anywhere and the transfer is straightforward on KSC\'s end.',
+    outcome:'Romeo to contact NEC director regarding Kwon\'s availability and work permit situation.', source:'beeper-sync' },
+  { id:1786790830000, type:'whatsapp', contact:'Alex Kroes', club:'Ajax', date:'2026-08-15',
+    notes:'Timo asked Alex Kroes whether Ajax needed an experienced physical defensive midfielder — Hyeok-kyu Kwon (200–250k, currently in 2. Bundesliga). Alex confirmed Ajax has no need. On Aug 16 Timo also informed Alex that VFL Stuttgart is open to selling Josha Vagnoman and sent the EFP x Josha Vagnoman x SL Benfica PDF profile, asking about Benfica\'s right-back need.',
+    outcome:'Ajax pass on Kwon; Vagnoman-to-Benfica pitch via Alex Kroes in progress — awaiting response.', source:'beeper-sync' },
+  { id:1786791023000, type:'whatsapp', contact:'David Verwilghen', club:'Anderlecht', date:'2026-08-15',
+    notes:'Timo chased David Verwilghen at Anderlecht for an update on Hong (the player linked to Mainz). David asked for updated conditions on Aug 15. On Aug 16, Timo replied with urgency: Hong earns 90k/month, loan interest exists from multiple parties, and a permanent transfer is achievable for €2m. Timo urged David to call immediately as competing clubs were also in contact and the window is closing.',
+    outcome:'Urgently awaiting callback from David Verwilghen to progress Hong to Anderlecht before another club moves.', source:'beeper-sync' },
+  { id:1786831436000, type:'whatsapp', contact:'Fynn Buggenthien', club:'EFP internal', date:'2026-08-15',
+    notes:'Timo and Fynn discussed the Connor Barron situation — Rick Pattenden was expected to send his club\'s needs list the following day. On Aug 16 Fynn sent a voice note and agreed to produce a scouting report for a new smaller-scale outreach approach being considered by EFP. Fynn noted he was traveling but would complete the report.',
+    outcome:'Fynn to prepare scouting/approach report; Rick Pattenden\'s needs list expected imminently.', source:'beeper-sync' },
+  // AUGUST 14
+  { id:1786715213000, type:'whatsapp', contact:'Rick Pattenden', club:'Nottingham Forest', date:'2026-08-14',
+    notes:'Timo asked Rick whether anything had been agreed for Connor Barron, noting he had just spoken to a Championship club with a desperate need for the position. Rick attempted to call Timo (missed call via Beeper). No text reply received.',
+    outcome:'Awaiting callback from Rick Pattenden; Championship club interest in Connor Barron to be followed up.', source:'beeper-sync' },
+  { id:1786716131000, type:'whatsapp', contact:'Alex Kroes', club:'Ajax', date:'2026-08-14',
+    notes:'Timo reached out after West Brom called seeking a replacement for their sold captain (DM/6). He asked if Ajax would consider selling Bogarde. Alex replied that his agent is meeting tonight but Ajax would only sell for big money, and the player would likely prefer to stay for UCL. Timo acknowledged and wished Ajax good luck for their game.',
+    outcome:'Ajax Bogarde not available at a workable price; West Brom DM search continues via other channels.', source:'beeper-sync' },
+  { id:1786718946000, type:'whatsapp', contact:'Romeo Castelen', club:'Sparta Rotterdam', date:'2026-08-14',
+    notes:'Timo confirmed Sparta Rotterdam is still looking for a #6 (DM) and proposed Hyeok-kyu Kwon, a Korean DM currently at KSC who earns 20k/month and can transfer for around 250k. KSC had called Timo seeking a solution for the player. Romeo acknowledged the need but flagged that non-EU players are harder to place at Sparta level due to work permit restrictions, and Timo asked if there are ways to work around it.',
+    outcome:'Kwon as Sparta target under exploration; work permit feasibility for non-EU player to be investigated.', source:'beeper-sync' },
+  { id:1786719661000, type:'whatsapp', contact:'Caglar Meker', club:'Kasimpaşa / Westerlo', date:'2026-08-14',
+    notes:'Caglar shared Kasimpaşa\'s specific need: right-footed centre-back, transfer fee up to 2–2.5M, salary 600k net, referencing Kevin Mouanga and Moritz Jenz as benchmark profiles. Fynn suggested Denis Vavro (Wolfsburg) but Caglar confirmed Kasimpaşa already tried him and he refused to come. Westerlo also flagged as needing a winger.',
+    outcome:'Kasimpaşa CB search ongoing with Vavro eliminated; Fynn to propose alternative CB options by tomorrow; Westerlo winger need noted.', source:'beeper-sync' },
+  { id:1786721688000, type:'whatsapp', contact:'Fynn Buggenthien', club:'', date:'2026-08-14',
+    notes:'Extensive internal planning session covering Denis Vavro (Wolfsburg, Slovak CB, 5M market value, 1 year contract, not in squad, refuses Turkey — K2K Sports agent confirmed 3 clubs already in talks). Discussed Carboni from Monza at 3–4M asking price and Denis Vavro to NEC as alternative to Turkey. Fynn circulated new EFP player decks: Dennis Geiger → WBA, Farid Alfa-Ruprecht → WBA, Kwon Hyeok Kyu → Sparta Rotterdam.',
+    outcome:'Denis Vavro Turkey route closed; NEC being explored as next option; WBA and Sparta player decks distributed for follow-up.', source:'beeper-sync' },
   // AUGUST 12
   { id:1786508039000, type:'whatsapp', contact:'Fynn Buggenthien', club:'', date:'2026-08-12',
     notes:'Timo and Fynn are staying together at a hotel in Stuttgart ahead of the 14:00 in-person meeting at VFL Stuttgart. At 04:13am Timo sent outreach messages to Hoffenheim, Leverkusen and Dortmund. During morning coordination around 6am they discussed adding Osnabrück to the return itinerary, though relevance is uncertain. Timo noted he only slept 3 hours.',
@@ -10719,8 +10782,8 @@ function selectLogType(btn, type) {
   if (el) el.textContent = titles[type] || 'Log Activity';
 }
 // ─── INTERACTION LOG HELPERS ──────────────────────────────────────────────────
-const _LOG_ICONS  = { call:'📞', meeting:'🤝', email:'📧', whatsapp:'💬', note:'📋' };
-const _LOG_LABELS = { call:'Call logged', meeting:'Meeting logged', email:'Email logged', whatsapp:'WhatsApp logged', note:'Note' };
+const _LOG_ICONS  = { call:'📞', meeting:'🤝', email:'📧', whatsapp:'💬', note:'📋', pitch:'⚽' };
+const _LOG_LABELS = { call:'Call logged', meeting:'Meeting logged', email:'Email logged', whatsapp:'WhatsApp logged', note:'Note', pitch:'Pitch sent' };
 
 // Render a compact related-activity list (for profile drawers)
 function _renderRelatedActivity(entries, emptyMsg) {
@@ -10807,7 +10870,8 @@ function _linkifyText(text) {
 }
 
 function _renderContactFeed(feedEl, contactName) {
-  const entries = logsAdded.filter(l => l.contact === contactName);
+  const _cn = (contactName || '').trim().toLowerCase();
+  const entries = logsAdded.filter(l => (l.contact || '').trim().toLowerCase() === _cn);
   if (!entries.length) {
     feedEl.innerHTML = '<p style="color:var(--text3);font-size:13px;margin:0">No interactions logged yet. Use Log Activity to record calls, emails and meetings.</p>';
     return;
@@ -12641,7 +12705,17 @@ function apmSubmit() {
       pdfName: pdfVal || null,
       noteColor:'var(--text3)', hot:false
     });
-    renderPitches(); fbSave();
+    // Auto-log to Activity Feed so pitch actions are visible there
+    logsAdded.unshift({
+      id: Date.now(),
+      type: 'note',
+      notes: `Pitched ${playerVal} to ${clubVal}${posVal && posVal !== '—' ? ' (' + posVal + ')' : ''}${noteVal && noteVal !== 'Just added' ? ' — ' + noteVal : ''}`,
+      date: new Date().toISOString().split('T')[0],
+      contact: contactVal || '',
+      club: clubVal,
+      source: 'pitch'
+    });
+    renderPitches(); _renderGlobalFeed(); _renderDashFeed(); fbSave();
     showSnack(`✓ Pitch added: ${playerVal} → ${clubVal}`, false);
   } else {
     if (!clubVal) { showSnack('⚠ Club name is required', true); return; }
@@ -14260,7 +14334,7 @@ function go(view) {
   if (view === 'relationships') renderRelationships();
   if (view === 'pitches')       renderPitches();
   if (view === 'clubpitches')   renderClubPitches();
-  if (view === 'activity')      setTimeout(_renderGlobalFeed, 50);
+  if (view === 'activity')      setTimeout(function(){ if(typeof applyActivityFilter==='function') applyActivityFilter(); else _renderGlobalFeed(); }, 50);
   if (view === 'tasks')         setTimeout(renderTasks, 50);
   if (view === 'matches')       _matchesOnView();
   if (typeof mobBottomActive === 'function') mobBottomActive(view);
