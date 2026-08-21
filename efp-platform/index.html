@@ -3140,6 +3140,7 @@ th.ds-sort:hover { background: rgba(30,58,95,.06); }
           <option value="pitch">Pitch</option>
         </select>
         <input id="af-search" type="text" class="input" placeholder="Search person or club…" style="width:200px;height:34px;font-size:12px;" oninput="applyActivityFilter()">
+        <button class="btn btn-outline btn-sm" onclick="triggerSync()" title="Fetch latest Beeper data from Firebase" style="height:34px;display:flex;align-items:center;gap:4px;">↻ Refresh</button>
       </div>
       <div id="af-results-bar" style="font-size:12px;color:var(--text3);padding:6px 4px 0;display:none;"></div>
       <div class="panel" id="activity-feed-panel"></div>
@@ -4673,6 +4674,26 @@ function efpInitFirebase() {
         _fbFirstLoad = false;
         setTimeout(_migrateToFirebase, 1000);
         return;
+      }
+
+      // ── Activity logs from scheduled sync task — processed BEFORE stale guard ──
+      // The sync task writes to efp/activityLogs via PATCH without touching efp/savedAt.
+      // The stale guard below compares savedAt timestamps and would reject the update
+      // (since savedAt hasn't changed). We merge activityLogs here first so they always land.
+      if (d.activityLogs) {
+        const _syncLogs = Array.isArray(d.activityLogs) ? d.activityLogs : Object.values(d.activityLogs);
+        const _existIds = new Set(logsAdded.map(l => String(l.id)));
+        const _newSyncEntries = _syncLogs.filter(l => l && !_existIds.has(String(l.id)));
+        if (_newSyncEntries.length > 0) {
+          logsAdded = [..._newSyncEntries, ...logsAdded];
+          logsAdded.sort((a, b) => {
+            const da = a.date || '', db = b.date || '';
+            if (da !== db) return db.localeCompare(da);
+            return (b.id || 0) - (a.id || 0);
+          });
+          _renderGlobalFeed();
+          _renderDashFeed();
+        }
       }
 
       // ── Stale-snapshot guard ──────────────────────────────────────────────────
