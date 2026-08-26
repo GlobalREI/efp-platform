@@ -365,6 +365,20 @@ body {
 .data-table tbody tr:hover { background: var(--surface2); }
 .data-table tbody tr:last-child td { border-bottom: none; }
 
+/* ─── MANDATE TABLE: tighter horizontal padding so action column is never clipped ─── */
+#view-mandates .data-table th { padding: 11px 12px; }
+#view-mandates .data-table td { padding: 13px 12px; }
+#view-mandates .data-table th:nth-child(1),
+#view-mandates .data-table td:nth-child(1) { width: 56px; min-width: 56px; }   /* Priority */
+#view-mandates .data-table th:nth-child(3),
+#view-mandates .data-table td:nth-child(3) { width: 64px; min-width: 64px; }   /* Position */
+#view-mandates .data-table th:nth-child(4),
+#view-mandates .data-table td:nth-child(4) { width: 44px; min-width: 44px; text-align: center; }  /* Age */
+#view-mandates .data-table th:nth-child(6),
+#view-mandates .data-table td:nth-child(6) { width: 110px; min-width: 110px; } /* Market Value */
+#view-mandates .data-table th:last-child,
+#view-mandates .data-table td:last-child   { width: 200px; min-width: 200px; white-space: nowrap; } /* Actions */
+
 /* ─── STATUS DOTS ─── */
 .status {
   display: inline-flex; align-items: center; gap: 5px;
@@ -2944,7 +2958,7 @@ th.ds-sort:hover { background: rgba(30,58,95,.06); }
       <div class="panel">
         <table class="data-table">
           <thead>
-            <tr><th class="ds-sort">Priority</th><th class="ds-sort">Player</th><th class="ds-sort">Position</th><th class="ds-sort">Age</th><th class="ds-sort">Current Club</th><th class="ds-sort">Market Value</th><th class="ds-sort">Contact Person</th><th class="ds-sort">Status</th><th style="width:64px"></th></tr>
+            <tr><th class="ds-sort">Priority</th><th class="ds-sort">Player</th><th class="ds-sort">Position</th><th class="ds-sort">Age</th><th class="ds-sort">Current Club</th><th class="ds-sort">Market Value</th><th class="ds-sort">Contact Person</th><th class="ds-sort">Status</th><th style="width:200px;min-width:200px"></th></tr>
           </thead>
           <tbody>
           </tbody>
@@ -3707,7 +3721,7 @@ th.ds-sort:hover { background: rgba(30,58,95,.06); }
       <div id="bulk-input-text">
         <textarea id="bulk-text-input" rows="10" style="width:100%;padding:12px;border:1px solid var(--border);border-radius:8px;font-size:13px;resize:vertical;font-family:inherit;color:var(--text);background:var(--surface2);box-sizing:border-box" placeholder="Paste WhatsApp message, email, or any text listing players for sale or loan…"></textarea>
         <div style="display:flex;gap:8px;align-items:center;margin-top:6px">
-          <input class="field-input" id="bulk-source-club" placeholder="Source club (optional, e.g. RSC Anderlecht)" style="flex:1">
+          <input class="field-input" id="bulk-source-club" placeholder="Source club (optional, e.g. RSC Anderlecht)" style="flex:1" autocomplete="off" list="efp-club-datalist">
         </div>
       </div>
 
@@ -3911,7 +3925,8 @@ th.ds-sort:hover { background: rgba(30,58,95,.06); }
       <div style="display:flex;gap:10px;margin-bottom:10px">
         <div style="flex:1">
           <label class="field-label">Current Club</label>
-          <input class="field-input" id="pp-edit-club" placeholder="e.g. Rangers FC">
+          <input class="field-input" id="pp-edit-club" placeholder="e.g. Rangers FC" autocomplete="off"
+            oninput="_taClub(this)" onfocus="_taClub(this)" onblur="_taBlur()" onkeydown="_taKey(event)">
         </div>
         <div style="flex:1">
           <label class="field-label">Market Value</label>
@@ -15409,8 +15424,8 @@ function initMandateRows() {
     const existingContent = lastTd.innerHTML;
     const delKey = tr.dataset.mandateId || name;
     if (!tr.dataset.mandateId) tr.dataset.mandateId = name; // use name as key for static rows
-    lastTd.innerHTML = `<div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">
-      <div style="flex:1">${existingContent}</div>
+    lastTd.innerHTML = `<div style="display:flex;align-items:center;gap:5px;flex-wrap:nowrap;white-space:nowrap">
+      <div style="flex:1;min-width:0">${existingContent}</div>
       <button class="btn btn-outline btn-xs suggest-btn"
         onclick="event.stopPropagation();showMandateSuggestions('${name.replace(/'/g,"\\'")}','${pos}','${age}','${val}','${club.replace(/'/g,"\\'")}')">
         Suggest →
@@ -15420,7 +15435,7 @@ function initMandateRows() {
         PDF →
       </button>
       <button onclick="event.stopPropagation();deleteMandate('${delKey.replace(/'/g,"\\'")}',this)" title="Delete mandate"
-        style="background:none;border:none;color:var(--red);cursor:pointer;font-size:13px;padding:2px 4px;opacity:.55;line-height:1">✕</button>
+        style="background:none;border:none;color:var(--red);cursor:pointer;font-size:13px;padding:2px 4px;opacity:.55;line-height:1;flex-shrink:0">✕</button>
     </div>`;
     // Remove whole-row onclick so suggest button click works independently
     tr.onclick = null;
