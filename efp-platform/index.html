@@ -7862,7 +7862,53 @@ let needsAdded      = [];   // {id,club,pos,ageMin,ageMax,budMin,budMax,prio,con
 let playerNotes     = {};   // {[playerName]: {status, notes}} — editable player profile notes
 let clubData        = {};   // {[clubName]: {league,country,flag,status,notes,linkedContacts:[{name,role}]}}
 let logsAdded       = [   // {id,type,notes,date,duration,outcome,contact,club,source}
-  // ── Beeper-synced interactions (last synced 2026-08-17) ──
+  // ── Beeper-synced interactions (last synced 2026-08-26) ──
+  // AUGUST 26
+  { id:1787762400000, type:'whatsapp', contact:'Romeo Castelen', club:'PSV Eindhoven', date:'2026-08-26',
+    notes:'Active discussions on PSV player loan deal. PSV loan terms confirmed: €800k salary, €2.5m buy option, €150k loan fee, performance bonuses from PSV after every 5 games. Four Polish clubs still no clear feedback. Romeo: "coming days a lot will happen" and "making rounds in UK today." HSV still looking for a right back. Timo offered Isaac to Basel owner. Planning to pitch Sem to Freiburg tomorrow.',
+    outcome:'Follow up on Sem pitch to Freiburg; wait for feedback from Polish clubs on PSV loan; monitor HSV RB search.', source:'beeper-sync' },
+  { id:1787755200000, type:'whatsapp', contact:'Fynn Buggenthien', club:'EFP internal', date:'2026-08-26',
+    notes:'Discussed Sem for Freiburg vs Hoffenheim — Fynn confirmed Freiburg is "sogar noch besser" (even better fit). Hoffenheim formally dropped from Sem\'s target list — report to be prepared for Freiburg only. Timo sent Claude Maurice scouting stats image for analysis, querying a discrepancy between his successful dribbles (90th percentile) vs slide rank (20th). Fynn to finish Freiburg report tonight.',
+    outcome:'Fynn to finalize Freiburg scouting report tonight. Evaluate Claude Maurice stats fit for Freiburg/Köln system.', source:'beeper-sync' },
+  { id:1787731200000, type:'whatsapp', contact:'Daniel Ebbert', club:'VfL Stuttgart', date:'2026-08-26',
+    notes:'Timo pitched 19-year-old KSC player Eymen Laghrissi — won\'t renew his contract, KSC selling for €150-200k. Daniel confirmed he knows the profile loosely and will forward it to Stuttgart\'s NLZ (youth academy). Fits Stuttgart\'s youth development strategy.',
+    outcome:'Daniel Ebbert to forward Laghrissi profile to Stuttgart NLZ. Potential low-cost young acquisition worth following up.', source:'beeper-sync' },
+  // AUGUST 25
+  { id:1787670359000, type:'whatsapp', contact:'Romeo Castelen', club:'', date:'2026-08-25',
+    notes:'Discussion about a new player (unnamed) with scouting notes forwarded: described as dynamic, technically good, strong dribbler. Romeo confirmed best position is No. 9 but can also play on the wing. Netherlands flagged as a good fit. Timo directing Romeo to pitch to Sparta Rotterdam, Sittard, and FC Twente, noting EFP holds a mandate for these clubs. Earlier Timo also continued pushing on the Meulensteen deal, expressing restraint — "Im pushing but can\'t push too much."',
+    outcome:'Romeo to pitch the unnamed player to Sparta, Sittard, Twente under EFP mandate. Meulensteen push ongoing — Timo to call Romeo with update.', source:'beeper-sync' },
+  { id:1787665084000, type:'whatsapp', contact:'Alex Kroes', club:'Ajax', date:'2026-08-25',
+    notes:'Alex Kroes in Linz at Raiffeisen Arena for a LASK European match. He met with Celtic for lunch and was in a meeting with them. Timo pitched Bogarde for Celtic\'s No. 6 search; Alex confirmed Celtic discussed Bogarde and he will start the match, though with physical issues. Alex reported his transfer window is going well overall.',
+    outcome:'Celtic-Bogarde conversation confirmed at Alex\'s level. Physical issues noted. Timo to monitor Bogarde situation for Celtic.', source:'beeper-sync' },
+  // AUGUST 24
+  { id:1787552855000, type:'whatsapp', contact:'Romeo Castelen', club:'NEC', date:'2026-08-24',
+    notes:'Active negotiation on Melle Meulensteen deal. Romeo shared deal structure: €6.5M fixed transfer fee with performance bonuses (€100k appearances, €100k DFB-Pokal final, €250k UCL, €150k EL, €250k Bundesliga title) plus 10% sell-on clause. Romeo asked whether to hold at this structure and suggested keeping a range allowing up to €7M. Timo expressed frustration — "this is really a shit deal" — and asked whether Thomas (Meulensteen\'s agent) could go back to Hoffenheim to recover value from their end. Reference to "Devy is hot to make it." Romeo called Timo directly. Internal EFP discussion confirmed Thomas\'s agent conduct is the main blocker and EFP must maintain control.',
+    outcome:'Deal structure proposed at €6.5M + bonuses; Timo unhappy with terms. Thomas agent situation unresolved. Follow up with Romeo on revised approach.', source:'beeper-sync' },
+  { id:1787561000000, type:'whatsapp', contact:'Fynn Buggenthien', club:'EFP internal', date:'2026-08-24',
+    notes:'Internal discussion about Thomas (Meulensteen\'s player-side). Fynn frustrated: "Ich komme nicht auf Thomas klar" (cannot deal with Thomas). Timo acknowledged the agent incompetence but framed it as "part of the game" and emphasised EFP must stay in control of its own processes. Romeo said he can\'t do anything from his side either. Fynn also produced new profile PDFs: EFP x Sem Steijn x FC Augsburg and EFP x Christian Gomis x FC Lugano, adding two new targets to the pipeline.',
+    outcome:'EFP aligning internally on strategy around Thomas. New profiles (Sem Steijn for Augsburg, Christian Gomis for Lugano) prepared and shared in internal group.', source:'beeper-sync' },
+  // AUGUST 23
+  { id:1787470000000, type:'whatsapp', contact:'Christian Weber', club:'SV Elversberg', date:'2026-08-23',
+    notes:'Timo congratulated Christian Weber on Elversberg\'s advancement (likely DFB-Pokal) and followed up on Melle Meulensteen, noting EFP can secure him for approximately 1M under market value. This is a fresh follow-up after the original pitch on Aug 17 (when the Elversberg PDF was sent). No reply received from Christian.',
+    outcome:'Awaiting response from Elversberg on Meulensteen. Deal below market value angle being used as a selling point.', source:'beeper-sync' },
+  { id:1787474000000, type:'whatsapp', contact:'Rick Pattenden', club:'', date:'2026-08-23',
+    notes:'Timo followed up with Rick asking whether he had managed to identify any clubs looking for a striker, referencing the Moussa Sylla profile shared on Aug 12. No reply received from Rick.',
+    outcome:'Awaiting Rick Pattenden\'s response on Moussa Sylla striker placement.', source:'beeper-sync' },
+  // AUGUST 21
+  { id:1787310000000, type:'whatsapp', contact:'David Verwilghen', club:'Anderlecht', date:'2026-08-21',
+    notes:'David Verwilghen formally rejected the Hong profile: "we discussed the profile yesterday and our preference is a right foot AM so Hong won\'t be on our shortlist." This closes the Anderlecht avenue for Hong after a week of intensive chasing. Prior to this, on Aug 18–20, Timo had sent multiple urgent messages to David pushing for Anderlecht to act quickly, noting Hong had multiple competing offers and clubs were pressing for a same-day decision. David called Timo on Aug 18.',
+    outcome:'Anderlecht out on Hong — preference is right-foot AM. Hong placement must be redirected to other clubs urgently.', source:'beeper-sync' },
+  // AUGUST 19–20
+  { id:1787120000000, type:'whatsapp', contact:'Fynn Buggenthien', club:'EFP internal', date:'2026-08-19',
+    notes:'EFP Transfer Window group activity (Fynn + Romeo). Timo posted Augsburg\'s two priority searches: (1) Creative No.10 / playmaking midfielder — right-footed, left-sided AM, Odgaard-type physicality but playmaking role, strong in tight spaces, Stroeykens explicitly ruled out due to injuries; (2) Athletic CB — minimum 1.88m, mobile, front-foot defender, comfortable on the ball. Romeo shared Leipzig intel (forwarded): Leipzig needs striker, winger, and No.6. On Aug 18, Romeo shared PSV loan terms for Babadi: salary 800k, option to buy 2.5M, loan fee 150k plus performance bonuses. Fynn evaluated Babadi as good for 2. Bundesliga level. Bochum confirmed as needing a left winger. Fynn also produced: EFP x Odin Bjørtuft x FC Augsburg (Aug 20) and EFP x Kristjan Asllani x Ipswich Town (Aug 21).',
+    outcome:'Augsburg shortlist being built (Bjørtuft, Sem Steijn confirmed). Leipzig needs logged. Bochum winger slot and Babadi/PSV loan terms on radar for Bochum. Asllani-to-Ipswich pitch prepared.', source:'beeper-sync' },
+  // AUGUST 18
+  { id:1787050000000, type:'whatsapp', contact:'Alex Kroes', club:'Ajax', date:'2026-08-18',
+    notes:'Social exchange and relationship building. Timo mentioned he is helping Simon\'s club (Feyenoord context) with two players and knows Simon for 3 years, thinking of doing something together. Alex confirmed knowing Simon: "Good guy." On Aug 19 Timo wished Ajax good luck for their evening game; Alex thanked him. On Aug 22 Timo reached out asking where Alex is in the world — no reply yet.',
+    outcome:'Relationship with Alex Kroes maintained. Possible collaboration angle with Simon\'s club being developed. Follow up on Aug 22 message pending.', source:'beeper-sync' },
+  { id:1787054000000, type:'whatsapp', contact:'Fynn Buggenthien', club:'EFP internal', date:'2026-08-18',
+    notes:'Fynn produced EFP x Kwon Hyeok Kyu x NK Celje profile, opening Slovenia as a new placement market for Kwon alongside existing Dutch/Belgian targets. Also prepared EFP x Kévin Monzialo x KSC and EFP x Melle Meulensteen x Schalke 04 profiles on Aug 17 evening, broadening Meulensteen\'s target club list to include Schalke 04 in addition to Elversberg.',
+    outcome:'Kwon now being pitched to Slovenian club NK Celje. Meulensteen pitch expanded to Schalke 04. KSC being targeted for Monzialo.', source:'beeper-sync' },
   // AUGUST 17
   { id:1786948055000, type:'whatsapp', contact:'Theo Janssen', club:'', date:'2026-08-17',
     notes:'Theo replied "Thank you my friend" to Timo\'s congratulations from Aug 16 on his team\'s first win of the new season.',
