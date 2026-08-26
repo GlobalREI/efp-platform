@@ -460,6 +460,9 @@ body {
 .act-time { font-size: 11px; color: var(--text3); margin-top: 2px; }
 .feed-link { color: var(--accent); cursor: pointer; text-decoration: underline; text-decoration-style: dotted; text-underline-offset: 2px; font-weight: 600; }
 .feed-link:hover { text-decoration-style: solid; }
+.feed-link-unknown { color: var(--amber); cursor: pointer; text-decoration: underline dashed; text-underline-offset: 2px; font-weight: 500; }
+.feed-link-unknown:hover { background: color-mix(in srgb, var(--amber) 15%, transparent); border-radius: 3px; }
+#_quick-add-popup { position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:20px 24px;z-index:99999;box-shadow:0 8px 32px rgba(0,0,0,.35);min-width:260px;text-align:center; }
 /* Position chip buttons in Add Requirement drawer */
 .pos-chip-btn {
   padding: 4px 10px; border-radius: 20px; border: 1px solid var(--border);
@@ -2163,7 +2166,7 @@ tr:hover .pdr-btn     { opacity: 1; }
   #view-mandates .data-table td:nth-child(7) { display:none !important; }
 
   /* Strip link colours — all clickable names render as plain text in print */
-  .feed-link { color:#111 !important; text-decoration:none !important; }
+  .feed-link, .feed-link-unknown { color:#111 !important; text-decoration:none !important; }
 
   /* Full width for the active view */
   body, html  { width:100%; height:auto; overflow:visible; background:#fff; }
@@ -10933,7 +10936,93 @@ function _linkifyText(text) {
     );
   });
 
+  // ── Detect unknown proper-noun names (not yet in EFP) ──
+  // Common words to skip so we don't false-flag football/business terms
+  const _SKIP_WORDS = new Set(['Follow','Outcome','Notes','Contact','Club','Reply','Internal',
+    'Transfer','Window','Celtic','Dutch','Swiss','Scottish','French','German','Austrian',
+    'Polish','Czech','Belgian','Saudi','Champions','League','Bundesliga','Premier','Europa',
+    'Conference','Manager','Profile','Season','Slot','Next','Monday','Tuesday','Wednesday',
+    'Thursday','Friday','Saturday','Sunday','January','February','March','April','May','June',
+    'July','August','September','October','November','December','EFP','NLZ','DFB','UCL','UEL',
+    'The','This','That','These','Those','There','Their','Also','After','Before','During',
+    'Against','Between','Without','Around','During','About','Active','Awaiting','Planning',
+    'No','Yes','HSV','PSV','KSC','NEC','RB','VfL','SV','FC','SC','AS','AC','TSG','VFL']);
+
+  // Build set of all already-known names to avoid double-wrapping
+  const _allKnown = new Set([...playerNames, ...contactNames, ...clubNames]);
+
+  // Process only text nodes (between HTML tags) to avoid mangling attributes
+  result = result.replace(/([^<>]+)/g, (textNode) => {
+    return textNode.replace(
+      /\b([A-ZÜÖÄ][a-züöäéèàüöä]{1,}(?:\s+[A-ZÜÖÄ][a-züöäéèàüöä]{1,}){1,2})\b/g,
+      (match) => {
+        const words = match.trim().split(/\s+/);
+        // Must be 2+ words, none of them in skip list, and not already a known entity
+        if (words.length < 2) return match;
+        if (words.some(w => _SKIP_WORDS.has(w))) return match;
+        if (_allKnown.has(match)) return match;
+        const safeName = match.replace(/'/g, "\\'");
+        return `<span class="feed-link-unknown" title="Add '${match}' to EFP" onclick="quickAddFromFeed('${safeName}');event.stopPropagation();">${match}</span>`;
+      }
+    );
+  });
+
   return result;
+}
+
+// Quick-add popup for names found in feed notes that aren't yet in EFP
+function quickAddFromFeed(name) {
+  const existing = document.getElementById('_quick-add-popup');
+  if (existing) existing.remove();
+
+  const overlay = document.createElement('div');
+  overlay.id = '_quick-add-overlay';
+  overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:99998;';
+  overlay.onclick = () => { overlay.remove(); const p = document.getElementById('_quick-add-popup'); if (p) p.remove(); };
+  document.body.appendChild(overlay);
+
+  const safeName = name.replace(/'/g, "\\'");
+  const popup = document.createElement('div');
+  popup.id = '_quick-add-popup';
+  popup.innerHTML = `
+    <div style="font-size:13px;color:var(--text3);margin-bottom:4px">Found in feed — not yet in EFP</div>
+    <div style="font-weight:700;font-size:17px;margin-bottom:16px">${name}</div>
+    <div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-bottom:12px">
+      <button class="btn btn-primary btn-sm" onclick="_qAddPlayer('${safeName}')">⚽ Add as Player</button>
+      <button class="btn btn-outline btn-sm" onclick="_qAddContact('${safeName}')">👤 Add as Contact</button>
+    </div>
+    <div><button class="btn btn-ghost btn-sm" onclick="document.getElementById('_quick-add-overlay').click()" style="color:var(--text3);font-size:12px">Dismiss</button></div>
+  `;
+  document.body.appendChild(popup);
+}
+
+function _qAddPlayer(name) {
+  document.getElementById('_quick-add-overlay')?.click();
+  // Navigate to mandates and open profile for new player
+  go('mandates');
+  setTimeout(() => {
+    // Pre-fill search with the name so user can confirm add
+    const searchEl = document.getElementById('mandate-search');
+    if (searchEl) { searchEl.value = name; searchEl.dispatchEvent(new Event('input')); }
+    // Try opening player profile directly — works even for new players
+    try { openPlayerProfile(name, { name }); } catch(e) {}
+    showSnack(`💡 Add '${name}' as a player — fill in details and save`, false);
+  }, 300);
+}
+
+function _qAddContact(name) {
+  document.getElementById('_quick-add-overlay')?.click();
+  go('contacts');
+  setTimeout(() => {
+    // Pre-fill name in the add-contact drawer if it exists
+    const addBtn = document.querySelector('[onclick*="openAddContact"], [onclick*="addContact"]');
+    if (addBtn) addBtn.click();
+    setTimeout(() => {
+      const nameInput = document.querySelector('#add-contact-name, #contact-name-input, input[placeholder*="Name"]');
+      if (nameInput) { nameInput.value = name; nameInput.dispatchEvent(new Event('input')); }
+    }, 200);
+    showSnack(`💡 Add '${name}' as a contact — fill in club and role`, false);
+  }, 300);
 }
 
 function _renderContactFeed(feedEl, contactName) {
