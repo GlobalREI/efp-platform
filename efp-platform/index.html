@@ -11013,16 +11013,16 @@ function quickAddFromFeed(name) {
 
 function _qAddPlayer(name) {
   document.getElementById('_quick-add-overlay')?.click();
-  // Navigate to mandates and open profile for new player
   go('mandates');
   setTimeout(() => {
-    // Pre-fill search with the name so user can confirm add
-    const searchEl = document.getElementById('mandate-search');
-    if (searchEl) { searchEl.value = name; searchEl.dispatchEvent(new Event('input')); }
-    // Try opening player profile directly — works even for new players
-    try { openPlayerProfile(name, { name }); } catch(e) {}
-    showSnack(`💡 Add '${name}' as a player — fill in details and save`, false);
-  }, 300);
+    // Open Add Mandate form directly (skips method picker)
+    chooseMandateManual();
+    setTimeout(() => {
+      const nameEl = document.getElementById('m-name');
+      if (nameEl) { nameEl.value = name; nameEl.dispatchEvent(new Event('input')); }
+      showSnack(`💡 Fill in details for '${name}' and save`, false);
+    }, 150);
+  }, 200);
 }
 
 function _qAddContact(name) {
@@ -14062,6 +14062,8 @@ function _taOpen(inputEl, items, cb) {
   _taCb = cb;
   const dd = _taGetEl();
   if (!items.length) { dd.style.display = 'none'; return; }
+  // Disable drawer overlays so they don't steal pointer events from the dropdown
+  document.querySelectorAll('.drawer-overlay').forEach(el => el.style.pointerEvents = 'none');
   dd.innerHTML = items.map((item, i) =>
     `<div class="efp-ta-opt" data-i="${i}" data-v="${(item.value||item.label).replace(/"/g,'&quot;')}"
       style="padding:9px 13px;cursor:pointer;font-size:13px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:6px"
@@ -14077,15 +14079,20 @@ function _taOpen(inputEl, items, cb) {
   dd.style.display = '';
 }
 
+function _taRestoreOverlays() {
+  document.querySelectorAll('.drawer-overlay').forEach(el => el.style.pointerEvents = '');
+}
+
 function _taPick(i) {
   const opt = _taGetEl().querySelectorAll('.efp-ta-opt')[i];
   if (opt && _taCb) _taCb(opt.dataset.v, opt.querySelector('span').textContent);
   _taGetEl().style.display = 'none';
+  _taRestoreOverlays();
 }
 
 function _taBlur() {
   clearTimeout(_taCloseTimer);
-  _taCloseTimer = setTimeout(() => { if (_taEl) _taEl.style.display = 'none'; }, 180);
+  _taCloseTimer = setTimeout(() => { if (_taEl) _taEl.style.display = 'none'; _taRestoreOverlays(); }, 180);
 }
 
 function _taFocus() { clearTimeout(_taCloseTimer); }
