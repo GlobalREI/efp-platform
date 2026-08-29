@@ -7880,7 +7880,39 @@ let needsAdded      = [];   // {id,club,pos,ageMin,ageMax,budMin,budMax,prio,con
 let playerNotes     = {};   // {[playerName]: {status, notes}} — editable player profile notes
 let clubData        = {};   // {[clubName]: {league,country,flag,status,notes,linkedContacts:[{name,role}]}}
 let logsAdded       = [   // {id,type,notes,date,duration,outcome,contact,club,source}
-  // ── Beeper-synced interactions (last synced 2026-08-26) ──
+  // ── Beeper-synced interactions (last synced 2026-08-28) ──
+  // AUGUST 28
+  { id:1787947260000, type:'whatsapp', contact:'Romeo Castelen', club:'Bochum', date:'2026-08-28',
+    notes:'Romeo informed Timo that Bochum need a left winger with speed — Romeo is speaking to the coach directly about this. Romeo shared Fabrice Tamba (via Transfermarkt) as a candidate and forwarded Teodor Ivanov\'s profile. Timo shared an image of another player and Romeo confirmed "very good player." Timo also offered Sem Steijn to Eintracht Frankfurt (noting they might sell Duan this window). Timo asked whether a player could be bought for €3-4m — Romeo confirmed he knows Lars (Director at Bochum) and will check.',
+    outcome:'Romeo to check with Lars (Director) on €3-4m fee viability. Bochum left-winger need active — Tamba and Teodor Ivanov are candidates. Sem Steijn pitch to Frankfurt live.', source:'beeper-sync' },
+  { id:1787938260000, type:'whatsapp', contact:'Owen Coyle Notingham Forest', club:'Nottingham Forest', date:'2026-08-28',
+    notes:'Timo asked Owen if a €3.5m offer for Tyler Bindon makes sense. Owen confirmed Tyler is joining Charlton on loan — a permanent would require £6m+. Owen also disclosed Forest need to move out a RB and a CM (both first loans) and sent loan decks for Archie Whitehall and Jimmy (2x Europa League appearances, both in first-team squads).',
+    outcome:'Tyler Bindon to Charlton on loan — permanent not viable at current budget. Review Archie Whitehall and Jimmy loan decks for potential placement. Follow up on Forest RB and CM loan opportunities.', source:'beeper-sync' },
+  { id:1787938800000, type:'whatsapp', contact:'Sebastian Dirscherl', club:'HSV', date:'2026-08-28',
+    notes:'Morning exchange: Timo sent a voice note pitching Sem Steijn as an alternative to Vieira ("falls Vieira nicht klappt — es gibt eine window of opportunity bei Sem Steijn"). Sebastian said he needs to discuss with Claus (HSV sporting director) and would get back later. Sebastian did call back in the evening (incoming call logged at 17:40). Discussion likely covers Lushendry Martes and/or Sem Steijn.',
+    outcome:'Sebastian to discuss Sem Steijn (and likely Martes) with Claus at HSV. Evening callback received — follow up on outcome urgently given window close.', source:'beeper-sync' },
+  { id:1787929620000, type:'whatsapp', contact:'Rick Pattenden', club:'Nottingham Forest', date:'2026-08-28',
+    notes:'Rick confirmed Henry Lawrence was signed from Liege for €2.5m. Timo expressed interest in finding a center back for a Champions League club below €3.5m — Rick reacted positively and will check. Timo also offered a Marvin Young-type profile (from Sparta) on a loan-with-option basis. Rick agreed loan plus option with a small loan fee could work. Timo noted Werder Bremen can only loan but HSV could pay a fee.',
+    outcome:'Rick to check CB options below €3.5m for a Champions League club. Loan-with-option structure agreed in principle for Young-type profile. Follow up on availability and HSV as a fee-paying buyer.', source:'beeper-sync' },
+  { id:1787920533000, type:'whatsapp', contact:'Fynn Buggenthien', club:'EFP internal', date:'2026-08-28',
+    notes:'EFP internal group active: Fynn sent EFP x Sem Steijn x SGE.pdf (Eintracht Frankfurt pitch) at 17:34, EFP x Darío Osorio x RB Leipzig.pdf at 10:09, and EFP x Sem Steijn x Mainz 05.pdf at 08:25. Internal chat covered analysis of Ismael Baouf (described as "datentechnisch top top," MW €3m — Timo considering pitching to Salzburg for €3.5-4m), discussion of "der Schwede" (Marvin Young) outperforming xG at new club, and scouting review of a Cambuur player.',
+    outcome:'Sem Steijn pitched to Frankfurt, Mainz, and via Romeo to Frankfurt again. Darío Osorio pitched to RB Leipzig. Baouf flagged as high-value prospect worth a Salzburg approach. Continue pushing Sem Steijn to remaining Bundesliga targets before window close.', source:'beeper-sync' },
+  { id:1787911500000, type:'whatsapp', contact:'Daniel Ebbert', club:'VfL Stuttgart', date:'2026-08-28',
+    notes:'Timo pitched a No. 10 (AM) profile — age under 25, market value €12m, available at €6-7m. Daniel replied that Stuttgart NLZ said Laghrissi is "nicht interessant" (not interesting). Daniel also confirmed Stuttgart are making no more moves this window ("Machen nichts mehr").',
+    outcome:'Stuttgart closed for this window — Laghrissi pitch unsuccessful, and no further signing activity expected. Note for next window.', source:'beeper-sync' },
+  // AUGUST 27
+  { id:1787871000000, type:'whatsapp', contact:'Fynn Buggenthien', club:'EFP internal', date:'2026-08-27',
+    notes:'Fynn produced three new EFP profiles: Isaac Babadi x RSCA (Anderlecht), Marvin Young x RB Salzburg, and Lushendry Martes x RB Salzburg — expanding the Babadi campaign and opening RB Salzburg as a new target. Fynn also proposed Eymen Laghrissi as a Center Forward candidate for KV Kortrijk, with GD Estoril Praia as an alternative club. Timo asked about Isaac Babadi to Anderlecht and Fynn responded via voice note.',
+    outcome:'Babadi-to-Anderlecht pitch live. Follow up on Salzburg interest in Young and Martes. Explore Laghrissi for Kortrijk and Estoril Praia.', source:'beeper-sync' },
+  { id:1787839535000, type:'whatsapp', contact:'Alex Kroes', club:'Ajax', date:'2026-08-27',
+    notes:'Timo sent an end-of-window proactive message to Alex Kroes asking if Ajax is still looking for any profiles, noting EFP has several highly interesting players available as the window approaches its close. No response received yet.',
+    outcome:'Awaiting response from Alex Kroes on remaining Ajax needs.', source:'beeper-sync' },
+  { id:1787835600000, type:'whatsapp', contact:'Romeo Castelen', club:'', date:'2026-08-27',
+    notes:'Timo spoke to Red Bull Salzburg about Marvin Young and Lushendry Martes — Fynn prepared dedicated EFP profiles for both. Romeo confirmed RB Salzburg would likely loan-only, not buy; Timo to ask anyway. Timo also asked Romeo whether Kévin Monzialo would go to KV Kortrijk — Romeo confirmed positively: "Is better Then Den Bosch." Multiple voice notes exchanged covering additional deal details.',
+    outcome:'Timo to follow up with Salzburg on Young/Martes loan. Monzialo-to-Kortrijk angle confirmed viable by Romeo — pursue further.', source:'beeper-sync' },
+  { id:1787832548000, type:'whatsapp', contact:'Sebastian Dirscherl', club:'HSV', date:'2026-08-27',
+    notes:'Timo sent an urgent message to HSV contact Sebastian Dirscherl requesting a 5-minute call, noting an exciting option has come up ("eine spannende Option ergeben"). Message was read by Sebastian at 09:14 but no reply received. Likely relates to Lushendry Martes or Marvin Young, for whom new EFP-RB Salzburg profiles were also being prepared today.',
+    outcome:'Awaiting callback from Sebastian Dirscherl (HSV). Follow up if no response by tomorrow.', source:'beeper-sync' },
   // AUGUST 26
   { id:1787762400000, type:'whatsapp', contact:'Romeo Castelen', club:'PSV Eindhoven', date:'2026-08-26',
     notes:'Active discussions on PSV player loan deal. PSV loan terms confirmed: €800k salary, €2.5m buy option, €150k loan fee, performance bonuses from PSV after every 5 games. Four Polish clubs still no clear feedback. Romeo: "coming days a lot will happen" and "making rounds in UK today." HSV still looking for a right back. Timo offered Isaac to Basel owner. Planning to pitch Sem to Freiburg tomorrow.',
