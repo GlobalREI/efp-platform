@@ -1,24 +1,29 @@
 /**
- * AppLayout — universal chrome: dark sidebar + sticky topbar + <Outlet />
+ * AppLayout — universal chrome: dark green sidebar + sticky topbar + <Outlet />
  * Every route in the app renders inside this shell.
  */
 import React, { useState } from 'react'
 import { NavLink, Outlet, useNavigate } from 'react-router-dom'
 import styles from './AppLayout.module.css'
+import {
+  IconDashboard, IconMandates, IconClubs, IconContacts,
+  IconNeeds, IconPitches, IconScout, IconActivities,
+  IconSettings, IconBell, IconSearch
+} from './Icons'
 
 const NAV_MAIN = [
-  { to: '/',           label: 'Dashboard',  icon: '📊' },
-  { to: '/mandates',   label: 'Mandates',   icon: '⚽' },
-  { to: '/clubs',      label: 'Clubs',      icon: '🏟' },
-  { to: '/contacts',   label: 'Contacts',   icon: '👤' },
-  { to: '/needs',      label: 'Club Needs', icon: '🎯' },
-  { to: '/pitches',    label: 'Pitches',    icon: '📤' },
-  { to: '/scout',      label: 'Scout',      icon: '🔍' },
-  { to: '/activities', label: 'Activities', icon: '📋' },
+  { to: '/',           label: 'Dashboard',  Icon: IconDashboard  },
+  { to: '/mandates',   label: 'Mandates',   Icon: IconMandates   },
+  { to: '/clubs',      label: 'Clubs',      Icon: IconClubs      },
+  { to: '/contacts',   label: 'Contacts',   Icon: IconContacts   },
+  { to: '/needs',      label: 'Club Needs', Icon: IconNeeds      },
+  { to: '/pitches',    label: 'Pitches',    Icon: IconPitches    },
+  { to: '/scout',      label: 'Scout',      Icon: IconScout      },
+  { to: '/activities', label: 'Activities', Icon: IconActivities },
 ]
 
 const NAV_BOTTOM = [
-  { to: '/settings', label: 'Settings', icon: '⚙️' },
+  { to: '/settings', label: 'Settings', Icon: IconSettings },
 ]
 
 export function AppLayout() {
@@ -37,12 +42,12 @@ export function AppLayout() {
       {/* ── Sidebar ── */}
       <aside className={styles.sidebar}>
         <div className={styles.logo}>
-          <span className={styles.logoMark}>EFP</span>
-          <span className={styles.logoSub}>OS</span>
+          <div className={styles.logoMark}>E</div>
+          <span className={styles.logoText}>EFP OS</span>
         </div>
 
         <nav className={styles.nav}>
-          {NAV_MAIN.map(({ to, label, icon }) => (
+          {NAV_MAIN.map(({ to, label, Icon }) => (
             <NavLink
               key={to}
               to={to}
@@ -51,14 +56,14 @@ export function AppLayout() {
                 `${styles.navItem} ${isActive ? styles.active : ''}`
               }
             >
-              <span className={styles.navIcon}>{icon}</span>
+              <span className={styles.navIcon}><Icon size={15} /></span>
               <span className={styles.navLabel}>{label}</span>
             </NavLink>
           ))}
         </nav>
 
         <div className={styles.sidebarBottom}>
-          {NAV_BOTTOM.map(({ to, label, icon }) => (
+          {NAV_BOTTOM.map(({ to, label, Icon }) => (
             <NavLink
               key={to}
               to={to}
@@ -66,7 +71,7 @@ export function AppLayout() {
                 `${styles.navItem} ${isActive ? styles.active : ''}`
               }
             >
-              <span className={styles.navIcon}>{icon}</span>
+              <span className={styles.navIcon}><Icon size={15} /></span>
               <span className={styles.navLabel}>{label}</span>
             </NavLink>
           ))}
@@ -85,7 +90,7 @@ export function AppLayout() {
         {/* Sticky topbar */}
         <header className={styles.topbar}>
           <div className={styles.searchWrap}>
-            <span className={styles.searchIcon}>🔍</span>
+            <span className={styles.searchIcon}><IconSearch size={13} /></span>
             <input
               className={styles.searchInput}
               type="search"
@@ -97,7 +102,9 @@ export function AppLayout() {
             <kbd className={styles.searchKbd}>↵</kbd>
           </div>
           <div className={styles.topbarRight}>
-            <button className={styles.topbarAction} title="Notifications">🔔</button>
+            <button className={styles.topbarAction} title="Notifications">
+              <IconBell size={15} />
+            </button>
             <div className={styles.topbarDivider} />
             <button className={styles.avatarBtn} title="Account">T</button>
           </div>
