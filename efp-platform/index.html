@@ -23,6 +23,8 @@ html { background: #ffffff; overscroll-behavior: none; }
   --navy2:     #142E56;
   --navy-dim:  rgba(27,58,107,0.07);
   --navy-mid:  rgba(27,58,107,0.14);
+  --brand:     #3A8B4A;
+  --brand-dim: rgba(58,139,74,0.10);
   --accent:    #2563EB;
   --accent2:   #1D4ED8;
   --acc-glow:  rgba(37,99,235,0.12);
@@ -502,8 +504,8 @@ body {
   background: var(--surface2); color: var(--text2); font-size: 12px; font-weight: 600;
   cursor: pointer; transition: all .12s;
 }
-.pos-chip-btn:hover { border-color: var(--navy); color: var(--navy); }
-.pos-chip-btn.pos-selected { background: var(--navy); color: #fff; border-color: var(--navy); }
+.pos-chip-btn:hover { border-color: var(--brand); color: var(--brand); }
+.pos-chip-btn.pos-selected { background: var(--brand); color: #fff; border-color: var(--brand); }
 .profile-activity-section { border-top: 1px solid var(--border); padding-top: 14px; margin-top: 18px; }
 .profile-activity-section .sec-label { font-size: 12px; font-weight: 700; color: var(--text2); letter-spacing: .04em; margin-bottom: 10px; }
 .profile-act-row { display:flex; gap:8px; padding:7px 0; border-bottom: 1px solid var(--border); }
@@ -884,7 +886,7 @@ body {
   outline: none;
 }
 .field-input:focus, .field-select:focus, .field-textarea:focus {
-  border-color: var(--navy); box-shadow: 0 0 0 3px var(--navy-dim);
+  border-color: var(--brand); box-shadow: 0 0 0 3px var(--brand-dim);
 }
 .field-select { appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%239CA3AF' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 12px center; padding-right: 32px; }
 .field-textarea { resize: vertical; min-height: 80px; line-height: 1.5; }
@@ -899,8 +901,8 @@ body {
   font-size: 12.5px; font-weight: 500; color: var(--text2);
   cursor: pointer; text-align: center; transition: all 0.1s;
 }
-.method-btn:hover { border-color: var(--navy); color: var(--navy); }
-.method-btn.selected { border-color: var(--navy); background: var(--navy-dim); color: var(--navy); font-weight: 600; }
+.method-btn:hover { border-color: var(--brand); color: var(--brand); }
+.method-btn.selected { border-color: var(--brand); background: var(--brand-dim); color: var(--brand); font-weight: 600; }
 
 /* pitch preview strip */
 .pitch-preview {
@@ -3141,7 +3143,7 @@ th.ds-sort:hover { background: rgba(30,58,95,.06); }
   border-bottom: 1px solid rgba(255,255,255,0.08);
 }
 .brand-monogram {
-  background: var(--accent);
+  background: var(--brand);
   border-radius: 8px;
   width: 32px; height: 32px;
   font-size: 12px; font-weight: 800;
@@ -3177,7 +3179,7 @@ th.ds-sort:hover { background: rgba(30,58,95,.06); }
   font-weight: 600;
 }
 .nav-item.active::before {
-  background: var(--accent);
+  background: var(--brand);
   width: 3px;
 }
 .nav-icon {
@@ -4718,14 +4720,14 @@ input.field-input, select.field-input, select.field-select {
 </div><!-- /main -->
 
 <!-- ══ NEW PITCH DRAWER ══ -->
-<div class="drawer-overlay" id="pitch-overlay" onclick="closePitchDrawer()"></div>
-<div class="drawer" id="pitch-drawer">
+<div class="drawer-overlay" id="pitch-overlay" aria-hidden="true" onclick="closePitchDrawer()"></div>
+<div class="drawer" id="pitch-drawer" role="dialog" aria-modal="true" aria-labelledby="pitch-drawer-title">
   <div class="drawer-head">
     <div>
-      <div class="drawer-title">New Player Pitch</div>
+      <div class="drawer-title" id="pitch-drawer-title">New Player Pitch</div>
       <div class="drawer-sub">Create a new pitch opportunity in the pipeline</div>
     </div>
-    <div class="drawer-close" onclick="closePitchDrawer()">✕</div>
+    <div class="drawer-close" onclick="closePitchDrawer()" aria-label="Close drawer">✕</div>
   </div>
 
   <div class="drawer-body">
@@ -4895,10 +4897,10 @@ input.field-input, select.field-input, select.field-select {
 </div>
 
 <!-- ══ ADD CONTACT DRAWER ══ -->
-<div class="drawer-overlay" id="contact-overlay" onclick="closeDrawer('contact');_resetContactDrawer()"></div>
-<div class="drawer" id="contact-drawer">
+<div class="drawer-overlay" id="contact-overlay" aria-hidden="true" onclick="closeDrawer('contact');_resetContactDrawer()"></div>
+<div class="drawer" id="contact-drawer" role="dialog" aria-modal="true" aria-labelledby="contact-drawer-title">
   <div class="drawer-head">
-    <div><div class="drawer-title">Add Contact</div><div class="drawer-sub">Add a new contact to the CRM</div></div>
+    <div><div class="drawer-title" id="contact-drawer-title">Add Contact</div><div class="drawer-sub">Add a new contact to the CRM</div></div>
     <div class="drawer-close" onclick="closeDrawer('contact');_resetContactDrawer()">✕</div>
   </div>
   <div class="drawer-body">
@@ -4952,10 +4954,10 @@ input.field-input, select.field-input, select.field-select {
 </div>
 
 <!-- ══ ADD CLUB DRAWER ══ -->
-<div class="drawer-overlay" id="club-overlay" onclick="closeDrawer('club')"></div>
-<div class="drawer" id="club-drawer">
+<div class="drawer-overlay" id="club-overlay" aria-hidden="true" onclick="closeDrawer('club')"></div>
+<div class="drawer" id="club-drawer" role="dialog" aria-modal="true" aria-labelledby="club-drawer-title">
   <div class="drawer-head">
-    <div><div class="drawer-title">Add Club</div><div class="drawer-sub">Add a new club to the CRM database</div></div>
+    <div><div class="drawer-title" id="club-drawer-title">Add Club</div><div class="drawer-sub">Add a new club to the CRM database</div></div>
     <div class="drawer-close" onclick="closeDrawer('club')">✕</div>
   </div>
   <div class="drawer-body">
@@ -5000,7 +5002,7 @@ input.field-input, select.field-input, select.field-select {
 
 <!-- ══ MANDATE METHOD PICKER ══ -->
 <div class="modal-bg" id="mandate-method-modal" onclick="closeModal('mandate-method-modal',event)">
-  <div class="modal" style="width:520px">
+  <div class="modal" role="dialog" aria-modal="true" style="width:520px">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;padding-bottom:16px;border-bottom:1px solid var(--border)">
       <div>
         <div style="font-size:17px;font-weight:700;color:var(--text);letter-spacing:-0.02em">Add Player Mandate</div>
@@ -5033,7 +5035,7 @@ input.field-input, select.field-input, select.field-select {
 
 <!-- ══ MANDATE AUTO-IMPORT ══ -->
 <div class="modal-bg" id="mandate-import-modal" onclick="closeModal('mandate-import-modal',event)">
-  <div class="modal" style="width:500px">
+  <div class="modal" role="dialog" aria-modal="true" style="width:500px">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;padding-bottom:16px;border-bottom:1px solid var(--border)">
       <div>
         <div style="font-size:17px;font-weight:700;color:var(--text);letter-spacing:-0.02em">Import Player</div>
@@ -5116,7 +5118,7 @@ input.field-input, select.field-input, select.field-select {
 
 <!-- ══ BULK MANDATE IMPORT MODAL ══ -->
 <div class="modal-bg" id="bulk-import-modal" style="display:none;align-items:flex-start;padding-top:40px">
-  <div class="modal" style="width:640px;max-height:85vh;overflow-y:auto">
+  <div class="modal" role="dialog" aria-modal="true" style="width:640px;max-height:85vh;overflow-y:auto">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;padding-bottom:14px;border-bottom:1px solid var(--border)">
       <div>
         <div style="font-size:17px;font-weight:700;color:var(--text);letter-spacing:-0.02em">📋 Bulk Player Import</div>
@@ -5189,11 +5191,11 @@ input.field-input, select.field-input, select.field-select {
 </div>
 
 <!-- ══ CLUB EDIT DRAWER ══ -->
-<div class="drawer-overlay" id="club-edit-overlay" onclick="closeClubEdit()"></div>
-<div class="drawer" id="club-edit-drawer">
+<div class="drawer-overlay" id="club-edit-overlay" aria-hidden="true" onclick="closeClubEdit()"></div>
+<div class="drawer" id="club-edit-drawer" role="dialog" aria-modal="true" aria-labelledby="club-edit-drawer-title">
   <div class="drawer-head">
     <div>
-      <div class="drawer-title" id="ce-title">Edit Club</div>
+      <div class="drawer-title" id="club-edit-drawer-title">Edit Club</div>
       <div class="drawer-sub" id="ce-sub">Update club details and linked contacts</div>
     </div>
     <div class="drawer-close" onclick="closeClubEdit()">✕</div>
@@ -5513,7 +5515,7 @@ input.field-input, select.field-input, select.field-select {
 
 <!-- ══ CONTACT DETAIL DRAWER ══ -->
 <div class="drawer-overlay" id="cd-drawer-overlay" onclick="closeContactDrawer()" style="display:none"></div>
-<div class="drawer" id="cd-detail-drawer">
+<div class="drawer" id="cd-detail-drawer" role="dialog" aria-modal="true" aria-labelledby="cd-detail-drawer-title">
   <div class="drawer-head">
     <div style="display:flex;align-items:center;gap:12px">
       <div class="avatar" id="cdd-avatar" style="width:36px;height:36px;font-size:13px;flex-shrink:0">?</div>
@@ -5554,9 +5556,9 @@ input.field-input, select.field-input, select.field-select {
 
 <!-- ══ ADD MANDATE DRAWER ══ -->
 <div class="drawer-overlay" id="mandate-overlay"></div>
-<div class="drawer" id="mandate-drawer">
+<div class="drawer" id="mandate-drawer" role="dialog" aria-modal="true" aria-labelledby="mandate-drawer-title">
   <div class="drawer-head">
-    <div><div class="drawer-title">Add Player Mandate</div><div class="drawer-sub">Register a player you represent for transfer</div></div>
+    <div><div class="drawer-title" id="mandate-drawer-title">Add Player Mandate</div><div class="drawer-sub">Register a player you represent for transfer</div></div>
     <div class="drawer-close" onclick="closeDrawer('mandate')">✕</div>
   </div>
   <div class="drawer-body">
@@ -5657,7 +5659,7 @@ input.field-input, select.field-input, select.field-select {
 
 <!-- ══ ADD REQUIREMENT DRAWER ══ -->
 <div class="drawer-overlay" id="req-overlay" onclick="closeDrawer('req')"></div>
-<div class="drawer" id="req-drawer">
+<div class="drawer" id="req-drawer" role="dialog" aria-modal="true" aria-labelledby="req-drawer-title">
   <div class="drawer-head">
     <div><div class="drawer-title">Add Club Requirement</div><div class="drawer-sub">Record what a club is actively looking for</div></div>
     <div class="drawer-close" onclick="closeDrawer('req')">✕</div>
@@ -5765,7 +5767,7 @@ input.field-input, select.field-input, select.field-select {
 
 <!-- ══ DRAFT EMAIL MODAL ══ -->
 <div class="modal-bg" id="email-modal" onclick="closeModal('email-modal',event)">
-  <div class="modal" style="width:600px">
+  <div class="modal" role="dialog" aria-modal="true" style="width:600px">
     <div style="display:flex;align-items:center;gap:10px;margin-bottom:20px;padding-bottom:16px;border-bottom:1px solid var(--border)">
       <div style="flex:1"><div class="modal-title" style="margin:0;padding:0;border:none">Draft Email</div><div style="font-size:12px;color:var(--text3);margin-top:2px">AI-assisted · review before sending via Outlook</div></div>
       <button class="drawer-close" onclick="document.getElementById('email-modal').style.display='none'">✕</button>
@@ -5802,7 +5804,7 @@ European Football Partners</textarea>
 
 <!-- ══ DRAFT WHATSAPP MODAL ══ -->
 <div class="modal-bg" id="wa-modal" onclick="closeModal('wa-modal',event)">
-  <div class="modal" style="width:520px">
+  <div class="modal" role="dialog" aria-modal="true" style="width:520px">
     <div style="display:flex;align-items:center;gap:10px;margin-bottom:20px;padding-bottom:16px;border-bottom:1px solid var(--border)">
       <div style="flex:1"><div class="modal-title" style="margin:0;padding:0;border:none">Draft WhatsApp</div><div style="font-size:12px;color:var(--text3);margin-top:2px">AI-assisted · copy and send via Beeper</div></div>
       <button class="drawer-close" onclick="document.getElementById('wa-modal').style.display='none'">✕</button>
@@ -5826,7 +5828,7 @@ European Football Partners</textarea>
 
 <!-- ══ LOG ACTIVITY MODAL ══ -->
 <div class="modal-bg" id="log-modal" onclick="closeModal('log-modal',event)">
-  <div class="modal" style="width:480px">
+  <div class="modal" role="dialog" aria-modal="true" style="width:480px">
     <div style="display:flex;align-items:center;gap:10px;margin-bottom:20px;padding-bottom:16px;border-bottom:1px solid var(--border)">
       <div style="flex:1"><div class="modal-title" style="margin:0;padding:0;border:none" id="log-title">Log Activity</div><div style="font-size:12px;color:var(--text3);margin-top:2px">All activities appear in the contact timeline</div></div>
       <button class="drawer-close" onclick="document.getElementById('log-modal').style.display='none'">✕</button>
@@ -5865,7 +5867,7 @@ European Football Partners</textarea>
 
 <!-- ══ ADD TASK MODAL ══ -->
 <div class="modal-bg" id="task-modal" onclick="closeModal('task-modal',event)">
-  <div class="modal" style="width:460px">
+  <div class="modal" role="dialog" aria-modal="true" style="width:460px">
     <div style="display:flex;align-items:center;gap:10px;margin-bottom:20px;padding-bottom:16px;border-bottom:1px solid var(--border)">
       <div style="flex:1"><div class="modal-title" style="margin:0;padding:0;border:none">Add Task</div></div>
       <button class="drawer-close" onclick="document.getElementById('task-modal').style.display='none'">✕</button>
@@ -5909,7 +5911,7 @@ European Football Partners</textarea>
 
 <!-- ══ NEED DETAIL MODAL ══ -->
 <div class="modal-bg" id="need-modal" onclick="closeNeed(event)">
-  <div class="modal">
+  <div class="modal" role="dialog" aria-modal="true">
     <div class="modal-title" id="nm-title">Club Requirement</div>
     <div class="modal-grid">
       <div class="detail-panel">
@@ -5955,7 +5957,7 @@ European Football Partners</textarea>
 
 <!-- ══ PDF EXPORT MODAL ══ -->
 <div class="modal-bg" id="pdf-export-modal" onclick="closeModal('pdf-export-modal',event)" style="display:none">
-  <div class="modal" style="width:640px;max-height:88vh;display:flex;flex-direction:column;padding:0;overflow:hidden">
+  <div class="modal" role="dialog" aria-modal="true" style="width:640px;max-height:88vh;display:flex;flex-direction:column;padding:0;overflow:hidden">
 
     <!-- Header -->
     <div style="padding:20px 22px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-shrink:0">
@@ -21282,7 +21284,7 @@ document.addEventListener('click', e => {
 
 <!-- ══ RELATIONSHIP ADD/EDIT DRAWER ════════════════════════════════════════ -->
 <div class="drawer-overlay" id="rel-overlay" onclick="closeDrawer('rel')"></div>
-<div class="drawer" id="rel-drawer">
+<div class="drawer" id="rel-drawer" role="dialog" aria-modal="true" aria-labelledby="rel-drawer-title">
   <div class="drawer-head">
     <div>
       <div class="drawer-title" id="rel-drawer-title">Add Relationship</div>
@@ -21471,7 +21473,7 @@ document.addEventListener('click', e => {
 
 <!-- ══ MANDATE DETAIL / EDIT DRAWER ════════════════════════════════════════ -->
 <div class="drawer-overlay" id="mandate-detail-overlay" onclick="closeDrawer('mandate-detail')"></div>
-<div class="drawer" id="mandate-detail-drawer">
+<div class="drawer" id="mandate-detail-drawer" role="dialog" aria-modal="true" aria-labelledby="mandate-detail-drawer-title">
   <div class="drawer-head">
     <div>
       <div class="drawer-title" id="mandate-detail-drawer-title">Player Mandate</div>
