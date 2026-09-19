@@ -7,8 +7,16 @@ import { ref, push } from 'firebase/database'
 import { db } from '../data/firebase'
 import { Drawer, DrawerBody, DrawerFoot, drawerStyles as s } from '../components/Drawer'
 import { Button } from '../components/Button'
+import {
+  ClubSearchField,    type ClubResult,
+  ContactSearchField, type ContactResult,
+  MoneyInput,
+} from '../components/FormFields'
 
-const POSITIONS = ['GK','CB','RB','RWB','LB','LWB','CDM','CM','CAM','RW','LW','CF','ST','SS']
+const POSITIONS    = ['GK','CB','RB','RWB','LB','LWB','CDM','CM','CAM','RW','LW','CF','ST','SS']
+const WINDOWS      = ['Summer 2026','Winter 2027','Summer 2027','Winter 2028','Summer 2028']
+const MANDATE_TYPES = ['Exclusive','Co-mandate','Non-exclusive','Advisory']
+const FEET         = ['Right','Left','Both']
 
 interface Props {
   open: boolean
@@ -17,22 +25,43 @@ interface Props {
 }
 
 export function AddMandateForm({ open, onClose, onSaved }: Props) {
-  const [name,     setName]     = useState('')
-  const [pos,      setPos]      = useState('')
-  const [pos2,     setPos2]     = useState('')
-  const [age,      setAge]      = useState('')
-  const [club,     setClub]     = useState('')
-  const [value,    setValue]    = useState('')
-  const [nat,      setNat]      = useState('')
-  const [window,   setWindow]   = useState('Summer 2026')
-  const [notes,    setNotes]    = useState('')
-  const [saving,   setSaving]   = useState(false)
-  const [error,    setError]    = useState('')
+  // Player
+  const [name,     setName]    = useState('')
+  const [pos,      setPos]     = useState('')
+  const [pos2,     setPos2]    = useState('')
+  const [age,      setAge]     = useState('')
+  const [height,   setHeight]  = useState('')
+  const [nat,      setNat]     = useState('')
+  const [foot,     setFoot]    = useState('Right')
+
+  // Current club (linked)
+  const [clubName, setClubName] = useState('')
+  const [clubId,   setClubId]   = useState<string | undefined>()
+
+  // Deal
+  const [marketValue,   setMarketValue]   = useState('')
+  const [expectedPrice, setExpectedPrice] = useState('')
+  const [salary,        setSalary]        = useState('')
+  const [contractExp,   setContractExp]   = useState('')
+  const [mandateType,   setMandateType]   = useState('Exclusive')
+  const [window,        setWindow]        = useState('Summer 2026')
+
+  // Contact (linked from /contacts)
+  const [contactQuery,  setContactQuery]  = useState('')
+  const [contactPerson, setContactPerson] = useState<ContactResult | null>(null)
+
+  // Notes
+  const [notes,  setNotes]  = useState('')
+  const [saving, setSaving] = useState(false)
+  const [error,  setError]  = useState('')
 
   const reset = () => {
-    setName(''); setPos(''); setPos2(''); setAge(''); setClub('')
-    setValue(''); setNat(''); setWindow('Summer 2026'); setNotes('')
-    setError('')
+    setName(''); setPos(''); setPos2(''); setAge(''); setHeight(''); setNat(''); setFoot('Right')
+    setClubName(''); setClubId(undefined)
+    setMarketValue(''); setExpectedPrice(''); setSalary('')
+    setContractExp(''); setMandateType('Exclusive'); setWindow('Summer 2026')
+    setContactQuery(''); setContactPerson(null)
+    setNotes(''); setError('')
   }
 
   const handleClose = () => { reset(); onClose() }
@@ -41,23 +70,29 @@ export function AddMandateForm({ open, onClose, onSaved }: Props) {
     if (!name.trim()) { setError('Player name is required'); return }
     setSaving(true); setError('')
     try {
-      const r = ref(db, 'mandates')
-      const result = await push(r, {
-        name: name.trim(),
-        pos: pos || null,
-        pos2: pos2 || null,
-        age: age ? Number(age) : null,
-        club: club.trim() || null,
-        value: value.trim() || null,
-        nationality: nat.trim() || null,
-        transfer_window: window,
-        notes: notes.trim() || null,
-        savedAt: Date.now(),
-        archived: false,
+      const result = await push(ref(db, 'mandates'), {
+        name:             name.trim(),
+        pos:              pos  || null,
+        pos2:             pos2 || null,
+        age:              age    ? Number(age)    : null,
+        height:           height ? Number(height) : null,
+        nationality:      nat.trim()  || null,
+        foot:             foot || null,
+        club:             clubName.trim() || null,
+        club_id:          clubId || null,
+        value:            marketValue.trim()   || null,
+        expected_price:   expectedPrice.trim() || null,
+        salary:           salary.trim()        || null,
+        contract_expires: contractExp.trim()   || null,
+        mandate_type:     mandateType,
+        transfer_window:  window,
+        contact_person:   contactPerson?.name || null,
+        contact_id:       contactPerson?.id   || null,
+        notes:            notes.trim()        || null,
+        savedAt:          Date.now(),
+        archived:         false,
       })
-      reset()
-      onClose()
-      onSaved?.(result.key!)
+      reset(); onClose(); onSaved?.(result.key!)
     } catch (e: any) {
       setError(e.message || 'Save failed — check your connection')
     } finally {
@@ -66,29 +101,35 @@ export function AddMandateForm({ open, onClose, onSaved }: Props) {
   }
 
   return (
-    <Drawer open={open} onClose={handleClose} title="New Player Mandate" sub="Add to active mandate list">
+    <Drawer open={open} onClose={handleClose} title="Add Player Mandate" sub="Register a player you represent for transfer">
       <DrawerBody>
         {error && <div className={s.saveError}>{error}</div>}
 
+        {/* ── PLAYER ─────────────────────────────── */}
         <p className={s.section}>Player</p>
 
         <div className={s.field}>
-          <label className={s.fieldLabel}>Name <span className={s.req}>*</span></label>
-          <input className={s.fieldInput} value={name} onChange={e => setName(e.target.value)} placeholder="e.g. Dennis Geiger" />
+          <label className={s.fieldLabel}>Player Name <span className={s.req}>*</span></label>
+          <input
+            className={s.fieldInput}
+            value={name}
+            onChange={e => setName(e.target.value)}
+            placeholder="Full name"
+          />
         </div>
 
         <div className={s.fieldRow}>
           <div className={s.field}>
-            <label className={s.fieldLabel}>Primary position</label>
+            <label className={s.fieldLabel}>Position <span className={s.req}>*</span></label>
             <select className={s.fieldSelect} value={pos} onChange={e => setPos(e.target.value)}>
               <option value="">Select…</option>
               {POSITIONS.map(p => <option key={p} value={p}>{p}</option>)}
             </select>
           </div>
           <div className={s.field}>
-            <label className={s.fieldLabel}>Secondary position</label>
+            <label className={s.fieldLabel}>Secondary Position</label>
             <select className={s.fieldSelect} value={pos2} onChange={e => setPos2(e.target.value)}>
-              <option value="">—</option>
+              <option value="">None</option>
               {POSITIONS.map(p => <option key={p} value={p}>{p}</option>)}
             </select>
           </div>
@@ -97,46 +138,128 @@ export function AddMandateForm({ open, onClose, onSaved }: Props) {
         <div className={s.fieldRow}>
           <div className={s.field}>
             <label className={s.fieldLabel}>Age</label>
-            <input className={s.fieldInput} type="number" min="15" max="45" value={age} onChange={e => setAge(e.target.value)} placeholder="e.g. 24" />
+            <input
+              className={s.fieldInput}
+              type="number" min="15" max="45"
+              value={age}
+              onChange={e => setAge(e.target.value)}
+              placeholder="e.g. 23"
+            />
           </div>
           <div className={s.field}>
-            <label className={s.fieldLabel}>Nationality</label>
-            <input className={s.fieldInput} value={nat} onChange={e => setNat(e.target.value)} placeholder="e.g. German" />
+            <label className={s.fieldLabel}>Height (cm)</label>
+            <input
+              className={s.fieldInput}
+              type="number" min="150" max="220"
+              value={height}
+              onChange={e => setHeight(e.target.value)}
+              placeholder="e.g. 185"
+            />
           </div>
-        </div>
-
-        <p className={s.section}>Deal</p>
-
-        <div className={s.field}>
-          <label className={s.fieldLabel}>Current club</label>
-          <input className={s.fieldInput} value={club} onChange={e => setClub(e.target.value)} placeholder="e.g. LASK" />
         </div>
 
         <div className={s.fieldRow}>
           <div className={s.field}>
-            <label className={s.fieldLabel}>Transfer fee / value</label>
-            <input className={s.fieldInput} value={value} onChange={e => setValue(e.target.value)} placeholder="e.g. €4M" />
+            <label className={s.fieldLabel}>Nationality</label>
+            <input
+              className={s.fieldInput}
+              value={nat}
+              onChange={e => setNat(e.target.value)}
+              placeholder="e.g. Dutch, EU passport"
+            />
           </div>
           <div className={s.field}>
-            <label className={s.fieldLabel}>Window</label>
-            <select className={s.fieldSelect} value={window} onChange={e => setWindow(e.target.value)}>
-              <option>Summer 2026</option>
-              <option>Winter 2027</option>
-              <option>Summer 2027</option>
+            <label className={s.fieldLabel}>Preferred Foot</label>
+            <select className={s.fieldSelect} value={foot} onChange={e => setFoot(e.target.value)}>
+              {FEET.map(f => <option key={f} value={f}>{f}</option>)}
             </select>
           </div>
         </div>
 
+        {/* ── DEAL ────────────────────────────────── */}
+        <p className={s.section}>Deal</p>
+
+        <ClubSearchField
+          label="Current Club"
+          value={clubName}
+          onChange={setClubName}
+          onSelect={(c: ClubResult) => { setClubName(c.name); setClubId(c.id) }}
+          placeholder="e.g. LASK"
+        />
+
+        {clubId && (
+          <p style={{ fontSize: 'var(--text-xs)', color: 'var(--text-muted)', marginTop: -8, marginBottom: 8 }}>
+            ✓ Linked to club record
+          </p>
+        )}
+
+        <div className={s.fieldRow}>
+          <MoneyInput label="Market Value"   value={marketValue}   onChange={setMarketValue}   placeholder="€4M" />
+          <MoneyInput label="Expected Price" value={expectedPrice} onChange={setExpectedPrice} placeholder="€2.5M" />
+        </div>
+
+        <div className={s.fieldRow}>
+          <MoneyInput label="Salary (p/m)" value={salary} onChange={setSalary} placeholder="€80K" />
+          <div className={s.field}>
+            <label className={s.fieldLabel}>Contract Expires</label>
+            <input
+              className={s.fieldInput}
+              value={contractExp}
+              onChange={e => setContractExp(e.target.value)}
+              placeholder="e.g. Jun 2026"
+            />
+          </div>
+        </div>
+
+        <div className={s.fieldRow}>
+          <div className={s.field}>
+            <label className={s.fieldLabel}>Mandate Type</label>
+            <select className={s.fieldSelect} value={mandateType} onChange={e => setMandateType(e.target.value)}>
+              {MANDATE_TYPES.map(t => <option key={t} value={t}>{t}</option>)}
+            </select>
+          </div>
+          <div className={s.field}>
+            <label className={s.fieldLabel}>Transfer Window</label>
+            <select className={s.fieldSelect} value={window} onChange={e => setWindow(e.target.value)}>
+              {WINDOWS.map(w => <option key={w} value={w}>{w}</option>)}
+            </select>
+          </div>
+        </div>
+
+        {/* ── CONTACT ─────────────────────────────── */}
+        <p className={s.section}>Contact</p>
+
+        <ContactSearchField
+          label="Contact Person"
+          value={contactQuery}
+          onChange={q => { setContactQuery(q); if (!q) setContactPerson(null) }}
+          onSelect={(c: ContactResult) => { setContactPerson(c); setContactQuery(c.name) }}
+          placeholder="Type to search contacts…"
+        />
+
+        {contactPerson && (
+          <p style={{ fontSize: 'var(--text-xs)', color: 'var(--text-muted)', marginTop: -8, marginBottom: 8 }}>
+            ✓ Linked to contact record
+          </p>
+        )}
+
+        {/* ── NOTES ───────────────────────────────── */}
         <p className={s.section}>Notes</p>
 
         <div className={s.field}>
           <label className={s.fieldLabel}>Notes</label>
-          <textarea className={s.fieldTextarea} value={notes} onChange={e => setNotes(e.target.value)} placeholder="Scouting intel, deal status, context…" rows={4} />
+          <textarea
+            className={s.fieldTextarea}
+            value={notes}
+            onChange={e => setNotes(e.target.value)}
+            placeholder="Scouting intel, deal status, context…"
+            rows={4}
+          />
         </div>
       </DrawerBody>
 
       <DrawerFoot>
-        <Button variant="primary" loading={saving} onClick={handleSave}>Save mandate</Button>
+        <Button variant="primary" loading={saving} onClick={handleSave}>Add Mandate</Button>
         <Button variant="ghost" onClick={handleClose} disabled={saving}>Cancel</Button>
       </DrawerFoot>
     </Drawer>

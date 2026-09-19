@@ -7,6 +7,11 @@ import { ref, push } from 'firebase/database'
 import { db } from '../data/firebase'
 import { Drawer, DrawerBody, DrawerFoot, drawerStyles as s } from '../components/Drawer'
 import { Button } from '../components/Button'
+import {
+  ClubSearchField,  type ClubResult,
+  ContactSearchField, type ContactResult,
+  MoneyInput,
+} from '../components/FormFields'
 
 const POSITIONS = ['GK','CB','RB','RWB','LB','LWB','CDM','CM','CAM','RW','LW','CF','ST','SS']
 
@@ -17,57 +22,79 @@ interface Props {
 }
 
 export function AddNeedForm({ open, onClose, onSaved }: Props) {
-  const [club,     setClub]     = useState('')
-  const [league,   setLeague]   = useState('')
-  const [selPos,   setSelPos]   = useState<string[]>([])
-  const [ageMin,   setAgeMin]   = useState('')
-  const [ageMax,   setAgeMax]   = useState('')
-  const [budMin,   setBudMin]   = useState('')
-  const [budMax,   setBudMax]   = useState('')
-  const [dealType, setDealType] = useState('transfer')
-  const [urgency,  setUrgency]  = useState('open')
-  const [contact,  setContact]  = useState('')
-  const [notes,    setNotes]    = useState('')
-  const [saving,   setSaving]   = useState(false)
-  const [error,    setError]    = useState('')
+  // Club
+  const [clubName,   setClubName]   = useState('')
+  const [clubId,     setClubId]     = useState<string | undefined>()
+  const [league,     setLeague]     = useState('')
+
+  // Requirement
+  const [selPos,     setSelPos]     = useState<string[]>([])
+  const [ageMin,     setAgeMin]     = useState('')
+  const [ageMax,     setAgeMax]     = useState('')
+  const [playerNat,  setPlayerNat]  = useState('')
+
+  // Budget & deal
+  const [budMin,     setBudMin]     = useState('')
+  const [budMax,     setBudMax]     = useState('')
+  const [loanFee,    setLoanFee]    = useState('')
+  const [salary,     setSalary]     = useState('')
+  const [dealType,   setDealType]   = useState('transfer')
+  const [urgency,    setUrgency]    = useState('open')
+  const [window,     setWindow]     = useState('Summer 2026')
+
+  // Contact
+  const [contactQuery,  setContactQuery]  = useState('')
+  const [contactPerson, setContactPerson] = useState<ContactResult | null>(null)
+
+  // Notes
+  const [notes, setNotes] = useState('')
+
+  const [saving, setSaving] = useState(false)
+  const [error,  setError]  = useState('')
 
   const togglePos = (p: string) =>
     setSelPos(prev => prev.includes(p) ? prev.filter(x => x !== p) : [...prev, p])
 
   const reset = () => {
-    setClub(''); setLeague(''); setSelPos([]); setAgeMin(''); setAgeMax('')
-    setBudMin(''); setBudMax(''); setDealType('transfer'); setUrgency('open')
-    setContact(''); setNotes(''); setError('')
+    setClubName(''); setClubId(undefined); setLeague('')
+    setSelPos([]); setAgeMin(''); setAgeMax(''); setPlayerNat('')
+    setBudMin(''); setBudMax(''); setLoanFee(''); setSalary('')
+    setDealType('transfer'); setUrgency('open'); setWindow('Summer 2026')
+    setContactQuery(''); setContactPerson(null)
+    setNotes(''); setError('')
   }
 
   const handleClose = () => { reset(); onClose() }
 
   const handleSave = async () => {
-    if (!club.trim()) { setError('Club name is required'); return }
-    if (selPos.length === 0) { setError('Select at least one position'); return }
+    if (!clubName.trim())       { setError('Club name is required'); return }
+    if (selPos.length === 0)    { setError('Select at least one position'); return }
     setSaving(true); setError('')
     try {
-      const r = ref(db, 'needs')
-      const result = await push(r, {
-        club: club.trim(),
-        league: league.trim() || null,
-        pos: selPos[0],
-        positions: selPos,
-        ageMin: ageMin ? Number(ageMin) : null,
-        ageMax: ageMax ? Number(ageMax) : null,
-        budMin: budMin.trim() || null,
-        budMax: budMax.trim() || null,
+      const result = await push(ref(db, 'needs'), {
+        club:             clubName.trim(),
+        club_id:          clubId || null,
+        league:           league.trim() || null,
+        pos:              selPos[0],
+        positions:        selPos,
+        ageMin:           ageMin ? Number(ageMin) : null,
+        ageMax:           ageMax ? Number(ageMax) : null,
+        player_nat:       playerNat.trim() || null,
+        budMin:           budMin.trim() || null,
+        budMax:           budMax.trim() || null,
+        loan_fee:         loanFee.trim() || null,
+        salary:           salary.trim() || null,
         dealType,
         urgency,
-        contact: contact.trim() || null,
-        notes: notes.trim() || null,
-        status: 'open',
-        savedAt: Date.now(),
-        archived: false,
+        transfer_window:  window,
+        contact:          contactPerson?.name || null,
+        contact_id:       contactPerson?.id   || null,
+        notes:            notes.trim() || null,
+        status:           'open',
+        savedAt:          Date.now(),
+        archived:         false,
       })
-      reset()
-      onClose()
-      onSaved?.(result.key!)
+      reset(); onClose(); onSaved?.(result.key!)
     } catch (e: any) {
       setError(e.message || 'Save failed — check your connection')
     } finally {
@@ -76,21 +103,33 @@ export function AddNeedForm({ open, onClose, onSaved }: Props) {
   }
 
   return (
-    <Drawer open={open} onClose={handleClose} title="New Club Need" sub="Add a buying requirement">
+    <Drawer open={open} onClose={handleClose} title="New Club Need" sub="Register a buying requirement">
       <DrawerBody>
         {error && <div className={s.saveError}>{error}</div>}
 
+        {/* ── CLUB ─────────────────────────────────── */}
         <p className={s.section}>Club</p>
 
-        <div className={s.field}>
-          <label className={s.fieldLabel}>Club name <span className={s.req}>*</span></label>
-          <input className={s.fieldInput} value={club} onChange={e => setClub(e.target.value)} placeholder="e.g. NEC Nijmegen" />
-        </div>
+        <ClubSearchField
+          label="Club name"
+          value={clubName}
+          onChange={setClubName}
+          onSelect={(c: ClubResult) => { setClubName(c.name); setClubId(c.id) }}
+          placeholder="e.g. NEC Nijmegen"
+          required
+        />
+
         <div className={s.field}>
           <label className={s.fieldLabel}>League / country</label>
-          <input className={s.fieldInput} value={league} onChange={e => setLeague(e.target.value)} placeholder="e.g. Eredivisie · Netherlands" />
+          <input
+            className={s.fieldInput}
+            value={league}
+            onChange={e => setLeague(e.target.value)}
+            placeholder="e.g. Eredivisie · Netherlands"
+          />
         </div>
 
+        {/* ── REQUIREMENT ──────────────────────────── */}
         <p className={s.section}>Requirement</p>
 
         <div className={s.field}>
@@ -122,25 +161,47 @@ export function AddNeedForm({ open, onClose, onSaved }: Props) {
         <div className={s.fieldRow}>
           <div className={s.field}>
             <label className={s.fieldLabel}>Age min</label>
-            <input className={s.fieldInput} type="number" min="15" max="45" value={ageMin} onChange={e => setAgeMin(e.target.value)} placeholder="e.g. 18" />
+            <input
+              className={s.fieldInput}
+              type="number" min="15" max="45"
+              value={ageMin}
+              onChange={e => setAgeMin(e.target.value)}
+              placeholder="e.g. 18"
+            />
           </div>
           <div className={s.field}>
             <label className={s.fieldLabel}>Age max</label>
-            <input className={s.fieldInput} type="number" min="15" max="45" value={ageMax} onChange={e => setAgeMax(e.target.value)} placeholder="e.g. 25" />
+            <input
+              className={s.fieldInput}
+              type="number" min="15" max="45"
+              value={ageMax}
+              onChange={e => setAgeMax(e.target.value)}
+              placeholder="e.g. 25"
+            />
           </div>
         </div>
 
+        <div className={s.field}>
+          <label className={s.fieldLabel}>Nationality preference</label>
+          <input
+            className={s.fieldInput}
+            value={playerNat}
+            onChange={e => setPlayerNat(e.target.value)}
+            placeholder="e.g. EU passport, Dutch"
+          />
+        </div>
+
+        {/* ── BUDGET & DEAL ────────────────────────── */}
         <p className={s.section}>Budget & deal</p>
 
         <div className={s.fieldRow}>
-          <div className={s.field}>
-            <label className={s.fieldLabel}>Budget min</label>
-            <input className={s.fieldInput} value={budMin} onChange={e => setBudMin(e.target.value)} placeholder="e.g. €1M" />
-          </div>
-          <div className={s.field}>
-            <label className={s.fieldLabel}>Budget max</label>
-            <input className={s.fieldInput} value={budMax} onChange={e => setBudMax(e.target.value)} placeholder="e.g. €4M" />
-          </div>
+          <MoneyInput label="Budget min" value={budMin} onChange={setBudMin} placeholder="€1M" />
+          <MoneyInput label="Budget max" value={budMax} onChange={setBudMax} placeholder="€4M" />
+        </div>
+
+        <div className={s.fieldRow}>
+          <MoneyInput label="Loan fee (if loan)" value={loanFee} onChange={setLoanFee} placeholder="€200K" />
+          <MoneyInput label="Salary (p/m)" value={salary} onChange={setSalary} placeholder="€80K" />
         </div>
 
         <div className={s.fieldRow}>
@@ -164,15 +225,44 @@ export function AddNeedForm({ open, onClose, onSaved }: Props) {
           </div>
         </div>
 
-        <p className={s.section}>Contact & notes</p>
+        <div className={s.field}>
+          <label className={s.fieldLabel}>Transfer window</label>
+          <select className={s.fieldSelect} value={window} onChange={e => setWindow(e.target.value)}>
+            {['Summer 2026','Winter 2027','Summer 2027','Winter 2028','Summer 2028'].map(w =>
+              <option key={w} value={w}>{w}</option>
+            )}
+          </select>
+        </div>
+
+        {/* ── CONTACT ──────────────────────────────── */}
+        <p className={s.section}>Club contact</p>
+
+        <ContactSearchField
+          label="Contact person at club"
+          value={contactQuery}
+          onChange={q => { setContactQuery(q); if (!q) setContactPerson(null) }}
+          onSelect={(c: ContactResult) => { setContactPerson(c); setContactQuery(c.name) }}
+          placeholder="Search your contacts…"
+        />
+
+        {contactPerson && (
+          <p style={{ fontSize: 'var(--text-xs)', color: 'var(--text-muted)', marginTop: -8, marginBottom: 8 }}>
+            ✓ Linked to contact record
+          </p>
+        )}
+
+        {/* ── NOTES ────────────────────────────────── */}
+        <p className={s.section}>Notes</p>
 
         <div className={s.field}>
-          <label className={s.fieldLabel}>Club contact</label>
-          <input className={s.fieldInput} value={contact} onChange={e => setContact(e.target.value)} placeholder="e.g. Romeo Castelen · Head of Football" />
-        </div>
-        <div className={s.field}>
           <label className={s.fieldLabel}>Notes</label>
-          <textarea className={s.fieldTextarea} value={notes} onChange={e => setNotes(e.target.value)} placeholder="Intel, context, deal history…" rows={4} />
+          <textarea
+            className={s.fieldTextarea}
+            value={notes}
+            onChange={e => setNotes(e.target.value)}
+            placeholder="Intel, context, deal history…"
+            rows={4}
+          />
         </div>
       </DrawerBody>
 
