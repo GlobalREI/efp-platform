@@ -269,7 +269,7 @@ body {
 .btn-accent:hover { background: var(--accent2); }
 
 /* ─── CONTENT ─── */
-.content { flex: 1; overflow-y: auto; padding: 28px 32px; background: var(--bg); overscroll-behavior: none; }
+.content { flex: 1; overflow-y: auto; overflow-x: hidden; padding: 28px 32px; background: var(--bg); overscroll-behavior: none; min-width: 0; }
 .view { display: none; }
 .view.active { display: block; }
 
@@ -3037,10 +3037,12 @@ th.ds-sort:hover { background: rgba(30,58,95,.06); }
 
 .profile-page-body {
   display: grid;
-  grid-template-columns: 1fr 380px;
-  gap: 24px;
+  grid-template-columns: 1fr 340px;
+  gap: 20px;
   align-items: start;
+  min-width: 0;
 }
+.profile-page-body > * { min-width: 0; }
 .profile-form-panel {
   background: var(--surface);
   border: 1px solid var(--border);
@@ -3334,6 +3336,8 @@ th.ds-sort:hover { background: rgba(30,58,95,.06); }
   padding: 0 0 16px 0;
   border-bottom: 1px solid var(--border);
   margin-bottom: 0;
+  flex-wrap: wrap;
+  min-width: 0;
 }
 .pp-topbar-back {
   display: inline-flex; align-items: center; gap: 6px;
@@ -3343,7 +3347,7 @@ th.ds-sort:hover { background: rgba(30,58,95,.06); }
   cursor: pointer; transition: all 0.12s; flex-shrink: 0;
 }
 .pp-topbar-back:hover { background: var(--bg); color: var(--text); border-color: var(--border2); }
-.pp-topbar-actions { display: flex; align-items: center; gap: 7px; margin-left: auto; }
+.pp-topbar-actions { display: flex; align-items: center; gap: 7px; margin-left: auto; flex-wrap: wrap; }
 
 /* ── PLAYER PROFILE HERO ── */
 .pp-hero {
@@ -3785,11 +3789,11 @@ input.field-input, select.field-input, select.field-select {
   </div>
 
   <!-- ── Sync Review Banner ─────────────────────────────────────────── -->
-  <div id="sync-intel-banner" style="display:none;background:linear-gradient(90deg,#1B3A6B,#2563EB);color:#fff;padding:10px 20px;font-size:13px;align-items:center;gap:12px">
-    <span style="font-size:16px">🔔</span>
-    <span id="sync-intel-text" style="flex:1"></span>
-    <button onclick="openSyncReview()" style="background:#fff;border:none;border-radius:5px;color:#1B3A6B;font-size:12px;font-weight:700;padding:5px 12px;cursor:pointer">Review →</button>
-    <button onclick="dismissSyncBanner()" style="background:rgba(255,255,255,.2);border:none;border-radius:5px;color:#fff;font-size:12px;padding:4px 10px;cursor:pointer">Dismiss</button>
+  <div id="sync-intel-banner" style="display:none;width:100%;box-sizing:border-box;background:linear-gradient(90deg,#1B3A6B,#2563EB);color:#fff;padding:10px 24px;font-size:13px;align-items:center;gap:12px;flex-shrink:0;z-index:10">
+    <span style="font-size:15px;flex-shrink:0">🔔</span>
+    <span id="sync-intel-text" style="flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap"></span>
+    <button onclick="openSyncReview()" style="background:#fff;border:none;border-radius:5px;color:#1B3A6B;font-size:12px;font-weight:700;padding:5px 14px;cursor:pointer;white-space:nowrap;flex-shrink:0">Review →</button>
+    <button onclick="dismissSyncBanner()" style="background:rgba(255,255,255,.2);border:none;border-radius:5px;color:#fff;font-size:12px;padding:4px 10px;cursor:pointer;white-space:nowrap;flex-shrink:0">Dismiss</button>
   </div>
 
   <!-- ── Sync Review Modal ───────────────────────────────────────────── -->
