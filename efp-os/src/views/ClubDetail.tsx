@@ -45,7 +45,7 @@ interface Club {
 
 interface Mandate {
   id: string; name: string; pos?: string; club?: string
-  statusText?: string; archived?: boolean
+  statusText?: string; archived?: boolean; linked_club_key?: string
 }
 
 interface Need {
@@ -134,7 +134,7 @@ export function ClubDetail() {
     )
   }
 
-  const linkedMandates = mandates.filter(m => m.club?.toLowerCase() === club.name?.toLowerCase() && !m.archived)
+  const linkedMandates = mandates.filter(m => (m.club?.toLowerCase() === club.name?.toLowerCase() || m.linked_club_key === id) && !m.archived)
   const linkedNeeds    = needs.filter(n => n.club?.toLowerCase() === club.name?.toLowerCase())
   const status = club.status || 'Not Started'
 
@@ -246,6 +246,17 @@ export function ClubDetail() {
         <Card title="Mandates" titleIcon="⚽">
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, padding: '14px 18px' }}>
             {linkedMandates.map(m => (
+              <PlayerChip key={m.id} name={m.name} id={m.id} size="md" />
+            ))}
+          </div>
+        </Card>
+      )}
+
+      {/* ── Players Scouted for this Club (from TM Scout) ── */}
+      {linkedMandates.some(m => m.linked_club_key === id) && (
+        <Card title="Scouted via TM Scout" titleIcon="🔍">
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, padding: '14px 18px' }}>
+            {linkedMandates.filter(m => m.linked_club_key === id).map(m => (
               <PlayerChip key={m.id} name={m.name} id={m.id} size="md" />
             ))}
           </div>

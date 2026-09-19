@@ -531,3 +531,169 @@
   transition: opacity 0.1s, background 0.1s;
 }
 .leagueChipRemove:hover { opacity: 1; background: rgba(0,0,0,0.08); }
+
+/* ── Save Panel (linked save flow) ─────────────────────────────── */
+.trOpen td {
+  background: color-mix(in srgb, var(--accent) 6%, var(--surface));
+}
+
+.saveBtnOpen {
+  background: color-mix(in srgb, var(--accent) 12%, var(--surface)) !important;
+  color: var(--accent) !important;
+  border-color: var(--accent) !important;
+}
+
+.savePanelRow {
+  background: var(--surface-2, #f7f8fa);
+}
+.savePanelRow:hover {
+  background: var(--surface-2, #f7f8fa) !important;
+}
+
+.savePanelCell {
+  padding: 0 !important;
+  border-top: 2px solid var(--accent) !important;
+  border-bottom: 2px solid var(--accent) !important;
+}
+
+.savePanel {
+  display: flex;
+  flex-direction: column;
+  background: var(--surface);
+  border-radius: 0;
+}
+
+.savePanelHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 16px 8px;
+  border-bottom: 1px solid var(--border);
+}
+
+.savePanelTitle {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--fg);
+}
+
+.savePanelBody {
+  padding: 10px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.savePanelLabel {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: .05em;
+  color: var(--fg-muted);
+}
+
+.savePanelSearch {
+  width: 100%;
+  padding: 6px 10px;
+  font-size: 13px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--surface-2, #f7f8fa);
+  color: var(--fg);
+  outline: none;
+  box-sizing: border-box;
+}
+.savePanelSearch:focus {
+  border-color: var(--accent);
+}
+
+.savePanelList {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  max-height: 120px;
+  overflow-y: auto;
+}
+
+.savePanelItem {
+  display: flex;
+  flex-direction: column;
+  padding: 6px 10px;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  cursor: pointer;
+  min-width: 120px;
+  max-width: 180px;
+  transition: border-color .15s, background .15s;
+}
+.savePanelItem:hover {
+  border-color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 6%, var(--surface));
+}
+
+.savePanelItemActive {
+  border-color: var(--accent) !important;
+  background: color-mix(in srgb, var(--accent) 12%, var(--surface)) !important;
+}
+
+.savePanelItemName {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--fg);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.savePanelItemSub {
+  font-size: 11px;
+  color: var(--fg-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.savePanelEmpty {
+  font-size: 12px;
+  color: var(--fg-muted);
+  font-style: italic;
+}
+
+.savePanelFooter {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+  padding: 8px 16px 10px;
+  border-top: 1px solid var(--border);
+}
+
+.savePanelCancel {
+  padding: 5px 14px;
+  font-size: 12px;
+  font-weight: 500;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--surface);
+  color: var(--fg-muted);
+  cursor: pointer;
+}
+.savePanelCancel:hover {
+  border-color: var(--fg-muted);
+  color: var(--fg);
+}
+
+.savePanelConfirm {
+  padding: 5px 16px;
+  font-size: 12px;
+  font-weight: 600;
+  border: none;
+  border-radius: 6px;
+  background: var(--accent);
+  color: #fff;
+  cursor: pointer;
+}
+.savePanelConfirm:hover {
+  opacity: .88;
+}

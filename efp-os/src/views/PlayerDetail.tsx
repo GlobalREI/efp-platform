@@ -59,6 +59,15 @@ interface Pitch {
   date?: string
 }
 
+interface FbLinkedClub {
+  id: string
+  name: string
+  league?: string
+  country?: string
+  linked_mandate_key?: string
+  linked_mandate_name?: string
+}
+
 const PRIO_LABEL: Record<number, string> = { 1: 'P1', 2: 'P2', 3: 'P3' }
 
 export function PlayerDetail() {
@@ -67,6 +76,7 @@ export function PlayerDetail() {
   const [mandate, setMandate]   = useState<Mandate | null>(null)
   const [notes,   setNotes]     = useState<PlayerNotes>({})
   const [pitches, setPitches]   = useState<Pitch[]>([])
+  const [linkedClubs, setLinkedClubs] = useState<FbLinkedClub[]>([])
   const [loading, setLoading]   = useState(true)
   const [editMode, setEditMode] = useState(false)
   const [draft,   setDraft]     = useState<Partial<Mandate>>({})
@@ -109,10 +119,22 @@ export function PlayerDetail() {
     }
     onValue(pRef, pHandler)
 
+    // Load clubs scouted for this mandate
+    const cRef = ref(db, 'clubs')
+    const cHandler = (snap: any) => {
+      if (!snap.exists()) return setLinkedClubs([])
+      const all: FbLinkedClub[] = Object.entries(snap.val())
+        .map(([cid, v]: [string, any]) => ({ id: cid, ...v }))
+        .filter((c: FbLinkedClub) => c.linked_mandate_key === id)
+      setLinkedClubs(all)
+    }
+    onValue(cRef, cHandler)
+
     return () => {
       off(mRef, 'value', mHandler)
       if (nUnsub) nUnsub()
       off(pRef, 'value', pHandler)
+      off(cRef, 'value', cHandler)
     }
   }, [id])
 
@@ -254,6 +276,31 @@ export function PlayerDetail() {
           <p className={styles.notesText} style={{ padding: '14px 18px' }}>
             {notes.notes}
           </p>
+        </Card>
+      )}
+
+      {/* ── Clubs Scouted for this Player (from TM Scout) ── */}
+      {linkedClubs.length > 0 && (
+        <Card title="Scouted Clubs" titleIcon="🔍">
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
+            {linkedClubs.map(c => (
+              <div
+                key={c.id}
+                style={{
+                  display: 'flex', alignItems: 'center', gap: 10,
+                  padding: '10px 18px', borderBottom: '1px solid var(--border)',
+                  cursor: 'pointer',
+                }}
+                onClick={() => nav(`/clubs/${c.id}`)}
+              >
+                <span style={{ fontSize: 20 }}>🏟</span>
+                <div>
+                  <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--fg)' }}>{c.name}</div>
+                  {c.league && <div style={{ fontSize: 11, color: 'var(--fg-muted)' }}>{c.league}</div>}
+                </div>
+              </div>
+            ))}
+          </div>
         </Card>
       )}
 

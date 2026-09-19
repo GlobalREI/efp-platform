@@ -7,14 +7,15 @@
  *   2. Find a Player — search TM players, match against active club needs
  *   3. Find a Loan Player — same as player, pre-set age ≤ 24
  *
- * "Save" on any row writes to Firebase (/clubs or /mandates) and the record
- * immediately appears on that club's / player's profile page.
+ * "+ Save" on any row opens an inline Save Panel so you can link the record:
+ *   - Club → link to a player mandate (shows in that player's profile)
+ *   - Player / Loan → link to a CRM club (shows in that club's profile)
  *
  * Firebase data auto-refreshes every 5 min in the background.
  * TM search runs on explicit user action (Enter / Search TM button).
  * League filter supports multi-select on ALL tabs.
  */
-import { useEffect, useRef, useState, useCallback } from 'react'
+import { Fragment, useEffect, useRef, useState, useCallback } from 'react'
 import { ref, get, push, set } from 'firebase/database'
 import { db } from '../data/firebase'
 import { PageHeader } from '../components/PageHeader'
@@ -50,10 +51,13 @@ interface FbNeed {
 interface FbMandate {
   id: string; name?: string; pos?: string
   age?: number | string; value?: number | string
-  status?: string
+  status?: string; archived?: boolean
+  linked_club_key?: string; linked_club_name?: string
 }
 interface FbClub {
   id: string; name?: string; league?: string; country?: string
+  archived?: boolean
+  linked_mandate_key?: string; linked_mandate_name?: string
 }
 
 /* ── Scoring ────────────────────────────────────────────────────────────── */
@@ -69,7 +73,7 @@ function needScore(club: TmClub, needs: FbNeed[], filterPos: string): number {
         return np.some(p => p.includes(filterPos.toLowerCase()))
       })
     : directNeeds
-  const leagueMatches = needs.filter(n => {
+  const leagueMatchNeeds = needs.filter(n => {
     const nl = (n.league || '').toLowerCase()
     const cl = club.league.toLowerCase()
     return nl && cl && (nl.includes(cl) || cl.includes(nl))
@@ -77,7 +81,7 @@ function needScore(club: TmClub, needs: FbNeed[], filterPos: string): number {
   return Math.min(100,
     posDirectNeeds.length * 50 +
     (directNeeds.length - posDirectNeeds.length) * 20 +
-    leagueMatches.length * 10
+    leagueMatchNeeds.length * 10
   )
 }
 
@@ -260,6 +264,71 @@ function RangeFilter({ label, min, max, onMin, onMax, placeholder = ['Min', 'Max
   )
 }
 
+/* ── Save Panel ─────────────────────────────────────────────────────────── */
+interface SavePanelItem { id: string; name: string; sub?: string }
+
+function SavePanel({
+  title, listLabel, items, onSelect, selectedId,
+  linkSearch, onSearchChange, onCancel, onConfirm, saving,
+}: {
+  title: string; listLabel: string
+  items: SavePanelItem[]
+  onSelect: (id: string) => void; selectedId: string
+  linkSearch: string; onSearchChange: (v: string) => void
+  onCancel: () => void; onConfirm: () => void; saving: boolean
+}) {
+  const filtered = items.filter(it =>
+    it.name.toLowerCase().includes(linkSearch.toLowerCase()) ||
+    (it.sub || '').toLowerCase().includes(linkSearch.toLowerCase())
+  )
+  return (
+    <div className={styles.savePanel}>
+      <div className={styles.savePanelHeader}>
+        <span className={styles.savePanelTitle}>{title}</span>
+      </div>
+      <div className={styles.savePanelBody}>
+        <p className={styles.savePanelLabel}>{listLabel}</p>
+        <input
+          className={styles.savePanelSearch}
+          type="text"
+          placeholder="Search…"
+          value={linkSearch}
+          onChange={e => onSearchChange(e.target.value)}
+          autoFocus
+        />
+        <ul className={styles.savePanelList}>
+          {filtered.length === 0 && (
+            <li className={styles.savePanelEmpty}>No matches</li>
+          )}
+          {filtered.map(it => (
+            <li
+              key={it.id}
+              className={`${styles.savePanelItem} ${selectedId === it.id ? styles.savePanelItemActive : ''}`}
+              onClick={() => onSelect(selectedId === it.id ? '' : it.id)}
+            >
+              <span className={styles.savePanelItemName}>{it.name}</span>
+              {it.sub && <span className={styles.savePanelItemSub}>{it.sub}</span>}
+            </li>
+          ))}
+        </ul>
+      </div>
+      <div className={styles.savePanelFooter}>
+        <button type="button" className={styles.savePanelCancel} onClick={onCancel}>
+          Cancel
+        </button>
+        <button
+          type="button"
+          className={styles.savePanelConfirm}
+          disabled={saving}
+          onClick={onConfirm}
+        >
+          {saving ? 'Saving…' : selectedId ? 'Confirm & Save' : 'Save without link'}
+        </button>
+      </div>
+    </div>
+  )
+}
+
 /* ══════════════════════════════════════════════════════════════════════════
    Main Component
 ══════════════════════════════════════════════════════════════════════════ */
@@ -290,9 +359,14 @@ export function TmScoutView() {
   const [filterMvMin,   setFilterMvMin]   = useState('')
   const [filterMvMax,   setFilterMvMax]   = useState('')
 
-  /* Save state: tmId → { firebaseKey, type } */
+  /* Save: tmId → { firebaseKey, type } for "View Profile" button */
   const [savedMap,  setSavedMap]  = useState<Record<string, { key: string; type: 'club' | 'mandate' }>>({})
   const [savingId,  setSavingId]  = useState<string | null>(null)
+
+  /* Save panel state */
+  const [openSaveId,    setOpenSaveId]    = useState<string | null>(null)
+  const [selectedLinkId, setSelectedLinkId] = useState<string>('')
+  const [linkSearch,    setLinkSearch]    = useState<string>('')
 
   /* ── Load Firebase ── */
   const loadFirebase = useCallback(async () => {
@@ -339,6 +413,7 @@ export function TmScoutView() {
     setTmResults([]); setTmError(null); setSearched(false); setQuery('')
     setFilterLeagues([]); setFilterPos('')
     setFilterAgeMin(''); setFilterAgeMax(''); setFilterMvMin(''); setFilterMvMax('')
+    setOpenSaveId(null); setSelectedLinkId(''); setLinkSearch('')
     if (tab === 'loan') setTimeout(() => setFilterAgeMax('24'), 0)
   }, [tab])
 
@@ -346,6 +421,7 @@ export function TmScoutView() {
   const runSearch = useCallback(async () => {
     if (!query.trim()) return
     setSearching(true); setTmError(null); setTmResults([]); setSearched(true)
+    setOpenSaveId(null); setSelectedLinkId(''); setLinkSearch('')
     try {
       if (tab === 'club') {
         setTmResults(await searchTmClubs(query))
@@ -361,11 +437,22 @@ export function TmScoutView() {
 
   const onKey = (e: React.KeyboardEvent) => { if (e.key === 'Enter') runSearch() }
 
+  /* ── Panel helpers ── */
+  function openPanel(id: string) {
+    setOpenSaveId(prev => (prev === id ? null : id))
+    setSelectedLinkId('')
+    setLinkSearch('')
+  }
+  function closePanel() {
+    setOpenSaveId(null)
+    setSelectedLinkId('')
+    setLinkSearch('')
+  }
+
   /* ── Filtered results ── */
   const displayResults = (() => {
     if (tab === 'club') {
       let clubs = tmResults as TmClub[]
-      // Filter by selected leagues (client-side, TmClub has league field)
       if (filterLeagues.length > 0) {
         clubs = clubs.filter(club =>
           filterLeagues.some(l => leagueMatches(club.league || '', l))
@@ -374,7 +461,6 @@ export function TmScoutView() {
       return clubs
     }
 
-    // Player / Loan: filter by position, age, MV
     let players = filterTmPlayers(tmResults as TmPlayer[], {
       position: filterPos || undefined,
       ageMin:   filterAgeMin ? parseInt(filterAgeMin) : undefined,
@@ -383,17 +469,15 @@ export function TmScoutView() {
       mvMax:    filterMvMax  ? parseFloat(filterMvMax) : undefined,
     })
 
-    // Filter by selected leagues: cross-reference player's club with Firebase clubs
-    // Players whose clubs are not in Firebase are shown regardless (no data = no filter)
     if (filterLeagues.length > 0) {
       players = players.filter(player => {
         const playerClub = (player.club || '').toLowerCase().trim()
-        if (!playerClub) return true // no club info → show
+        if (!playerClub) return true
         const fbMatch = fbClubs.find(fc => {
           const fcName = (fc.name || '').toLowerCase()
           return fcName && (fcName.includes(playerClub) || playerClub.includes(fcName))
         })
-        if (!fbMatch) return true // club not in Firebase → show (don't penalise missing data)
+        if (!fbMatch) return true
         return filterLeagues.some(l => leagueMatches(fbMatch.league || '', l))
       })
     }
@@ -402,11 +486,11 @@ export function TmScoutView() {
   })()
 
   /* ── Save club to Firebase ── */
-  async function saveClub(club: TmClub) {
+  async function saveClub(club: TmClub, linkedMandateKey?: string, linkedMandateName?: string) {
     setSavingId(club.id)
     try {
       const newRef = push(ref(db, 'clubs'))
-      await set(newRef, {
+      const payload: Record<string, unknown> = {
         name:            club.name,
         league:          club.league  || '',
         country:         club.country || '',
@@ -422,8 +506,14 @@ export function TmScoutView() {
         tm_search_mv:    filterMvMin  && filterMvMax  ? `€${filterMvMin}–${filterMvMax}M` : '',
         tm_search_leagues: filterLeagues.length > 0 ? filterLeagues.join(', ') : '',
         savedAt:         Date.now(),
-      })
+      }
+      if (linkedMandateKey) {
+        payload.linked_mandate_key  = linkedMandateKey
+        payload.linked_mandate_name = linkedMandateName || ''
+      }
+      await set(newRef, payload)
       setSavedMap(prev => ({ ...prev, [club.id]: { key: newRef.key!, type: 'club' } }))
+      await loadFirebase()
     } catch (e) {
       console.error('Save club error:', e)
     } finally {
@@ -432,11 +522,11 @@ export function TmScoutView() {
   }
 
   /* ── Save player to Firebase ── */
-  async function savePlayer(player: TmPlayer) {
+  async function savePlayer(player: TmPlayer, linkedClubKey?: string, linkedClubName?: string) {
     setSavingId(player.id)
     try {
       const newRef = push(ref(db, 'mandates'))
-      await set(newRef, {
+      const payload: Record<string, unknown> = {
         name:              player.name,
         pos:               player.position  || '',
         age:               player.age       || '',
@@ -449,14 +539,29 @@ export function TmScoutView() {
         source:            'tm_scout',
         savedAt:           Date.now(),
         statusText:        'Active Mandate',
-      })
+      }
+      if (linkedClubKey) {
+        payload.linked_club_key  = linkedClubKey
+        payload.linked_club_name = linkedClubName || ''
+      }
+      await set(newRef, payload)
       setSavedMap(prev => ({ ...prev, [player.id]: { key: newRef.key!, type: 'mandate' } }))
+      await loadFirebase()
     } catch (e) {
       console.error('Save player error:', e)
     } finally {
       setSavingId(null)
     }
   }
+
+  /* ── Link options ── */
+  const mandateOptions: SavePanelItem[] = mandates
+    .filter(m => !m.archived && m.name)
+    .map(m => ({ id: m.id, name: m.name!, sub: m.pos }))
+
+  const clubOptions: SavePanelItem[] = fbClubs
+    .filter(c => c.name)
+    .map(c => ({ id: c.id, name: c.name!, sub: c.league }))
 
   /* ── Header sub ── */
   const sub = fbLoading
@@ -516,15 +621,11 @@ export function TmScoutView() {
 
         {/* ── Filters — league on ALL tabs ── */}
         <div className={styles.filterRow}>
-
-          {/* League multi-select — present on every tab */}
           <MultiLeagueSelect selected={filterLeagues} onChange={setFilterLeagues} />
-
           <div className={styles.filterDivider} />
 
           {tab === 'club' && (
             <>
-              {/* Club tab: also define what player profile you're placing */}
               <span className={styles.filterGroupLabel}>Player profile:</span>
               <FilterSelect label="Position" value={filterPos} onChange={setFilterPos} options={POSITIONS} placeholder="Any" />
               <RangeFilter label="Age" min={filterAgeMin} max={filterAgeMax} onMin={setFilterAgeMin} onMax={setFilterAgeMax} />
@@ -539,10 +640,9 @@ export function TmScoutView() {
               <RangeFilter label="MV (€M)" min={filterMvMin} max={filterMvMax} onMin={setFilterMvMin} onMax={setFilterMvMax} />
             </>
           )}
-
         </div>
 
-        {/* League chips — show selected leagues as pill summary */}
+        {/* League chips */}
         {filterLeagues.length > 0 && (
           <div className={styles.leagueChips}>
             {filterLeagues.map(l => (
@@ -608,48 +708,77 @@ export function TmScoutView() {
             </thead>
             <tbody>
               {(displayResults as TmClub[]).map((club, i) => {
-                const score    = needScore(club, needs, filterPos)
-                const saved    = savedMap[club.id]
+                const score   = needScore(club, needs, filterPos)
+                const saved   = savedMap[club.id]
+                const isOpen  = openSaveId === club.id
                 const isSaving = savingId === club.id
                 return (
-                  <tr key={club.id || i} className={styles.tr}>
-                    <td className={styles.td}>
-                      <div className={styles.entityCell}>
-                        <Avatar imageUrl={club.logoUrl} name={club.name} size={24} />
-                        <span className={styles.entityName}>{club.name}</span>
-                      </div>
-                    </td>
-                    <td className={styles.td}>
-                      <div className={styles.metaStack}>
-                        <span className={styles.meta}>{club.league || '—'}</span>
-                        {club.country && <span className={styles.metaSub}>{club.country}</span>}
-                      </div>
-                    </td>
-                    <td className={`${styles.td} ${styles.tdNum}`}><span className={styles.num}>{club.squadSize || '—'}</span></td>
-                    <td className={`${styles.td} ${styles.tdNum}`}><span className={styles.num}>{club.avgAge || '—'}</span></td>
-                    <td className={`${styles.td} ${styles.tdNum}`}><span className={styles.mv}>{club.marketValue || '—'}</span></td>
-                    <td className={`${styles.td} ${styles.tdNum}`}><ScoreBadge score={score} /></td>
-                    <td className={styles.td}>
-                      <div className={styles.rowActions}>
-                        {club.profileUrl && (
-                          <a href={club.profileUrl} target="_blank" rel="noopener noreferrer"
-                            className={styles.tmLink} title="View on Transfermarkt">
-                            <ExternalLinkIcon size={13} />
-                          </a>
-                        )}
-                        {saved ? (
-                          <button className={styles.savedBtn} onClick={() => nav(`/clubs/${saved.key}`)}>
-                            ✓ View Profile
-                          </button>
-                        ) : (
-                          <button className={styles.saveBtn} onClick={() => saveClub(club)} disabled={isSaving}>
-                            {isSaving ? <Spinner /> : null}
-                            {isSaving ? 'Saving…' : '+ Save'}
-                          </button>
-                        )}
-                      </div>
-                    </td>
-                  </tr>
+                  <Fragment key={club.id || i}>
+                    <tr className={`${styles.tr} ${isOpen ? styles.trOpen : ''}`}>
+                      <td className={styles.td}>
+                        <div className={styles.entityCell}>
+                          <Avatar imageUrl={club.logoUrl} name={club.name} size={24} />
+                          <span className={styles.entityName}>{club.name}</span>
+                        </div>
+                      </td>
+                      <td className={styles.td}>
+                        <div className={styles.metaStack}>
+                          <span className={styles.meta}>{club.league || '—'}</span>
+                          {club.country && <span className={styles.metaSub}>{club.country}</span>}
+                        </div>
+                      </td>
+                      <td className={`${styles.td} ${styles.tdNum}`}><span className={styles.num}>{club.squadSize || '—'}</span></td>
+                      <td className={`${styles.td} ${styles.tdNum}`}><span className={styles.num}>{club.avgAge || '—'}</span></td>
+                      <td className={`${styles.td} ${styles.tdNum}`}><span className={styles.mv}>{club.marketValue || '—'}</span></td>
+                      <td className={`${styles.td} ${styles.tdNum}`}><ScoreBadge score={score} /></td>
+                      <td className={styles.td}>
+                        <div className={styles.rowActions}>
+                          {club.profileUrl && (
+                            <a href={club.profileUrl} target="_blank" rel="noopener noreferrer"
+                              className={styles.tmLink} title="View on Transfermarkt">
+                              <ExternalLinkIcon size={13} />
+                            </a>
+                          )}
+                          {saved ? (
+                            <button className={styles.savedBtn} onClick={() => nav(`/clubs/${saved.key}`)}>
+                              ✓ View Profile
+                            </button>
+                          ) : (
+                            <button
+                              className={`${styles.saveBtn} ${isOpen ? styles.saveBtnOpen : ''}`}
+                              onClick={() => openPanel(club.id)}
+                              disabled={isSaving}
+                            >
+                              {isSaving ? <Spinner /> : null}
+                              {isSaving ? 'Saving…' : isOpen ? '▲ Close' : '+ Save'}
+                            </button>
+                          )}
+                        </div>
+                      </td>
+                    </tr>
+                    {isOpen && (
+                      <tr className={styles.savePanelRow}>
+                        <td colSpan={7} className={styles.savePanelCell}>
+                          <SavePanel
+                            title={`Save "${club.name}" to CRM`}
+                            listLabel="Link to a player mandate — which player are you scouting this club for?"
+                            items={mandateOptions}
+                            onSelect={setSelectedLinkId}
+                            selectedId={selectedLinkId}
+                            linkSearch={linkSearch}
+                            onSearchChange={setLinkSearch}
+                            onCancel={closePanel}
+                            saving={!!isSaving}
+                            onConfirm={() => {
+                              const linked = mandates.find(m => m.id === selectedLinkId)
+                              saveClub(club, linked?.id, linked?.name)
+                              closePanel()
+                            }}
+                          />
+                        </td>
+                      </tr>
+                    )}
+                  </Fragment>
                 )
               })}
             </tbody>
@@ -677,46 +806,75 @@ export function TmScoutView() {
               {(displayResults as TmPlayer[]).map((player, i) => {
                 const matches  = mandateMatchCount(player, needs)
                 const saved    = savedMap[player.id]
+                const isOpen   = openSaveId === player.id
                 const isSaving = savingId === player.id
                 return (
-                  <tr key={player.id || i} className={styles.tr}>
-                    <td className={styles.td}>
-                      <div className={styles.entityCell}>
-                        <Avatar imageUrl={player.imageUrl} name={player.name} size={28} round />
-                        <span className={styles.entityName}>{player.name}</span>
-                      </div>
-                    </td>
-                    <td className={styles.td}>
-                      {player.position
-                        ? <span className={styles.posBadge}>{player.position}</span>
-                        : <span className={styles.meta}>—</span>}
-                    </td>
-                    <td className={`${styles.td} ${styles.tdNum}`}><span className={styles.num}>{player.age || '—'}</span></td>
-                    <td className={styles.td}><span className={styles.meta}>{player.nationality || '—'}</span></td>
-                    <td className={styles.td}><span className={styles.meta}>{player.club || '—'}</span></td>
-                    <td className={`${styles.td} ${styles.tdNum}`}><span className={styles.mv}>{player.marketValue || '—'}</span></td>
-                    <td className={`${styles.td} ${styles.tdNum}`}><MatchBadge count={matches} /></td>
-                    <td className={styles.td}>
-                      <div className={styles.rowActions}>
-                        {player.profileUrl && (
-                          <a href={player.profileUrl} target="_blank" rel="noopener noreferrer"
-                            className={styles.tmLink} title="View on Transfermarkt">
-                            <ExternalLinkIcon size={13} />
-                          </a>
-                        )}
-                        {saved ? (
-                          <button className={styles.savedBtn} onClick={() => nav(`/mandates/${saved.key}`)}>
-                            ✓ View Profile
-                          </button>
-                        ) : (
-                          <button className={styles.saveBtn} onClick={() => savePlayer(player)} disabled={isSaving}>
-                            {isSaving ? <Spinner /> : null}
-                            {isSaving ? 'Saving…' : '+ Save'}
-                          </button>
-                        )}
-                      </div>
-                    </td>
-                  </tr>
+                  <Fragment key={player.id || i}>
+                    <tr className={`${styles.tr} ${isOpen ? styles.trOpen : ''}`}>
+                      <td className={styles.td}>
+                        <div className={styles.entityCell}>
+                          <Avatar imageUrl={player.imageUrl} name={player.name} size={28} round />
+                          <span className={styles.entityName}>{player.name}</span>
+                        </div>
+                      </td>
+                      <td className={styles.td}>
+                        {player.position
+                          ? <span className={styles.posBadge}>{player.position}</span>
+                          : <span className={styles.meta}>—</span>}
+                      </td>
+                      <td className={`${styles.td} ${styles.tdNum}`}><span className={styles.num}>{player.age || '—'}</span></td>
+                      <td className={styles.td}><span className={styles.meta}>{player.nationality || '—'}</span></td>
+                      <td className={styles.td}><span className={styles.meta}>{player.club || '—'}</span></td>
+                      <td className={`${styles.td} ${styles.tdNum}`}><span className={styles.mv}>{player.marketValue || '—'}</span></td>
+                      <td className={`${styles.td} ${styles.tdNum}`}><MatchBadge count={matches} /></td>
+                      <td className={styles.td}>
+                        <div className={styles.rowActions}>
+                          {player.profileUrl && (
+                            <a href={player.profileUrl} target="_blank" rel="noopener noreferrer"
+                              className={styles.tmLink} title="View on Transfermarkt">
+                              <ExternalLinkIcon size={13} />
+                            </a>
+                          )}
+                          {saved ? (
+                            <button className={styles.savedBtn} onClick={() => nav(`/mandates/${saved.key}`)}>
+                              ✓ View Profile
+                            </button>
+                          ) : (
+                            <button
+                              className={`${styles.saveBtn} ${isOpen ? styles.saveBtnOpen : ''}`}
+                              onClick={() => openPanel(player.id)}
+                              disabled={isSaving}
+                            >
+                              {isSaving ? <Spinner /> : null}
+                              {isSaving ? 'Saving…' : isOpen ? '▲ Close' : '+ Save'}
+                            </button>
+                          )}
+                        </div>
+                      </td>
+                    </tr>
+                    {isOpen && (
+                      <tr className={styles.savePanelRow}>
+                        <td colSpan={8} className={styles.savePanelCell}>
+                          <SavePanel
+                            title={`Save "${player.name}" to CRM${tab === 'loan' ? ' (Loan)' : ''}`}
+                            listLabel="Link to a club in CRM — which club needs this player?"
+                            items={clubOptions}
+                            onSelect={setSelectedLinkId}
+                            selectedId={selectedLinkId}
+                            linkSearch={linkSearch}
+                            onSearchChange={setLinkSearch}
+                            onCancel={closePanel}
+                            saving={!!isSaving}
+                            onConfirm={() => {
+                              const linked = fbClubs.find(c => c.id === selectedLinkId)
+                              savePlayer(player, linked?.id, linked?.name)
+                              closePanel()
+                            }}
+                          />
+                        </td>
+                      </tr>
+                    )}
+                  </Fragment>
                 )
               })}
             </tbody>
