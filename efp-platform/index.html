@@ -5,45 +5,55 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>EFP — European Football Partners</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;450;500;550;600;700;800&display=swap" rel="stylesheet">
 <style>
 * { box-sizing: border-box; }
 html { background: #ffffff; overscroll-behavior: none; }
 
 :root {
-  --bg:        #F5F5F5;
+  --bg:        #F7F8FA;
   --surface:   #FFFFFF;
-  --surface1:  #F5F5F5;
-  --surface2:  #F9F9F9;
+  --surface1:  #F7F8FA;
+  --surface2:  #F3F4F6;
   --border:    #E5E7EB;
   --border2:   #D1D5DB;
   --navy:      #1B3A6B;
   --navy2:     #142E56;
   --navy-dim:  rgba(27,58,107,0.07);
   --navy-mid:  rgba(27,58,107,0.14);
-  --text:      #111827;
-  --text2:     #4B5563;
-  --text3:     #9CA3AF;
-  --text4:     #D1D5DB;
+  --accent:    #2563EB;
+  --accent2:   #1D4ED8;
+  --acc-glow:  rgba(37,99,235,0.12);
+  --text:      #0F172A;
+  --text1:     #0F172A;
+  --text2:     #475569;
+  --text3:     #94A3B8;
+  --text4:     #CBD5E1;
   --green:     #166534;
   --green-bg:  rgba(22,101,52,0.08);
   --amber:     #92400E;
   --amber-bg:  rgba(146,64,14,0.08);
   --red:       #7F1D1D;
   --red-bg:    rgba(127,29,29,0.08);
-  --slate:     #374151;
+  --slate:     #334155;
   --gold:      #B45309;
   --gold-bg:   rgba(180,83,9,0.08);
-  --sidebar-w: 232px;
-  --topbar-h:  58px;
+  --sidebar-w: 240px;
+  --topbar-h:  60px;
+  --radius:    8px;
+  --radius-lg: 12px;
   --shadow:    0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
   --shadow-md: 0 4px 16px rgba(0,0,0,0.08), 0 1px 4px rgba(0,0,0,0.04);
+  --shadow-lg: 0 8px 32px rgba(0,0,0,0.10), 0 2px 8px rgba(0,0,0,0.06);
 }
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 body {
-  font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', sans-serif;
-  background: var(--surface);
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  background: var(--bg);
   color: var(--text);
   width: 100%;
   min-width: 100vw;
@@ -52,6 +62,7 @@ body {
   display: flex;
   font-size: 14px;
   -webkit-font-smoothing: antialiased;
+  font-feature-settings: 'cv02','cv03','cv04','cv11';
 }
 
 /* Global filter utility — works on ALL screen sizes */
@@ -73,7 +84,7 @@ body {
 .sidebar::-webkit-scrollbar { display: none; }
 
 .sidebar-brand {
-  padding: 22px 20px 18px;
+  padding: 20px 18px 16px;
   border-bottom: 1px solid var(--border);
 }
 .brand-mark {
@@ -83,34 +94,35 @@ body {
   margin-bottom: 2px;
 }
 .brand-monogram {
-  width: 28px; height: 28px;
+  width: 30px; height: 30px;
   background: var(--navy);
-  border-radius: 4px;
+  border-radius: 6px;
   display: flex; align-items: center; justify-content: center;
-  color: white; font-size: 11px; font-weight: 700; letter-spacing: 0.02em;
+  color: white; font-size: 11px; font-weight: 800; letter-spacing: 0.03em;
 }
 .brand-name {
-  font-size: 13px; font-weight: 700; color: var(--navy);
-  letter-spacing: -0.01em;
+  font-size: 13px; font-weight: 700; color: var(--text);
+  letter-spacing: -0.02em;
 }
 .brand-tagline {
-  font-size: 10px; color: var(--text3); letter-spacing: 0.06em;
-  text-transform: uppercase; padding-left: 38px;
+  font-size: 10px; color: var(--text3); letter-spacing: 0.04em;
+  text-transform: uppercase; padding-left: 40px;
 }
 
-.nav-section { padding: 16px 12px 6px; }
+.nav-section { padding: 14px 10px 4px; }
 .nav-label {
   font-size: 9.5px; font-weight: 600; color: var(--text3);
-  text-transform: uppercase; letter-spacing: 0.1em;
-  padding: 0 8px; margin-bottom: 3px;
+  text-transform: uppercase; letter-spacing: 0.12em;
+  padding: 0 10px; margin-bottom: 2px;
 }
 
 .nav-item {
   display: flex; align-items: center; gap: 9px;
-  padding: 7px 8px; border-radius: 5px;
+  padding: 7px 10px; border-radius: 6px;
   font-size: 13px; font-weight: 450; color: var(--text2);
-  cursor: pointer; transition: all 0.1s; position: relative;
+  cursor: pointer; transition: background 0.1s, color 0.1s; position: relative;
   letter-spacing: -0.01em;
+  user-select: none;
 }
 .nav-item:hover { background: var(--bg); color: var(--text); }
 .nav-item.active {
@@ -119,14 +131,15 @@ body {
 }
 .nav-item.active::before {
   content: '';
-  position: absolute; left: 0; top: 5px; bottom: 5px;
-  width: 2px; background: var(--navy); border-radius: 1px;
+  position: absolute; left: 0; top: 6px; bottom: 6px;
+  width: 2.5px; background: var(--navy); border-radius: 2px;
 }
 .nav-icon {
-  width: 15px; text-align: center; font-size: 13px;
-  opacity: 0.7; flex-shrink: 0;
+  width: 16px; text-align: center; font-size: 13px;
+  opacity: 0.65; flex-shrink: 0;
 }
 .nav-item.active .nav-icon { opacity: 1; }
+.nav-item:hover .nav-icon { opacity: 0.85; }
 .nav-badge {
   margin-left: auto;
   font-size: 10px; font-weight: 600;
@@ -138,12 +151,12 @@ body {
 
 .sidebar-footer {
   margin-top: auto;
-  padding: 12px;
+  padding: 12px 10px;
   border-top: 1px solid var(--border);
 }
 .user-tile {
-  display: flex; align-items: center; gap: 9px;
-  padding: 8px; border-radius: 6px; cursor: pointer;
+  display: flex; align-items: center; gap: 10px;
+  padding: 8px 10px; border-radius: 7px; cursor: pointer;
   transition: background 0.1s;
 }
 .user-tile:hover { background: var(--bg); }
@@ -154,10 +167,10 @@ body {
   font-size: 11px; font-weight: 700; flex-shrink: 0;
 }
 .user-name { font-size: 12px; font-weight: 600; color: var(--text); }
-.user-role { font-size: 10px; color: var(--text3); }
+.user-role { font-size: 10.5px; color: var(--text3); }
 
 /* ─── MAIN ─── */
-.main { flex: 1; min-width: 0; display: flex; flex-direction: column; overflow: hidden; background: var(--surface); }
+.main { flex: 1; min-width: 0; display: flex; flex-direction: column; overflow: hidden; background: var(--bg); }
 
 .topbar {
   height: var(--topbar-h);
@@ -169,7 +182,7 @@ body {
 }
 .topbar-title {
   font-size: 15px; font-weight: 650; color: var(--text);
-  letter-spacing: -0.02em; flex: 1;
+  letter-spacing: -0.025em; flex: 1;
 }
 .search {
   display: flex; align-items: center; gap: 7px;
@@ -233,24 +246,30 @@ body {
 
 .btn {
   display: inline-flex; align-items: center; gap: 5px;
-  padding: 7px 14px; border-radius: 6px;
+  padding: 7px 15px; border-radius: 7px;
   font-size: 12.5px; font-weight: 550;
   cursor: pointer; border: none; white-space: nowrap;
-  letter-spacing: -0.01em; transition: all 0.1s;
+  letter-spacing: -0.01em; transition: all 0.12s;
 }
 .btn-primary {
   background: var(--navy); color: white;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.1);
 }
-.btn-primary:hover { background: var(--navy2); }
+.btn-primary:hover { background: var(--navy2); box-shadow: 0 2px 4px rgba(0,0,0,0.12); }
 .btn-outline {
-  background: transparent; color: var(--text2);
-  border: 1px solid var(--border2);
+  background: var(--surface); color: var(--text2);
+  border: 1px solid var(--border);
 }
-.btn-outline:hover { background: var(--bg); color: var(--text); }
+.btn-outline:hover { background: var(--bg); color: var(--text); border-color: var(--border2); }
 .btn-sm { padding: 5px 11px; font-size: 12px; }
+.btn-accent {
+  background: var(--accent); color: white;
+  box-shadow: 0 1px 2px rgba(37,99,235,0.15);
+}
+.btn-accent:hover { background: var(--accent2); }
 
 /* ─── CONTENT ─── */
-.content { flex: 1; overflow-y: auto; padding: 28px 32px; background: var(--surface); overscroll-behavior: none; }
+.content { flex: 1; overflow-y: auto; padding: 28px 32px; background: var(--bg); overscroll-behavior: none; }
 .view { display: none; }
 .view.active { display: block; }
 
@@ -331,7 +350,7 @@ body {
 .panel {
   background: var(--surface);
   border: 1px solid var(--border);
-  border-radius: 8px;
+  border-radius: 10px;
   box-shadow: var(--shadow);
   overflow: hidden;
 }
@@ -342,7 +361,7 @@ body {
 }
 .panel-label {
   font-size: 11px; font-weight: 600; color: var(--text3);
-  text-transform: uppercase; letter-spacing: 0.08em; flex: 1;
+  text-transform: uppercase; letter-spacing: 0.09em; flex: 1;
 }
 
 /* ─── TABLE ─── */
@@ -2966,12 +2985,347 @@ th.ds-sort:hover { background: rgba(30,58,95,.06); }
 #view-clubfinder .dlg input.dlg-inp:focus {border-color:var(--accent);box-shadow:0 0 0 3px var(--acc-glow)}
 
 #view-clubfinder .dlg-btns {display:flex;gap:8px;justify-content:flex-end}
-</style>
 
+/* ─── FULL-PAGE PROFILE VIEWS ─────────────────────────────────────────────── */
+.profile-page { max-width: 1160px; margin: 0 auto; }
+
+.profile-page-header {
+  display: flex; align-items: center; gap: 20px;
+  margin-bottom: 28px; padding-bottom: 22px;
+  border-bottom: 1px solid var(--border);
+}
+.profile-back-btn {
+  display: inline-flex; align-items: center; gap: 7px;
+  padding: 7px 14px; border-radius: 7px;
+  border: 1px solid var(--border); background: var(--surface);
+  color: var(--text2); font-size: 13px; font-weight: 500;
+  cursor: pointer; transition: all 0.12s; flex-shrink: 0;
+  text-decoration: none; box-shadow: var(--shadow);
+}
+.profile-back-btn:hover { background: var(--bg); color: var(--text); border-color: var(--border2); }
+
+.profile-hero {
+  flex: 1; display: flex; align-items: center; gap: 18px;
+}
+.profile-hero-avatar {
+  width: 54px; height: 54px; border-radius: 50%;
+  background: linear-gradient(135deg, var(--navy), var(--navy2));
+  color: white; display: flex; align-items: center; justify-content: center;
+  font-size: 20px; font-weight: 700; flex-shrink: 0;
+  box-shadow: 0 2px 8px rgba(27,58,107,0.25);
+}
+.profile-hero-info { flex: 1; min-width: 0; }
+.profile-hero-name {
+  font-size: 24px; font-weight: 700; color: var(--text);
+  letter-spacing: -0.04em; line-height: 1; margin-bottom: 5px;
+}
+.profile-hero-meta { font-size: 13px; color: var(--text3); }
+
+.profile-prio-group {
+  display: flex; gap: 8px; align-items: center;
+}
+.profile-prio-btn {
+  padding: 7px 16px; border-radius: 7px; border: 1.5px solid var(--border);
+  background: var(--surface); font-size: 12.5px; font-weight: 600;
+  cursor: pointer; transition: all 0.12s; color: var(--text2);
+  white-space: nowrap;
+}
+.profile-prio-btn:hover { border-color: var(--border2); background: var(--bg); }
+.profile-prio-btn.active-p1 { background: #FEF2F2; border-color: #FECACA; color: #991B1B; }
+.profile-prio-btn.active-p2 { background: #FFFBEB; border-color: #FDE68A; color: #92400E; }
+.profile-prio-btn.active-p3 { background: var(--surface2); border-color: var(--border2); color: var(--text2); }
+
+.profile-page-body {
+  display: grid;
+  grid-template-columns: 1fr 380px;
+  gap: 24px;
+  align-items: start;
+}
+.profile-form-panel {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: var(--shadow);
+}
+.profile-form-section {
+  padding: 22px 24px;
+  border-bottom: 1px solid var(--border);
+}
+.profile-form-section:last-child { border-bottom: none; }
+.profile-form-section-title {
+  font-size: 10.5px; font-weight: 600; color: var(--text3);
+  text-transform: uppercase; letter-spacing: 0.1em;
+  margin-bottom: 16px;
+}
+.profile-form-grid-2 {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 12px;
+}
+.profile-form-grid-3 {
+  display: grid; grid-template-columns: 1fr 1fr 80px; gap: 10px;
+}
+.profile-form-grid-4 {
+  display: grid; grid-template-columns: 1fr 1fr 80px 90px; gap: 10px;
+}
+.profile-actions-bar {
+  display: flex; gap: 8px; align-items: center;
+  padding: 16px 24px;
+  background: var(--bg); border-top: 1px solid var(--border);
+}
+.profile-side-col {
+  display: flex; flex-direction: column; gap: 20px;
+}
+.profile-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: var(--shadow);
+}
+.profile-card-head {
+  padding: 13px 18px;
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: space-between;
+}
+.profile-card-title {
+  font-size: 10.5px; font-weight: 600; color: var(--text3);
+  text-transform: uppercase; letter-spacing: 0.09em;
+}
+.profile-card-body { padding: 16px 18px; }
+.profile-card-items { display: flex; flex-direction: column; gap: 8px; }
+
+/* need view specific */
+.need-page-header {
+  display: flex; align-items: center; gap: 20px;
+  margin-bottom: 28px; padding-bottom: 22px;
+  border-bottom: 1px solid var(--border);
+}
+.need-hero { flex: 1; display: flex; align-items: center; gap: 16px; }
+.need-hero-icon {
+  width: 52px; height: 52px; border-radius: 10px;
+  background: var(--navy-dim); border: 1px solid var(--navy-mid);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 22px; flex-shrink: 0;
+}
+.need-hero-name { font-size: 22px; font-weight: 700; color: var(--text); letter-spacing: -0.03em; line-height: 1; margin-bottom: 4px; }
+.need-hero-meta { font-size: 13px; color: var(--text3); }
+
+/* ══════════════════════════════════════════════════════
+   DARK SIDEBAR REDESIGN
+══════════════════════════════════════════════════════ */
+.sidebar {
+  background: #0F172A;
+  border-right: none;
+  box-shadow: 1px 0 0 rgba(255,255,255,0.06);
+}
+.sidebar-brand {
+  padding: 22px 18px 18px;
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+}
+.brand-monogram {
+  background: var(--accent);
+  border-radius: 8px;
+  width: 32px; height: 32px;
+  font-size: 12px; font-weight: 800;
+}
+.brand-name {
+  color: #FFFFFF;
+  font-size: 13px; font-weight: 700;
+}
+.brand-tagline {
+  color: rgba(255,255,255,0.38);
+  font-size: 9.5px; letter-spacing: 0.07em;
+}
+.nav-section { padding: 12px 10px 4px; }
+.nav-label {
+  color: rgba(255,255,255,0.3);
+  font-size: 9.5px; letter-spacing: 0.12em;
+  padding: 0 10px; margin-bottom: 3px;
+}
+.nav-item {
+  color: rgba(255,255,255,0.58);
+  font-size: 13px; font-weight: 450;
+  border-radius: 7px;
+  padding: 7px 10px;
+  transition: background 0.1s, color 0.1s;
+}
+.nav-item:hover {
+  background: rgba(255,255,255,0.07);
+  color: rgba(255,255,255,0.9);
+}
+.nav-item.active {
+  background: rgba(255,255,255,0.1);
+  color: #FFFFFF;
+  font-weight: 600;
+}
+.nav-item.active::before {
+  background: var(--accent);
+  width: 3px;
+}
+.nav-icon {
+  opacity: 0.7;
+  font-size: 14px;
+}
+.nav-item.active .nav-icon { opacity: 1; }
+.nav-item:hover .nav-icon   { opacity: 0.9; }
+.nav-badge {
+  background: rgba(255,255,255,0.12);
+  color: rgba(255,255,255,0.7);
+  font-size: 10px; font-weight: 600;
+  border-radius: 10px; padding: 1px 7px;
+}
+.nav-badge.urgent {
+  background: rgba(220,38,38,0.25);
+  color: #FCA5A5;
+}
+.sidebar-footer {
+  border-top: 1px solid rgba(255,255,255,0.08);
+  padding: 12px 10px;
+}
+.user-tile:hover { background: rgba(255,255,255,0.07); }
+.user-avatar {
+  background: var(--accent);
+  width: 30px; height: 30px;
+  font-size: 12px;
+}
+.user-name { color: rgba(255,255,255,0.9); font-size: 12px; font-weight: 600; }
+.user-role { color: rgba(255,255,255,0.38); font-size: 10.5px; }
+
+/* ══════════════════════════════════════════════════════
+   TOPBAR IMPROVEMENTS
+══════════════════════════════════════════════════════ */
+.topbar {
+  height: 58px;
+  padding: 0 24px;
+  border-bottom: 1px solid var(--border);
+  background: var(--surface);
+}
+.topbar-title {
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  color: var(--text);
+}
+
+/* ══════════════════════════════════════════════════════
+   DASHBOARD IMPROVEMENTS
+══════════════════════════════════════════════════════ */
+.dash-greeting {
+  display: flex; align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 24px;
+}
+.dash-greeting-text {
+  font-size: 22px; font-weight: 700;
+  color: var(--text); letter-spacing: -0.03em; line-height: 1.2;
+}
+.dash-greeting-sub {
+  font-size: 13px; color: var(--text3); margin-top: 4px;
+}
+.dash-greeting-actions { display: flex; gap: 8px; align-items: center; }
+
+/* Better KPI strip */
+.kpi-strip {
+  border-radius: 12px;
+  box-shadow: var(--shadow-md);
+  margin-bottom: 24px;
+}
+.kpi-card { padding: 20px 22px; }
+.kpi-label {
+  font-size: 11px; font-weight: 550;
+  color: var(--text3); text-transform: none;
+  letter-spacing: 0; margin-bottom: 8px;
+}
+.kpi-value {
+  font-size: 28px; font-weight: 750;
+  letter-spacing: -0.04em;
+}
+.kpi-value.navy { color: var(--navy); }
+.kpi-sub { font-size: 11.5px; color: var(--text3); margin-top: 6px; }
+
+/* Better panels */
+.panel { border-radius: 12px; box-shadow: var(--shadow); }
+.panel-head { padding: 16px 20px; }
+.panel-label {
+  font-size: 13px; font-weight: 650;
+  color: var(--text); text-transform: none;
+  letter-spacing: -0.01em;
+}
+
+/* Needs bar modernised */
+.needs-bar {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  box-shadow: var(--shadow);
+  padding: 0; overflow: hidden;
+  margin-bottom: 24px;
+}
+.needs-bar-head {
+  display: flex; align-items: center; gap: 10px;
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--border);
+}
+.needs-bar-label {
+  flex: 1; font-size: 13px; font-weight: 650;
+  color: var(--text); letter-spacing: -0.01em;
+}
+.needs-grid { padding: 16px 20px; gap: 12px; }
+.need-cell {
+  border-radius: 10px;
+  padding: 14px 16px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+.need-cell:hover {
+  border-color: var(--border2);
+  box-shadow: var(--shadow);
+}
+.need-club { font-size: 13px; font-weight: 650; color: var(--text); margin-bottom: 4px; letter-spacing: -0.01em; }
+.need-pos  { font-size: 12px; color: var(--text2); margin-bottom: 6px; }
+.need-meta { font-size: 11px; color: var(--text3); line-height: 1.5; }
+
+/* Today's tasks panel */
+.dash-tasks-top {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  box-shadow: var(--shadow);
+  overflow: hidden;
+  margin-bottom: 24px;
+}
+.dash-tasks-top-head {
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: space-between;
+}
+.dash-tasks-top-icon {
+  width: 30px; height: 30px; border-radius: 8px;
+  background: var(--navy-dim); color: var(--navy);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 14px; font-weight: 700;
+}
+
+/* Contact rows in dashboard */
+.contact-row { padding: 12px 20px; }
+.contact-name { font-size: 13px; font-weight: 600; color: var(--text); }
+.contact-meta { font-size: 11.5px; color: var(--text3); margin-top: 1px; }
+.days-tag {
+  font-size: 11px; font-weight: 600;
+  padding: 3px 9px; border-radius: 20px;
+  white-space: nowrap;
+}
+.days-tag.overdue { background: #FEF2F2; color: #991B1B; }
+.days-tag.warn    { background: #FFFBEB; color: #92400E; }
+
+/* Two-col gap */
+.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+.gap-bot { margin-bottom: 20px; }
 </style>
-  <!-- Firebase Realtime Database SDK — defer so HTML renders while scripts download -->
-  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js" defer></script>
-  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js" defer></script>
+  <!-- Firebase Realtime Database SDK -->
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
 </head>
 <body>
 
@@ -3058,7 +3412,7 @@ th.ds-sort:hover { background: rgba(30,58,95,.06); }
   <div class="nav-section">
     <div class="nav-label">Overview</div>
     <div class="nav-item active" onclick="go('dashboard')">
-      <span class="nav-icon">⚡</span> Dashboard
+      <span class="nav-icon"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg></span> Dashboard
       <span class="nav-badge urgent" id="sidebar-dash-badge" style="display:none">0</span>
     </div>
   </div>
@@ -3066,50 +3420,50 @@ th.ds-sort:hover { background: rgba(30,58,95,.06); }
   <div class="nav-section">
     <div class="nav-label">CRM</div>
     <div class="nav-item" onclick="go('clubs')">
-      <span class="nav-icon">🏟</span> Clubs
+      <span class="nav-icon"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></span> Clubs
     </div>
     <div class="nav-item" onclick="go('contacts')">
-      <span class="nav-icon">👤</span> Contacts
+      <span class="nav-icon"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></span> Contacts
     </div>
     <div class="nav-item" onclick="go('mandates')">
-      <span class="nav-icon">⚽</span> Player Mandates
+      <span class="nav-icon"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg></span> Player Mandates
     </div>
     <div class="nav-item" onclick="go('needs')">
-      <span class="nav-icon">🎯</span> Club Needs
+      <span class="nav-icon"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></span> Club Needs
     </div>
   </div>
 
   <div class="nav-section">
     <div class="nav-label">Pipelines</div>
     <div class="nav-item" onclick="go('relationships')">
-      <span class="nav-icon">🤝</span> Relationships
+      <span class="nav-icon"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></span> Relationships
     </div>
     <div class="nav-item" onclick="go('pitches')">
-      <span class="nav-icon">📋</span> Player Pitches
+      <span class="nav-icon"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg></span> Player Pitches
     </div>
     <div class="nav-item" onclick="go('clubpitches')">
-      <span class="nav-icon">🏟</span> Club Mandates
+      <span class="nav-icon"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg></span> Club Mandates
     </div>
   </div>
 
   <div class="nav-section">
     <div class="nav-label">Intelligence</div>
     <div class="nav-item" onclick="go('matches')">
-      <span class="nav-icon">🎯</span> AI Matches
+      <span class="nav-icon"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></span> AI Matches
       <span class="nav-badge" id="matches-nav-badge" style="display:none">0</span>
     </div>
     <div class="nav-item" onclick="go('clubfinder')">
-      <span class="nav-icon">🔭</span> Scout
+      <span class="nav-icon"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></span> Scout
     </div>
   </div>
 
   <div class="nav-section">
     <div class="nav-label">Workspace</div>
     <div class="nav-item" onclick="go('activity')">
-      <span class="nav-icon">📰</span> Activity Feed
+      <span class="nav-icon"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 20V10"/><path d="M12 20V4"/><path d="M6 20v-6"/></svg></span> Activity Feed
     </div>
     <div class="nav-item" onclick="go('tasks')">
-      <span class="nav-icon">✅</span> Tasks
+      <span class="nav-icon"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg></span> Tasks
       <span class="nav-badge" id="sidebar-tasks-badge" style="display:none">0</span>
     </div>
   </div>
@@ -3117,7 +3471,7 @@ th.ds-sort:hover { background: rgba(30,58,95,.06); }
   <div class="nav-section">
     <div class="nav-label">Export</div>
     <div class="nav-item" onclick="openPdfExport()">
-      <span class="nav-icon">📄</span> Export to PDF
+      <span class="nav-icon"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg></span> Export to PDF
     </div>
   </div>
 
@@ -3193,6 +3547,18 @@ th.ds-sort:hover { background: rgba(30,58,95,.06); }
 
     <!-- ══════════ DASHBOARD ══════════ -->
     <div class="view active" id="view-dashboard">
+
+      <!-- Greeting header -->
+      <div class="dash-greeting">
+        <div>
+          <div class="dash-greeting-text" id="dash-greeting-text">Good morning, Timo</div>
+          <div class="dash-greeting-sub" id="dash-greeting-sub">Here's your transfer intelligence overview</div>
+        </div>
+        <div class="dash-greeting-actions">
+          <button class="btn btn-outline btn-sm" onclick="go('activity')">Activity Feed</button>
+          <button class="btn btn-primary btn-sm" onclick="apmOpen('player')">+ New Pitch</button>
+        </div>
+      </div>
 
       <!-- KPI Strip -->
       <div class="kpi-strip">
@@ -4598,208 +4964,225 @@ th.ds-sort:hover { background: rgba(30,58,95,.06); }
   </div>
 </div>
 
-<!-- ══ PLAYER PROFILE DRAWER (merged) ══ -->
-<div class="drawer-overlay" id="pp-overlay" onclick="closePlayerProfile()"></div>
-<div class="drawer" id="pp-drawer">
-  <div class="drawer-head">
-    <div>
-      <div class="drawer-title" id="pp-name">Player Profile</div>
-      <div class="drawer-sub" id="pp-meta">View &amp; edit mandate details</div>
-    </div>
-    <div class="drawer-close" onclick="closePlayerProfile()">✕</div>
-  </div>
+<!-- ══ PLAYER PROFILE — FULL PAGE VIEW ══ -->
+<div id="view-player-profile" class="view">
+  <div class="profile-page">
 
-  <div class="drawer-body" style="padding-top:16px">
-
-    <!-- Priority -->
-    <div class="form-group" style="margin-bottom:14px">
-      <label class="form-label">Priority</label>
-      <div style="display:flex;gap:8px">
-        <button type="button" id="pp-prio-1" onclick="setPPPrio(1)"
-          style="flex:1;padding:8px;border-radius:6px;border:2px solid var(--border);background:var(--surface2);
-                 font-size:13px;font-weight:700;cursor:pointer;transition:all 0.15s;color:var(--text)">
-          🔴 P1 — Focus
-        </button>
-        <button type="button" id="pp-prio-2" onclick="setPPPrio(2)"
-          style="flex:1;padding:8px;border-radius:6px;border:2px solid var(--border);background:var(--surface2);
-                 font-size:13px;font-weight:700;cursor:pointer;transition:all 0.15s;color:var(--text)">
-          🟡 P2 — Active
-        </button>
-        <button type="button" id="pp-prio-3" onclick="setPPPrio(3)"
-          style="flex:1;padding:8px;border-radius:6px;border:2px solid var(--border);background:var(--surface2);
-                 font-size:13px;font-weight:700;cursor:pointer;transition:all 0.15s;color:var(--text)">
-          ⚪ P3 — Watch
-        </button>
+    <!-- Header -->
+    <div class="profile-page-header">
+      <button class="profile-back-btn" onclick="closePlayerProfile()">← Back</button>
+      <div class="profile-hero">
+        <div class="profile-hero-avatar" id="pp-avatar">?</div>
+        <div class="profile-hero-info">
+          <div class="profile-hero-name" id="pp-name">Player Profile</div>
+          <div class="profile-hero-meta" id="pp-meta">View &amp; edit mandate details</div>
+        </div>
+      </div>
+      <div class="profile-prio-group">
+        <button type="button" id="pp-prio-1" class="profile-prio-btn" onclick="setPPPrio(1)">🔴 P1 Focus</button>
+        <button type="button" id="pp-prio-2" class="profile-prio-btn" onclick="setPPPrio(2)">🟡 P2 Active</button>
+        <button type="button" id="pp-prio-3" class="profile-prio-btn" onclick="setPPPrio(3)">⚪ P3 Watch</button>
       </div>
     </div>
 
-    <div style="border-top:1px solid var(--border);padding-top:14px;margin-bottom:14px">
+    <!-- Body: two columns -->
+    <div class="profile-page-body">
 
-      <!-- Editable mandate fields -->
-      <div class="field" style="margin-bottom:10px">
-        <label class="field-label">Player Name</label>
-        <input class="field-input" id="pp-edit-name" placeholder="Full name">
-      </div>
-      <div style="display:flex;gap:10px;margin-bottom:10px">
-        <div style="flex:1">
-          <label class="field-label">Position</label>
-          <select class="field-select" id="pp-edit-pos">
-            <option value="">Select…</option>
-            <option value="GK">GK — Goalkeeper</option>
-            <option value="RB">RB — Right-Back</option><option value="LB">LB — Left-Back</option><option value="RWB">RWB — Right Wing-Back</option><option value="LWB">LWB — Left Wing-Back</option>
-            <option value="CB">CB — Centre-Back</option><option value="RCB">RCB — Right Centre-Back</option><option value="LCB">LCB — Left Centre-Back</option>
-            <option value="DM">DM — Defensive Mid</option><option value="RDM">RDM — Right Def. Mid</option><option value="LDM">LDM — Left Def. Mid</option>
-            <option value="CM">CM — Central Mid</option><option value="RCM">RCM — Right Central Mid</option><option value="LCM">LCM — Left Central Mid</option><option value="RM">RM — Right Mid</option><option value="LM">LM — Left Mid</option>
-            <option value="AM">AM — Attacking Mid</option><option value="RAM">RAM — Right Att. Mid</option><option value="LAM">LAM — Left Att. Mid</option>
-            <option value="RW">RW — Right Winger</option><option value="LW">LW — Left Winger</option><option value="RF">RF — Right Forward</option><option value="LF">LF — Left Forward</option>
-            <option value="CF">CF — Centre-Forward</option><option value="ST">ST — Striker</option><option value="SS">SS — Second Striker</option>
-          </select>
+      <!-- LEFT: Edit form -->
+      <div>
+        <div class="profile-form-panel">
+
+          <!-- Player details -->
+          <div class="profile-form-section">
+            <div class="profile-form-section-title">Player Details</div>
+            <div class="field" style="margin-bottom:12px">
+              <label class="field-label">Player Name</label>
+              <input class="field-input" id="pp-edit-name" placeholder="Full name">
+            </div>
+            <div class="profile-form-grid-4" style="margin-bottom:12px">
+              <div>
+                <label class="field-label">Position</label>
+                <select class="field-select" id="pp-edit-pos">
+                  <option value="">Select…</option>
+                  <option value="GK">GK — Goalkeeper</option>
+                  <option value="RB">RB — Right-Back</option><option value="LB">LB — Left-Back</option><option value="RWB">RWB — Right Wing-Back</option><option value="LWB">LWB — Left Wing-Back</option>
+                  <option value="CB">CB — Centre-Back</option><option value="RCB">RCB — Right Centre-Back</option><option value="LCB">LCB — Left Centre-Back</option>
+                  <option value="DM">DM — Defensive Mid</option><option value="RDM">RDM — Right Def. Mid</option><option value="LDM">LDM — Left Def. Mid</option>
+                  <option value="CM">CM — Central Mid</option><option value="RCM">RCM — Right Central Mid</option><option value="LCM">LCM — Left Central Mid</option><option value="RM">RM — Right Mid</option><option value="LM">LM — Left Mid</option>
+                  <option value="AM">AM — Attacking Mid</option><option value="RAM">RAM — Right Att. Mid</option><option value="LAM">LAM — Left Att. Mid</option>
+                  <option value="RW">RW — Right Winger</option><option value="LW">LW — Left Winger</option><option value="RF">RF — Right Forward</option><option value="LF">LF — Left Forward</option>
+                  <option value="CF">CF — Centre-Forward</option><option value="ST">ST — Striker</option><option value="SS">SS — Second Striker</option>
+                </select>
+              </div>
+              <div>
+                <label class="field-label">Secondary Position</label>
+                <select class="field-select" id="pp-edit-pos2">
+                  <option value="">None</option>
+                  <option value="GK">GK — Goalkeeper</option>
+                  <option value="RB">RB — Right-Back</option><option value="LB">LB — Left-Back</option><option value="RWB">RWB — Right Wing-Back</option><option value="LWB">LWB — Left Wing-Back</option>
+                  <option value="CB">CB — Centre-Back</option><option value="RCB">RCB — Right Centre-Back</option><option value="LCB">LCB — Left Centre-Back</option>
+                  <option value="DM">DM — Defensive Mid</option><option value="RDM">RDM — Right Def. Mid</option><option value="LDM">LDM — Left Def. Mid</option>
+                  <option value="CM">CM — Central Mid</option><option value="RCM">RCM — Right Central Mid</option><option value="LCM">LCM — Left Central Mid</option><option value="RM">RM — Right Mid</option><option value="LM">LM — Left Mid</option>
+                  <option value="AM">AM — Attacking Mid</option><option value="RAM">RAM — Right Att. Mid</option><option value="LAM">LAM — Left Att. Mid</option>
+                  <option value="RW">RW — Right Winger</option><option value="LW">LW — Left Winger</option><option value="RF">RF — Right Forward</option><option value="LF">LF — Left Forward</option>
+                  <option value="CF">CF — Centre-Forward</option><option value="ST">ST — Striker</option><option value="SS">SS — Second Striker</option>
+                </select>
+              </div>
+              <div>
+                <label class="field-label">Age</label>
+                <input class="field-input" id="pp-edit-age" placeholder="23" type="number" min="16" max="45">
+              </div>
+              <div>
+                <label class="field-label">Height (cm)</label>
+                <input class="field-input" id="pp-edit-height" placeholder="185" type="number" min="150" max="220">
+              </div>
+            </div>
+            <div style="display:flex;gap:8px;margin-bottom:8px;align-items:center">
+              <label class="field-label" style="margin:0;flex:1;font-size:11px;color:var(--text3)">Auto-fill player data from name</label>
+              <button type="button" class="btn btn-outline btn-sm" onclick="_ppAutoFill()">🔍 Look up</button>
+            </div>
+            <div id="pp-autofill-status" style="display:none;font-size:11.5px;color:var(--text2);margin-bottom:8px;padding:6px 10px;background:var(--surface2);border-radius:6px;border:1px solid var(--border)"></div>
+            <div class="profile-form-grid-2" style="margin-bottom:12px">
+              <div>
+                <label class="field-label">Current Club</label>
+                <input class="field-input" id="pp-edit-club" placeholder="e.g. Rangers FC" autocomplete="off"
+                  oninput="_taClub(this)" onfocus="_taClub(this)" onblur="_taBlur()" onkeydown="_taKey(event)">
+              </div>
+              <div>
+                <label class="field-label">Market Value</label>
+                <input class="field-input" id="pp-edit-val" placeholder="e.g. €3.5M" inputmode="numeric" oninput="_valInput(this)" onblur="_valBlur(this)">
+              </div>
+            </div>
+            <div class="profile-form-grid-2" style="margin-bottom:12px">
+              <div>
+                <label class="field-label">Nationality</label>
+                <input class="field-input" id="pp-edit-nat" placeholder="e.g. Dutch, EU passport">
+              </div>
+              <div>
+                <label class="field-label">Preferred Foot</label>
+                <select class="field-select" id="pp-edit-foot">
+                  <option value="">—</option>
+                  <option>Right</option><option>Left</option><option>Both</option>
+                </select>
+              </div>
+            </div>
+            <div class="profile-form-grid-2">
+              <div>
+                <label class="field-label">Contract Expires</label>
+                <input class="field-input" id="pp-edit-contract" placeholder="e.g. Jun 2026">
+              </div>
+              <div>
+                <label class="field-label">Mandate Type</label>
+                <select class="field-select" id="pp-edit-mandate-type">
+                  <option value="">—</option>
+                  <option>Exclusive</option><option>Non-exclusive</option><option>Co-agent</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <!-- Deal info -->
+          <div class="profile-form-section">
+            <div class="profile-form-section-title">Deal &amp; Financials</div>
+            <div class="profile-form-grid-2" style="margin-bottom:12px">
+              <div>
+                <label class="field-label">Expected Price</label>
+                <input class="field-input" id="pp-edit-expected-price" placeholder="e.g. €2.5M" inputmode="numeric" oninput="_valInput(this)" onblur="_valBlur(this)">
+              </div>
+              <div>
+                <label class="field-label">Salary (p/m)</label>
+                <input class="field-input" id="pp-edit-salary" placeholder="e.g. €80.000" inputmode="numeric" oninput="_valInput(this)" onblur="_valBlur(this)">
+              </div>
+            </div>
+            <div class="profile-form-grid-2" style="margin-bottom:12px">
+              <div>
+                <label class="field-label">Status</label>
+                <select id="pp-status" class="field-input" style="width:100%">
+                  <option value="Active Mandate">Active Mandate</option>
+                  <option value="Pending Confirm">Pending Confirm</option>
+                  <option value="New Mandate">New Mandate</option>
+                  <option value="Loan Mandate">Loan Mandate</option>
+                  <option value="On Hold">On Hold</option>
+                  <option value="Deal Closed">Deal Closed ✅</option>
+                  <option value="No Deal">No Deal ❌</option>
+                  <option value="Mandate Ended">Mandate Ended</option>
+                </select>
+              </div>
+              <div>
+                <label class="field-label">Deal Type</label>
+                <select class="field-select" id="pp-deal-type" style="width:100%">
+                  <option value="either">Loan or Permanent</option>
+                  <option value="loan">Loan Only</option>
+                  <option value="permanent">Permanent Only</option>
+                </select>
+              </div>
+            </div>
+            <div class="field" style="position:relative">
+              <label class="field-label">Source / Via</label>
+              <input class="field-input" id="pp-edit-source" placeholder="Type to search contacts…" autocomplete="off"
+                oninput="_taContact(this)" onfocus="_taContact(this)" onblur="_taBlur()" onkeydown="_taKey(event)">
+            </div>
+          </div>
+
+          <!-- Internal Notes -->
+          <div class="profile-form-section">
+            <div class="profile-form-section-title">Internal Notes</div>
+            <textarea id="pp-notes" class="input" rows="4" placeholder="e.g. No club because too expensive · Agent wants loan-to-buy · Check in August · Salary €80k/month max…"
+              style="width:100%;resize:vertical;font-family:inherit;font-size:13px;box-sizing:border-box;border:1px solid var(--border);border-radius:7px;padding:10px 12px;color:var(--text);background:var(--surface);outline:none"
+              onfocus="this.style.borderColor='var(--navy)'" onblur="this.style.borderColor='var(--border)'"></textarea>
+          </div>
+
+          <!-- Action buttons -->
+          <div class="profile-actions-bar">
+            <button class="btn btn-primary" onclick="savePlayerProfile()" style="flex:1">Save Changes</button>
+            <button class="btn btn-outline" onclick="closePlayerProfile();setTimeout(()=>showMandateSuggestions(document.getElementById('pp-edit-name').value,document.getElementById('pp-edit-pos').value,document.getElementById('pp-edit-age').value,document.getElementById('pp-edit-val').value,document.getElementById('pp-edit-club').value),100)">Suggest Clubs →</button>
+            <button class="btn btn-outline" onclick="goToPlayerMatches(document.getElementById('pp-edit-name').value)" title="See AI Matches">⚡ AI</button>
+            <button id="pp-archive-btn" class="btn btn-outline" onclick="archiveMandate()" title="Archive mandate" style="flex-shrink:0">📦</button>
+            <button class="btn btn-outline" onclick="deleteMandateFromDrawer()" title="Delete mandate" style="color:var(--red);border-color:var(--red);flex-shrink:0">🗑</button>
+          </div>
         </div>
-        <div style="flex:1">
-          <label class="field-label">Secondary Position</label>
-          <select class="field-select" id="pp-edit-pos2">
-            <option value="">None</option>
-            <option value="GK">GK — Goalkeeper</option>
-            <option value="RB">RB — Right-Back</option><option value="LB">LB — Left-Back</option><option value="RWB">RWB — Right Wing-Back</option><option value="LWB">LWB — Left Wing-Back</option>
-            <option value="CB">CB — Centre-Back</option><option value="RCB">RCB — Right Centre-Back</option><option value="LCB">LCB — Left Centre-Back</option>
-            <option value="DM">DM — Defensive Mid</option><option value="RDM">RDM — Right Def. Mid</option><option value="LDM">LDM — Left Def. Mid</option>
-            <option value="CM">CM — Central Mid</option><option value="RCM">RCM — Right Central Mid</option><option value="LCM">LCM — Left Central Mid</option><option value="RM">RM — Right Mid</option><option value="LM">LM — Left Mid</option>
-            <option value="AM">AM — Attacking Mid</option><option value="RAM">RAM — Right Att. Mid</option><option value="LAM">LAM — Left Att. Mid</option>
-            <option value="RW">RW — Right Winger</option><option value="LW">LW — Left Winger</option><option value="RF">RF — Right Forward</option><option value="LF">LF — Left Forward</option>
-            <option value="CF">CF — Centre-Forward</option><option value="ST">ST — Striker</option><option value="SS">SS — Second Striker</option>
-          </select>
-        </div>
-        <div style="flex:0 0 72px">
-          <label class="field-label">Age</label>
-          <input class="field-input" id="pp-edit-age" placeholder="23" type="number" min="16" max="45">
-        </div>
-        <div style="flex:0 0 80px">
-          <label class="field-label">Height (cm)</label>
-          <input class="field-input" id="pp-edit-height" placeholder="185" type="number" min="150" max="220">
-        </div>
-      </div>
-      <div style="display:flex;gap:8px;margin-bottom:4px;align-items:center">
-        <label class="field-label" style="margin:0;flex:1">Auto-fill from name</label>
-        <button type="button" class="btn btn-outline" onclick="_ppAutoFill()" style="font-size:11px;padding:2px 10px;height:28px;white-space:nowrap">🔍 Look up</button>
-      </div>
-      <div id="pp-autofill-status" style="display:none;font-size:11.5px;color:var(--text2);margin-bottom:8px;padding:6px 10px;background:var(--surface2);border-radius:6px;border:1px solid var(--border)"></div>
-      <div style="display:flex;gap:10px;margin-bottom:10px">
-        <div style="flex:1">
-          <label class="field-label">Current Club</label>
-          <input class="field-input" id="pp-edit-club" placeholder="e.g. Rangers FC" autocomplete="off"
-            oninput="_taClub(this)" onfocus="_taClub(this)" onblur="_taBlur()" onkeydown="_taKey(event)">
-        </div>
-        <div style="flex:1">
-          <label class="field-label">Market Value</label>
-          <input class="field-input" id="pp-edit-val" placeholder="e.g. €3.5M" inputmode="numeric" oninput="_valInput(this)" onblur="_valBlur(this)">
-        </div>
-      </div>
-      <div style="display:flex;gap:10px;margin-bottom:10px">
-        <div style="flex:1">
-          <label class="field-label">Nationality</label>
-          <input class="field-input" id="pp-edit-nat" placeholder="e.g. Dutch, EU passport">
-        </div>
-        <div style="flex:1">
-          <label class="field-label">Preferred Foot</label>
-          <select class="field-select" id="pp-edit-foot">
-            <option value="">—</option>
-            <option>Right</option><option>Left</option><option>Both</option>
-          </select>
-        </div>
-      </div>
-      <div style="display:flex;gap:10px;margin-bottom:10px">
-        <div style="flex:1">
-          <label class="field-label">Contract Expires</label>
-          <input class="field-input" id="pp-edit-contract" placeholder="e.g. Jun 2026">
-        </div>
-        <div style="flex:1">
-          <label class="field-label">Mandate Type</label>
-          <select class="field-select" id="pp-edit-mandate-type">
-            <option value="">—</option>
-            <option>Exclusive</option><option>Non-exclusive</option><option>Co-agent</option>
-          </select>
-        </div>
-      </div>
-      <div style="display:flex;gap:10px;margin-bottom:10px">
-        <div style="flex:1">
-          <label class="field-label">Expected Price</label>
-          <input class="field-input" id="pp-edit-expected-price" placeholder="e.g. €2.5M" inputmode="numeric" oninput="_valInput(this)" onblur="_valBlur(this)">
-        </div>
-        <div style="flex:1">
-          <label class="field-label">Salary (p/m)</label>
-          <input class="field-input" id="pp-edit-salary" placeholder="e.g. €80.000" inputmode="numeric" oninput="_valInput(this)" onblur="_valBlur(this)">
-        </div>
-      </div>
-      <div class="field" style="margin-bottom:10px;position:relative">
-        <label class="field-label">Source / Via</label>
-        <input class="field-input" id="pp-edit-source" placeholder="Type to search contacts…" autocomplete="off"
-          oninput="_taContact(this)" onfocus="_taContact(this)" onblur="_taBlur()" onkeydown="_taKey(event)">
       </div>
 
-      <!-- Status -->
-      <div class="field">
-        <label class="field-label">Status</label>
-        <select id="pp-status" class="field-input" style="width:100%">
-          <option value="Active Mandate">Active Mandate</option>
-          <option value="Pending Confirm">Pending Confirm</option>
-          <option value="New Mandate">New Mandate</option>
-          <option value="Loan Mandate">Loan Mandate</option>
-          <option value="On Hold">On Hold</option>
-          <option value="Deal Closed">Deal Closed ✅</option>
-          <option value="No Deal">No Deal ❌</option>
-          <option value="Mandate Ended">Mandate Ended</option>
-        </select>
-      </div>
-      <!-- Deal Type -->
-      <div class="field" style="margin-top:10px">
-        <label class="field-label">Deal Type</label>
-        <select class="field-select" id="pp-deal-type" style="width:100%">
-          <option value="either">Loan or Permanent</option>
-          <option value="loan">Loan Only</option>
-          <option value="permanent">Permanent Only</option>
-        </select>
+      <!-- RIGHT: Sidebar cards -->
+      <div class="profile-side-col">
+
+        <!-- Pitch History -->
+        <div class="profile-card">
+          <div class="profile-card-head">
+            <span class="profile-card-title">Pitch History</span>
+            <button class="btn btn-outline btn-sm" onclick="addPitchForMandate()" style="font-size:11px;padding:3px 10px">+ Add Pitch</button>
+          </div>
+          <div class="profile-card-body">
+            <div id="pp-pitch-history" class="profile-card-items">
+              <div style="color:var(--text3);font-size:12px;padding:4px 0">No pitches logged yet.</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Related Activity -->
+        <div class="profile-card">
+          <div class="profile-card-head">
+            <span class="profile-card-title">Related Activity</span>
+          </div>
+          <div class="profile-card-body">
+            <div id="pp-activity"></div>
+          </div>
+        </div>
+
+        <!-- Scout Searches -->
+        <div class="profile-card">
+          <div class="profile-card-head">
+            <span class="profile-card-title">🔭 Linked Scout Searches</span>
+          </div>
+          <div class="profile-card-body">
+            <div id="pp-scout-searches" class="profile-card-items">
+              <div style="color:var(--text3);font-size:12px;padding:4px 0">No Scout searches linked yet.</div>
+            </div>
+          </div>
+        </div>
+
       </div>
     </div>
-
-    <!-- Internal Notes -->
-    <div class="form-group" style="margin-bottom:14px">
-      <label class="form-label">Internal Notes</label>
-      <textarea id="pp-notes" class="input" rows="4" placeholder="e.g. No club because too expensive · Agent wants loan-to-buy · Check in August · Salary €80k/month max…" style="width:100%;resize:vertical;font-family:inherit;font-size:13px;box-sizing:border-box"></textarea>
-    </div>
-
-    <!-- Action buttons -->
-    <div style="display:flex;gap:8px;margin-bottom:10px">
-      <button class="btn btn-primary" onclick="savePlayerProfile()" style="flex:1">Save Changes</button>
-      <button class="btn btn-outline" onclick="closePlayerProfile();setTimeout(()=>showMandateSuggestions(document.getElementById('pp-edit-name').value,document.getElementById('pp-edit-pos').value,document.getElementById('pp-edit-age').value,document.getElementById('pp-edit-val').value,document.getElementById('pp-edit-club').value),100)">Suggest Clubs →</button>
-      <button id="pp-archive-btn" class="btn btn-outline" onclick="archiveMandate()" title="Archive this mandate" style="flex-shrink:0">📦</button>
-      <button class="btn btn-outline" onclick="deleteMandateFromDrawer()" title="Delete this mandate" style="color:var(--red);border-color:var(--red);flex-shrink:0">🗑</button>
-    </div>
-    <div style="margin-bottom:18px">
-      <button class="btn btn-outline" style="width:100%;justify-content:center;gap:6px;color:var(--accent);border-color:var(--accent)" onclick="goToPlayerMatches(document.getElementById('pp-edit-name').value)" title="Go to AI Matches filtered for this player">⚡ See AI Matches for this player →</button>
-    </div>
-
-    <!-- Pitch History -->
-    <div style="border-top:1px solid var(--border);padding-top:14px">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
-        <div style="font-size:13px;font-weight:600;color:var(--text)">Pitch History</div>
-        <button class="btn btn-outline btn-xs" onclick="addPitchForMandate()" title="Log a new pitch">+ Add Pitch</button>
-      </div>
-      <div id="pp-pitch-history" style="display:flex;flex-direction:column;gap:8px"></div>
-    </div>
-
-    <div class="profile-activity-section">
-      <div class="sec-label">RELATED ACTIVITY</div>
-      <div id="pp-activity"></div>
-    </div>
-
-    <!-- Scout searches linked to this mandate -->
-    <div style="margin-top:22px;padding-top:18px;border-top:1px solid var(--border)">
-      <div style="font-size:13px;font-weight:600;color:var(--text);margin-bottom:12px">🔭 Linked Scout Searches</div>
-      <div id="pp-scout-searches" style="display:flex;flex-direction:column;gap:8px">
-        <div style="color:var(--text3);font-size:12px;padding:8px 0">No Scout searches linked to this mandate yet. Save a Find-a-Club search and link it here.</div>
-      </div>
-    </div>
-
   </div>
 </div>
 
@@ -5603,7 +5986,7 @@ function efpInitFirebase() {
         // Refresh need detail pitched-players panel if open
         _refreshNeedDetailIfOpen();
         // If mandate detail drawer is open, refresh its pitch history too
-        if (document.getElementById('pp-drawer')?.classList.contains('open') && _ppCurrentPlayer) {
+        if (document.getElementById('view-player-profile')?.classList.contains('active') && _ppCurrentPlayer) {
           const mdName = _ppCurrentPlayer;
           if (mdName) {
             const histEl = document.getElementById('pp-pitch-history');
@@ -8626,8 +9009,8 @@ document.addEventListener('keydown', function (e) {
   // 3. Display-based drawers (club-edit, player-profile)
   const ceOv = document.getElementById('club-edit-overlay');
   if (ceOv && ceOv.style.display === 'block' && typeof closeClubEdit === 'function') { closeClubEdit(); closed = true; }
-  const ppOv = document.getElementById('pp-overlay');
-  if (ppOv && ppOv.style.display === 'block' && typeof closePlayerProfile === 'function') { closePlayerProfile(); closed = true; }
+  const ppView = document.getElementById('view-player-profile');
+  if (ppView && ppView.classList.contains('active') && typeof closePlayerProfile === 'function') { closePlayerProfile(); closed = true; }
   if (closed) document.body.style.overflow = '';
 });
 
@@ -9765,6 +10148,7 @@ function deleteClub(id, btn) {
 // ─── PLAYER PROFILE DRAWER ───
 let _ppCurrentPlayer  = null; // name of open player
 let _ppCurrentMandate = null; // direct reference to the allMandates object — avoids name-search race
+let _prevView         = 'mandates'; // tracks which view to return to on profile close
 
 // Maps any stored position string (abbr or full name) → dropdown option value
 // Canonical 26-position code list
@@ -9929,16 +10313,15 @@ function openPlayerProfile(playerName, data) {
     }
   }
 
-  // Open drawer
-  document.getElementById('pp-overlay').style.display = 'block';
-  document.getElementById('pp-drawer').classList.add('open');
+  // Navigate to full-page profile view
+  _prevView = document.querySelector('.view.active')?.id?.replace('view-','') || 'mandates';
+  go('player-profile');
 }
 
 function closePlayerProfile() {
-  document.getElementById('pp-overlay').style.display = 'none';
-  document.getElementById('pp-drawer').classList.remove('open');
   _ppCurrentPlayer  = null;
   _ppCurrentMandate = null;
+  go(_prevView || 'mandates');
 }
 
 // ── Contact Detail Drawer ──────────────────────────────────
@@ -10061,7 +10444,7 @@ function archiveNeed(id) {
   const inAdded = needsAdded.find(n => n.id === id);
   if (inAdded) inAdded.archived = need.archived;
   fbSave();
-  closeDrawer('need-detail');
+  closeNeedDetail();
   _renderNeedsTable();
   _updateNeedsSubtitle();
   showSnack(need.archived ? `${need.club} requirement archived` : `${need.club} requirement restored`, false);
@@ -10074,11 +10457,8 @@ function setNeedPrio(n, silent) {
   [1,2,3].forEach(i => {
     const btn = document.getElementById('nd-needprio-' + i);
     if (!btn) return;
-    const active = (i === n);
-    const colors = { 1:'#dc2626', 2:'#d97706', 3:'#6b7280' };
-    btn.style.borderColor = active ? colors[i] : 'var(--border)';
-    btn.style.background  = active ? (i===1?'#fef2f2':i===2?'#fffbeb':'#f9fafb') : 'var(--surface2)';
-    btn.style.color       = active ? colors[i] : 'var(--text)';
+    btn.classList.remove('active-p1','active-p2','active-p3');
+    if (i === n) btn.classList.add('active-p' + i);
   });
 }
 
@@ -10087,11 +10467,8 @@ function setPPPrio(n, silent) {
   [1,2,3].forEach(i => {
     const btn = document.getElementById('pp-prio-' + i);
     if (!btn) return;
-    const active = (i === n);
-    const colors = { 1:'#dc2626', 2:'#d97706', 3:'#6b7280' };
-    btn.style.borderColor  = active ? colors[i] : 'var(--border)';
-    btn.style.background   = active ? (i===1?'#fef2f2': i===2?'#fffbeb':'#f9fafb') : 'var(--surface2)';
-    btn.style.color        = active ? colors[i] : 'var(--text)';
+    btn.classList.remove('active-p1','active-p2','active-p3');
+    if (i === n) btn.classList.add('active-p' + i);
   });
 }
 
@@ -11599,7 +11976,13 @@ function openNeedDetail(clubName, pos, budMin, budMax, contact, prio, notes, nee
     }
   }
 
-  openDrawer('need-detail');
+  // Navigate to full-page club need view
+  _prevView = document.querySelector('.view.active')?.id?.replace('view-','') || 'needs';
+  go('club-need');
+}
+
+function closeNeedDetail() {
+  go(_prevView || 'needs');
 }
 
 function saveNeedDetail() {
@@ -11654,13 +12037,13 @@ function saveNeedDetail() {
   }
 
   const _ndIsEdit   = !!_currentNeedId;
-  const _ndSaveBtn  = document.querySelector('#need-detail-drawer .btn-primary');
+  const _ndSaveBtn  = document.querySelector('#view-club-need .btn-primary');
   const _ndResetBtn = () => { if (window._DS && _ndSaveBtn) _DS.btn(_ndSaveBtn, 'default'); };
   if (window._DS && _ndSaveBtn) _DS.btn(_ndSaveBtn, 'loading');
   try {
     fbSave();
     setTimeout(() => {
-      closeDrawer('need-detail');
+      closeNeedDetail();
       if (_ndIsEdit) showSnack('✓ Requirement updated', false);
       _ndResetBtn();
     }, 350);
@@ -11673,7 +12056,7 @@ function saveNeedDetail() {
 
 function pitchToNeedClub() {
   const club = document.getElementById('nd-club').value.trim();
-  closeDrawer('need-detail');
+  closeNeedDetail();
   setTimeout(() => {
     apmOpen('player');
     setTimeout(() => {
@@ -11713,7 +12096,7 @@ function initNeedRows() {
 
 // Also re-open drawer with fresh pitch list when pitches update while drawer is open
 function _refreshNeedDetailIfOpen() {
-  if (!document.getElementById('need-detail-drawer')?.classList.contains('open')) return;
+  if (!document.getElementById('view-club-need')?.classList.contains('active')) return;
   const club = document.getElementById('nd-club')?.value;
   if (!club) return;
   // Re-render pitch list only
@@ -15468,6 +15851,21 @@ function renderDashboard() {
   _renderDashNeeds();
   _renderDashTasks();
   _renderDashFeed();
+
+  // ── Greeting ───────────────────────────────────────────────────────────────
+  const _greet = document.getElementById('dash-greeting-text');
+  const _greetSub = document.getElementById('dash-greeting-sub');
+  if (_greet) {
+    const _h = new Date().getHours();
+    const _tod = _h < 12 ? 'morning' : _h < 17 ? 'afternoon' : 'evening';
+    _greet.textContent = `Good ${_tod}, Timo`;
+  }
+  if (_greetSub) {
+    const _now = new Date();
+    const _dayStr = _now.toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long'});
+    const _urgentCount = (allNeeds||[]).filter(n=>!n.archived&&n.prio==='Urgent').length;
+    _greetSub.textContent = _dayStr + (_urgentCount ? ` · ${_urgentCount} urgent club needs require attention` : ' · Transfer Intelligence Platform');
+  }
 }
 
 const TITLES = {
@@ -15475,11 +15873,13 @@ const TITLES = {
   clubs:'Clubs', mandates:'Player Mandates', needs:'Club Needs',
   relationships:'Relationship Pipeline', pitches:'Player Pitch Pipeline',
   clubpitches:'Club Mandates',
-  matches:'AI Matches', activity:'Activity Feed', tasks:'Tasks', clubfinder:'Scout'
+  matches:'AI Matches', activity:'Activity Feed', tasks:'Tasks', clubfinder:'Scout',
+  'player-profile':'Player Profile', 'club-need':'Club Requirement'
 };
 const NAV_IDX = {
   dashboard:0, clubs:1, contacts:2, mandates:3, needs:4,
-  'contact-detail':2, relationships:5, pitches:6, clubpitches:7, matches:8, activity:9, tasks:10, clubfinder:11
+  'contact-detail':2, relationships:5, pitches:6, clubpitches:7, matches:8, activity:9, tasks:10, clubfinder:11,
+  'player-profile':3, 'club-need':4
 };
 
 function _updateTopbarActions(view) {
@@ -16911,8 +17311,8 @@ window._DS = (function () {
       return;
     }
     // 4. Fallback: close player profile
-    var ppOv = document.getElementById('pp-overlay');
-    if (ppOv && ppOv.style.display !== 'none') { if (typeof closePlayerProfile === 'function') closePlayerProfile(); return; }
+    var ppView2 = document.getElementById('view-player-profile');
+    if (ppView2 && ppView2.classList.contains('active')) { if (typeof closePlayerProfile === 'function') closePlayerProfile(); return; }
     // 5. Fallback: close club edit
     var ceOv = document.getElementById('club-edit-overlay');
     if (ceOv && ceOv.style.display !== 'none') { if (typeof closeClubEdit === 'function') closeClubEdit(); return; }
@@ -20414,138 +20814,154 @@ document.addEventListener('click', e => {
   </div>
 </div>
 
-<!-- ══ NEED DETAIL / EDIT DRAWER ════════════════════════════════════════ -->
-<div class="drawer-overlay" id="need-detail-overlay" onclick="closeDrawer('need-detail')"></div>
-<div class="drawer" id="need-detail-drawer">
-  <div class="drawer-head">
-    <div>
-      <div class="drawer-title" id="nd-title">Club Requirement</div>
-      <div class="drawer-sub" id="nd-subtitle">View &amp; edit requirement details</div>
-    </div>
-    <div class="drawer-close" onclick="closeDrawer('need-detail')">✕</div>
-  </div>
-  <div class="drawer-body" style="padding-top:16px">
+<!-- ══ CLUB NEED FULL-PAGE VIEW ════════════════════════════════════════ -->
+<div id="view-club-need" class="view">
+  <div class="profile-page">
 
-    <!-- EFP Priority (P1/P2/P3) -->
-    <div style="margin-bottom:14px">
-      <label class="field-label">Priority</label>
-      <div style="display:flex;gap:8px">
-        <button type="button" id="nd-needprio-1" onclick="setNeedPrio(1)"
-          style="flex:1;padding:8px;border-radius:6px;border:2px solid var(--border);background:var(--surface2);
-                 font-size:13px;font-weight:700;cursor:pointer;transition:all 0.15s;color:var(--text)">
-          🔴 P1 — Focus
-        </button>
-        <button type="button" id="nd-needprio-2" onclick="setNeedPrio(2)"
-          style="flex:1;padding:8px;border-radius:6px;border:2px solid var(--border);background:var(--surface2);
-                 font-size:13px;font-weight:700;cursor:pointer;transition:all 0.15s;color:var(--text)">
-          🟡 P2 — Active
-        </button>
-        <button type="button" id="nd-needprio-3" onclick="setNeedPrio(3)"
-          style="flex:1;padding:8px;border-radius:6px;border:2px solid var(--border);background:var(--surface2);
-                 font-size:13px;font-weight:700;cursor:pointer;transition:all 0.15s;color:var(--text)">
-          ⚪ P3 — Watch
-        </button>
+    <!-- Header -->
+    <div class="profile-page-header">
+      <button class="profile-back-btn" onclick="closeNeedDetail()">← Back</button>
+      <div style="display:flex;gap:10px;align-items:center">
+        <button class="btn btn-primary" onclick="saveNeedDetail()">Save Changes</button>
+        <button id="nd-archive-btn" class="btn btn-outline" title="Archive requirement" onclick="if(_currentNeedId)archiveNeed(_currentNeedId)">📦 Archive</button>
+        <button class="btn btn-outline" title="Delete requirement" style="color:var(--red);border-color:var(--red)" onclick="if(_currentNeedId&&confirm('Delete this club requirement?')){closeNeedDetail();deleteNeed(_currentNeedId,null)}">🗑 Delete</button>
       </div>
     </div>
 
-    <div style="border-top:1px solid var(--border);padding-top:14px">
-
-    <!-- Edit form -->
-    <div class="field">
-      <label class="field-label">Club</label>
-      <input class="field-input" id="nd-club" placeholder="Club name" list="efp-club-datalist" autocomplete="off">
-    </div>
-    <div class="field">
-      <label class="field-label">Position(s) needed <span class="req">*</span></label>
-      <input class="field-input" id="nd-pos" placeholder="e.g. CB, LB, CDM">
-    </div>
-    <div class="field-row field">
+    <!-- Hero -->
+    <div class="need-hero">
+      <div class="need-hero-icon">🏟️</div>
       <div>
-        <label class="field-label">Budget min <span style="color:var(--red)">*</span></label>
-        <input class="field-input" id="nd-budmin" placeholder="e.g. €3,000,000" inputmode="numeric" oninput="_valInput(this)" onblur="_valBlur(this)">
-      </div>
-      <div>
-        <label class="field-label">Budget max <span style="color:var(--red)">*</span></label>
-        <input class="field-input" id="nd-budmax" placeholder="e.g. €8,000,000" inputmode="numeric" oninput="_valInput(this)" onblur="_valBlur(this)">
-      </div>
-    </div>
-    <div class="field-row field">
-      <div>
-        <label class="field-label">Age Min</label>
-        <input class="field-input" id="nd-agemin" placeholder="e.g. 20" type="number" min="15" max="45">
-      </div>
-      <div>
-        <label class="field-label">Age Max</label>
-        <input class="field-input" id="nd-agemax" placeholder="e.g. 27" type="number" min="15" max="45">
-      </div>
-    </div>
-    <div class="field-row field">
-      <div>
-        <label class="field-label">Transfer Window</label>
-        <select class="field-select" id="nd-window">
-          <option>Summer 2025</option>
-          <option>Winter 2026</option>
-          <option selected>Summer 2026</option>
-          <option>Winter 2027</option>
-          <option>Summer 2027</option>
-          <option>Ongoing</option>
-        </select>
-      </div>
-      <div>
-        <label class="field-label">Urgency</label>
-        <select class="field-select" id="nd-prio">
-          <option>Urgent</option><option>High</option><option>Medium</option><option>Low</option>
-        </select>
-      </div>
-    </div>
-    <div class="field">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">
-        <label class="field-label" style="margin-bottom:0">Contact</label>
-        <span id="nd-contact-link" style="display:none;font-size:11px;color:var(--navy);cursor:pointer;text-decoration:underline;text-underline-offset:2px" onclick="_openContactByName(document.getElementById('nd-contact').value.trim())">Open Profile →</span>
-      </div>
-      <input class="field-input" id="nd-contact" placeholder="e.g. David Verwilghen" oninput="document.getElementById('nd-contact-link').style.display=this.value.trim()?'inline':'none'">
-    </div>
-    <div class="field">
-      <label class="field-label">Deal Type</label>
-      <select class="field-select" id="nd-deal-type">
-        <option value="either">Loan or Permanent</option>
-        <option value="loan">Loan Only</option>
-        <option value="permanent">Permanent Only</option>
-      </select>
-    </div>
-    <div class="field">
-      <label class="field-label">Notes / Profile details</label>
-      <textarea class="field-textarea" id="nd-notes" rows="3" placeholder="Age range, playing style, specific requirements…"></textarea>
-    </div>
-    <div style="display:flex;gap:10px;margin-top:8px">
-      <button class="btn btn-primary" style="flex:1" onclick="saveNeedDetail()">Save Changes</button>
-      <button class="btn btn-outline" onclick="closeDrawer('need-detail')">Cancel</button>
-      <button id="nd-archive-btn" class="btn btn-outline" title="Archive requirement" style="flex-shrink:0" onclick="if(_currentNeedId)archiveNeed(_currentNeedId)">📦</button>
-      <button class="btn btn-outline" title="Delete requirement" style="color:var(--red);border-color:var(--red);flex-shrink:0" onclick="if(_currentNeedId&&confirm('Delete this club requirement?')){closeDrawer('need-detail');deleteNeed(_currentNeedId,null)}">🗑</button>
-    </div>
-    </div>
-
-    <!-- Pitched players panel -->
-    <div style="margin-top:22px;padding-top:18px;border-top:1px solid var(--border)">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
-        <div style="font-size:13px;font-weight:600;color:var(--text)">Players Pitched to This Club</div>
-        <button class="btn btn-outline btn-xs" onclick="pitchToNeedClub()" title="Pitch a player to this club">+ Pitch Player</button>
-      </div>
-      <div id="nd-pitch-list" style="display:flex;flex-direction:column;gap:8px">
-        <div style="color:var(--text3);font-size:12px;padding:6px 0">No pitches to this club yet.</div>
+        <div class="need-hero-name" id="nd-title">Club Requirement</div>
+        <div class="need-hero-meta" id="nd-subtitle">View &amp; edit requirement details</div>
+        <!-- Priority buttons -->
+        <div class="profile-prio-group" style="margin-top:12px">
+          <button type="button" id="nd-needprio-1" class="profile-prio-btn" onclick="setNeedPrio(1)">🔴 P1 Focus</button>
+          <button type="button" id="nd-needprio-2" class="profile-prio-btn" onclick="setNeedPrio(2)">🟡 P2 Active</button>
+          <button type="button" id="nd-needprio-3" class="profile-prio-btn" onclick="setNeedPrio(3)">⚪ P3 Watch</button>
+        </div>
       </div>
     </div>
 
-    <!-- Scout searches linked to this club need -->
-    <div style="margin-top:22px;padding-top:18px;border-top:1px solid var(--border)">
-      <div style="font-size:13px;font-weight:600;color:var(--text);margin-bottom:12px">🔭 Linked Scout Searches</div>
-      <div id="nd-scout-searches" style="display:flex;flex-direction:column;gap:8px">
-        <div style="color:var(--text3);font-size:12px;padding:6px 0">No Scout searches linked to this club need.</div>
-      </div>
-    </div>
+    <!-- Body: two-column -->
+    <div class="profile-page-body">
 
-  </div>
-</div>
+      <!-- LEFT: Edit form -->
+      <div class="profile-form-panel">
+
+        <div class="profile-form-section">
+          <div class="profile-form-section-title">Requirement Details</div>
+          <div class="profile-form-grid-2">
+            <div class="field">
+              <label class="field-label">Club</label>
+              <input class="field-input" id="nd-club" placeholder="Club name" list="efp-club-datalist" autocomplete="off">
+            </div>
+            <div class="field">
+              <label class="field-label">Position(s) needed <span class="req">*</span></label>
+              <input class="field-input" id="nd-pos" placeholder="e.g. CB, LB, CDM">
+            </div>
+            <div class="field">
+              <label class="field-label">Budget Min <span style="color:var(--red)">*</span></label>
+              <input class="field-input" id="nd-budmin" placeholder="e.g. €3,000,000" inputmode="numeric" oninput="_valInput(this)" onblur="_valBlur(this)">
+            </div>
+            <div class="field">
+              <label class="field-label">Budget Max <span style="color:var(--red)">*</span></label>
+              <input class="field-input" id="nd-budmax" placeholder="e.g. €8,000,000" inputmode="numeric" oninput="_valInput(this)" onblur="_valBlur(this)">
+            </div>
+            <div class="field">
+              <label class="field-label">Age Min</label>
+              <input class="field-input" id="nd-agemin" placeholder="e.g. 20" type="number" min="15" max="45">
+            </div>
+            <div class="field">
+              <label class="field-label">Age Max</label>
+              <input class="field-input" id="nd-agemax" placeholder="e.g. 27" type="number" min="15" max="45">
+            </div>
+            <div class="field">
+              <label class="field-label">Transfer Window</label>
+              <select class="field-select" id="nd-window">
+                <option>Summer 2025</option>
+                <option>Winter 2026</option>
+                <option selected>Summer 2026</option>
+                <option>Winter 2027</option>
+                <option>Summer 2027</option>
+                <option>Ongoing</option>
+              </select>
+            </div>
+            <div class="field">
+              <label class="field-label">Urgency</label>
+              <select class="field-select" id="nd-prio">
+                <option>Urgent</option><option>High</option><option>Medium</option><option>Low</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <div class="profile-form-section">
+          <div class="profile-form-section-title">Deal &amp; Contact</div>
+          <div class="profile-form-grid-2">
+            <div class="field">
+              <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">
+                <label class="field-label" style="margin-bottom:0">Contact</label>
+                <span id="nd-contact-link" style="display:none;font-size:11px;color:var(--navy);cursor:pointer;text-decoration:underline;text-underline-offset:2px" onclick="_openContactByName(document.getElementById('nd-contact').value.trim())">Open Profile →</span>
+              </div>
+              <input class="field-input" id="nd-contact" placeholder="e.g. David Verwilghen" oninput="document.getElementById('nd-contact-link').style.display=this.value.trim()?'inline':'none'">
+            </div>
+            <div class="field">
+              <label class="field-label">Deal Type</label>
+              <select class="field-select" id="nd-deal-type">
+                <option value="either">Loan or Permanent</option>
+                <option value="loan">Loan Only</option>
+                <option value="permanent">Permanent Only</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <div class="profile-form-section">
+          <div class="profile-form-section-title">Notes</div>
+          <div class="field">
+            <textarea class="field-textarea" id="nd-notes" rows="5" placeholder="Age range, playing style, specific requirements…"></textarea>
+          </div>
+        </div>
+
+        <div class="profile-actions-bar">
+          <button class="btn btn-primary" onclick="saveNeedDetail()">Save Changes</button>
+          <button class="btn btn-outline" onclick="closeNeedDetail()">Cancel</button>
+        </div>
+
+      </div><!-- /profile-form-panel -->
+
+      <!-- RIGHT: Side cards -->
+      <div class="profile-side-col">
+
+        <div class="profile-card">
+          <div class="profile-card-head">
+            <div class="profile-card-title">Players Pitched</div>
+            <button class="btn btn-outline btn-xs" onclick="pitchToNeedClub()">+ Pitch Player</button>
+          </div>
+          <div class="profile-card-body">
+            <div id="nd-pitch-list" class="profile-card-items">
+              <div style="color:var(--text3);font-size:12px;padding:6px 0">No pitches to this club yet.</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="profile-card">
+          <div class="profile-card-head">
+            <div class="profile-card-title">🔭 Linked Scout Searches</div>
+          </div>
+          <div class="profile-card-body">
+            <div id="nd-scout-searches" class="profile-card-items">
+              <div style="color:var(--text3);font-size:12px;padding:6px 0">No Scout searches linked to this club need.</div>
+            </div>
+          </div>
+        </div>
+
+      </div><!-- /profile-side-col -->
+
+    </div><!-- /profile-page-body -->
+  </div><!-- /profile-page -->
+</div><!-- /view-club-need -->
 
 <!-- ══ MANDATE DETAIL / EDIT DRAWER ════════════════════════════════════════ -->
 <div class="drawer-overlay" id="mandate-detail-overlay" onclick="closeDrawer('mandate-detail')"></div>
