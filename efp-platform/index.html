@@ -10943,6 +10943,8 @@ const CE_STATUS_DOT = {
 };
 
 function openClubEdit(clubName) {
+  // Hide sync banner while drawer is open
+  (function(){ var b=document.getElementById('sync-intel-banner'); if(b&&b.style.display!=='none'){b.dataset.hiddenForDrawer='1';b.style.display='none';} })();
   _ceCurrentName  = clubName;
   const saved     = clubData[clubName] || {};
 
@@ -10999,6 +11001,8 @@ function closeClubEdit() {
   _ceCurrentName = null;
   _ceTempContacts = [];
   ceCloseDropdown();
+  // Restore sync banner if it was hidden by the drawer
+  (function(){ var b=document.getElementById('sync-intel-banner'); if(b&&b.dataset.hiddenForDrawer==='1'){delete b.dataset.hiddenForDrawer;if(_syncReviewItems&&_syncReviewItems.length>0)b.style.display='flex';} })();
 }
 
 function saveClubEdit() {
@@ -16248,6 +16252,18 @@ function go(view) {
   if (typeof mobCloseNav === 'function') mobCloseNav();
   // Clear any stuck body overflow lock (e.g. drawer was open when navigation happened)
   document.body.style.overflow = '';
+  // ── Sync banner: hide on profile/detail pages, restore on list views ──
+  (function() {
+    var b = document.getElementById('sync-intel-banner');
+    if (!b) return;
+    var profileViews = ['player-profile', 'club-need', 'contact-profile'];
+    if (profileViews.indexOf(view) !== -1) {
+      if (b.style.display !== 'none') { b.dataset.hiddenForProfile = '1'; b.style.display = 'none'; }
+    } else if (b.dataset.hiddenForProfile === '1') {
+      delete b.dataset.hiddenForProfile;
+      if (_syncReviewItems && _syncReviewItems.length > 0) b.style.display = 'flex';
+    }
+  })();
   _updateTopbarActions(view);
 }
 
