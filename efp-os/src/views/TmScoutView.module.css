@@ -383,3 +383,151 @@
 /* ── TM external link ── */
 .tmLink { display: inline-flex; align-items: center; color: var(--text-3); text-decoration: none; transition: color 0.1s; }
 .tmLink:hover { color: var(--accent); }
+
+/* ── Multi-League Select ─────────────────────────────────────────────── */
+.mlWrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.mlLabel {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-2);
+  white-space: nowrap;
+}
+
+.mlBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 30px;
+  padding: 0 10px;
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  background: var(--surface);
+  color: var(--text);
+  font-size: 12px;
+  cursor: pointer;
+  transition: border-color 0.15s, color 0.15s, background 0.15s;
+  min-width: 120px;
+  white-space: nowrap;
+}
+.mlBtn:hover { border-color: var(--accent); color: var(--accent); }
+
+.mlBtnActive {
+  border-color: var(--accent);
+  background: var(--accent-dim);
+  color: var(--accent);
+  font-weight: 600;
+}
+.mlBtnActive:hover { background: var(--accent); color: #fff; }
+
+.mlBtnText {
+  flex: 1;
+  text-align: left;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.mlDropdown {
+  position: absolute;
+  top: calc(100% + 5px);
+  left: 0;
+  z-index: 200;
+  min-width: 210px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.12);
+  padding: 6px;
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.mlClear {
+  width: 100%;
+  padding: 6px 10px;
+  border: none;
+  border-radius: var(--r-sm);
+  background: none;
+  color: var(--text-3);
+  font-size: 11.5px;
+  font-weight: 500;
+  cursor: pointer;
+  text-align: left;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 4px;
+  transition: background 0.1s, color 0.1s;
+}
+.mlClear:hover { background: var(--surface-2); color: var(--text); }
+
+.mlOption {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 10px;
+  cursor: pointer;
+  border-radius: var(--r-sm);
+  transition: background 0.1s;
+  user-select: none;
+}
+.mlOption:hover { background: var(--surface-2); }
+
+.mlCheckbox {
+  width: 14px;
+  height: 14px;
+  accent-color: var(--accent);
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.mlOptionText {
+  flex: 1;
+  font-size: 12px;
+  color: var(--text);
+}
+
+/* ── League chips (selected leagues shown below filter row) ── */
+.leagueChips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  padding-top: 4px;
+}
+
+.leagueChip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  height: 22px;
+  padding: 0 8px 0 9px;
+  background: var(--accent-dim);
+  color: var(--accent);
+  border-radius: var(--r-full);
+  font-size: 11px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.leagueChipRemove {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 14px;
+  height: 14px;
+  border: none;
+  background: none;
+  color: var(--accent);
+  font-size: 14px;
+  line-height: 1;
+  cursor: pointer;
+  padding: 0;
+  border-radius: 50%;
+  opacity: 0.7;
+  transition: opacity 0.1s, background 0.1s;
+}
+.leagueChipRemove:hover { opacity: 1; background: rgba(0,0,0,0.08); }

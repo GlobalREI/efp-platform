@@ -12,6 +12,7 @@
  *
  * Firebase data auto-refreshes every 5 min in the background.
  * TM search runs on explicit user action (Enter / Search TM button).
+ * League filter supports multi-select on ALL tabs.
  */
 import { useEffect, useRef, useState, useCallback } from 'react'
 import { ref, get, push, set } from 'firebase/database'
@@ -51,6 +52,9 @@ interface FbMandate {
   age?: number | string; value?: number | string
   status?: string
 }
+interface FbClub {
+  id: string; name?: string; league?: string; country?: string
+}
 
 /* ── Scoring ────────────────────────────────────────────────────────────── */
 function needScore(club: TmClub, needs: FbNeed[], filterPos: string): number {
@@ -79,7 +83,6 @@ function needScore(club: TmClub, needs: FbNeed[], filterPos: string): number {
 
 function mandateMatchCount(player: TmPlayer, needs: FbNeed[]): number {
   const pos = player.position.toLowerCase()
-  const age = parseInt(player.age, 10)
   const mv  = parseTmValue(player.marketValue)
   return needs.filter(n => {
     const np = [...(n.positions ?? []), n.pos ?? ''].map(p => p.toLowerCase()).filter(Boolean)
@@ -90,6 +93,12 @@ function mandateMatchCount(player: TmPlayer, needs: FbNeed[]): number {
     if (mv !== null && (mv < budMin * 0.6 || mv > budMax * 1.6)) return false
     return true
   }).length
+}
+
+/* ── League match helper ────────────────────────────────────────────────── */
+function leagueMatches(a: string, b: string): boolean {
+  const al = a.toLowerCase(), bl = b.toLowerCase()
+  return al === bl || al.includes(bl) || bl.includes(al)
 }
 
 /* ── Sub-components ─────────────────────────────────────────────────────── */
@@ -148,6 +157,71 @@ function Spinner({ white = false }: { white?: boolean }) {
   )
 }
 
+/* ── Multi-select league picker ─────────────────────────────────────────── */
+function MultiLeagueSelect({ selected, onChange }: {
+  selected: string[]
+  onChange: (leagues: string[]) => void
+}) {
+  const [open, setOpen] = useState(false)
+  const wrapRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    if (!open) return
+    function onDown(e: MouseEvent) {
+      if (wrapRef.current && !wrapRef.current.contains(e.target as Node)) setOpen(false)
+    }
+    document.addEventListener('mousedown', onDown)
+    return () => document.removeEventListener('mousedown', onDown)
+  }, [open])
+
+  function toggle(league: string) {
+    onChange(selected.includes(league)
+      ? selected.filter(l => l !== league)
+      : [...selected, league])
+  }
+
+  const label = selected.length === 0 ? 'All leagues'
+    : selected.length === 1 ? selected[0]
+    : `${selected.length} leagues`
+
+  return (
+    <div ref={wrapRef} className={styles.mlWrap}>
+      <span className={styles.mlLabel}>League</span>
+      <button
+        type="button"
+        className={`${styles.mlBtn} ${selected.length > 0 ? styles.mlBtnActive : ''}`}
+        onClick={() => setOpen(v => !v)}
+      >
+        <span className={styles.mlBtnText}>{label}</span>
+        <svg width="10" height="6" viewBox="0 0 10 6" fill="none" stroke="currentColor" strokeWidth="1.6"
+          strokeLinecap="round" style={{ flexShrink: 0, transition: 'transform 0.15s', transform: open ? 'rotate(180deg)' : 'none' }}>
+          <path d="M1 1l4 4 4-4"/>
+        </svg>
+      </button>
+      {open && (
+        <div className={styles.mlDropdown}>
+          {selected.length > 0 && (
+            <button type="button" className={styles.mlClear} onClick={() => { onChange([]); setOpen(false) }}>
+              ✕ Clear all ({selected.length} selected)
+            </button>
+          )}
+          {LEAGUES.map(league => (
+            <label key={league} className={styles.mlOption}>
+              <input
+                type="checkbox"
+                className={styles.mlCheckbox}
+                checked={selected.includes(league)}
+                onChange={() => toggle(league)}
+              />
+              <span className={styles.mlOptionText}>{league}</span>
+            </label>
+          ))}
+        </div>
+      )}
+    </div>
+  )
+}
+
 function FilterSelect({ label, value, onChange, options, placeholder }: {
   label: string; value: string; onChange: (v: string) => void; options: string[]; placeholder?: string
 }) {
@@ -196,6 +270,7 @@ export function TmScoutView() {
   /* Firebase */
   const [needs,     setNeeds]     = useState<FbNeed[]>([])
   const [mandates,  setMandates]  = useState<FbMandate[]>([])
+  const [fbClubs,   setFbClubs]   = useState<FbClub[]>([])
   const [fbLoading, setFbLoading] = useState(true)
   const [lastSync,  setLastSync]  = useState<Date | null>(null)
   const refreshTimer = useRef<ReturnType<typeof setInterval>>()
@@ -207,13 +282,13 @@ export function TmScoutView() {
   const [tmError,   setTmError]   = useState<string | null>(null)
   const [searched,  setSearched]  = useState(false)
 
-  /* Filters — shared state, reset on tab change */
-  const [filterLeague, setFilterLeague] = useState('')
-  const [filterPos,    setFilterPos]    = useState('')
-  const [filterAgeMin, setFilterAgeMin] = useState('')
-  const [filterAgeMax, setFilterAgeMax] = useState('')
-  const [filterMvMin,  setFilterMvMin]  = useState('')
-  const [filterMvMax,  setFilterMvMax]  = useState('')
+  /* Filters — multi-select leagues + other criteria */
+  const [filterLeagues, setFilterLeagues] = useState<string[]>([])
+  const [filterPos,     setFilterPos]     = useState('')
+  const [filterAgeMin,  setFilterAgeMin]  = useState('')
+  const [filterAgeMax,  setFilterAgeMax]  = useState('')
+  const [filterMvMin,   setFilterMvMin]   = useState('')
+  const [filterMvMax,   setFilterMvMax]   = useState('')
 
   /* Save state: tmId → { firebaseKey, type } */
   const [savedMap,  setSavedMap]  = useState<Record<string, { key: string; type: 'club' | 'mandate' }>>({})
@@ -222,9 +297,10 @@ export function TmScoutView() {
   /* ── Load Firebase ── */
   const loadFirebase = useCallback(async () => {
     try {
-      const [ns, ms] = await Promise.all([
+      const [ns, ms, cs] = await Promise.all([
         get(ref(db, '/needs')),
         get(ref(db, '/mandates')),
+        get(ref(db, '/clubs')),
       ])
       const needsArr: FbNeed[] = []
       if (ns.exists()) ns.forEach(c => {
@@ -236,8 +312,14 @@ export function TmScoutView() {
         const v = c.val()
         if (v && !v.archived) mandatesArr.push({ id: c.key!, ...v })
       })
+      const clubsArr: FbClub[] = []
+      if (cs.exists()) cs.forEach(c => {
+        const v = c.val()
+        if (v && v.name) clubsArr.push({ id: c.key!, name: v.name, league: v.league, country: v.country })
+      })
       setNeeds(needsArr)
       setMandates(mandatesArr)
+      setFbClubs(clubsArr)
       setLastSync(new Date())
     } catch (e) {
       console.error('Firebase load error:', e)
@@ -255,8 +337,9 @@ export function TmScoutView() {
   /* Reset on tab change */
   useEffect(() => {
     setTmResults([]); setTmError(null); setSearched(false); setQuery('')
-    setFilterLeague(''); setFilterPos(''); setFilterAgeMin(''); setFilterAgeMax(''); setFilterMvMin(''); setFilterMvMax('')
-    if (tab === 'loan') { setTimeout(() => setFilterAgeMax('24'), 0) }
+    setFilterLeagues([]); setFilterPos('')
+    setFilterAgeMin(''); setFilterAgeMax(''); setFilterMvMin(''); setFilterMvMax('')
+    if (tab === 'loan') setTimeout(() => setFilterAgeMax('24'), 0)
   }, [tab])
 
   /* ── TM Search ── */
@@ -280,14 +363,42 @@ export function TmScoutView() {
 
   /* ── Filtered results ── */
   const displayResults = (() => {
-    if (tab === 'club') return tmResults as TmClub[]
-    return filterTmPlayers(tmResults as TmPlayer[], {
+    if (tab === 'club') {
+      let clubs = tmResults as TmClub[]
+      // Filter by selected leagues (client-side, TmClub has league field)
+      if (filterLeagues.length > 0) {
+        clubs = clubs.filter(club =>
+          filterLeagues.some(l => leagueMatches(club.league || '', l))
+        )
+      }
+      return clubs
+    }
+
+    // Player / Loan: filter by position, age, MV
+    let players = filterTmPlayers(tmResults as TmPlayer[], {
       position: filterPos || undefined,
       ageMin:   filterAgeMin ? parseInt(filterAgeMin) : undefined,
       ageMax:   filterAgeMax ? parseInt(filterAgeMax) : undefined,
       mvMin:    filterMvMin  ? parseFloat(filterMvMin) : undefined,
       mvMax:    filterMvMax  ? parseFloat(filterMvMax) : undefined,
     })
+
+    // Filter by selected leagues: cross-reference player's club with Firebase clubs
+    // Players whose clubs are not in Firebase are shown regardless (no data = no filter)
+    if (filterLeagues.length > 0) {
+      players = players.filter(player => {
+        const playerClub = (player.club || '').toLowerCase().trim()
+        if (!playerClub) return true // no club info → show
+        const fbMatch = fbClubs.find(fc => {
+          const fcName = (fc.name || '').toLowerCase()
+          return fcName && (fcName.includes(playerClub) || playerClub.includes(fcName))
+        })
+        if (!fbMatch) return true // club not in Firebase → show (don't penalise missing data)
+        return filterLeagues.some(l => leagueMatches(fbMatch.league || '', l))
+      })
+    }
+
+    return players
   })()
 
   /* ── Save club to Firebase ── */
@@ -296,21 +407,21 @@ export function TmScoutView() {
     try {
       const newRef = push(ref(db, 'clubs'))
       await set(newRef, {
-        name:             club.name,
-        league:           club.league  || '',
-        country:          club.country || '',
-        status:           'Active',
-        tm_id:            club.id,
-        tm_market_value:  club.marketValue || '',
-        tm_squad_size:    club.squadSize  || '',
-        tm_avg_age:       club.avgAge     || '',
-        tm_logo_url:      club.logoUrl    || '',
-        tm_profile_url:   club.profileUrl || '',
-        // Saved search context — what player profile were we targeting here?
-        tm_search_pos:    filterPos    || '',
-        tm_search_age:    filterAgeMin && filterAgeMax ? `${filterAgeMin}–${filterAgeMax}` : '',
-        tm_search_mv:     filterMvMin  && filterMvMax  ? `€${filterMvMin}–${filterMvMax}M` : '',
-        savedAt:          Date.now(),
+        name:            club.name,
+        league:          club.league  || '',
+        country:         club.country || '',
+        status:          'Active',
+        tm_id:           club.id,
+        tm_market_value: club.marketValue || '',
+        tm_squad_size:   club.squadSize  || '',
+        tm_avg_age:      club.avgAge     || '',
+        tm_logo_url:     club.logoUrl    || '',
+        tm_profile_url:  club.profileUrl || '',
+        tm_search_pos:   filterPos    || '',
+        tm_search_age:   filterAgeMin && filterAgeMax ? `${filterAgeMin}–${filterAgeMax}` : '',
+        tm_search_mv:    filterMvMin  && filterMvMax  ? `€${filterMvMin}–${filterMvMax}M` : '',
+        tm_search_leagues: filterLeagues.length > 0 ? filterLeagues.join(', ') : '',
+        savedAt:         Date.now(),
       })
       setSavedMap(prev => ({ ...prev, [club.id]: { key: newRef.key!, type: 'club' } }))
     } catch (e) {
@@ -326,18 +437,18 @@ export function TmScoutView() {
     try {
       const newRef = push(ref(db, 'mandates'))
       await set(newRef, {
-        name:           player.name,
-        pos:            player.position  || '',
-        age:            player.age       || '',
-        nationality:    player.nationality || '',
-        club:           player.club      || '',
-        value:          player.marketValue || '',
-        tm_id:          player.id,
-        tm_profile_url: player.profileUrl || '',
-        tm_image_url:   player.imageUrl  || '',
-        source:         'tm_scout',
-        savedAt:        Date.now(),
-        statusText:     'Active Mandate',
+        name:              player.name,
+        pos:               player.position  || '',
+        age:               player.age       || '',
+        nationality:       player.nationality || '',
+        club:              player.club      || '',
+        value:             player.marketValue || '',
+        tm_id:             player.id,
+        tm_profile_url:    player.profileUrl || '',
+        tm_image_url:      player.imageUrl  || '',
+        source:            'tm_scout',
+        savedAt:           Date.now(),
+        statusText:        'Active Mandate',
       })
       setSavedMap(prev => ({ ...prev, [player.id]: { key: newRef.key!, type: 'mandate' } }))
     } catch (e) {
@@ -403,19 +514,24 @@ export function TmScoutView() {
           </button>
         </div>
 
-        {/* ── Filters ── */}
+        {/* ── Filters — league on ALL tabs ── */}
         <div className={styles.filterRow}>
+
+          {/* League multi-select — present on every tab */}
+          <MultiLeagueSelect selected={filterLeagues} onChange={setFilterLeagues} />
+
+          <div className={styles.filterDivider} />
+
           {tab === 'club' && (
             <>
-              <FilterSelect label="League" value={filterLeague} onChange={setFilterLeague} options={LEAGUES} placeholder="All leagues" />
-              <div className={styles.filterDivider} />
-              {/* Player profile you're trying to place at this club */}
+              {/* Club tab: also define what player profile you're placing */}
               <span className={styles.filterGroupLabel}>Player profile:</span>
               <FilterSelect label="Position" value={filterPos} onChange={setFilterPos} options={POSITIONS} placeholder="Any" />
               <RangeFilter label="Age" min={filterAgeMin} max={filterAgeMax} onMin={setFilterAgeMin} onMax={setFilterAgeMax} />
               <RangeFilter label="MV (€M)" min={filterMvMin} max={filterMvMax} onMin={setFilterMvMin} onMax={setFilterMvMax} />
             </>
           )}
+
           {(tab === 'player' || tab === 'loan') && (
             <>
               <FilterSelect label="Position" value={filterPos} onChange={setFilterPos} options={POSITIONS} placeholder="All positions" />
@@ -423,7 +539,25 @@ export function TmScoutView() {
               <RangeFilter label="MV (€M)" min={filterMvMin} max={filterMvMax} onMin={setFilterMvMin} onMax={setFilterMvMax} />
             </>
           )}
+
         </div>
+
+        {/* League chips — show selected leagues as pill summary */}
+        {filterLeagues.length > 0 && (
+          <div className={styles.leagueChips}>
+            {filterLeagues.map(l => (
+              <span key={l} className={styles.leagueChip}>
+                {l}
+                <button
+                  type="button"
+                  className={styles.leagueChipRemove}
+                  onClick={() => setFilterLeagues(filterLeagues.filter(x => x !== l))}
+                  aria-label={`Remove ${l}`}
+                >×</button>
+              </span>
+            ))}
+          </div>
+        )}
       </div>
 
       {/* ── Error ── */}
@@ -442,7 +576,11 @@ export function TmScoutView() {
 
       {/* No results */}
       {!tmError && searched && !searching && displayResults.length === 0 && (
-        <div className={styles.empty}>No results found — try a different search term.</div>
+        <div className={styles.empty}>
+          {filterLeagues.length > 0
+            ? `No results in selected league${filterLeagues.length > 1 ? 's' : ''} — try different leagues or clear the filter.`
+            : 'No results found — try a different search term.'}
+        </div>
       )}
 
       {/* ── Club results ── */}
@@ -453,6 +591,7 @@ export function TmScoutView() {
               Looking for: <strong>{filterPos}</strong>
               {filterAgeMin || filterAgeMax ? ` · Age ${filterAgeMin || '?'}–${filterAgeMax || '?'}` : ''}
               {filterMvMin || filterMvMax ? ` · €${filterMvMin || '0'}–${filterMvMax || '∞'}M` : ''}
+              {filterLeagues.length > 0 ? ` · ${filterLeagues.join(', ')}` : ''}
             </div>
           )}
           <table className={styles.table}>
@@ -460,10 +599,10 @@ export function TmScoutView() {
               <tr>
                 <th className={styles.th}>Club</th>
                 <th className={styles.th}>League / Country</th>
-                <th className={styles.th + ' ' + styles.thNum}>Squad</th>
-                <th className={styles.th + ' ' + styles.thNum}>Avg Age</th>
-                <th className={styles.th + ' ' + styles.thNum}>Market Value</th>
-                <th className={styles.th + ' ' + styles.thNum} title="Cross-ref with your active needs">Need Score</th>
+                <th className={`${styles.th} ${styles.thNum}`}>Squad</th>
+                <th className={`${styles.th} ${styles.thNum}`}>Avg Age</th>
+                <th className={`${styles.th} ${styles.thNum}`}>Market Value</th>
+                <th className={`${styles.th} ${styles.thNum}`} title="Cross-ref with your active needs">Need Score</th>
                 <th className={styles.th}></th>
               </tr>
             </thead>
@@ -486,10 +625,10 @@ export function TmScoutView() {
                         {club.country && <span className={styles.metaSub}>{club.country}</span>}
                       </div>
                     </td>
-                    <td className={styles.td + ' ' + styles.tdNum}><span className={styles.num}>{club.squadSize || '—'}</span></td>
-                    <td className={styles.td + ' ' + styles.tdNum}><span className={styles.num}>{club.avgAge || '—'}</span></td>
-                    <td className={styles.td + ' ' + styles.tdNum}><span className={styles.mv}>{club.marketValue || '—'}</span></td>
-                    <td className={styles.td + ' ' + styles.tdNum}><ScoreBadge score={score} /></td>
+                    <td className={`${styles.td} ${styles.tdNum}`}><span className={styles.num}>{club.squadSize || '—'}</span></td>
+                    <td className={`${styles.td} ${styles.tdNum}`}><span className={styles.num}>{club.avgAge || '—'}</span></td>
+                    <td className={`${styles.td} ${styles.tdNum}`}><span className={styles.mv}>{club.marketValue || '—'}</span></td>
+                    <td className={`${styles.td} ${styles.tdNum}`}><ScoreBadge score={score} /></td>
                     <td className={styles.td}>
                       <div className={styles.rowActions}>
                         {club.profileUrl && (
@@ -499,13 +638,11 @@ export function TmScoutView() {
                           </a>
                         )}
                         {saved ? (
-                          <button className={styles.savedBtn}
-                            onClick={() => nav(`/clubs/${saved.key}`)}>
+                          <button className={styles.savedBtn} onClick={() => nav(`/clubs/${saved.key}`)}>
                             ✓ View Profile
                           </button>
                         ) : (
-                          <button className={styles.saveBtn}
-                            onClick={() => saveClub(club)} disabled={isSaving}>
+                          <button className={styles.saveBtn} onClick={() => saveClub(club)} disabled={isSaving}>
                             {isSaving ? <Spinner /> : null}
                             {isSaving ? 'Saving…' : '+ Save'}
                           </button>
@@ -528,11 +665,11 @@ export function TmScoutView() {
               <tr>
                 <th className={styles.th}>Player</th>
                 <th className={styles.th}>Position</th>
-                <th className={styles.th + ' ' + styles.thNum}>Age</th>
+                <th className={`${styles.th} ${styles.thNum}`}>Age</th>
                 <th className={styles.th}>Nationality</th>
                 <th className={styles.th}>Current Club</th>
-                <th className={styles.th + ' ' + styles.thNum}>Market Value</th>
-                <th className={styles.th + ' ' + styles.thNum} title="Active club needs this player fits">Needs Match</th>
+                <th className={`${styles.th} ${styles.thNum}`}>Market Value</th>
+                <th className={`${styles.th} ${styles.thNum}`} title="Active club needs this player fits">Needs Match</th>
                 <th className={styles.th}></th>
               </tr>
             </thead>
@@ -554,11 +691,11 @@ export function TmScoutView() {
                         ? <span className={styles.posBadge}>{player.position}</span>
                         : <span className={styles.meta}>—</span>}
                     </td>
-                    <td className={styles.td + ' ' + styles.tdNum}><span className={styles.num}>{player.age || '—'}</span></td>
+                    <td className={`${styles.td} ${styles.tdNum}`}><span className={styles.num}>{player.age || '—'}</span></td>
                     <td className={styles.td}><span className={styles.meta}>{player.nationality || '—'}</span></td>
                     <td className={styles.td}><span className={styles.meta}>{player.club || '—'}</span></td>
-                    <td className={styles.td + ' ' + styles.tdNum}><span className={styles.mv}>{player.marketValue || '—'}</span></td>
-                    <td className={styles.td + ' ' + styles.tdNum}><MatchBadge count={matches} /></td>
+                    <td className={`${styles.td} ${styles.tdNum}`}><span className={styles.mv}>{player.marketValue || '—'}</span></td>
+                    <td className={`${styles.td} ${styles.tdNum}`}><MatchBadge count={matches} /></td>
                     <td className={styles.td}>
                       <div className={styles.rowActions}>
                         {player.profileUrl && (
@@ -568,13 +705,11 @@ export function TmScoutView() {
                           </a>
                         )}
                         {saved ? (
-                          <button className={styles.savedBtn}
-                            onClick={() => nav(`/mandates/${saved.key}`)}>
+                          <button className={styles.savedBtn} onClick={() => nav(`/mandates/${saved.key}`)}>
                             ✓ View Profile
                           </button>
                         ) : (
-                          <button className={styles.saveBtn}
-                            onClick={() => savePlayer(player)} disabled={isSaving}>
+                          <button className={styles.saveBtn} onClick={() => savePlayer(player)} disabled={isSaving}>
                             {isSaving ? <Spinner /> : null}
                             {isSaving ? 'Saving…' : '+ Save'}
                           </button>
@@ -608,7 +743,7 @@ export function TmScoutView() {
           <div className={styles.promptSub}>
             {tab === 'club'
               ? `Set a player profile to calculate Need Score against your ${needs.length} active needs`
-              : `Results matched against your ${needs.length} active club needs`}
+              : `Filter by league, position and age — results matched against your ${needs.length} active club needs`}
           </div>
         </div>
       )}
