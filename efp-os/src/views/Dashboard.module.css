@@ -1,64 +1,68 @@
-/* ─── Dashboard.module.css ───────────────────────────────────────────────── */
+/* ─── Dashboard.module.css — Direction A · Edge ─────────────────────────── */
 
 .page {
-  padding: 28px 28px 48px;
-  max-width: 1100px;
+  padding: 24px 28px 56px;
+  max-width: 1060px;
   margin: 0 auto;
 }
 
-/* Sync intelligence banner */
+/* ── Sync banner ─────────────────────────────────────────────────────────── */
 .banner {
   display: flex;
   align-items: center;
   gap: 10px;
   background: var(--amber-dim);
   border: 1px solid var(--amber);
+  border-left: 3px solid var(--amber);
   border-radius: var(--r-lg);
-  padding: 12px 16px;
-  margin-bottom: 24px;
+  padding: 10px 14px;
+  margin-bottom: 20px;
   font-size: 13px;
-  color: var(--text);
 }
-.bannerIcon { font-size: 16px; flex-shrink: 0; }
-.bannerText { flex: 1; }
-.bannerReview {
+.bannerDot {
+  width: 7px; height: 7px;
+  border-radius: 50%;
+  background: var(--amber);
+  flex-shrink: 0;
+  animation: pulse 2s ease-in-out infinite;
+}
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.4; }
+}
+.bannerText { flex: 1; color: var(--text); }
+.bannerCta {
   background: var(--amber);
   color: #fff;
   border: none;
   border-radius: var(--r-md);
-  padding: 5px 12px;
+  padding: 4px 12px;
   font-size: 12px;
   font-weight: 600;
   font-family: var(--font);
   cursor: pointer;
   flex-shrink: 0;
 }
-.bannerDismiss {
+.bannerX {
   background: none;
-  border: 1px solid var(--border-2);
-  border-radius: var(--r-md);
-  padding: 5px 12px;
+  border: none;
+  color: var(--text-3);
   font-size: 12px;
-  color: var(--text-2);
-  font-family: var(--font);
   cursor: pointer;
+  padding: 2px 4px;
   flex-shrink: 0;
 }
-.bannerDismiss:hover { background: var(--surface-2); }
 
-/* Page header */
+/* ── Page header ─────────────────────────────────────────────────────────── */
 .header {
-  display: flex;
-  align-items: flex-end;
-  justify-content: space-between;
-  gap: 16px;
-  margin-bottom: 24px;
+  margin-bottom: 22px;
 }
 .title {
   font-size: var(--text-2xl);
   font-weight: 700;
   color: var(--text);
-  margin: 0 0 4px;
+  margin: 0 0 3px;
+  letter-spacing: -0.02em;
 }
 .sub {
   font-size: var(--text-sm);
@@ -66,76 +70,250 @@
   margin: 0;
 }
 
-/* Stat card grid */
-.grid {
+/* ══ Section 1 — Hero KPI row ════════════════════════════════════════════ */
+.heroRow {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+  grid-template-columns: repeat(3, 1fr);
+  gap: 14px;
+  margin-bottom: 28px;
+}
+
+.heroCard {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+  padding: 18px 20px;
+  text-align: left;
+  cursor: pointer;
+  font-family: var(--font);
+  box-shadow: var(--shadow-sm);
+  transition: box-shadow 0.15s, border-color 0.15s, transform 0.1s;
+}
+.heroCard:hover {
+  box-shadow: var(--shadow);
+  border-color: var(--border-2);
+  transform: translateY(-1px);
+}
+.heroPrimary {
+  border-left: 3px solid #3B82F6;
+}
+.heroAlert {
+  border-left: 3px solid #EF4444;
+}
+
+.heroCardInner { flex: 1; min-width: 0; }
+
+.heroMeta {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 10px;
+}
+.heroIcon {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+.heroLabel {
+  font-size: var(--text-sm);
+  font-weight: 600;
+  color: var(--text-2);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.heroVal {
+  font-size: 32px;
+  font-weight: 800;
+  color: var(--text);
+  line-height: 1;
+  letter-spacing: -0.03em;
+  margin-bottom: 5px;
+}
+
+.heroSub {
+  font-size: var(--text-xs);
+  color: var(--text-3);
+}
+
+.overdueTag {
+  font-size: var(--text-xs);
+  font-weight: 700;
+  color: #EF4444;
+  background: #FEF2F2;
+  padding: 1px 6px;
+  border-radius: var(--r-full);
+}
+
+/* ══ Sections ════════════════════════════════════════════════════════════ */
+.section {
+  margin-bottom: 28px;
+}
+.sectionHead {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+.sectionTitle {
+  font-size: var(--text-md);
+  font-weight: 700;
+  color: var(--text);
+  margin: 0;
+}
+.sectionLink {
+  font-size: var(--text-sm);
+  color: var(--accent);
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-family: var(--font);
+  padding: 0;
+}
+.sectionLink:hover { text-decoration: underline; }
+
+/* ══ Section 2 — Pipeline ════════════════════════════════════════════════ */
+.pipelineCard {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+  padding: 18px 20px;
+  box-shadow: var(--shadow-sm);
+}
+
+/* Multi-color segmented bar */
+.pipelineBar {
+  display: flex;
+  height: 10px;
+  border-radius: var(--r-full);
+  overflow: hidden;
+  gap: 2px;
+  margin-bottom: 16px;
+  background: var(--surface-2);
+}
+.pipelineSegment {
+  border-radius: 2px;
+  min-width: 4px;
+  transition: width 0.5s ease;
+}
+.pipelineEmpty {
+  height: 10px;
+  background: var(--surface-2);
+  border-radius: var(--r-full);
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: var(--text-xs);
+  color: var(--text-3);
+}
+
+/* Stage legend grid */
+.stageGrid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 20px;
+}
+.stageCell {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: var(--text-xs);
+}
+.stageDot {
+  width: 7px; height: 7px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.stageName {
+  color: var(--text-2);
+}
+.stageCount {
+  font-weight: 700;
+  color: var(--text);
+  min-width: 16px;
+}
+
+/* ══ Section 3 — CRM stats ═══════════════════════════════════════════════ */
+.statGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
   gap: 14px;
 }
 
 .statCard {
+  position: relative;
   display: flex;
   align-items: center;
-  gap: 14px;
+  gap: 10px;
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: var(--r-lg);
-  padding: 16px 18px;
+  padding: 14px 16px;
   text-align: left;
   cursor: pointer;
-  transition: box-shadow 0.15s, border-color 0.15s;
-  box-shadow: var(--shadow-sm);
   font-family: var(--font);
+  box-shadow: var(--shadow-sm);
+  overflow: hidden;
+  transition: box-shadow 0.15s, border-color 0.15s, transform 0.1s;
 }
 .statCard:hover {
   box-shadow: var(--shadow);
   border-color: var(--border-2);
+  transform: translateY(-1px);
 }
-
+.statAccent {
+  position: absolute;
+  left: 0; top: 0; bottom: 0;
+  width: 3px;
+  border-radius: var(--r-sm) 0 0 var(--r-sm);
+}
 .statIcon {
-  width: 40px; height: 40px;
-  border-radius: var(--r-md);
-  display: flex; align-items: center; justify-content: center;
-  font-size: 18px;
+  display: flex;
+  align-items: center;
   flex-shrink: 0;
 }
-
-.statBody { flex: 1; min-width: 0; }
 .statCount {
-  font-size: var(--text-2xl);
-  font-weight: 700;
+  font-size: var(--text-xl);
+  font-weight: 800;
   color: var(--text);
-  line-height: 1.1;
+  letter-spacing: -0.02em;
+  flex: 1;
 }
 .statLabel {
   font-size: var(--text-sm);
   color: var(--text-3);
-  margin-top: 2px;
+  white-space: nowrap;
 }
-
 .statArrow {
-  font-size: 16px;
+  font-size: 14px;
   color: var(--text-3);
   flex-shrink: 0;
 }
 
-/* Loading skeleton */
-.skeleton {
+/* ── Skeleton loading ─────────────────────────────────────────────────── */
+.skel {
   display: inline-block;
-  width: 32px;
-  height: 22px;
   background: linear-gradient(90deg, var(--surface-2) 25%, var(--surface-3) 50%, var(--surface-2) 75%);
   background-size: 200% 100%;
   animation: shimmer 1.2s infinite;
   border-radius: var(--r-sm);
   vertical-align: middle;
 }
+.heroVal .skel  { width: 40px; height: 28px; }
+.statCount .skel { width: 28px; height: 20px; }
 @keyframes shimmer {
   0%   { background-position: 200% 0; }
   100% { background-position: -200% 0; }
 }
 
-@media (max-width: 600px) {
-  .page { padding: 16px 16px 32px; }
-  .grid { grid-template-columns: 1fr 1fr; }
+/* ── Responsive ──────────────────────────────────────────────────────── */
+@media (max-width: 700px) {
+  .page { padding: 16px 16px 40px; }
+  .heroRow  { grid-template-columns: 1fr; }
+  .statGrid { grid-template-columns: 1fr; }
 }
