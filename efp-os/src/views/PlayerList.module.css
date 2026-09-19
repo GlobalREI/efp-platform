@@ -44,8 +44,8 @@
 }
 .archiveToggle:hover { background: var(--surface-2); }
 .archiveToggle.active {
-  background: var(--navy-mid);
-  border-color: var(--navy-mid);
+  background: var(--accent);
+  border-color: var(--accent);
   color: #fff;
 }
 

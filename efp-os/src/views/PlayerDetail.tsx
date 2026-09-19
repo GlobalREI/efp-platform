@@ -13,6 +13,7 @@ import {
 } from '../components/PageShell'
 import { PriorityBadge, StatusPill } from '../components/Badge'
 import { Button } from '../components/Button'
+import styles from './PlayerDetail.module.css'
 
 /* ── Types ── */
 interface Mandate {
@@ -121,17 +122,20 @@ export function PlayerDetail() {
 
   if (loading) {
     return (
-      <div style={{ padding: '40px 28px', color: 'var(--text-3)', fontSize: '13px' }}>
-        Loading…
+      <div className={styles.loadingWrap}>
+        <div className={styles.spinnerRow}>
+          <div className={styles.spinner} />
+          <span>Loading…</span>
+        </div>
       </div>
     )
   }
 
   if (!mandate) {
     return (
-      <div style={{ padding: '40px 28px' }}>
-        <p style={{ color: 'var(--text-2)' }}>Mandate not found.</p>
-        <Button variant="ghost" size="sm" onClick={() => nav('/mandates')} style={{ marginTop: 12 }}>
+      <div className={styles.notFound}>
+        <p>Mandate not found.</p>
+        <Button variant="ghost" size="sm" onClick={() => nav('/mandates')}>
           ← Back to Mandates
         </Button>
       </div>
@@ -185,20 +189,18 @@ export function PlayerDetail() {
       </Card>
 
       <Card title="Quick Info" titleIcon="ℹ️">
-        <div style={{ padding: '12px 14px', display: 'flex', flexDirection: 'column', gap: 10 }}>
-          {[
-            ['Window',   mandate.transfer_window || '—'],
+        {[
+            ['Window',    mandate.transfer_window || '—'],
             ['Deal Type', notes.dealType || '—'],
-            ['Expected', mandate.expectedPrice || '—'],
-            ['Salary',   mandate.salary || '—'],
-            ['Source',   mandate.contact || '—'],
+            ['Expected',  mandate.expectedPrice || '—'],
+            ['Salary',    mandate.salary || '—'],
+            ['Source',    mandate.contact || '—'],
           ].map(([label, val]) => (
-            <div key={label} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 8 }}>
-              <span style={{ fontSize: 11, color: 'var(--text-3)', fontWeight: 500, textTransform: 'uppercase', letterSpacing: '0.06em', flexShrink: 0 }}>{label}</span>
-              <span style={{ fontSize: 13, color: 'var(--text)', textAlign: 'right', wordBreak: 'break-word' }}>{val}</span>
+            <div key={label} className={styles.infoRow}>
+              <span className={styles.infoLabel}>{label}</span>
+              <span className={styles.infoValue}>{val}</span>
             </div>
           ))}
-        </div>
       </Card>
     </>
   )
@@ -245,9 +247,9 @@ export function PlayerDetail() {
       {/* ── Internal Notes ── */}
       {notes.notes && (
         <Card title="Internal Notes" titleIcon="📝">
-          <div style={{ padding: '14px 18px', fontSize: 13, color: 'var(--text)', lineHeight: 1.6, whiteSpace: 'pre-wrap' }}>
+          <p className={styles.notesText} style={{ padding: '14px 18px' }}>
             {notes.notes}
-          </div>
+          </p>
         </Card>
       )}
     </PageShell>

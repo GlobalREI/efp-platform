@@ -89,3 +89,43 @@
   --z-modal:       400;
   --z-toast:       500;
 }
+
+/* ── Alias tokens — bridge old and new naming conventions ── */
+:root {
+  /* Spacing aliases */
+  --space-1:  4px;
+  --space-2:  8px;
+  --space-3:  12px;
+  --space-4:  16px;
+  --space-5:  20px;
+  --space-6:  24px;
+  --space-8:  32px;
+  --space-10: 40px;
+  --space-12: 48px;
+  --space-16: 64px;
+
+  /* Radius aliases */
+  --radius-sm:   6px;
+  --radius-md:   8px;
+  --radius-lg:   12px;
+  --radius-xl:   16px;
+  --radius-full: 9999px;
+
+  /* Surface aliases (surface-0 = page bg, surface-1 = card white) */
+  --surface-0: #F7FAF8;
+  --surface-1: #FFFFFF;
+  /* --surface-2 and --surface-3 already defined above */
+
+  /* Text aliases */
+  --text-primary:   #1A2E1E;
+  --text-secondary: #52735A;
+  --text-muted:     #92AF98;
+  --text-1:         #1A2E1E;
+  --text-2:         #52735A;  /* already defined — reinforce */
+
+  /* Brand alias */
+  --brand:     #3A8B4A;
+
+  /* Nav compat */
+  --navy-mid:  #2D4A33;
+}

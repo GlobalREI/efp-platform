@@ -30,7 +30,7 @@
   display: inline-flex; align-items: center; justify-content: center;
   flex-shrink: 0;
 }
-.player .av  { background: #2563EB; }
+.player .av  { background: var(--blue); }
 .contact .av { background: #7C3AED; }
 .icon { font-size: 12px; line-height: 1; }
 

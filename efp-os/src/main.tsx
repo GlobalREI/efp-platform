@@ -20,6 +20,9 @@ const PitchList     = lazy(() => import('./views/PitchList').then(m => ({ defaul
 const PitchDetail   = lazy(() => import('./views/PitchDetail').then(m => ({ default: m.PitchDetail })))
 const TaskList      = lazy(() => import('./views/TaskList').then(m => ({ default: m.TaskList })))
 const SearchResults = lazy(() => import('./views/SearchResults').then(m => ({ default: m.SearchResults })))
+const ScoutView      = lazy(() => import('./views/ScoutView').then(m => ({ default: m.ScoutView })))
+const ActivitiesView = lazy(() => import('./views/ActivitiesView').then(m => ({ default: m.ActivitiesView })))
+const SettingsView   = lazy(() => import('./views/SettingsView').then(m => ({ default: m.SettingsView })))
 
 function Spinner() {
   return (
@@ -38,9 +41,9 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
             <Route index               element={<Dashboard />} />
             <Route path="mandates"     element={<MandateList />} />
             <Route path="mandates/:id" element={<PlayerDetail />} />
-            <Route path="scout"        element={<div style={{padding:'32px',color:'var(--text-2)'}}>Scout — coming soon</div>} />
-            <Route path="activities"   element={<div style={{padding:'32px',color:'var(--text-2)'}}>Activities — coming soon</div>} />
-            <Route path="settings"     element={<div style={{padding:'32px',color:'var(--text-2)'}}>Settings — coming soon</div>} />
+            <Route path="scout"        element={<ScoutView />} />
+            <Route path="activities"   element={<ActivitiesView />} />
+            <Route path="settings"     element={<SettingsView />} />
             <Route path="clubs"        element={<ClubList />} />
             <Route path="clubs/:id"    element={<ClubDetail />} />
             <Route path="contacts"     element={<ContactList />} />

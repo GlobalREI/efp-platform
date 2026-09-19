@@ -2057,7 +2057,7 @@ body {
     border-left: 4px solid var(--amber, #d97706) !important;
   }
   #view-mandates .data-table tr[data-priority="2"] {
-    border-left: 4px solid var(--accent, #1B3A6B) !important;
+    border-left: 4px solid var(--accent, #3A8B4A) !important;
   }
 
   /* ── TASK PERSON FILTER: pin to right, don't scroll away ─────────────── */
@@ -2433,7 +2433,7 @@ th.ds-sort:hover { background: rgba(30,58,95,.06); }
       <div style="font-size:11px;color:var(--text3);text-align:center;letter-spacing:.05em;text-transform:uppercase;margin-bottom:6px">Who are you?</div>
       <div class="auth-user-tiles">
         <button class="auth-user-tile" onclick="efpSelectUser('timo')">
-          <div class="auth-user-av" style="background:#1B3A6B">T</div>
+          <div class="auth-user-av" style="background:#2D4A33">T</div>
           Timo
         </button>
         <button class="auth-user-tile" onclick="efpSelectUser('fynn')">
@@ -2606,10 +2606,10 @@ th.ds-sort:hover { background: rgba(30,58,95,.06); }
   </div>
 
   <!-- ── Sync Review Banner ─────────────────────────────────────────── -->
-  <div id="sync-intel-banner" style="display:none;background:linear-gradient(90deg,#1B3A6B,#2563EB);color:#fff;padding:10px 20px;font-size:13px;align-items:center;gap:12px">
+  <div id="sync-intel-banner" style="display:none;background:linear-gradient(90deg,#152018,#3A8B4A);color:#fff;padding:10px 20px;font-size:13px;align-items:center;gap:12px">
     <span style="font-size:16px">🔔</span>
     <span id="sync-intel-text" style="flex:1"></span>
-    <button onclick="openSyncReview()" style="background:#fff;border:none;border-radius:5px;color:#1B3A6B;font-size:12px;font-weight:700;padding:5px 12px;cursor:pointer">Review →</button>
+    <button onclick="openSyncReview()" style="background:#fff;border:none;border-radius:5px;color:#152018;font-size:12px;font-weight:700;padding:5px 12px;cursor:pointer">Review →</button>
     <button onclick="dismissSyncBanner()" style="background:rgba(255,255,255,.2);border:none;border-radius:5px;color:#fff;font-size:12px;padding:4px 10px;cursor:pointer">Dismiss</button>
   </div>
 
@@ -2722,7 +2722,7 @@ th.ds-sort:hover { background: rgba(30,58,95,.06); }
             <div style="font-size:11px;color:var(--text3)">8 contacts</div>
           </div>
           <div class="contact-row" onclick="openContact('valencia','marc-ciria')">
-            <div class="avatar" style="background:#1B3A6B">MC</div>
+            <div class="avatar" style="background:#2D4A33">MC</div>
             <div class="contact-info">
               <div class="contact-name">Marc Ciria</div>
               <div class="contact-meta">Sporting Director · Valencia CF · 🇪🇸</div>
@@ -2833,7 +2833,7 @@ th.ds-sort:hover { background: rgba(30,58,95,.06); }
       </div>
 
       <div class="profile-card">
-        <div class="profile-av" id="cd-avatar" style="background:#1B3A6B">MC</div>
+        <div class="profile-av" id="cd-avatar" style="background:#2D4A33">MC</div>
         <div>
           <div class="profile-name" id="cd-name">Marc Ciria</div>
           <div class="profile-role" id="cd-role">Sporting Director · Valencia CF · 🇪🇸 Spain</div>
@@ -3283,7 +3283,7 @@ th.ds-sort:hover { background: rgba(30,58,95,.06); }
         <!-- Person filter -->
         <div class="task-person-filter">
           <button class="tpf-all active" id="tpf-all" onclick="filterTasksByPerson('all')">All</button>
-          <button class="tpf-btn active" id="tpf-timo" onclick="filterTasksByPerson('timo')" style="background:#1B3A6B" title="Timo">T</button>
+          <button class="tpf-btn active" id="tpf-timo" onclick="filterTasksByPerson('timo')" style="background:#2D4A33" title="Timo">T</button>
           <button class="tpf-btn" id="tpf-fynn" onclick="filterTasksByPerson('fynn')" style="background:#5B21B6" title="Fynn">F</button>
         </div>
       </div>
@@ -4558,7 +4558,7 @@ European Football Partners</textarea>
 // ─────────────────────────────────────────────────────────────────────────────
 // Each user has their own PIN. Change these before sharing.
 const EFP_USERS = {
-  timo: { id:'timo', name:'Timo', initials:'T', color:'#1B3A6B', email:'timo@euro-fp.com', pin:'efp2026'  },
+  timo: { id:'timo', name:'Timo', initials:'T', color:'#2D4A33', email:'timo@euro-fp.com', pin:'efp2026'  },
   fynn: { id:'fynn', name:'Fynn', initials:'F', color:'#5B21B6', email:'fynn@euro-fp.com', pin:'efp2026' },
 };
 let   _efpSelectedUserId = null;
@@ -5806,7 +5806,7 @@ function openSyncReview() {
     }
     listEl.innerHTML = _syncReviewItems.map(item => {
       const badge = item.type === 'club-need'
-        ? '<span style="font-size:10px;font-weight:700;padding:2px 7px;border-radius:4px;background:#EFF6FF;color:#1d4ed8">🏟 Club Need</span>'
+        ? '<span style="font-size:10px;font-weight:700;padding:2px 7px;border-radius:4px;background:#ECFDF5;color:#166534">🏟 Club Need</span>'
         : item.type === 'pitch-alert'
         ? '<span style="font-size:10px;font-weight:700;padding:2px 7px;border-radius:4px;background:#FFF7ED;color:#c2410c">📄 Pitch</span>'
         : item.type === 'contact-alert'
@@ -6646,7 +6646,7 @@ function hideSnack() {
 const CONTACTS_DB = {
   valencia: [
     {
-      id:'marc-ciria', initials:'MC', color:'#1B3A6B',
+      id:'marc-ciria', initials:'MC', color:'#2D4A33',
       name:'Marc Ciria', role:'Sporting Director', club:'Valencia CF', country:'🇪🇸 Spain', city:'Valencia',
       email:'m.ciria@valenciacf.es', phone:'+34 96 123 4567', wa:'+34 96 123 4567',
       linkedin:'linkedin.com/in/marc-ciria', assistant:'',
@@ -6706,7 +6706,7 @@ const CONTACTS_DB = {
   ],
   nice: [
     {
-      id:'florent-ghisolfi', initials:'FG', color:'#1B3A6B',
+      id:'florent-ghisolfi', initials:'FG', color:'#2D4A33',
       name:'Florent Ghisolfi', role:'Sporting Director', club:'OGC Nice', country:'🇫🇷 France', city:'Nice',
       email:'f.ghisolfi@ogcnice.com', phone:'+33 4 9209 1234', wa:'',
       linkedin:'linkedin.com/in/florent-ghisolfi', assistant:'',
@@ -6737,7 +6737,7 @@ const CONTACTS_DB = {
   ],
   utrecht: [
     {
-      id:'jordy-zuidam', initials:'JZ', color:'#1B3A6B',
+      id:'jordy-zuidam', initials:'JZ', color:'#2D4A33',
       name:'Jordy Zuidam', role:'Sporting Director', club:'FC Utrecht', country:'🇳🇱 Netherlands', city:'Utrecht',
       email:'j.zuidam@fcutrecht.nl', phone:'+31 30 212 4567', wa:'+31 30 212 4567',
       linkedin:'linkedin.com/in/jordy-zuidam', assistant:'',
@@ -6779,7 +6779,7 @@ const CONTACTS_DB = {
   ],
   lask: [
     {
-      id:'alex-kroes', initials:'AK', color:'#1B3A6B',
+      id:'alex-kroes', initials:'AK', color:'#2D4A33',
       name:'Alex Kroes', role:'Managing Director', club:'LASK', country:'🇦🇹 Austria', city:'Linz',
       email:'', phone:'', wa:'',
       linkedin:'', assistant:'',
@@ -7535,7 +7535,7 @@ function globalSearch(q) {
   const typeLabel = { club:'Clubs', contact:'Contacts', mandate:'Player Mandates', pitch:'Player Pitches', clubpitch:'Club Mandates', need:'Club Needs', rel:'Relationships', task:'Tasks' };
   const iconStyle = {
     club:      'background:#F0F9FF;color:#0369A1',
-    contact:   'background:#EFF6FF;color:#2563EB',
+    contact:   'background:#F5F3FF;color:#7C3AED',
     mandate:   'background:#F0FDF4;color:#16A34A',
     pitch:     'background:#F5F3FF;color:#7C3AED',
     clubpitch: 'background:#FFFBEB;color:#D97706',
@@ -8726,7 +8726,7 @@ let allClubs     = [];   // all clubs    — replaces 129 static HTML rows + clu
 let _efpMigrated = false; // guards one-time migration
 
 // Avatar colour palette
-const _AV_COLS = ['#1B3A6B','#92400E','#4B5563','#5B21B6','#CC0000','#EF0107','#0D5E3A','#7C3AED'];
+const _AV_COLS = ['#2D4A33','#92400E','#4B5563','#5B21B6','#CC0000','#EF0107','#0D5E3A','#7C3AED'];
 function _avCol(name) { return _AV_COLS[name.charCodeAt(0) % _AV_COLS.length]; }
 function _initials(name) { return name.split(' ').map(w=>w[0]).join('').substring(0,2).toUpperCase(); }
 
@@ -10569,7 +10569,7 @@ function generatePdf() {
 
   const now   = new Date().toLocaleDateString('en-GB', { day:'numeric', month:'long', year:'numeric' });
   const _val  = (m) => m.value || (m.val ? '€' + (m.val >= 1e6 ? (m.val/1e6).toFixed(1)+'m' : (m.val/1e3).toFixed(0)+'k') : '—');
-  const _deal = (dt) => dt === 'loan' ? ['🔄 Loan Only','#dbeafe','#1d4ed8'] : dt === 'permanent' ? ['✅ Permanent','#dcfce7','#15803d'] : ['⚡ Loan or Perm','#f3f4f6','#374151'];
+  const _deal = (dt) => dt === 'loan' ? ['🔄 Loan Only','#EFF5F1','#2D4A33'] : dt === 'permanent' ? ['✅ Permanent','#dcfce7','#15803d'] : ['⚡ Loan or Perm','#f3f4f6','#374151'];
 
   let body = '';
 

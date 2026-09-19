@@ -18,6 +18,7 @@ import {
 } from '../components/PageShell'
 import { StatusPill }     from '../components/Badge'
 import { Button }         from '../components/Button'
+import styles from './ClubDetail.module.css'
 import { PlayerChip }     from '../components/Chip'
 
 interface Club {
@@ -107,17 +108,17 @@ export function ClubDetail() {
 
   if (loading) {
     return (
-      <div style={{ padding: '40px 28px', color: 'var(--text-3)', fontSize: '13px' }}>
-        Loading…
+      <div className={styles.loadingWrap}>
+        <div className={styles.spinner} />
       </div>
     )
   }
 
   if (!club) {
     return (
-      <div style={{ padding: '40px 28px' }}>
-        <p style={{ color: 'var(--text-2)' }}>Club not found.</p>
-        <Button variant="ghost" size="sm" onClick={() => nav('/clubs')} style={{ marginTop: 12 }}>
+      <div className={styles.notFound}>
+        <p>Club not found.</p>
+        <Button variant="ghost" size="sm" onClick={() => nav('/clubs')}>
           ← Back to Clubs
         </Button>
       </div>
@@ -170,20 +171,18 @@ export function ClubDetail() {
 
       {/* Quick Stats */}
       <Card title="Quick Info" titleIcon="ℹ️">
-        <div style={{ padding: '12px 14px', display: 'flex', flexDirection: 'column', gap: 10 }}>
-          {[
+        {[
             ['League',   club.league  || '—'],
             ['Country',  club.country || '—'],
             ['Status',   status],
             ['Mandates', String(linkedMandates.length)],
             ['Needs',    String(linkedNeeds.length)],
           ].map(([label, val]) => (
-            <div key={label} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 8 }}>
-              <span style={{ fontSize: 11, color: 'var(--text-3)', fontWeight: 500, textTransform: 'uppercase', letterSpacing: '0.06em', flexShrink: 0 }}>{label}</span>
-              <span style={{ fontSize: 13, color: 'var(--text)', textAlign: 'right' }}>{val}</span>
+            <div key={label} className={styles.infoRow}>
+              <span className={styles.infoLabel}>{label}</span>
+              <span className={styles.infoValue}>{val}</span>
             </div>
           ))}
-        </div>
       </Card>
     </>
   )
@@ -213,32 +212,22 @@ export function ClubDetail() {
       {/* ── Window Notes ── */}
       {(windowsWithContent.length > 0 || club.notes) && (
         <Card title="Notes by Window" titleIcon="📝">
-          <div style={{ borderBottom: '1px solid var(--border)', display: 'flex', gap: 0, flexWrap: 'wrap' }}>
+          <div className={styles.winTabs}>
             {(windowsWithContent.length > 0 ? windowsWithContent : ['General']).map(w => (
               <button
                 key={w}
                 onClick={() => setActiveWin(w)}
-                style={{
-                  padding: '8px 14px',
-                  fontSize: 12,
-                  fontWeight: activeWin === w ? 600 : 400,
-                  color: activeWin === w ? 'var(--text)' : 'var(--text-3)',
-                  background: 'none',
-                  border: 'none',
-                  borderBottom: activeWin === w ? '2px solid var(--accent)' : '2px solid transparent',
-                  cursor: 'pointer',
-                  fontFamily: 'var(--font)',
-                  whiteSpace: 'nowrap',
-                }}
+                className={`${styles.winTab} ${activeWin === w ? styles.winTabActive : ''}`}
               >
                 {w} {winNotes[w]?.trim() ? '●' : ''}
               </button>
             ))}
           </div>
-          <div style={{ padding: '14px 18px', fontSize: 13, color: 'var(--text)', lineHeight: 1.65, whiteSpace: 'pre-wrap', minHeight: 60 }}>
-            {winNotes[activeWin] || (activeWin === 'General' && club.notes) || (
-              <span style={{ color: 'var(--text-3)' }}>No notes for {activeWin}.</span>
-            )}
+          <div style={{ padding: '14px 18px' }}>
+            {winNotes[activeWin] || (activeWin === 'General' && club.notes)
+              ? <p className={styles.winNotes}>{winNotes[activeWin] || club.notes}</p>
+              : <p className={styles.winEmpty}>No notes for {activeWin}.</p>
+            }
           </div>
         </Card>
       )}
@@ -257,29 +246,23 @@ export function ClubDetail() {
       {/* ── Club Needs ── */}
       {linkedNeeds.length > 0 && (
         <Card title="Club Needs" titleIcon="🎯">
-          <div style={{ padding: '14px 18px', display: 'flex', flexDirection: 'column', gap: 10 }}>
-            {linkedNeeds.map(n => {
+          {linkedNeeds.map(n => {
               const pos = Array.isArray(n.positions) ? n.positions.join(', ') : (n.pos || '—')
               return (
                 <div
                   key={n.id}
-                  style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '10px 0', borderBottom: '1px solid var(--border)', cursor: 'pointer' }}
+                  className={styles.needRow}
                   onClick={() => nav(`/needs/${n.id}`)}
                 >
                   <span style={{ fontSize: 20 }}>🎯</span>
-                  <div>
-                    <div style={{ fontSize: 13, fontWeight: 500, color: 'var(--text)' }}>{pos}</div>
-                    {n.budget && <div style={{ fontSize: 11, color: 'var(--text-3)' }}>Budget: {n.budget}</div>}
+                  <div className={styles.needPos}>
+                    {pos}
+                    {n.budget && <div className={styles.needBudget}>Budget: {n.budget}</div>}
                   </div>
-                  {n.status && (
-                    <div style={{ marginLeft: 'auto' }}>
-                      <StatusPill status={n.status} size="sm" />
-                    </div>
-                  )}
+                  {n.status && <StatusPill status={n.status} size="sm" />}
                 </div>
               )
             })}
-          </div>
         </Card>
       )}
     </PageShell>
