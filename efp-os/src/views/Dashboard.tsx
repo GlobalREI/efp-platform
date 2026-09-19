@@ -82,7 +82,7 @@ export function Dashboard() {
   }
 
   const CARDS = [
-    { label: 'Players',  count: stats.players,  to: '/players',  icon: '⚽', color: '#2563EB' },
+    { label: 'Players',  count: stats.players,  to: '/mandates',  icon: '⚽', color: '#2563EB' },
     { label: 'Clubs',    count: stats.clubs,    to: '/clubs',    icon: '🏟', color: '#15803D' },
     { label: 'Contacts', count: stats.contacts, to: '/contacts', icon: '👤', color: '#7C3AED' },
     { label: 'Needs',    count: stats.needs,    to: '/needs',    icon: '🎯', color: '#EA580C' },

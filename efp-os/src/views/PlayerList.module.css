@@ -1,0 +1,155 @@
+/* ─── MandateList (PlayerList) ──────────────────────────────────────────── */
+
+.page {
+  display: flex;
+  flex-direction: column;
+  min-height: 100%;
+}
+
+/* ── Filters bar ── */
+.filters {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.filterSelect {
+  font-family: var(--font);
+  font-size: 12px;
+  padding: 4px 8px;
+  border: 1px solid var(--border);
+  border-radius: var(--r-sm);
+  background: var(--surface);
+  color: var(--text);
+  cursor: pointer;
+  appearance: none;
+  padding-right: 24px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' fill='none'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%2394A3B8' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 8px center;
+}
+.filterSelect:focus { outline: none; border-color: var(--accent); }
+
+.archiveToggle {
+  font-family: var(--font);
+  font-size: 12px;
+  padding: 4px 10px;
+  border: 1px solid var(--border);
+  border-radius: var(--r-sm);
+  background: var(--surface);
+  color: var(--text-2);
+  cursor: pointer;
+  transition: background 0.1s, border-color 0.1s, color 0.1s;
+}
+.archiveToggle:hover { background: var(--surface-2); }
+.archiveToggle.active {
+  background: var(--navy-mid);
+  border-color: var(--navy-mid);
+  color: #fff;
+}
+
+/* ── Skeleton loading ── */
+.skeletonWrap { padding: 0 28px; display: flex; flex-direction: column; gap: 10px; }
+.skeleton {
+  height: 44px;
+  border-radius: var(--r-sm);
+  background: linear-gradient(90deg, var(--surface-2) 25%, var(--surface-3) 50%, var(--surface-2) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.4s ease-in-out infinite;
+}
+@keyframes shimmer { to { background-position: -200% 0; } }
+
+/* ── Empty state ── */
+.empty {
+  padding: 60px 28px;
+  text-align: center;
+  font-size: 13px;
+  color: var(--text-3);
+}
+
+/* ── Table ── */
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+.table thead tr {
+  border-bottom: 2px solid var(--border);
+}
+
+.table th {
+  padding: 8px 12px;
+  text-align: left;
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: var(--text-3);
+  white-space: nowrap;
+}
+
+/* Col widths */
+.thPrio   { width: 60px;  padding-left: 28px; }
+.thName   { min-width: 160px; }
+.thPos    { width: 100px; }
+.thClub   { width: 140px; }
+.thAge    { width: 50px;  text-align: center; }
+.thWindow { width: 130px; }
+.thStatus { width: 110px; }
+
+.row {
+  border-bottom: 1px solid var(--border);
+  cursor: pointer;
+  transition: background 0.1s;
+}
+.row:hover { background: var(--surface-2); }
+.row.archived { opacity: 0.55; }
+.row.archived:hover { opacity: 0.75; }
+
+.table td {
+  padding: 10px 12px;
+  vertical-align: middle;
+  color: var(--text);
+}
+
+.tdPrio   { padding-left: 28px; }
+.tdAge    { text-align: center; color: var(--text-2); }
+.tdPos    { color: var(--text-2); font-size: 12px; }
+.tdClub   { color: var(--text-2); }
+.tdWindow {}
+.tdStatus {}
+
+/* Player name + flag */
+.tdName { display: flex !important; flex-direction: column; gap: 2px; }
+.playerName { font-weight: 500; color: var(--text); }
+.nat {
+  font-size: 11px;
+  color: var(--text-3);
+}
+
+/* Status dot fallback */
+.dot {
+  display: inline-block;
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: var(--amber);
+}
+.dot[data-dot="dot-green"]  { background: var(--green); }
+.dot[data-dot="dot-red"]    { background: var(--red); }
+.dot[data-dot="dot-blue"]   { background: var(--blue); }
+.dot[data-dot="dot-purple"] { background: var(--purple); }
+
+/* Window badge */
+.windowBadge {
+  font-size: 11px;
+  color: var(--text-2);
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--r-full);
+  padding: 2px 8px;
+  white-space: nowrap;
+}
+
+.dash { color: var(--text-4); }

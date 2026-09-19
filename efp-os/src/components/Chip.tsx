@@ -17,7 +17,7 @@ interface ChipProps {
 export function PlayerChip({ name, id, onClick, size = 'md' }: ChipProps) {
   const nav = useNavigate()
   const initials = name.split(' ').filter(Boolean).map(w => w[0]).join('').slice(0, 2).toUpperCase()
-  const handle = onClick ?? (id ? () => nav(`/players/${id}`) : undefined)
+  const handle = onClick ?? (id ? () => nav(`/mandates/${id}`) : undefined)
   return (
     <span
       className={`${styles.chip} ${styles.player} ${styles[size]} ${handle ? styles.clickable : ''}`}
