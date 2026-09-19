@@ -8,7 +8,7 @@ import './styles/global.css'
 
 // Lazy-load every route so the initial bundle stays small
 const Dashboard     = lazy(() => import('./views/Dashboard').then(m => ({ default: m.Dashboard })))
-const PlayerList    = lazy(() => import('./views/PlayerList').then(m => ({ default: m.PlayerList })))
+const MandateList   = lazy(() => import('./views/PlayerList').then(m => ({ default: m.PlayerList })))
 const PlayerDetail  = lazy(() => import('./views/PlayerDetail').then(m => ({ default: m.PlayerDetail })))
 const ClubList      = lazy(() => import('./views/ClubList').then(m => ({ default: m.ClubList })))
 const ClubDetail    = lazy(() => import('./views/ClubDetail').then(m => ({ default: m.ClubDetail })))
@@ -36,8 +36,11 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
         <Routes>
           <Route element={<AppLayout />}>
             <Route index               element={<Dashboard />} />
-            <Route path="players"      element={<PlayerList />} />
-            <Route path="players/:id"  element={<PlayerDetail />} />
+            <Route path="mandates"     element={<MandateList />} />
+            <Route path="mandates/:id" element={<PlayerDetail />} />
+            <Route path="scout"        element={<div style={{padding:'32px',color:'var(--text-2)'}}>Scout — coming soon</div>} />
+            <Route path="activities"   element={<div style={{padding:'32px',color:'var(--text-2)'}}>Activities — coming soon</div>} />
+            <Route path="settings"     element={<div style={{padding:'32px',color:'var(--text-2)'}}>Settings — coming soon</div>} />
             <Route path="clubs"        element={<ClubList />} />
             <Route path="clubs/:id"    element={<ClubDetail />} />
             <Route path="contacts"     element={<ContactList />} />

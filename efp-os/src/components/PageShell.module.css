@@ -1,0 +1,300 @@
+/* ─── PageShell.module.css ──────────────────────────────────────────────────
+   Universal page template used by ALL profile pages and list pages.
+   ┌──────────────────────────────────────────────┐
+   │  .pageWrap                                   │
+   │  ┌────────────────────────────────────────┐  │
+   │  │  .breadcrumb                           │  │
+   │  ├────────────────────────────────────────┤  │
+   │  │  .hero  (dark header)                  │  │
+   │  │  ┌─────────────────────────────────┐   │  │
+   │  │  │  avatar · name · chips · badges │   │  │
+   │  │  └─────────────────────────────────┘   │  │
+   │  ├─────────────────────┬──────────────────┤  │
+   │  │  .mainCol (flex 1)  │  .rail (320px)   │  │
+   │  │  sections / cards   │  related objects │  │
+   │  └─────────────────────┴──────────────────┘  │
+   └──────────────────────────────────────────────┘
+*/
+
+/* ── Outer wrapper ── */
+.pageWrap {
+  max-width: 1160px;
+  margin: 0 auto;
+  padding: 0 0 48px;
+}
+
+/* ── Breadcrumb ── */
+.breadcrumb {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 14px 28px;
+  font-size: 12px;
+  color: var(--text-3);
+}
+.breadcrumb a,
+.breadcrumb button {
+  color: var(--text-3);
+  background: none;
+  border: none;
+  padding: 0;
+  font-size: 12px;
+  cursor: pointer;
+  font-family: var(--font);
+}
+.breadcrumb a:hover,
+.breadcrumb button:hover { color: var(--text-2); text-decoration: none; }
+.breadcrumb span { color: var(--border-2); }
+
+/* ── Hero header ── */
+.hero {
+  background: linear-gradient(135deg, #0F172A 0%, #1E3A5F 100%);
+  padding: 24px 28px 28px;
+  display: flex;
+  align-items: flex-start;
+  gap: 20px;
+}
+
+.avatar {
+  width: 72px; height: 72px;
+  border-radius: var(--r-lg);
+  background: rgba(255,255,255,0.12);
+  border: 2px solid rgba(255,255,255,0.15);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 24px; font-weight: 700; color: #fff;
+  flex-shrink: 0;
+  letter-spacing: -0.5px;
+}
+.avatarImg {
+  width: 72px; height: 72px;
+  border-radius: var(--r-lg);
+  object-fit: cover;
+  border: 2px solid rgba(255,255,255,0.15);
+  flex-shrink: 0;
+}
+
+.heroInfo { flex: 1; min-width: 0; }
+
+.heroName {
+  font-size: 22px;
+  font-weight: 700;
+  color: #fff;
+  margin: 0 0 4px;
+  line-height: 1.2;
+}
+.heroSub {
+  font-size: 13px;
+  color: rgba(255,255,255,0.55);
+  margin: 0 0 12px;
+}
+
+.heroChips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 12px;
+}
+.heroChip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: rgba(255,255,255,0.12);
+  border: 1px solid rgba(255,255,255,0.18);
+  color: rgba(255,255,255,0.88);
+  border-radius: var(--r-full);
+  font-size: 12px;
+  font-weight: 500;
+  padding: 3px 10px;
+  white-space: nowrap;
+}
+
+.heroBadges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.heroActions {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  flex-shrink: 0;
+  padding-top: 4px;
+}
+
+/* ── Body grid ── */
+.body {
+  display: grid;
+  grid-template-columns: 1fr 320px;
+  gap: 20px;
+  padding: 20px 28px 0;
+  align-items: start;
+  min-width: 0;
+}
+.body > * { min-width: 0; }
+
+.mainCol {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  min-width: 0;
+}
+
+.rail {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  min-width: 0;
+  /* Sticky: rail stays visible while main column scrolls */
+  position: sticky;
+  top: 20px;
+  max-height: calc(100vh - var(--topbar-h) - 40px);
+  overflow-y: auto;
+  scrollbar-width: thin;
+}
+
+/* ── Cards ── */
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+}
+
+.cardHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 18px;
+  border-bottom: 1px solid var(--border);
+}
+.cardTitle {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text);
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+.cardTitleIcon { font-size: 14px; }
+
+.cardBody { padding: 16px 18px; }
+
+/* Field grid inside a card (label + value pairs) */
+.fieldGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px 20px;
+}
+.fieldGridFull {
+  grid-column: 1 / -1;
+}
+.field {}
+.fieldLabel {
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--text-3);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin-bottom: 3px;
+}
+.fieldValue {
+  font-size: 13px;
+  color: var(--text);
+  font-weight: 450;
+  word-break: break-word;
+}
+.fieldEmpty { color: var(--text-4); font-style: italic; }
+
+/* ── Rail item (pitched player, linked club, etc.) ── */
+.railItem {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--border);
+  cursor: pointer;
+  transition: background 0.1s;
+}
+.railItem:last-child { border-bottom: none; }
+.railItem:hover { background: var(--surface-2); }
+
+.railAvatar {
+  width: 32px; height: 32px;
+  border-radius: 50%;
+  background: var(--accent-dim);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 11px; font-weight: 700; color: var(--accent);
+  flex-shrink: 0;
+}
+
+.railItemInfo { flex: 1; min-width: 0; }
+.railItemName { font-size: 13px; font-weight: 550; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.railItemSub  { font-size: 11px; color: var(--text-3); margin-top: 1px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+/* Empty state inside rail */
+.railEmpty {
+  padding: 20px 14px;
+  font-size: 12px;
+  color: var(--text-3);
+  text-align: center;
+}
+
+/* ── Edit mode toggle ── */
+.editToggleWrap {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.editModeLabel {
+  font-size: 12px;
+  color: rgba(255,255,255,0.6);
+}
+
+/* ── Responsive ── */
+@media (max-width: 900px) {
+  .body { grid-template-columns: 1fr; }
+  .rail { order: -1; }
+  .hero { padding: 18px 16px 22px; }
+  .breadcrumb { padding: 12px 16px; }
+  .body { padding: 14px 16px 0; }
+}
+
+/* ── Section block (for list pages with no hero) ── */
+.section {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+}
+.sectionHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 18px;
+  border-bottom: 1px solid var(--border);
+}
+.sectionTitle {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-2);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+/* ── Tag / pill inside a field value ── */
+.tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  color: var(--text-2);
+  border-radius: var(--r-full);
+  font-size: 11px;
+  font-weight: 500;
+  padding: 2px 8px;
+  white-space: nowrap;
+}
