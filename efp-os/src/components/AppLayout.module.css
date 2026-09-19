@@ -246,3 +246,22 @@
   min-width: 0;
   background: var(--bg);
 }
+
+/* Nav section groupings */
+.navSection {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  margin-bottom: 4px;
+}
+.navSection:last-child { margin-bottom: 0; }
+
+.navSectionLabel {
+  font-size: 9.5px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgba(141,201,150,0.35);
+  padding: 8px 10px 3px;
+  user-select: none;
+}

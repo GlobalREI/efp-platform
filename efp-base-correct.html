@@ -2483,36 +2483,10 @@ th.ds-sort:hover { background: rgba(30,58,95,.06); }
   </div>
 
   <div class="nav-section">
-    <div class="nav-label">CRM</div>
-    <div class="nav-item" onclick="go('clubs')">
-      <span class="nav-icon"><svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2 14V7l6-5 6 5v7"/><line x1="2" y1="14" x2="14" y2="14"/><rect x="6" y="9" width="4" height="5"/></svg></span> Clubs
-    </div>
-    <div class="nav-item" onclick="go('contacts')">
-      <span class="nav-icon"><svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><rect x="3" y="1" width="10" height="14" rx="1.5"/><circle cx="8" cy="6" r="2"/><path d="M5 12c0-1.657 1.343-3 3-3s3 1.343 3 3"/></svg></span> Contacts
-    </div>
+    <div class="nav-label">Players</div>
     <div class="nav-item" onclick="go('mandates')">
-      <span class="nav-icon"><svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="8" cy="5.5" r="3"/><path d="M2.5 15c0-3.038 2.462-5.5 5.5-5.5s5.5 2.462 5.5 5.5"/></svg></span> Player Mandates
+      <span class="nav-icon"><svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="8" cy="5.5" r="3"/><path d="M2.5 15c0-3.038 2.462-5.5 5.5-5.5s5.5 2.462 5.5 5.5"/></svg></span> Players
     </div>
-    <div class="nav-item" onclick="go('needs')">
-      <span class="nav-icon"><svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><rect x="2" y="1.5" width="12" height="13" rx="1.5"/><line x1="5" y1="5.5" x2="11" y2="5.5"/><line x1="5" y1="8.5" x2="11" y2="8.5"/><line x1="5" y1="11.5" x2="8" y2="11.5"/></svg></span> Club Needs
-    </div>
-  </div>
-
-  <div class="nav-section">
-    <div class="nav-label">Pipelines</div>
-    <div class="nav-item" onclick="go('relationships')">
-      <span class="nav-icon"><svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="5" cy="5" r="2.5"/><circle cx="11" cy="5" r="2.5"/><path d="M1 14c0-2.209 1.791-4 4-4"/><path d="M11 10c2.209 0 4 1.791 4 4"/><path d="M7 10c-.34.066-.67.166-.98.295"/><path d="M9 10c.34.066.67.166.98.295"/></svg></span> Relationships
-    </div>
-    <div class="nav-item" onclick="go('pitches')">
-      <span class="nav-icon"><svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2L9.5 14 7.5 9 2 6.5 14 2z"/></svg></span> Player Pitches
-    </div>
-    <div class="nav-item" onclick="go('clubpitches')">
-      <span class="nav-icon"><svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M4 2h8v6a4 4 0 0 1-8 0V2z"/><path d="M4 5H2a1 1 0 0 0 0 2h2"/><path d="M12 5h2a1 1 0 0 1 0 2h-2"/><line x1="8" y1="12" x2="8" y2="14"/><line x1="5" y1="14" x2="11" y2="14"/></svg></span> Club Mandates
-    </div>
-  </div>
-
-  <div class="nav-section">
-    <div class="nav-label">Intelligence</div>
     <div class="nav-item" onclick="go('matches')">
       <span class="nav-icon"><svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="8" cy="8" r="6.5"/><circle cx="8" cy="8" r="3"/><circle cx="8" cy="8" r="0.5" fill="currentColor" stroke="none"/></svg></span> AI Matches
       <span class="nav-badge" id="matches-nav-badge" style="display:none">0</span>
@@ -2520,20 +2494,42 @@ th.ds-sort:hover { background: rgba(30,58,95,.06); }
   </div>
 
   <div class="nav-section">
-    <div class="nav-label">Workspace</div>
-    <div class="nav-item" onclick="go('activity')">
-      <span class="nav-icon"><svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><polyline points="1,8 4,8 6,3 8,13 10,6 12,8 15,8"/></svg></span> Activity Feed
+    <div class="nav-label">CRM</div>
+    <div class="nav-item" onclick="go('clubs')">
+      <span class="nav-icon"><svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2 14V7l6-5 6 5v7"/><line x1="2" y1="14" x2="14" y2="14"/><rect x="6" y="9" width="4" height="5"/></svg></span> Clubs
     </div>
-    <div class="nav-item" onclick="go('tasks')">
-      <span class="nav-icon"><svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="8" cy="8" r="6.5"/><path d="M5.5 8l2 2 3.5-3.5"/></svg></span> Tasks
-      <span class="nav-badge" id="sidebar-tasks-badge" style="display:none">0</span>
+    <div class="nav-item" onclick="go('contacts')">
+      <span class="nav-icon"><svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><rect x="3" y="1" width="10" height="14" rx="1.5"/><circle cx="8" cy="6" r="2"/><path d="M5 12c0-1.657 1.343-3 3-3s3 1.343 3 3"/></svg></span> Contacts
+    </div>
+    <div class="nav-item" onclick="go('needs')">
+      <span class="nav-icon"><svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><rect x="2" y="1.5" width="12" height="13" rx="1.5"/><line x1="5" y1="5.5" x2="11" y2="5.5"/><line x1="5" y1="8.5" x2="11" y2="8.5"/><line x1="5" y1="11.5" x2="8" y2="11.5"/></svg></span> Club Needs
     </div>
   </div>
 
   <div class="nav-section">
-    <div class="nav-label">Export</div>
+    <div class="nav-label">Pipeline</div>
+    <div class="nav-item" onclick="go('pitches')">
+      <span class="nav-icon"><svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2L9.5 14 7.5 9 2 6.5 14 2z"/></svg></span> Pitches
+    </div>
+    <div class="nav-item" onclick="go('clubpitches')">
+      <span class="nav-icon"><svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M4 2h8v6a4 4 0 0 1-8 0V2z"/><path d="M4 5H2a1 1 0 0 0 0 2h2"/><path d="M12 5h2a1 1 0 0 1 0 2h-2"/><line x1="8" y1="12" x2="8" y2="14"/><line x1="5" y1="14" x2="11" y2="14"/></svg></span> Club Mandates
+    </div>
+    <div class="nav-item" onclick="go('relationships')">
+      <span class="nav-icon"><svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="5" cy="5" r="2.5"/><circle cx="11" cy="5" r="2.5"/><path d="M1 14c0-2.209 1.791-4 4-4"/><path d="M11 10c2.209 0 4 1.791 4 4"/><path d="M7 10c-.34.066-.67.166-.98.295"/><path d="M9 10c.34.066.67.166.98.295"/></svg></span> Relationships
+    </div>
+  </div>
+
+  <div class="nav-section">
+    <div class="nav-label">Workspace</div>
+    <div class="nav-item" onclick="go('tasks')">
+      <span class="nav-icon"><svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="8" cy="8" r="6.5"/><path d="M5.5 8l2 2 3.5-3.5"/></svg></span> Tasks
+      <span class="nav-badge" id="sidebar-tasks-badge" style="display:none">0</span>
+    </div>
+    <div class="nav-item" onclick="go('activity')">
+      <span class="nav-icon"><svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><polyline points="1,8 4,8 6,3 8,13 10,6 12,8 15,8"/></svg></span> Activity
+    </div>
     <div class="nav-item" onclick="openPdfExport()">
-      <span class="nav-icon"><svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><rect x="2" y="1" width="9" height="12" rx="1.5"/><path d="M5 5h6M5 8h4"/><path d="M11 1v4h4"/><path d="M11 1l4 4"/></svg></span> Export to PDF
+      <span class="nav-icon"><svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><rect x="2" y="1" width="9" height="12" rx="1.5"/><path d="M5 5h6M5 8h4"/><path d="M11 1v4h4"/><path d="M11 1l4 4"/></svg></span> Export PDF
     </div>
   </div>
 

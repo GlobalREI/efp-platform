@@ -11,19 +11,42 @@ import {
   IconSettings, IconBell, IconSearch
 } from './Icons'
 
-const NAV_MAIN = [
-  { to: '/',           label: 'Dashboard',  Icon: IconDashboard  },
-  { to: '/mandates',   label: 'Mandates',   Icon: IconMandates   },
-  { to: '/clubs',      label: 'Clubs',      Icon: IconClubs      },
-  { to: '/contacts',   label: 'Contacts',   Icon: IconContacts   },
-  { to: '/needs',      label: 'Club Needs', Icon: IconNeeds      },
-  { to: '/pitches',    label: 'Pitches',    Icon: IconPitches    },
-  { to: '/scout',      label: 'Scout',      Icon: IconScout      },
-  { to: '/activities', label: 'Activities', Icon: IconActivities },
-]
-
-const NAV_BOTTOM = [
-  { to: '/settings', label: 'Settings', Icon: IconSettings },
+// ── Nav structure with sections ───────────────────────────────────────────────
+const NAV = [
+  {
+    section: 'Overview',
+    items: [
+      { to: '/',       label: 'Dashboard',   Icon: IconDashboard },
+    ],
+  },
+  {
+    section: 'Players',
+    items: [
+      { to: '/mandates', label: 'Players',      Icon: IconMandates },
+      { to: '/scout',    label: 'AI Matches',   Icon: IconScout    },
+    ],
+  },
+  {
+    section: 'CRM',
+    items: [
+      { to: '/clubs',    label: 'Clubs',        Icon: IconClubs    },
+      { to: '/contacts', label: 'Contacts',     Icon: IconContacts },
+      { to: '/needs',    label: 'Club Needs',   Icon: IconNeeds    },
+    ],
+  },
+  {
+    section: 'Pipeline',
+    items: [
+      { to: '/pitches',  label: 'Pitches',      Icon: IconPitches     },
+    ],
+  },
+  {
+    section: 'Workspace',
+    items: [
+      { to: '/tasks',      label: 'Tasks',      Icon: IconActivities  },
+      { to: '/activities', label: 'Activity',   Icon: IconActivities  },
+    ],
+  },
 ]
 
 export function AppLayout() {
@@ -47,34 +70,36 @@ export function AppLayout() {
         </div>
 
         <nav className={styles.nav}>
-          {NAV_MAIN.map(({ to, label, Icon }) => (
-            <NavLink
-              key={to}
-              to={to}
-              end={to === '/'}
-              className={({ isActive }) =>
-                `${styles.navItem} ${isActive ? styles.active : ''}`
-              }
-            >
-              <span className={styles.navIcon}><Icon size={15} /></span>
-              <span className={styles.navLabel}>{label}</span>
-            </NavLink>
+          {NAV.map(({ section, items }) => (
+            <div key={section} className={styles.navSection}>
+              <div className={styles.navSectionLabel}>{section}</div>
+              {items.map(({ to, label, Icon }) => (
+                <NavLink
+                  key={to}
+                  to={to}
+                  end={to === '/'}
+                  className={({ isActive }) =>
+                    `${styles.navItem} ${isActive ? styles.active : ''}`
+                  }
+                >
+                  <span className={styles.navIcon}><Icon size={14} /></span>
+                  <span className={styles.navLabel}>{label}</span>
+                </NavLink>
+              ))}
+            </div>
           ))}
         </nav>
 
         <div className={styles.sidebarBottom}>
-          {NAV_BOTTOM.map(({ to, label, Icon }) => (
-            <NavLink
-              key={to}
-              to={to}
-              className={({ isActive }) =>
-                `${styles.navItem} ${isActive ? styles.active : ''}`
-              }
-            >
-              <span className={styles.navIcon}><Icon size={15} /></span>
-              <span className={styles.navLabel}>{label}</span>
-            </NavLink>
-          ))}
+          <NavLink
+            to="/settings"
+            className={({ isActive }) =>
+              `${styles.navItem} ${isActive ? styles.active : ''}`
+            }
+          >
+            <span className={styles.navIcon}><IconSettings size={14} /></span>
+            <span className={styles.navLabel}>Settings</span>
+          </NavLink>
           <div className={styles.sidebarUser}>
             <div className={styles.sidebarAvatar}>TB</div>
             <div className={styles.sidebarUserInfo}>
@@ -87,14 +112,13 @@ export function AppLayout() {
 
       {/* ── Main column ── */}
       <div className={styles.main}>
-        {/* Sticky topbar */}
         <header className={styles.topbar}>
           <div className={styles.searchWrap}>
             <span className={styles.searchIcon}><IconSearch size={13} /></span>
             <input
               className={styles.searchInput}
               type="search"
-              placeholder="Search mandates, clubs, contacts…"
+              placeholder="Search players, clubs, contacts…"
               value={search}
               onChange={e => setSearch(e.target.value)}
               onKeyDown={handleSearch}
@@ -110,7 +134,6 @@ export function AppLayout() {
           </div>
         </header>
 
-        {/* Scrollable content */}
         <main className={styles.content}>
           <Outlet />
         </main>
