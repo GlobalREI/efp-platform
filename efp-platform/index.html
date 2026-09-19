@@ -13729,7 +13729,7 @@ for(const[lk,clubs] of Object.entries(LEAGUES)){
 // ── Utility ───────────────────────────────────────────────────────────────────
 function sAvg(pl){const v=pl.filter(p=>p.mv>0).map(p=>p.mv);return v.length?v.reduce((a,b)=>a+b,0)/v.length:0}
 function sAvgAge(pl){const v=pl.filter(p=>p.age>0).map(p=>p.age);return v.length?v.reduce((a,b)=>a+b,0)/v.length:0}
-function getNum(id){const v=document.getElementById(id).value;return v===''?null:parseFloat(v);}
+function getNum(id){var eid=id.startsWith('cnf-')?id:'cnf-'+id;var el=document.getElementById(eid)||document.getElementById(id);var v=el?el.value:'';return v===''?null:parseFloat(v);}
 function inRange(val,mn,mx){
   if(mn!==null&&val<mn) return false;
   if(mx!==null&&val>mx) return false;
