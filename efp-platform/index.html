@@ -1419,6 +1419,17 @@ body {
   .modal-grid,
   .field-row { grid-template-columns: 1fr !important; }
 
+  /* Profile page body: stack to 1 column on mobile */
+  .profile-page-body {
+    grid-template-columns: 1fr !important;
+  }
+  /* Profile side col: disable sticky on mobile (columns stack) */
+  .profile-side-col {
+    position: static !important;
+    max-height: none !important;
+    overflow-y: visible !important;
+  }
+
   /* Club needs: 1 col on narrowest screens, 2 col on wider mobile */
   .needs-grid { grid-template-columns: 1fr; }
   @media (min-width: 420px) { .needs-grid { grid-template-columns: repeat(2, 1fr); } }
@@ -3076,6 +3087,11 @@ th.ds-sort:hover { background: rgba(30,58,95,.06); }
 }
 .profile-side-col {
   display: flex; flex-direction: column; gap: 20px;
+  position: sticky;
+  top: 0;
+  max-height: calc(100vh - var(--topbar-h));
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
 }
 .profile-card {
   background: var(--surface);
@@ -4184,6 +4200,7 @@ input.field-input, select.field-input, select.field-select {
           <option value="prio">Priority</option>
         </select>
         <button id="btn-archived-mandates" class="btn btn-outline btn-sm" onclick="_toggleArchivedMandates()">Show Archived</button>
+        <button class="btn btn-outline btn-sm" onclick="archiveWindowMandates()" title="Tag all active mandates as Summer 2026 and archive them for winter window">📦 Archive Window</button>
         <button class="btn btn-outline btn-sm view-pdf-btn" onclick="exportPagePDF()" style="gap:4px;align-items:center"><span style="font-size:13px">⬇</span> PDF</button>
         <button class="btn btn-primary btn-sm" onclick="openMandateMethodPicker()">+ New Mandate</button>
       </div>
@@ -5204,7 +5221,17 @@ input.field-input, select.field-input, select.field-select {
     </div>
     <div class="form-group" style="margin-bottom:16px">
       <label class="form-label">Internal Notes</label>
-      <textarea class="field-input" id="ce-notes" rows="3" placeholder="Club notes, scouting intel, deal history…" style="width:100%;margin-top:4px;resize:vertical"></textarea>
+      <!-- Window tabs for notes -->
+      <div id="ce-notes-tabs" style="display:flex;gap:4px;margin-top:6px;margin-bottom:6px;flex-wrap:wrap">
+        <button class="ce-note-tab btn btn-outline btn-sm" data-win="Summer 2025" onclick="_ceSelectNoteWindow('Summer 2025')" style="font-size:11px;padding:3px 8px">Summer 2025</button>
+        <button class="ce-note-tab btn btn-outline btn-sm" data-win="Winter 2026" onclick="_ceSelectNoteWindow('Winter 2026')" style="font-size:11px;padding:3px 8px">Winter 2026</button>
+        <button class="ce-note-tab btn btn-outline btn-sm" data-win="Summer 2026" onclick="_ceSelectNoteWindow('Summer 2026')" style="font-size:11px;padding:3px 8px">Summer 2026</button>
+        <button class="ce-note-tab btn btn-outline btn-sm active" data-win="Winter 2027" onclick="_ceSelectNoteWindow('Winter 2027')" style="font-size:11px;padding:3px 8px;background:var(--navy);color:#fff;border-color:var(--navy)">Winter 2027 ←</button>
+        <button class="ce-note-tab btn btn-outline btn-sm" data-win="Summer 2027" onclick="_ceSelectNoteWindow('Summer 2027')" style="font-size:11px;padding:3px 8px">Summer 2027</button>
+        <button class="ce-note-tab btn btn-outline btn-sm" data-win="General" onclick="_ceSelectNoteWindow('General')" style="font-size:11px;padding:3px 8px">General</button>
+      </div>
+      <div id="ce-notes-window-label" style="font-size:10px;color:var(--text3);margin-bottom:4px">Notes for: Winter 2027</div>
+      <textarea class="field-input" id="ce-notes" rows="4" placeholder="Club notes, scouting intel, deal history for this window…" style="width:100%;margin-top:0;resize:vertical"></textarea>
     </div>
 
     <!-- Linked Contacts -->
@@ -5404,6 +5431,20 @@ input.field-input, select.field-input, select.field-select {
                 </select>
               </div>
             </div>
+            <div class="profile-form-grid-2" style="margin-bottom:12px">
+              <div>
+                <label class="field-label">Transfer Window</label>
+                <select class="field-select" id="pp-window" style="width:100%">
+                  <option value="Summer 2025">Summer 2025</option>
+                  <option value="Winter 2026">Winter 2026</option>
+                  <option value="Summer 2026">Summer 2026</option>
+                  <option value="Winter 2027" selected>Winter 2027</option>
+                  <option value="Summer 2027">Summer 2027</option>
+                  <option value="Ongoing">Ongoing</option>
+                </select>
+              </div>
+              <div></div>
+            </div>
             <div class="field" style="position:relative">
               <label class="field-label">Source / Via</label>
               <input class="field-input" id="pp-edit-source" placeholder="Type to search contacts…" autocomplete="off"
@@ -5586,6 +5627,20 @@ input.field-input, select.field-input, select.field-select {
           <option>Exclusive</option><option>Non-exclusive</option><option>Co-agent</option>
         </select>
       </div>
+    </div>
+    <div class="field-row field">
+      <div>
+        <label class="field-label">Transfer Window</label>
+        <select class="field-select" id="m-window">
+          <option value="Summer 2025">Summer 2025</option>
+          <option value="Winter 2026">Winter 2026</option>
+          <option value="Summer 2026">Summer 2026</option>
+          <option value="Winter 2027" selected>Winter 2027</option>
+          <option value="Summer 2027">Summer 2027</option>
+          <option value="Ongoing">Ongoing</option>
+        </select>
+      </div>
+      <div></div>
     </div>
     <div class="field-row field">
       <div><label class="field-label">Expected Price</label><input class="field-input" id="m-expected-price" placeholder="e.g. €2.5M" inputmode="numeric" oninput="_valInput(this)" onblur="_valBlur(this)"></div>
@@ -9314,7 +9369,9 @@ let mandatesDeleted = [];   // names of deleted static mandates
 let clubsAdded      = [];   // {id,name,league,country,flag}
 let needsAdded      = [];   // {id,club,pos,ageMin,ageMax,budMin,budMax,prio,contact,notes}
 let playerNotes     = {};   // {[playerName]: {status, notes}} — editable player profile notes
-let clubData        = {};   // {[clubName]: {league,country,flag,status,notes,linkedContacts:[{name,role}]}}
+let clubData        = {};   // {[clubName]: {league,country,flag,status,notes,windowNotes,linkedContacts:[{name,role}]}}
+let _ceCurrentNoteWindow = 'Winter 2027'; // active tab in club edit notes
+let _ceTempWindowNotes   = {};            // staging for unsaved note text per window
 let logsAdded       = [   // {id,type,notes,date,duration,outcome,contact,club,source}
   // ── Beeper-synced interactions (last synced 2026-09-18) ──
   // SEPTEMBER 18
@@ -10559,6 +10616,8 @@ function openPlayerProfile(playerName, data) {
   setPPPrio(saved.priority || null, true);
   const ppDT = document.getElementById('pp-deal-type');
   if (ppDT) ppDT.value = data.dealType || saved.dealType || 'either';
+  const ppWin = document.getElementById('pp-window');
+  if (ppWin) ppWin.value = (_m ? (_m.transfer_window || 'Winter 2027') : 'Winter 2027');
 
   // Pitch history — use the richer mandate-detail renderer
   const history = (pitches || []).filter(p => p.player === playerName);
@@ -10748,6 +10807,43 @@ function archiveMandate() {
   showSnack(mandate.archived ? `${name} archived` : `${name} restored`, false);
 }
 
+/**
+ * Archive all current (non-archived) mandates for a completed transfer window.
+ * Tags each mandate with the selected window name and sets archived = true.
+ * The winter window will start fresh with no active mandates.
+ */
+function archiveWindowMandates() {
+  const active = allMandates.filter(m => !m.archived);
+  if (!active.length) { showSnack('No active mandates to archive', false); return; }
+
+  // Build a list of window options based on what's actually in use
+  const windowOptions = ['Summer 2025', 'Winter 2026', 'Summer 2026', 'Winter 2027', 'Summer 2027'];
+  const currentWindow = active.some(m => m.transfer_window === 'Summer 2026') ? 'Summer 2026' : 'Winter 2027';
+
+  // Confirm with user, let them pick the window label
+  const msg = `Archive all ${active.length} active mandate${active.length !== 1 ? 's' : ''} as completed for a past transfer window?
+
+This will mark them archived so you can start fresh. You can restore any individual mandate from the "Show Archived" view.
+
+Which window is closing?`;
+  const win = prompt(msg, currentWindow);
+  if (!win) return; // cancelled
+
+  active.forEach(m => {
+    m.archived = true;
+    if (!m.transfer_window) m.transfer_window = win;
+    // Also sync mandatesAdded
+    const inAdded = mandatesAdded.find(a => a.id === m.id || a.name === m.name);
+    if (inAdded) { inAdded.archived = true; if (!inAdded.transfer_window) inAdded.transfer_window = win; }
+  });
+
+  fbSave();
+  _renderMandatesTable();
+  _applyPlayerNoteBadges();
+  _updateMandateSubtitle();
+  showSnack(`📦 ${active.length} mandate${active.length !== 1 ? 's' : ''} archived — ${win} window closed`, false);
+}
+
 function archiveNeed(id) {
   if (!id) return;
   const need = allNeeds.find(n => n.id === id);
@@ -10802,8 +10898,9 @@ function savePlayerProfile() {
   const notes    = document.getElementById('pp-notes').value.trim();
   const priority = _ppSelectedPrio;
   const dealType = document.getElementById('pp-deal-type')?.value || 'either';
+  const transfer_window = document.getElementById('pp-window')?.value || 'Winter 2027';
 
-  // Save notes/priority/status/dealType under the (possibly new) name
+  // Save notes/priority/status/dealType/transfer_window under the (possibly new) name
   playerNotes[newName] = { status, notes, priority, dealType, savedAt: Date.now() };
   // Remove old key if name changed; cascade rename to pitches + matches
   if (newName !== _ppCurrentPlayer) {
@@ -10828,6 +10925,7 @@ function savePlayerProfile() {
     m.age = newAge; m.height = newHeight; m.club = newClub; m.value = newVal; m.contact = newSrc;
     m.dealType = dealType; m.expectedPrice = newExpectedPrice; m.salary = newSalary;
     m.nat = newNat; m.foot = newFoot; m.contract = newContract; m.type = newMType;
+    m.transfer_window = transfer_window;
   };
   if (_ppCurrentMandate) {
     _applyMandateFields(_ppCurrentMandate);
@@ -10959,7 +11057,15 @@ function openClubEdit(clubName) {
   document.getElementById('ce-league').value      = saved.league  || cells[1]?.textContent?.trim() || '';
   document.getElementById('ce-country').value     = saved.country || (cells[2]?.textContent?.trim().replace(/^[^\s]+\s/, '') || '');
   document.getElementById('ce-flag').value        = saved.flag    || cells[2]?.textContent?.trim().split(' ')[0] || '';
-  document.getElementById('ce-notes').value       = saved.notes   || '';
+  // Load windowed notes — backward compat: migrate old flat .notes to "General" window
+  _ceCurrentNoteWindow = 'Winter 2027'; // default to current active window
+  _ceTempWindowNotes   = Object.assign({}, saved.windowNotes || {});
+  if (!Object.keys(_ceTempWindowNotes).length && saved.notes) {
+    // First open after migration: move old notes to "General" so they aren't lost
+    _ceTempWindowNotes['General'] = saved.notes;
+  }
+  _ceRenderNotesTabs();
+  document.getElementById('ce-notes').value = _ceTempWindowNotes[_ceCurrentNoteWindow] || '';
 
   // Load linked contacts — from saved data first, then fall back to allContacts match
   _ceTempContacts = (saved.linkedContacts || []).slice();
@@ -10995,11 +11101,45 @@ function openClubEdit(clubName) {
   document.getElementById('club-edit-drawer').classList.add('open');
 }
 
+/** Switch the active window tab in club notes and save current textarea content */
+function _ceSelectNoteWindow(win) {
+  // Save current tab content to temp object before switching
+  const cur = document.getElementById('ce-notes');
+  if (cur) _ceTempWindowNotes[_ceCurrentNoteWindow] = cur.value.trim();
+  _ceCurrentNoteWindow = win;
+  // Populate textarea with the selected window's notes
+  if (cur) cur.value = _ceTempWindowNotes[win] || '';
+  // Update label
+  const lbl = document.getElementById('ce-notes-window-label');
+  if (lbl) lbl.textContent = 'Notes for: ' + win;
+  _ceRenderNotesTabs();
+}
+
+/** Render tab active state and dot indicators for windows that have notes */
+function _ceRenderNotesTabs() {
+  const tabs = document.querySelectorAll('.ce-note-tab');
+  tabs.forEach(btn => {
+    const w = btn.dataset.win;
+    const isActive = w === _ceCurrentNoteWindow;
+    const hasContent = !!(_ceTempWindowNotes[w] || '').trim();
+    // Reset style
+    btn.style.background    = isActive ? 'var(--navy)' : '';
+    btn.style.color         = isActive ? '#fff' : '';
+    btn.style.borderColor   = isActive ? 'var(--navy)' : '';
+    btn.style.fontWeight    = isActive ? '700' : '';
+    // Show dot if the tab has notes but isn't the current one
+    const label = w + (w === 'Winter 2027' ? ' ←' : '');
+    btn.textContent = hasContent && !isActive ? '● ' + label : label;
+  });
+}
+
 function closeClubEdit() {
   document.getElementById('club-edit-overlay').style.display = 'none';
   document.getElementById('club-edit-drawer').classList.remove('open');
   _ceCurrentName = null;
   _ceTempContacts = [];
+  _ceTempWindowNotes = {};
+  _ceCurrentNoteWindow = 'Winter 2027';
   ceCloseDropdown();
   // Restore sync banner if it was hidden by the drawer
   (function(){ var b=document.getElementById('sync-intel-banner'); if(b&&b.dataset.hiddenForDrawer==='1'){delete b.dataset.hiddenForDrawer;if(_syncReviewItems&&_syncReviewItems.length>0)b.style.display='flex';} })();
@@ -11012,7 +11152,12 @@ function saveClubEdit() {
   const country  = document.getElementById('ce-country').value.trim();
   const flag     = document.getElementById('ce-flag').value.trim();
   const status   = (clubData[_ceCurrentName] || {}).status || 'Not Started'; // preserve existing
-  const notes    = document.getElementById('ce-notes').value.trim();
+  // Save current tab content before building the windowNotes object
+  _ceTempWindowNotes[_ceCurrentNoteWindow] = document.getElementById('ce-notes').value.trim();
+  // Clean up empty windows
+  const windowNotes = {};
+  Object.entries(_ceTempWindowNotes).forEach(([k,v]) => { if (v.trim()) windowNotes[k] = v.trim(); });
+  const notes = Object.values(windowNotes).join(' | '); // keep flat .notes as plain-text fallback
   const oldName  = _ceCurrentName;
   const renamed  = newName !== oldName;
 
@@ -11021,7 +11166,7 @@ function saveClubEdit() {
     delete clubData[oldName];
   }
 
-  clubData[newName] = { name: newName, league, country, flag, status, notes,
+  clubData[newName] = { name: newName, league, country, flag, status, notes, windowNotes,
     linkedContacts: _ceTempContacts, savedAt: Date.now() };
 
   // ── P0 fix: update allClubs[] so name/league/country/flag persist on refresh ──
@@ -11481,8 +11626,9 @@ function submitMandate() {
   const expectedPrice = _normVal(document.getElementById('m-expected-price')?.value.trim()||'') || '';
   const salary        = _normVal(document.getElementById('m-salary')?.value.trim()||'')        || '';
   const foot = document.getElementById('m-foot')?.value || '';
+  const transfer_window = document.getElementById('m-window')?.value || 'Winter 2027';
   const d = { id:'m_'+Date.now(), name, position:pos, pos, pos2, age, height, nationality:nat, foot, club:mClub, value:val, contact,
-               expectedPrice, salary, dotClass:'dot-amber', statusText:'New Mandate' };
+               expectedPrice, salary, transfer_window, dotClass:'dot-amber', statusText:'New Mandate' };
   allMandates.push(d);
   mandatesAdded.push(d); // legacy sync
   const _mSaveBtn = document.querySelector('#mandate-drawer .drawer-foot .btn-primary');
@@ -16091,7 +16237,13 @@ function _updateMandateSubtitle() {
   if (!sub) return;
   const active   = allMandates.filter(m => !m.archived).length;
   const archived = allMandates.filter(m => m.archived).length;
-  sub.textContent = `${active} active mandate${active !== 1 ? 's' : ''}${archived ? ' · ' + archived + ' archived' : ''} · Summer 2026 window`;
+  // Show active window breakdown if mandates have window tags
+  const activeList = allMandates.filter(m => !m.archived);
+  const winGroups = {};
+  activeList.forEach(m => { const w = m.transfer_window || 'Untagged'; winGroups[w] = (winGroups[w]||0)+1; });
+  const winKeys = Object.keys(winGroups);
+  const winSuffix = winKeys.length === 1 ? ` · ${winKeys[0]}` : (winKeys.length > 1 ? ` · ${winKeys.join(', ')}` : ' · Winter 2027 window');
+  sub.textContent = `${active} active mandate${active !== 1 ? 's' : ''}${archived ? ' · ' + archived + ' archived' : ''}${active > 0 ? winSuffix : ''}`;
 }
 
 function _updateNeedsSubtitle() {
@@ -19837,7 +19989,7 @@ const ALL_LEAGUES_LIST = [
   {key:'cro', label:'🇭🇷 HNL Croatia'},
   {key:'bel', label:'🇧🇪 Jupiler Pro League'}
 ];
-let selectedLeagues = ['bl'];
+let selectedLeagues = ['bl','tbl','pl','er','sw','abl','ch','swe','den','nor','pol','sco','l1','lla','sa','por','cze','gre','cro','bel'];
 
 function renderLgDropdown(){
   const panel = document.getElementById('cnf-lgPanel');
