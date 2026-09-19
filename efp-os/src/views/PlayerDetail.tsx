@@ -36,6 +36,10 @@ interface Mandate {
   dotClass?: string
   statusText?: string
   archived?: boolean
+  tm_id?: string
+  tm_profile_url?: string
+  tm_image_url?: string
+  source?: string
 }
 
 interface PlayerNotes {
@@ -250,6 +254,24 @@ export function PlayerDetail() {
           <p className={styles.notesText} style={{ padding: '14px 18px' }}>
             {notes.notes}
           </p>
+        </Card>
+      )}
+
+      {/* ── Transfermarkt Data (saved from TM Scout) ── */}
+      {mandate.tm_id && (
+        <Card title="Transfermarkt Data" titleIcon="🌐">
+          <FieldGrid>
+            <Field label="TM ID"   value={mandate.tm_id} />
+            {mandate.source && <Field label="Source" value={mandate.source === 'tm_scout' ? 'TM Scout' : mandate.source} />}
+          </FieldGrid>
+          {mandate.tm_profile_url && (
+            <div style={{ padding: '10px 18px', borderTop: '1px solid var(--border)' }}>
+              <a href={mandate.tm_profile_url} target="_blank" rel="noopener noreferrer"
+                style={{ fontSize: 12, color: 'var(--accent)', textDecoration: 'none' }}>
+                View on Transfermarkt ↗
+              </a>
+            </div>
+          )}
         </Card>
       )}
     </PageShell>

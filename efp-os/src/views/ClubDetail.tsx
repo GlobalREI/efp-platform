@@ -32,6 +32,15 @@ interface Club {
   windowNotes?: Record<string, string>
   linkedContacts?: { name: string; role: string }[]
   savedAt?: number
+  tm_id?: string
+  tm_market_value?: string
+  tm_squad_size?: string
+  tm_avg_age?: string
+  tm_profile_url?: string
+  tm_logo_url?: string
+  tm_search_pos?: string
+  tm_search_age?: string
+  tm_search_mv?: string
 }
 
 interface Mandate {
@@ -263,6 +272,28 @@ export function ClubDetail() {
                 </div>
               )
             })}
+        </Card>
+      )}
+
+      {/* ── Transfermarkt Data (saved from TM Scout) ── */}
+      {club.tm_id && (
+        <Card title="Transfermarkt Data" titleIcon="🌐">
+          <FieldGrid>
+            {club.tm_market_value && <Field label="Squad Market Value" value={club.tm_market_value} />}
+            {club.tm_squad_size   && <Field label="Squad Size"         value={club.tm_squad_size} />}
+            {club.tm_avg_age      && <Field label="Average Age"        value={club.tm_avg_age} />}
+            {club.tm_search_pos   && <Field label="Scouted For (Pos)"  value={club.tm_search_pos} />}
+            {club.tm_search_age   && <Field label="Target Age Range"   value={club.tm_search_age} />}
+            {club.tm_search_mv    && <Field label="Target MV Range"    value={club.tm_search_mv} />}
+          </FieldGrid>
+          {club.tm_profile_url && (
+            <div style={{ padding: '10px 18px', borderTop: '1px solid var(--border)' }}>
+              <a href={club.tm_profile_url} target="_blank" rel="noopener noreferrer"
+                style={{ fontSize: 12, color: 'var(--accent)', textDecoration: 'none' }}>
+                View on Transfermarkt ↗
+              </a>
+            </div>
+          )}
         </Card>
       )}
     </PageShell>
