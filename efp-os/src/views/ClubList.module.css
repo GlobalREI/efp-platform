@@ -1,0 +1,83 @@
+/* ─── ClubList ─────────────────────────────────────────────────────────── */
+
+.page { display: flex; flex-direction: column; min-height: 100%; }
+
+.filters { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.sel {
+  font-family: var(--font); font-size: 12px;
+  padding: 4px 24px 4px 8px;
+  border: 1px solid var(--border); border-radius: var(--r-sm);
+  background: var(--surface) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' fill='none'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%2394A3B8' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") no-repeat right 8px center;
+  color: var(--text); cursor: pointer; appearance: none;
+}
+.sel:focus { outline: none; border-color: var(--accent); }
+
+.skeletonWrap { padding: 0 28px; display: flex; flex-direction: column; gap: 10px; }
+.skeleton {
+  height: 80px; border-radius: var(--r-md);
+  background: linear-gradient(90deg,var(--surface-2) 25%,var(--surface-3) 50%,var(--surface-2) 75%);
+  background-size: 200% 100%; animation: shimmer 1.4s ease-in-out infinite;
+}
+@keyframes shimmer { to { background-position: -200% 0; } }
+
+.empty {
+  padding: 60px 28px; text-align: center;
+  font-size: 13px; color: var(--text-3);
+}
+
+/* ── Card grid ── */
+.grid {
+  padding: 0 28px 28px;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 12px;
+}
+
+.card {
+  display: flex; flex-direction: column; gap: 10px;
+  padding: 16px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  box-shadow: var(--shadow-sm);
+  text-align: left;
+  cursor: pointer;
+  transition: box-shadow 0.15s, border-color 0.15s, transform 0.1s;
+  font-family: var(--font);
+}
+.card:hover {
+  box-shadow: var(--shadow);
+  border-color: var(--border-2);
+  transform: translateY(-1px);
+}
+
+.cardTop {
+  display: flex; align-items: center; gap: 12px;
+}
+
+.avatar {
+  width: 40px; height: 40px; border-radius: var(--r-md);
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+.flag   { font-size: 22px; line-height: 1; }
+.initials { font-size: 13px; font-weight: 700; color: var(--text-2); }
+
+.meta { flex: 1; min-width: 0; }
+.clubName { display: block; font-size: 14px; font-weight: 600; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.league   { display: block; font-size: 11px; color: var(--text-3); margin-top: 2px; }
+
+.dot {
+  width: 8px; height: 8px; border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.cardBottom {
+  display: flex; align-items: center; gap: 8px;
+  flex-wrap: wrap;
+}
+.country { font-size: 11px; color: var(--text-3); }
+.contactCount { font-size: 11px; color: var(--text-2); margin-left: auto; }
+.statusLabel { font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; }

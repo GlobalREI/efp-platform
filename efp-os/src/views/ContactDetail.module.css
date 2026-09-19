@@ -1,0 +1,134 @@
+/* ContactDetail.module.css */
+
+/* ─── Loading / not-found ─── */
+.loadingWrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 60vh;
+}
+
+.spinnerRow {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  color: var(--text-muted);
+  font-size: var(--text-sm);
+}
+
+.spinner {
+  width: 24px;
+  height: 24px;
+  border: 2px solid var(--border);
+  border-top-color: var(--brand);
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.notFound {
+  padding: var(--space-16) var(--space-8);
+  text-align: center;
+  color: var(--text-muted);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-4);
+}
+
+/* ─── Edit inputs ─── */
+.editInput {
+  width: 100%;
+  padding: var(--space-2) var(--space-3);
+  background: var(--surface-0);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  color: var(--text-primary);
+  font-size: var(--text-sm);
+  outline: none;
+  transition: border-color 0.15s;
+}
+.editInput:focus { border-color: var(--brand); }
+
+.editTextarea {
+  width: 100%;
+  padding: var(--space-3);
+  background: var(--surface-0);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  color: var(--text-primary);
+  font-size: var(--text-sm);
+  font-family: inherit;
+  line-height: 1.6;
+  resize: vertical;
+  outline: none;
+  transition: border-color 0.15s;
+}
+.editTextarea:focus { border-color: var(--brand); }
+
+/* ─── Links ─── */
+.link {
+  color: var(--brand);
+  text-decoration: none;
+}
+.link:hover { text-decoration: underline; }
+
+/* ─── Notes ─── */
+.notesText {
+  font-size: var(--text-sm);
+  color: var(--text-secondary);
+  line-height: 1.7;
+  white-space: pre-wrap;
+  margin: 0;
+}
+
+/* ─── Rail: Pitch rows ─── */
+.pitchRow {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-4);
+  font-size: var(--text-sm);
+  border-bottom: 1px solid var(--border);
+}
+.pitchRow:last-child { border-bottom: none; }
+
+.pitchPlayer {
+  flex: 1;
+  color: var(--text-primary);
+  font-weight: 500;
+}
+
+.pitchDot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.pitchStage {
+  font-size: var(--text-xs);
+  color: var(--text-muted);
+}
+
+/* ─── Rail: Info rows ─── */
+.infoRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-2) var(--space-4);
+  font-size: var(--text-sm);
+  border-bottom: 1px solid var(--border);
+}
+.infoRow:last-child { border-bottom: none; }
+
+.infoLabel {
+  font-size: var(--text-xs);
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}

@@ -1,0 +1,238 @@
+/* PitchList.module.css */
+
+.page {
+  padding: var(--space-6) var(--space-8);
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+/* ─── Filters ─── */
+.filters {
+  display: flex;
+  gap: var(--space-1);
+  background: var(--surface-0);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 3px;
+}
+
+.viewBtn {
+  padding: 5px 12px;
+  border: none;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--text-muted);
+  font-size: var(--text-xs);
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.viewBtnActive {
+  background: var(--surface-2);
+  color: var(--text-primary);
+}
+
+/* ─── Skeleton ─── */
+@keyframes shimmer {
+  0%   { background-position: -600px 0; }
+  100% { background-position: 600px 0; }
+}
+.skeletonCard {
+  height: 80px;
+  border-radius: var(--radius-md);
+  margin-bottom: var(--space-2);
+  background: linear-gradient(90deg, var(--surface-1) 25%, var(--surface-2) 50%, var(--surface-1) 75%);
+  background-size: 600px 100%;
+  animation: shimmer 1.4s infinite linear;
+}
+
+/* ─── Kanban board ─── */
+.kanban {
+  display: flex;
+  gap: var(--space-3);
+  overflow-x: auto;
+  padding-bottom: var(--space-4);
+  margin-top: var(--space-4);
+  align-items: flex-start;
+}
+
+/* ─── Column ─── */
+.col {
+  flex: 0 0 220px;
+  min-width: 220px;
+  background: var(--surface-0);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+}
+
+.colHeader {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-3) var(--space-3);
+  border-bottom: 1px solid var(--border);
+  background: var(--surface-1);
+}
+
+.colDot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.colLabel {
+  flex: 1;
+  font-size: var(--text-xs);
+  font-weight: 700;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.colCount {
+  font-size: var(--text-xs);
+  color: var(--text-muted);
+  background: var(--surface-2);
+  border-radius: var(--radius-full);
+  padding: 1px 7px;
+  font-weight: 600;
+}
+
+.colBody {
+  padding: var(--space-2);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  min-height: 60px;
+  max-height: calc(100vh - 220px);
+  overflow-y: auto;
+}
+
+.colEmpty {
+  padding: var(--space-3);
+  text-align: center;
+  font-size: var(--text-xs);
+  color: var(--text-muted);
+}
+
+/* ─── Kanban card ─── */
+.card {
+  background: var(--surface-1);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: var(--space-3);
+  cursor: pointer;
+  transition: transform 0.12s, box-shadow 0.12s;
+}
+.card:hover {
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-sm);
+}
+.cardHot {
+  border-left: 3px solid #EF4444;
+}
+
+.cardPlayer {
+  font-size: var(--text-sm);
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 3px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.hotDot { font-size: 12px; }
+
+.cardClub {
+  font-size: var(--text-xs);
+  color: var(--text-secondary);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.cardFlag { font-size: 13px; }
+
+.cardPos {
+  font-size: var(--text-xs);
+  color: var(--text-muted);
+  margin-top: 2px;
+}
+
+.cardNote {
+  font-size: var(--text-xs);
+  color: var(--text-muted);
+  margin-top: var(--space-2);
+  font-style: italic;
+  line-height: 1.4;
+}
+
+.cardPdf {
+  font-size: var(--text-xs);
+  color: var(--brand);
+  margin-top: 3px;
+}
+
+/* ─── List view ─── */
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  background: var(--surface-1);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  margin-top: var(--space-4);
+}
+.table thead tr {
+  background: var(--surface-0);
+  border-bottom: 1px solid var(--border);
+}
+.table th {
+  padding: var(--space-3) var(--space-4);
+  text-align: left;
+  font-size: var(--text-xs);
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+.table td {
+  padding: var(--space-3) var(--space-4);
+  font-size: var(--text-sm);
+  border-bottom: 1px solid var(--border);
+  vertical-align: middle;
+}
+.table tbody tr:last-child td { border-bottom: none; }
+
+.row { cursor: pointer; transition: background 0.12s; }
+.row:hover { background: var(--surface-2); }
+
+.thPlayer  { width: 18%; }
+.thClub    { width: 18%; }
+.thPos     { width: 8%; }
+.thContact { width: 15%; }
+.thStage   { width: 14%; }
+.thNote    { width: auto; }
+
+.playerName { font-weight: 600; }
+.flag       { font-size: 14px; }
+.pos        { color: var(--text-muted); }
+.contact    { color: var(--text-secondary); }
+.note       { color: var(--text-muted); font-size: var(--text-xs); }
+
+.stagePill {
+  display: inline-block;
+  padding: 2px 9px;
+  border-radius: var(--radius-full);
+  border: 1px solid;
+  font-size: var(--text-xs);
+  font-weight: 600;
+  background: transparent;
+}
+
+.emptyCell {
+  text-align: center;
+  padding: var(--space-12);
+  color: var(--text-muted);
+}

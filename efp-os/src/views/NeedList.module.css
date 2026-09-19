@@ -1,0 +1,182 @@
+/* NeedList.module.css */
+
+.page {
+  padding: var(--space-6) var(--space-8);
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+/* ─── Filters ─── */
+.filters {
+  display: flex;
+  gap: var(--space-2);
+}
+
+.sel {
+  padding: var(--space-2) var(--space-8) var(--space-2) var(--space-3);
+  background: var(--surface-1)
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%2394A3B8' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E")
+    no-repeat right 10px center;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  color: var(--text-primary);
+  font-size: var(--text-sm);
+  appearance: none;
+  cursor: pointer;
+  outline: none;
+}
+.sel:focus { border-color: var(--brand); }
+
+/* ─── Skeleton ─── */
+@keyframes shimmer {
+  0%   { background-position: -600px 0; }
+  100% { background-position: 600px 0; }
+}
+.skeletonWrap {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: var(--space-4);
+  margin-top: var(--space-6);
+}
+.skeleton {
+  height: 140px;
+  border-radius: var(--radius-lg);
+  background: linear-gradient(90deg, var(--surface-1) 25%, var(--surface-2) 50%, var(--surface-1) 75%);
+  background-size: 600px 100%;
+  animation: shimmer 1.4s infinite linear;
+}
+
+/* ─── Empty ─── */
+.empty {
+  margin-top: var(--space-12);
+  text-align: center;
+  color: var(--text-muted);
+  font-size: var(--text-sm);
+}
+
+/* ─── Grid ─── */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: var(--space-4);
+  margin-top: var(--space-4);
+}
+
+/* ─── Card ─── */
+.card {
+  background: var(--surface-1);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-4);
+  cursor: pointer;
+  transition: transform 0.12s, box-shadow 0.12s;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+.card:hover {
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-md);
+}
+.archived { opacity: 0.5; }
+
+/* ─── Card top ─── */
+.cardTop {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-2);
+}
+
+.clubInfo {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-2);
+  min-width: 0;
+}
+
+.flag {
+  font-size: 20px;
+  flex-shrink: 0;
+  line-height: 1;
+  padding-top: 2px;
+}
+
+.clubName {
+  font-size: var(--text-base);
+  font-weight: 700;
+  color: var(--text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.league {
+  font-size: var(--text-xs);
+  color: var(--text-muted);
+  margin-top: 1px;
+}
+
+.urgencyDot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  margin-top: 4px;
+}
+
+/* ─── Positions ─── */
+.positions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1);
+}
+
+.posPill {
+  padding: 3px 9px;
+  border-radius: var(--radius-full);
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  font-size: var(--text-xs);
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+.posEmpty {
+  font-size: var(--text-xs);
+  color: var(--text-muted);
+}
+
+/* ─── Meta row ─── */
+.cardMeta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  align-items: center;
+}
+
+.budget,
+.dealType,
+.window {
+  font-size: var(--text-xs);
+  color: var(--text-secondary);
+}
+
+.window {
+  padding: 2px 8px;
+  border-radius: var(--radius-full);
+  background: var(--surface-0);
+  border: 1px solid var(--border);
+}
+
+/* ─── Status ─── */
+.cardStatus { }
+
+/* ─── Contact ─── */
+.contact {
+  font-size: var(--text-xs);
+  color: var(--text-muted);
+  margin-top: auto;
+  border-top: 1px solid var(--border);
+  padding-top: var(--space-2);
+}
