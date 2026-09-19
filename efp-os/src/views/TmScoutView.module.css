@@ -1,0 +1,310 @@
+/* TmScoutView — Transfermarkt Scout */
+
+.page {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-5);
+  padding: var(--sp-6);
+  max-width: 1200px;
+}
+
+/* ── Refresh button ── */
+.refreshBtn {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  height: 32px;
+  padding: 0 12px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-2);
+  cursor: pointer;
+  transition: border-color 0.15s, color 0.15s;
+}
+.refreshBtn:hover { border-color: var(--accent); color: var(--accent); }
+
+/* ── Tab bar ── */
+.tabBar {
+  display: flex;
+  gap: 4px;
+  background: var(--surface-2);
+  border-radius: var(--r-lg);
+  padding: 4px;
+  width: fit-content;
+}
+.tab {
+  padding: 7px 18px;
+  border-radius: var(--r-md);
+  border: none;
+  background: transparent;
+  font-size: 12.5px;
+  font-weight: 500;
+  color: var(--text-2);
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+.tab:hover:not(.tabActive) { background: var(--surface-3); color: var(--text); }
+.tabActive {
+  background: var(--surface);
+  color: var(--text);
+  box-shadow: var(--shadow-sm);
+  font-weight: 600;
+}
+
+/* ── Search panel ── */
+.searchPanel {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-3);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+  padding: var(--sp-4) var(--sp-5);
+}
+
+.searchRow {
+  display: flex;
+  gap: var(--sp-3);
+  align-items: center;
+}
+
+.searchInput {
+  flex: 1;
+  height: 38px;
+  padding: 0 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  background: var(--surface-2);
+  color: var(--text);
+  font-size: 13px;
+  transition: border-color 0.15s;
+}
+.searchInput:focus {
+  outline: none;
+  border-color: var(--accent);
+  background: var(--surface);
+}
+.searchInput::placeholder { color: var(--text-3); }
+
+.searchBtn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  height: 38px;
+  padding: 0 18px;
+  background: var(--accent);
+  color: #fff;
+  border: none;
+  border-radius: var(--r-md);
+  font-size: 12.5px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.searchBtn:hover:not(:disabled) { background: var(--accent-hover); }
+.searchBtn:disabled { opacity: 0.55; cursor: not-allowed; }
+
+/* ── Filter row ── */
+.filterRow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--sp-4);
+  min-height: 32px;
+}
+
+.filterGroup {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.filterLabel {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-2);
+  white-space: nowrap;
+}
+.filterInput {
+  width: 60px;
+  height: 30px;
+  padding: 0 8px;
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  background: var(--surface);
+  color: var(--text);
+  font-size: 12px;
+  text-align: center;
+}
+.filterInput:focus { outline: none; border-color: var(--accent); }
+.filterSep { font-size: 12px; color: var(--text-3); }
+
+/* ── Error card ── */
+.errorCard {
+  display: flex;
+  gap: var(--sp-4);
+  align-items: flex-start;
+  background: var(--red-dim);
+  border: 1px solid rgba(239, 68, 68, 0.2);
+  border-radius: var(--r-lg);
+  padding: var(--sp-4) var(--sp-5);
+}
+.errorIcon { font-size: 20px; flex-shrink: 0; }
+.errorTitle { font-size: 13px; font-weight: 600; color: var(--red); margin-bottom: 4px; }
+.errorMsg { font-size: 12px; color: var(--text-2); margin-bottom: 6px; }
+.errorHint { font-size: 11.5px; color: var(--text-3); }
+.errorHint code {
+  background: rgba(0,0,0,0.05);
+  padding: 1px 4px;
+  border-radius: 3px;
+  font-family: monospace;
+}
+
+/* ── Empty ── */
+.empty {
+  text-align: center;
+  color: var(--text-3);
+  font-size: 13px;
+  padding: var(--sp-8) 0;
+}
+
+/* ── Prompt card (before first search) ── */
+.promptCard {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--sp-3);
+  min-height: 200px;
+  background: var(--surface);
+  border: 1px dashed var(--border-2);
+  border-radius: var(--r-xl);
+  padding: var(--sp-8);
+}
+.promptIcon { font-size: 36px; }
+.promptTitle {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text);
+}
+.promptSub { font-size: 12.5px; color: var(--text-3); }
+
+/* ── Table ── */
+.tableWrap {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+  overflow: hidden;
+}
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12.5px;
+}
+.th {
+  padding: 10px 12px;
+  text-align: left;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-3);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  background: var(--surface-2);
+  border-bottom: 1px solid var(--border);
+}
+.thNum { text-align: right; }
+.tr { border-bottom: 1px solid var(--border); transition: background 0.1s; }
+.tr:last-child { border-bottom: none; }
+.tr:hover { background: var(--surface-2); }
+.td { padding: 11px 12px; vertical-align: middle; }
+.tdNum { text-align: right; }
+
+/* ── Club cell ── */
+.clubCell { display: flex; align-items: center; gap: 10px; }
+.clubName { font-size: 13px; font-weight: 500; color: var(--text); }
+.clubLogo { width: 24px; height: 24px; object-fit: contain; flex-shrink: 0; }
+.clubLogoFallback {
+  width: 24px; height: 24px;
+  border-radius: 4px;
+  background: var(--surface-2);
+  color: var(--text-3);
+  font-size: 8px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+/* ── Player cell ── */
+.playerCell { display: flex; align-items: center; gap: 10px; }
+.playerName { font-size: 13px; font-weight: 500; color: var(--text); }
+.avatar {
+  width: 28px; height: 28px;
+  border-radius: 50%;
+  background: var(--accent-dim);
+  color: var(--accent);
+  font-size: 9px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.avatarImg {
+  width: 28px; height: 28px;
+  border-radius: 50%;
+  object-fit: cover;
+  flex-shrink: 0;
+}
+
+/* ── Meta text ── */
+.meta { font-size: 12px; color: var(--text-2); }
+
+/* ── Market value ── */
+.mv { font-size: 12.5px; font-weight: 600; color: var(--text); font-variant-numeric: tabular-nums; }
+
+/* ── Position badge ── */
+.posBadge {
+  display: inline-block;
+  padding: 2px 7px;
+  background: var(--accent-dim);
+  color: var(--accent);
+  border-radius: var(--r-full);
+  font-size: 10.5px;
+  font-weight: 700;
+}
+
+/* ── TM link ── */
+.tmLink {
+  display: inline-flex;
+  align-items: center;
+  color: var(--text-3);
+  transition: color 0.1s;
+  text-decoration: none;
+}
+.tmLink:hover { color: var(--accent); }
+
+/* ── Spinner ── */
+.spinner {
+  width: 13px;
+  height: 13px;
+  border: 2px solid rgba(255,255,255,0.4);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: spin 0.65s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ── Loan note ── */
+.loanNote {
+  padding: var(--sp-3) var(--sp-4);
+  font-size: 11.5px;
+  color: var(--text-3);
+  border-top: 1px solid var(--border);
+  background: var(--surface-2);
+}

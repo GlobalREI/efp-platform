@@ -133,3 +133,18 @@ export function IconTasks({ size = 15, className }: IconProps) {
     </svg>
   )
 }
+
+export function IconTmScout({ size = 15, className }: IconProps) {
+  // Globe with magnifying glass — represents TM search
+  return (
+    <svg {...d(size)} className={className}>
+      <circle cx="7" cy="8" r="5"/>
+      <line x1="7" y1="3" x2="7" y2="13"/>
+      <path d="M2 8h10"/>
+      <path d="M3.5 5.5c1 .8 2.2 1.3 3.5 1.3s2.5-.5 3.5-1.3"/>
+      <path d="M3.5 10.5c1-.8 2.2-1.3 3.5-1.3s2.5.5 3.5 1.3"/>
+      <circle cx="13" cy="4" r="1.5" fill="currentColor" stroke="none"/>
+      <line x1="11.9" y1="5.1" x2="14.5" y2="7.5"/>
+    </svg>
+  )
+}
