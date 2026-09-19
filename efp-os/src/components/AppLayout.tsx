@@ -62,6 +62,8 @@ export function AppLayout() {
 
   return (
     <div className={styles.shell}>
+      {/* Skip navigation — keyboard accessibility */}
+      <a href="#main-content" className={styles.skipLink}>Skip to main content</a>
       {/* ── Sidebar ── */}
       <aside className={styles.sidebar}>
         <div className={styles.logo}>
@@ -69,10 +71,10 @@ export function AppLayout() {
           <span className={styles.logoText}>EFP OS</span>
         </div>
 
-        <nav className={styles.nav}>
+        <nav className={styles.nav} aria-label="Main navigation">
           {NAV.map(({ section, items }) => (
             <div key={section} className={styles.navSection}>
-              <div className={styles.navSectionLabel}>{section}</div>
+              <div className={styles.navSectionLabel} aria-hidden="true">{section}</div>
               {items.map(({ to, label, Icon }) => (
                 <NavLink
                   key={to}
@@ -119,6 +121,7 @@ export function AppLayout() {
               className={styles.searchInput}
               type="search"
               placeholder="Search players, clubs, contacts…"
+              aria-label="Search players, clubs and contacts"
               value={search}
               onChange={e => setSearch(e.target.value)}
               onKeyDown={handleSearch}
@@ -126,15 +129,15 @@ export function AppLayout() {
             <kbd className={styles.searchKbd}>↵</kbd>
           </div>
           <div className={styles.topbarRight}>
-            <button className={styles.topbarAction} title="Notifications">
+            <button className={styles.topbarAction} title="Notifications" aria-label="Notifications">
               <IconBell size={15} />
             </button>
             <div className={styles.topbarDivider} />
-            <button className={styles.avatarBtn} title="Account">T</button>
+            <button className={styles.avatarBtn} title="Account menu" aria-label="Account menu">T</button>
           </div>
         </header>
 
-        <main className={styles.content}>
+        <main className={styles.content} id="main-content">
           <Outlet />
         </main>
       </div>

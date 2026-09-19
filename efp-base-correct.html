@@ -110,6 +110,34 @@ body {
   text-transform: uppercase; padding-left: 34px;
 }
 
+.skip-link {
+  position: absolute;
+  top: -100px;
+  left: 8px;
+  z-index: 9999;
+  padding: 8px 16px;
+  background: #8DC996;
+  color: #102018;
+  font-size: 13px;
+  font-weight: 700;
+  border-radius: 8px;
+  text-decoration: none;
+  transition: top 0.1s;
+}
+.skip-link:focus { top: 8px; }
+
+.sr-only {
+  position: absolute; width: 1px; height: 1px;
+  padding: 0; margin: -1px; overflow: hidden;
+  clip: rect(0,0,0,0); white-space: nowrap; border: 0;
+}
+
+:focus-visible {
+  outline: 2px solid #8DC996;
+  outline-offset: 2px;
+  box-shadow: 0 0 0 4px rgba(141,201,150,0.20);
+}
+
 .nav-section { padding: 10px 8px 4px; }
 .nav-label {
   font-size: 9.5px; font-weight: 600; color: rgba(177,208,183,0.4);
@@ -207,7 +235,7 @@ body {
 }
 .view-search:focus {
   border-color: var(--accent);
-  box-shadow: 0 0 0 2px rgba(59,130,246,.15);
+  box-shadow: 0 0 0 2px rgba(141,201,150,0.25);
 }
 .view-search::placeholder { color: var(--text3); }
 /* Hide kanban card when filtered out */
@@ -2431,6 +2459,7 @@ th.ds-sort:hover { background: rgba(30,58,95,.06); }
 <div id="mob-overlay" onclick="mobCloseNav()"></div>
 
 <!-- ══ PULL-TO-REFRESH INDICATOR (mobile only) ══════════════════════════ -->
+<a href="#main-content" class="skip-link">Skip to main content</a>
 <div id="ptr-wrap" aria-hidden="true">
   <div id="ptr-dot">
     <svg id="ptr-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" width="18" height="18">
@@ -2465,7 +2494,7 @@ th.ds-sort:hover { background: rgba(30,58,95,.06); }
   </button>
 </nav>
 <!-- ══ SIDEBAR ══ -->
-<nav class="sidebar">
+<nav class="sidebar" aria-label="Main navigation">
   <div class="sidebar-brand">
     <div class="brand-mark">
       <div class="brand-monogram">EFP</div>
@@ -2475,7 +2504,7 @@ th.ds-sort:hover { background: rgba(30,58,95,.06); }
   </div>
 
   <div class="nav-section">
-    <div class="nav-label">Overview</div>
+    <div class="nav-label" aria-hidden="true">Overview</div>
     <div class="nav-item active" onclick="go('dashboard')">
       <span class="nav-icon"><svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="1" width="6" height="6" rx="1.5"/><rect x="9" y="1" width="6" height="6" rx="1.5"/><rect x="1" y="9" width="6" height="6" rx="1.5"/><rect x="9" y="9" width="6" height="6" rx="1.5"/></svg></span> Dashboard
       <span class="nav-badge urgent" id="sidebar-dash-badge" style="display:none">0</span>
@@ -2483,7 +2512,7 @@ th.ds-sort:hover { background: rgba(30,58,95,.06); }
   </div>
 
   <div class="nav-section">
-    <div class="nav-label">Players</div>
+    <div class="nav-label" aria-hidden="true">Players</div>
     <div class="nav-item" onclick="go('mandates')">
       <span class="nav-icon"><svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="8" cy="5.5" r="3"/><path d="M2.5 15c0-3.038 2.462-5.5 5.5-5.5s5.5 2.462 5.5 5.5"/></svg></span> Players
     </div>
@@ -2494,7 +2523,7 @@ th.ds-sort:hover { background: rgba(30,58,95,.06); }
   </div>
 
   <div class="nav-section">
-    <div class="nav-label">CRM</div>
+    <div class="nav-label" aria-hidden="true">CRM</div>
     <div class="nav-item" onclick="go('clubs')">
       <span class="nav-icon"><svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2 14V7l6-5 6 5v7"/><line x1="2" y1="14" x2="14" y2="14"/><rect x="6" y="9" width="4" height="5"/></svg></span> Clubs
     </div>
@@ -2507,7 +2536,7 @@ th.ds-sort:hover { background: rgba(30,58,95,.06); }
   </div>
 
   <div class="nav-section">
-    <div class="nav-label">Pipeline</div>
+    <div class="nav-label" aria-hidden="true">Pipeline</div>
     <div class="nav-item" onclick="go('pitches')">
       <span class="nav-icon"><svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2L9.5 14 7.5 9 2 6.5 14 2z"/></svg></span> Pitches
     </div>
@@ -2520,7 +2549,7 @@ th.ds-sort:hover { background: rgba(30,58,95,.06); }
   </div>
 
   <div class="nav-section">
-    <div class="nav-label">Workspace</div>
+    <div class="nav-label" aria-hidden="true">Workspace</div>
     <div class="nav-item" onclick="go('tasks')">
       <span class="nav-icon"><svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="8" cy="8" r="6.5"/><path d="M5.5 8l2 2 3.5-3.5"/></svg></span> Tasks
       <span class="nav-badge" id="sidebar-tasks-badge" style="display:none">0</span>
@@ -2545,7 +2574,7 @@ th.ds-sort:hover { background: rgba(30,58,95,.06); }
 </nav>
 
 <!-- ══ MAIN ══ -->
-<div class="main">
+<div class="main" id="main-content" role="main">
   <div class="topbar">
     <!-- Mobile hamburger — hidden on desktop via CSS -->
     <button id="mob-ham" onclick="mobToggleNav()" aria-label="Open menu">☰</button>
@@ -2558,7 +2587,7 @@ th.ds-sort:hover { background: rgba(30,58,95,.06); }
       🔍
     </button>
     <div class="search" id="global-search-wrap">
-      <input id="global-search-input" type="text" placeholder="🔍  Search contacts, players, clubs…" autocomplete="off"
+      <input id="global-search-input" type="text" placeholder="🔍  Search contacts, players, clubs…" aria-label="Search contacts, players and clubs" autocomplete="off"
         oninput="globalSearch(this.value)" onkeydown="globalSearchKey(event)"
         onfocus="if(this.value)globalSearch(this.value)" onblur="setTimeout(()=>hideGlobalSearch(),180)"
         style="width:100%;background:none;border:none;outline:none;color:var(--text1);font-size:13px;padding:0">
@@ -2567,7 +2596,7 @@ th.ds-sort:hover { background: rgba(30,58,95,.06); }
     <div id="sync-badge" style="display:flex;align-items:center;gap:6px;font-size:11px;color:var(--text3);white-space:nowrap">
       <span id="fb-dot" title="Firebase: not configured"></span><span id="sync-dot" style="width:7px;height:7px;border-radius:50%;background:var(--green);display:inline-block"></span>
       <span id="sync-label">Synced · Jul 14, 2026 — 10:07</span>
-      <button onclick="triggerSync()" style="background:none;border:1px solid var(--border);border-radius:5px;color:var(--text2);font-size:11px;padding:2px 8px;cursor:pointer;margin-left:2px" title="Refresh from Beeper &amp; email">↻ Sync</button>
+      <button onclick="triggerSync()" aria-label="Sync from Beeper and email" style="background:none;border:1px solid var(--border);border-radius:5px;color:var(--text2);font-size:11px;padding:2px 8px;cursor:pointer;margin-left:2px" title="Refresh from Beeper &amp; email">↻ Sync</button>
     </div>
     <button class="btn btn-outline btn-sm" id="topbar-secondary-btn" onclick="openDrawer('contact')" style="display:none">+ Contact</button>
     <button class="btn btn-primary btn-sm" id="topbar-primary-btn" onclick="apmOpen('player')">+ New Pitch</button>
