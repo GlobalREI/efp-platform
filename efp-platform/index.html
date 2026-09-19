@@ -3322,6 +3322,272 @@ th.ds-sort:hover { background: rgba(30,58,95,.06); }
 /* Two-col gap */
 .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
 .gap-bot { margin-bottom: 20px; }
+
+/* ═══════════════════════════════════════════════════════════════
+   MODERN PROFILE REDESIGN v3.0 — SaaS-Grade UI
+   Inspired by Linear, Stripe, Vercel
+═══════════════════════════════════════════════════════════════ */
+
+/* ── PROFILE PAGE TOPBAR ── */
+.pp-topbar {
+  display: flex; align-items: center; gap: 10px;
+  padding: 0 0 16px 0;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 0;
+}
+.pp-topbar-back {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 7px 14px; border-radius: 8px;
+  border: 1.5px solid var(--border); background: var(--surface);
+  color: var(--text2); font-size: 13px; font-weight: 500;
+  cursor: pointer; transition: all 0.12s; flex-shrink: 0;
+}
+.pp-topbar-back:hover { background: var(--bg); color: var(--text); border-color: var(--border2); }
+.pp-topbar-actions { display: flex; align-items: center; gap: 7px; margin-left: auto; }
+
+/* ── PLAYER PROFILE HERO ── */
+.pp-hero {
+  background: linear-gradient(135deg, #0F172A 0%, #1B3A6B 100%);
+  border-radius: 16px;
+  padding: 28px 28px 26px;
+  margin: 16px 0 24px;
+  position: relative; overflow: hidden;
+}
+.pp-hero::after {
+  content: ''; position: absolute;
+  top: -50px; right: -50px;
+  width: 220px; height: 220px; border-radius: 50%;
+  background: rgba(255,255,255,0.04);
+  pointer-events: none;
+}
+.pp-hero-inner {
+  display: flex; align-items: flex-start; gap: 20px;
+  position: relative; z-index: 1;
+}
+.pp-hero-avatar {
+  width: 68px; height: 68px; border-radius: 14px;
+  background: rgba(255,255,255,0.15);
+  border: 2px solid rgba(255,255,255,0.22);
+  color: rgba(255,255,255,0.95);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 24px; font-weight: 800; flex-shrink: 0;
+}
+.pp-hero-body { flex: 1; min-width: 0; }
+.pp-hero-name {
+  font-size: 28px; font-weight: 800; color: #fff;
+  letter-spacing: -0.03em; line-height: 1.15; margin-bottom: 10px;
+}
+.pp-hero-chips { display: flex; flex-wrap: wrap; gap: 7px; margin-bottom: 14px; }
+.hero-chip {
+  display: inline-flex; align-items: center; gap: 5px;
+  padding: 4px 11px; border-radius: 20px;
+  font-size: 12px; font-weight: 600;
+  background: rgba(255,255,255,0.12);
+  border: 1px solid rgba(255,255,255,0.18);
+  color: rgba(255,255,255,0.88);
+}
+.pp-hero-prio { display: flex; gap: 7px; flex-wrap: wrap; }
+.pp-prio-pill {
+  padding: 5px 15px; border-radius: 20px;
+  font-size: 12px; font-weight: 600; cursor: pointer;
+  border: 1.5px solid rgba(255,255,255,0.22);
+  background: rgba(255,255,255,0.09);
+  color: rgba(255,255,255,0.5);
+  transition: all 0.15s;
+}
+.pp-prio-pill:hover { background: rgba(255,255,255,0.16); color: rgba(255,255,255,0.9); }
+.pp-prio-pill.active-p1 { background: #EF4444; border-color: #EF4444; color: #fff; box-shadow: 0 2px 12px rgba(239,68,68,0.35); }
+.pp-prio-pill.active-p2 { background: #F59E0B; border-color: #F59E0B; color: #fff; box-shadow: 0 2px 12px rgba(245,158,11,0.35); }
+.pp-prio-pill.active-p3 { background: rgba(255,255,255,0.22); border-color: rgba(255,255,255,0.32); color: #fff; }
+
+/* ── NEED HERO (Club Requirements) ── */
+.need-hero {
+  background: linear-gradient(135deg, #0C4A6E 0%, #075985 100%) !important;
+  border-radius: 16px !important;
+  padding: 28px 28px 26px !important;
+  margin: 16px 0 24px !important;
+  position: relative; overflow: hidden;
+  display: flex !important; align-items: flex-start !important; gap: 20px !important;
+}
+.need-hero::after {
+  content: ''; position: absolute;
+  top: -50px; right: -50px;
+  width: 200px; height: 200px; border-radius: 50%;
+  background: rgba(255,255,255,0.04); pointer-events: none;
+}
+.need-hero-icon {
+  width: 68px !important; height: 68px !important; border-radius: 14px !important;
+  background: rgba(255,255,255,0.15) !important;
+  border: 2px solid rgba(255,255,255,0.22) !important;
+  font-size: 26px !important; position: relative; z-index: 1; flex-shrink: 0;
+}
+.need-hero > div:last-child { position: relative; z-index: 1; flex: 1; min-width: 0; }
+.need-hero-name {
+  font-size: 26px !important; font-weight: 800 !important;
+  color: #fff !important; letter-spacing: -0.03em !important;
+  margin-bottom: 5px !important; line-height: 1.15 !important;
+}
+.need-hero-meta { color: rgba(255,255,255,0.6) !important; font-size: 13px !important; }
+.need-hero .profile-prio-group { margin-top: 14px !important; }
+.need-hero .profile-prio-btn {
+  background: rgba(255,255,255,0.09) !important; border-color: rgba(255,255,255,0.2) !important;
+  color: rgba(255,255,255,0.5) !important; border-radius: 20px !important;
+  padding: 5px 14px !important; font-size: 12px !important;
+}
+.need-hero .profile-prio-btn:hover { background: rgba(255,255,255,0.16) !important; color: #fff !important; }
+.need-hero .profile-prio-btn.active-p1 { background: #EF4444 !important; border-color: #EF4444 !important; color: #fff !important; box-shadow: 0 2px 10px rgba(239,68,68,0.35) !important; }
+.need-hero .profile-prio-btn.active-p2 { background: #F59E0B !important; border-color: #F59E0B !important; color: #fff !important; box-shadow: 0 2px 10px rgba(245,158,11,0.35) !important; }
+.need-hero .profile-prio-btn.active-p3 { background: rgba(255,255,255,0.22) !important; border-color: rgba(255,255,255,0.3) !important; color: #fff !important; }
+#nd-chips { margin-top: 10px; }
+
+/* ── FIELD LABEL OVERRIDE ── */
+.field-label {
+  font-size: 11.5px !important; font-weight: 600 !important;
+  color: #94A3B8 !important; margin-bottom: 5px !important;
+  text-transform: none !important; letter-spacing: 0 !important;
+}
+
+/* ── INPUT / SELECT / TEXTAREA OVERRIDE ── */
+.field-input, .field-select, .field-textarea {
+  background: #F8FAFC !important;
+  border: 1.5px solid #E2E8F0 !important;
+  border-radius: 8px !important;
+  font-size: 13px !important; color: #0F172A !important;
+  box-sizing: border-box;
+  transition: border-color 0.15s, box-shadow 0.15s, background 0.15s;
+}
+input.field-input, select.field-input, select.field-select {
+  height: 40px !important;
+  padding: 0 12px !important;
+}
+.field-textarea { padding: 10px 12px !important; min-height: 90px; }
+.field-input:focus, .field-select:focus, .field-textarea:focus {
+  border-color: #3B82F6 !important; outline: none !important;
+  box-shadow: 0 0 0 3px rgba(59,130,246,0.1) !important;
+  background: #fff !important;
+}
+.field-select {
+  appearance: none !important; -webkit-appearance: none !important;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%2394A3B8' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E") !important;
+  background-repeat: no-repeat !important; background-position: right 12px center !important;
+  padding-right: 32px !important; background-size: 10px !important;
+}
+
+/* ── SECTION TITLE OVERRIDE ── */
+.profile-form-section-title {
+  font-size: 13px !important; font-weight: 700 !important;
+  color: #1E293B !important; text-transform: none !important;
+  letter-spacing: 0 !important; margin-bottom: 18px !important;
+  padding-bottom: 10px !important;
+  border-bottom: 1px solid #F1F5F9 !important;
+  padding-left: 10px !important;
+  border-left: 3px solid #3B82F6 !important;
+  display: block !important;
+}
+
+/* ── FORM PANEL ── */
+.profile-form-panel {
+  border-radius: 12px !important;
+  border: 1.5px solid #E2E8F0 !important;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.05) !important;
+}
+.profile-form-section { padding: 22px 24px !important; }
+
+/* ── ACTIONS BAR ── */
+.profile-actions-bar {
+  background: #F8FAFC !important;
+  border-top: 1.5px solid #E2E8F0 !important;
+  padding: 14px 24px !important;
+}
+
+/* ── SIDE CARDS ── */
+.profile-card {
+  border-radius: 12px !important;
+  border: 1.5px solid #E2E8F0 !important;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.04) !important;
+}
+.profile-card-head {
+  padding: 14px 18px !important;
+  background: #FAFAFA !important;
+  border-bottom: 1px solid #F1F5F9 !important;
+}
+.profile-card-title {
+  font-size: 12.5px !important; font-weight: 700 !important;
+  color: #475569 !important; text-transform: none !important;
+  letter-spacing: 0 !important;
+}
+.profile-card-body { padding: 16px 18px !important; }
+
+/* ── HIDE OLD HEADER ROWS (replaced by topbar + hero) ── */
+#view-player-profile .profile-page-header { display: none !important; }
+#view-club-need .profile-page-header { display: none !important; }
+
+/* ── CONTACT FULL-PAGE HERO ── */
+#view-contact-detail {
+  max-width: 1100px; margin: 0 auto; padding-bottom: 60px;
+}
+#view-contact-detail .back {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 7px 14px; border-radius: 8px;
+  border: 1.5px solid var(--border); background: var(--surface);
+  color: var(--text2); font-size: 13px; font-weight: 500;
+  cursor: pointer; transition: all 0.12s;
+}
+#view-contact-detail .back:hover { background: var(--bg); color: var(--text); }
+.contact-hero-card {
+  background: linear-gradient(135deg, #1E293B 0%, #334155 100%);
+  border-radius: 16px; padding: 28px 28px 24px;
+  margin: 14px 0 24px; position: relative; overflow: hidden;
+  display: flex; align-items: flex-start; gap: 20px;
+}
+.contact-hero-card::after {
+  content: ''; position: absolute;
+  top: -40px; right: -40px;
+  width: 180px; height: 180px; border-radius: 50%;
+  background: rgba(255,255,255,0.04); pointer-events: none;
+}
+.contact-hero-av {
+  flex-shrink: 0; border-radius: 14px !important;
+  border: 2px solid rgba(255,255,255,0.15) !important;
+  font-size: 22px !important; font-weight: 800 !important;
+  width: 68px !important; height: 68px !important;
+  z-index: 1; position: relative;
+}
+.contact-hero-info { flex: 1; min-width: 0; position: relative; z-index: 1; }
+.contact-hero-name {
+  font-size: 26px; font-weight: 800; color: #fff;
+  letter-spacing: -0.03em; line-height: 1.15; margin-bottom: 5px;
+}
+.contact-hero-role-line { font-size: 14px; color: rgba(255,255,255,0.65); margin-bottom: 13px; }
+.contact-hero-chips { display: flex; flex-wrap: wrap; gap: 7px; margin-bottom: 16px; }
+.contact-hero-chips .hero-chip { background: rgba(255,255,255,0.12); border-color: rgba(255,255,255,0.18); color: rgba(255,255,255,0.88); }
+.contact-hero-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+.contact-hero-actions .btn { font-size: 12.5px !important; padding: 6px 14px !important; border-radius: 8px !important; }
+.contact-hero-actions .btn-primary {
+  background: rgba(255,255,255,0.15) !important;
+  border: 1.5px solid rgba(255,255,255,0.25) !important; color: #fff !important;
+}
+.contact-hero-actions .btn-primary:hover { background: rgba(255,255,255,0.22) !important; }
+.contact-hero-actions .btn-outline {
+  background: transparent !important; border: 1.5px solid rgba(255,255,255,0.2) !important;
+  color: rgba(255,255,255,0.7) !important;
+}
+.contact-hero-actions .btn-outline:hover { background: rgba(255,255,255,0.1) !important; color: #fff !important; }
+
+/* ── DETAIL PANEL OVERRIDES ── */
+.detail-panel-title {
+  font-size: 13px !important; font-weight: 700 !important;
+  color: #1E293B !important; text-transform: none !important;
+  letter-spacing: 0 !important; margin-bottom: 12px !important;
+  padding-left: 10px !important; border-left: 3px solid #3B82F6 !important;
+}
+.detail-panel {
+  border-radius: 12px !important;
+  border: 1.5px solid #E2E8F0 !important;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.04) !important;
+}
+.ai-note { border-radius: 10px !important; }
+
 </style>
   <!-- Firebase Realtime Database SDK -->
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
@@ -3757,22 +4023,22 @@ th.ds-sort:hover { background: rgba(30,58,95,.06); }
         <div class="ai-note-text" id="cd-insight-text">Marc Ciria was last contacted <strong>94 days ago</strong>. The summer transfer window opens in 3 weeks — this is the optimal moment to reconnect before clubs finalise shortlists. <strong>Draft a reconnection email →</strong></div>
       </div>
 
-      <div class="profile-card">
-        <div class="profile-av" id="cd-avatar" style="background:#1B3A6B">MC</div>
-        <div>
-          <div class="profile-name" id="cd-name">Marc Ciria</div>
-          <div class="profile-role" id="cd-role">Sporting Director · Valencia CF · 🇪🇸 Spain</div>
-          <div class="profile-tags">
-            <div class="profile-tag" id="cd-location-tag">📍 Valencia</div>
-            <div class="profile-tag" id="cd-days-tag" style="color:var(--red);border-color:#FECACA">⏰ 94 days — no contact</div>
-            <div class="profile-tag" id="cd-score-tag">Relationship 7 / 10</div>
+      <div class="contact-hero-card">
+        <div class="profile-av contact-hero-av" id="cd-avatar" style="background:#1B3A6B">MC</div>
+        <div class="contact-hero-info">
+          <div class="contact-hero-name" id="cd-name">Marc Ciria</div>
+          <div class="contact-hero-role-line" id="cd-role">Sporting Director · Valencia CF · 🇪🇸 Spain</div>
+          <div class="contact-hero-chips">
+            <div class="hero-chip" id="cd-location-tag">📍 Valencia</div>
+            <div class="hero-chip" id="cd-days-tag">⏰ 94 days — no contact</div>
+            <div class="hero-chip" id="cd-score-tag">Relationship 7 / 10</div>
           </div>
-          <div class="profile-actions">
-            <button class="btn btn-primary btn-sm" onclick="openEmailModal()">Draft Email</button>
-            <button class="btn btn-outline btn-sm" onclick="openWAModal()">Draft WhatsApp</button>
-            <button class="btn btn-outline btn-sm" onclick="openLogModal('call')">Log Call</button>
-            <button class="btn btn-outline btn-sm" onclick="openLogModal('meeting')">Log Meeting</button>
-            <button class="btn btn-outline btn-sm" onclick="openLogModal('note')">Add Note</button>
+          <div class="contact-hero-actions">
+            <button class="btn btn-primary btn-sm" onclick="openEmailModal()">✉ Draft Email</button>
+            <button class="btn btn-outline btn-sm" onclick="openWAModal()">💬 WhatsApp</button>
+            <button class="btn btn-outline btn-sm" onclick="openLogModal('call')">📞 Log Call</button>
+            <button class="btn btn-outline btn-sm" onclick="openLogModal('meeting')">🤝 Log Meeting</button>
+            <button class="btn btn-outline btn-sm" onclick="openLogModal('note')">📝 Add Note</button>
           </div>
         </div>
       </div>
@@ -4968,21 +5234,38 @@ th.ds-sort:hover { background: rgba(30,58,95,.06); }
 <div id="view-player-profile" class="view">
   <div class="profile-page">
 
-    <!-- Header -->
-    <div class="profile-page-header">
-      <button class="profile-back-btn" onclick="closePlayerProfile()">← Back</button>
-      <div class="profile-hero">
-        <div class="profile-hero-avatar" id="pp-avatar">?</div>
-        <div class="profile-hero-info">
-          <div class="profile-hero-name" id="pp-name">Player Profile</div>
-          <div class="profile-hero-meta" id="pp-meta">View &amp; edit mandate details</div>
+    <!-- Topbar -->
+    <div class="pp-topbar">
+      <button class="pp-topbar-back" onclick="closePlayerProfile()">← Player Mandates</button>
+      <div class="pp-topbar-actions">
+        <button class="btn btn-outline btn-sm" onclick="closePlayerProfile();setTimeout(()=>showMandateSuggestions(document.getElementById('pp-edit-name').value,document.getElementById('pp-edit-pos').value,document.getElementById('pp-edit-age').value,document.getElementById('pp-edit-val').value,document.getElementById('pp-edit-club').value),100)">Suggest Clubs →</button>
+        <button class="btn btn-outline btn-sm" onclick="goToPlayerMatches(document.getElementById('pp-edit-name').value)" title="AI Matches">⚡ AI</button>
+        <button id="pp-archive-btn" class="btn btn-outline btn-sm" onclick="archiveMandate()" title="Archive mandate">📦 Archive</button>
+        <button class="btn btn-outline btn-sm" onclick="deleteMandateFromDrawer()" title="Delete mandate" style="color:var(--red);border-color:var(--red)">🗑 Delete</button>
+        <button class="btn btn-primary btn-sm" onclick="savePlayerProfile()">Save Changes</button>
+      </div>
+    </div>
+
+    <!-- Hero section -->
+    <div class="pp-hero">
+      <div class="pp-hero-inner">
+        <div class="pp-hero-avatar" id="pp-avatar">?</div>
+        <div class="pp-hero-body">
+          <div class="pp-hero-name" id="pp-name">Player Profile</div>
+          <div class="pp-hero-chips" id="pp-chips"></div>
+          <div class="pp-hero-prio">
+            <button type="button" id="pp-prio-1" class="pp-prio-pill" onclick="setPPPrio(1)">🔴 P1 Focus</button>
+            <button type="button" id="pp-prio-2" class="pp-prio-pill" onclick="setPPPrio(2)">🟡 P2 Active</button>
+            <button type="button" id="pp-prio-3" class="pp-prio-pill" onclick="setPPPrio(3)">⚪ P3 Watch</button>
+          </div>
         </div>
       </div>
-      <div class="profile-prio-group">
-        <button type="button" id="pp-prio-1" class="profile-prio-btn" onclick="setPPPrio(1)">🔴 P1 Focus</button>
-        <button type="button" id="pp-prio-2" class="profile-prio-btn" onclick="setPPPrio(2)">🟡 P2 Active</button>
-        <button type="button" id="pp-prio-3" class="profile-prio-btn" onclick="setPPPrio(3)">⚪ P3 Watch</button>
-      </div>
+    </div>
+
+    <!-- Hidden legacy header (kept for compat) -->
+    <div class="profile-page-header" style="display:none">
+      <div class="profile-hero-avatar" id="pp-avatar-hidden">?</div>
+      <div class="profile-hero-name" id="pp-meta">View &amp; edit mandate details</div>
     </div>
 
     <!-- Body: two columns -->
@@ -5135,10 +5418,7 @@ th.ds-sort:hover { background: rgba(30,58,95,.06); }
           <!-- Action buttons -->
           <div class="profile-actions-bar">
             <button class="btn btn-primary" onclick="savePlayerProfile()" style="flex:1">Save Changes</button>
-            <button class="btn btn-outline" onclick="closePlayerProfile();setTimeout(()=>showMandateSuggestions(document.getElementById('pp-edit-name').value,document.getElementById('pp-edit-pos').value,document.getElementById('pp-edit-age').value,document.getElementById('pp-edit-val').value,document.getElementById('pp-edit-club').value),100)">Suggest Clubs →</button>
-            <button class="btn btn-outline" onclick="goToPlayerMatches(document.getElementById('pp-edit-name').value)" title="See AI Matches">⚡ AI</button>
-            <button id="pp-archive-btn" class="btn btn-outline" onclick="archiveMandate()" title="Archive mandate" style="flex-shrink:0">📦</button>
-            <button class="btn btn-outline" onclick="deleteMandateFromDrawer()" title="Delete mandate" style="color:var(--red);border-color:var(--red);flex-shrink:0">🗑</button>
+            <button class="btn btn-outline" onclick="closePlayerProfile()">Cancel</button>
           </div>
         </div>
       </div>
@@ -10202,7 +10482,9 @@ function openPlayerProfile(playerName, data) {
   _ppCurrentMandate = allMandates.find(m => m.name === playerName) || null;
 
   document.getElementById('pp-name').textContent = playerName;
-  document.getElementById('pp-meta').textContent = 'View & edit mandate details';
+  // Also update hidden legacy element if present
+  const ppMetaEl = document.getElementById('pp-meta');
+  if (ppMetaEl) ppMetaEl.textContent = 'View & edit mandate details';
 
   // Populate editable fields — ALWAYS prefer _ppCurrentMandate (live Firebase object) over
   // the `data` snapshot, which may come from cell text in initMandateRows() and can be
@@ -10236,6 +10518,32 @@ function openPlayerProfile(playerName, data) {
   // Reset autofill status
   const ppAfSt = document.getElementById('pp-autofill-status');
   if (ppAfSt) { ppAfSt.style.display = 'none'; ppAfSt.textContent = ''; }
+
+  // ── Populate hero avatar & chips ──────────────────────────────────────────
+  const ppAvEl = document.getElementById('pp-avatar');
+  if (ppAvEl) {
+    const ini = playerName.split(' ').filter(Boolean).map(w=>w[0]).join('').slice(0,2).toUpperCase();
+    ppAvEl.textContent = ini || '?';
+  }
+  const ppChipsEl = document.getElementById('pp-chips');
+  if (ppChipsEl) {
+    const chips = [];
+    const _pos = _m ? (_m.pos || _m.position || '') : (data.pos || '');
+    const _pos2 = _m ? (_m.pos2 || '') : (data.pos2 || '');
+    const _age  = _rawAge  && _rawAge  !== '—' ? _rawAge  : null;
+    const _club = _rawClub && _rawClub !== '—' ? _rawClub : null;
+    const _val  = _rawVal  && _rawVal  !== '—' ? _rawVal  : null;
+    const _nat  = (_m ? (_m.nat || _m.nationality || '') : (data.nat || ''));
+    const _mtype= (_m ? (_m.type || _m.mandateType || '') : (data.type || ''));
+    if (_pos)  chips.push('⚽ ' + _pos + (_pos2 ? ' / ' + _pos2 : ''));
+    if (_age)  chips.push('🎂 Age ' + _age);
+    if (_club) chips.push('🏟 ' + _club);
+    if (_val)  chips.push('💰 ' + _val);
+    if (_nat)  chips.push('🌍 ' + _nat);
+    if (_mtype) chips.push('📋 ' + _mtype);
+    ppChipsEl.innerHTML = chips.map(c => `<span class="hero-chip">${c}</span>`).join('');
+  }
+
   // Archive button label
   const ppArchBtn = document.getElementById('pp-archive-btn');
   if (ppArchBtn) ppArchBtn.title = (_m ? !!_m.archived : !!data.archived) ? 'Restore mandate' : 'Archive mandate';
@@ -11879,6 +12187,21 @@ function openNeedDetail(clubName, pos, budMin, budMax, contact, prio, notes, nee
   // Populate form
   document.getElementById('nd-title').textContent    = clubName;
   document.getElementById('nd-subtitle').textContent = needId ? 'Edit requirement details' : 'Core requirement — save to override';
+
+  // ── Populate need hero chips ──────────────────────────────────────────────
+  const ndChipsEl = document.getElementById('nd-chips');
+  if (ndChipsEl) {
+    const ndChips = [];
+    if (pos)    ndChips.push('⚽ ' + pos);
+    if (budMin || budMax) {
+      const bRange = (budMin && budMax) ? budMin + ' – ' + budMax : (budMin || budMax);
+      ndChips.push('💰 ' + bRange);
+    }
+    if (prio)   ndChips.push('🔥 ' + prio);
+    if (dealType && dealType !== 'either') ndChips.push(dealType === 'loan' ? '🔄 Loan Only' : '✅ Permanent Only');
+    ndChipsEl.innerHTML = ndChips.map(c => `<span class="hero-chip">${c}</span>`).join('');
+  }
+
   document.getElementById('nd-club').value    = clubName;
   document.getElementById('nd-pos').value     = pos     || '';
   document.getElementById('nd-budmin').value  = budMin  || '';
@@ -20818,13 +21141,13 @@ document.addEventListener('click', e => {
 <div id="view-club-need" class="view">
   <div class="profile-page">
 
-    <!-- Header -->
-    <div class="profile-page-header">
-      <button class="profile-back-btn" onclick="closeNeedDetail()">← Back</button>
-      <div style="display:flex;gap:10px;align-items:center">
-        <button class="btn btn-primary" onclick="saveNeedDetail()">Save Changes</button>
-        <button id="nd-archive-btn" class="btn btn-outline" title="Archive requirement" onclick="if(_currentNeedId)archiveNeed(_currentNeedId)">📦 Archive</button>
-        <button class="btn btn-outline" title="Delete requirement" style="color:var(--red);border-color:var(--red)" onclick="if(_currentNeedId&&confirm('Delete this club requirement?')){closeNeedDetail();deleteNeed(_currentNeedId,null)}">🗑 Delete</button>
+    <!-- Topbar -->
+    <div class="pp-topbar">
+      <button class="pp-topbar-back" onclick="closeNeedDetail()">← Club Requirements</button>
+      <div class="pp-topbar-actions">
+        <button id="nd-archive-btn" class="btn btn-outline btn-sm" title="Archive requirement" onclick="if(_currentNeedId)archiveNeed(_currentNeedId)">📦 Archive</button>
+        <button class="btn btn-outline btn-sm" title="Delete requirement" style="color:var(--red);border-color:var(--red)" onclick="if(_currentNeedId&&confirm('Delete this club requirement?')){closeNeedDetail();deleteNeed(_currentNeedId,null)}">🗑 Delete</button>
+        <button class="btn btn-primary btn-sm" onclick="saveNeedDetail()">Save Changes</button>
       </div>
     </div>
 
@@ -20834,6 +21157,7 @@ document.addEventListener('click', e => {
       <div>
         <div class="need-hero-name" id="nd-title">Club Requirement</div>
         <div class="need-hero-meta" id="nd-subtitle">View &amp; edit requirement details</div>
+        <div class="pp-hero-chips" id="nd-chips"></div>
         <!-- Priority buttons -->
         <div class="profile-prio-group" style="margin-top:12px">
           <button type="button" id="nd-needprio-1" class="profile-prio-btn" onclick="setNeedPrio(1)">🔴 P1 Focus</button>
@@ -20842,6 +21166,9 @@ document.addEventListener('click', e => {
         </div>
       </div>
     </div>
+
+    <!-- Hidden legacy header (kept for compat) -->
+    <div class="profile-page-header" style="display:none"></div>
 
     <!-- Body: two-column -->
     <div class="profile-page-body">
@@ -20925,7 +21252,7 @@ document.addEventListener('click', e => {
         </div>
 
         <div class="profile-actions-bar">
-          <button class="btn btn-primary" onclick="saveNeedDetail()">Save Changes</button>
+          <button class="btn btn-primary" onclick="saveNeedDetail()" style="flex:1">Save Changes</button>
           <button class="btn btn-outline" onclick="closeNeedDetail()">Cancel</button>
         </div>
 
