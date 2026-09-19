@@ -4792,6 +4792,14 @@ th.ds-sort:hover { background: rgba(30,58,95,.06); }
       <div id="pp-activity"></div>
     </div>
 
+    <!-- Scout searches linked to this mandate -->
+    <div style="margin-top:22px;padding-top:18px;border-top:1px solid var(--border)">
+      <div style="font-size:13px;font-weight:600;color:var(--text);margin-bottom:12px">🔭 Linked Scout Searches</div>
+      <div id="pp-scout-searches" style="display:flex;flex-direction:column;gap:8px">
+        <div style="color:var(--text3);font-size:12px;padding:8px 0">No Scout searches linked to this mandate yet. Save a Find-a-Club search and link it here.</div>
+      </div>
+    </div>
+
   </div>
 </div>
 
@@ -9890,6 +9898,35 @@ function openPlayerProfile(playerName, data) {
       (l.outcome && l.outcome.toLowerCase().includes(pName))
     );
     ppActEl.innerHTML = _renderRelatedActivity(related);
+  }
+
+  // ── Scout searches linked to this mandate ─────────────────────────────────
+  const ppScoutEl = document.getElementById('pp-scout-searches');
+  if (ppScoutEl) {
+    let _s = {};
+    try { const r = localStorage.getItem('cnf_searches'); if (r) _s = JSON.parse(r); } catch(e) {}
+    const nameLow = playerName.toLowerCase();
+    const linked = Object.entries(_s).filter(([k, v]) =>
+      v.linkedMandate && v.linkedMandate.toLowerCase() === nameLow
+    );
+    if (!linked.length) {
+      ppScoutEl.innerHTML = '<div style="color:var(--text3);font-size:12px;padding:8px 0">No Scout searches linked to this mandate yet. Save a Find-a-Club search and link it here.</div>';
+    } else {
+      ppScoutEl.innerHTML = linked.map(([k, v]) => {
+        const pos = (v.positions || [v.pos]).filter(Boolean).join(', ') || '—';
+        const mv  = (v.mvMin || v.mvMax) ? '€' + (v.mvMin || '?') + '–' + (v.mvMax || '?') + 'm' : '';
+        const clubCount = Object.values(v.selectedClubs || {}).reduce((a, b) => a + b.length, 0);
+        const sub = [pos, mv, clubCount ? clubCount + ' club' + (clubCount !== 1 ? 's' : '') + ' shortlisted' : ''].filter(Boolean).join(' · ');
+        return '<div style="display:flex;align-items:center;gap:10px;padding:9px 12px;background:var(--surface2);border-radius:8px;border:1px solid var(--border);cursor:pointer" onclick="go(\'clubfinder\')" title="Open Scout">'
+          + '<div style="font-size:22px">🔭</div>'
+          + '<div style="flex:1;min-width:0">'
+          + '<div style="font-size:13px;font-weight:600;color:var(--text)">' + k + '</div>'
+          + (sub ? '<div style="font-size:11px;color:var(--text3)">' + sub + '</div>' : '')
+          + '</div>'
+          + '<div style="font-size:11px;color:var(--navy);text-decoration:underline;white-space:nowrap">Open →</div>'
+          + '</div>';
+      }).join('');
+    }
   }
 
   // Open drawer
@@ -19859,44 +19896,61 @@ function promptSaveSearch(){
   const existing = activeSearch || '';
   const _mands = typeof allMandates !== 'undefined' ? allMandates : [];
   const _needs = typeof allNeeds !== 'undefined' ? allNeeds : [];
+
+  const INP_STYLE = 'width:100%;box-sizing:border-box;padding:9px 11px;border:1px solid #d1d5db;border-radius:8px;font-size:14px;font-family:inherit;background:#fff;color:#111827;margin-top:0;outline:none';
+  const LBL_STYLE = 'display:block;font-size:11px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;color:#6b7280;margin-bottom:6px';
+
   let linkHtml = '';
   if(mode === 'need'){
     const opts = _mands.filter(m=>!m.archived).map(m=>{
       const v = (m.name||'').replace(/"/g,'&quot;');
       return '<option value="'+v+'">'+v+' — '+(m.pos||'?')+', '+(m.club||'?')+'</option>';
     }).join('');
-    linkHtml = '<div style="margin-top:12px">'
-      +'<label class="field-label" style="margin-bottom:4px;display:block">Link to Player Mandate <span style="font-weight:400;color:var(--text3)">(optional)</span></label>'
-      +'<input class="dlg-inp" type="text" id="cnf-_dlgMandate" list="cnf-_mlist" placeholder="Type player name to link…" style="margin-top:0">'
-      +'<datalist id="cnf-_mlist">'+opts+'</datalist></div>';
+    linkHtml = '<div style="margin-top:16px">'
+      +'<label style="'+LBL_STYLE+'">Link to Player Mandate <span style="font-weight:400;text-transform:none;font-size:12px;color:#9ca3af">(optional)</span></label>'
+      +'<input type="text" id="cnf-_dlgMandate" list="cnf-_mlist" placeholder="Start typing a player name…" style="'+INP_STYLE+'">'
+      +'<datalist id="cnf-_mlist">'+opts+'</datalist>'
+      +'<div style="font-size:11px;color:#9ca3af;margin-top:4px">Links this search to that mandate\'s profile so it shows up there.</div>'
+      +'</div>';
   } else if(mode === 'player'){
     const clubSet = [...new Set(_needs.filter(n=>!n.archived).map(n=>n.club))];
     const opts = clubSet.map(c=>'<option value="'+c.replace(/"/g,'&quot;')+'">'+c+'</option>').join('');
-    linkHtml = '<div style="margin-top:12px">'
-      +'<label class="field-label" style="margin-bottom:4px;display:block">Link to Club Need <span style="font-weight:400;color:var(--text3)">(optional)</span></label>'
-      +'<input class="dlg-inp" type="text" id="cnf-_dlgNeed" list="cnf-_nlist" placeholder="Type club name to link…" style="margin-top:0">'
-      +'<datalist id="cnf-_nlist">'+opts+'</datalist></div>';
+    linkHtml = '<div style="margin-top:16px">'
+      +'<label style="'+LBL_STYLE+'">Link to Club Need <span style="font-weight:400;text-transform:none;font-size:12px;color:#9ca3af">(optional)</span></label>'
+      +'<input type="text" id="cnf-_dlgNeed" list="cnf-_nlist" placeholder="Start typing a club name…" style="'+INP_STYLE+'">'
+      +'<datalist id="cnf-_nlist">'+opts+'</datalist>'
+      +'<div style="font-size:11px;color:#9ca3af;margin-top:4px">Links this search to that club\'s need profile so it shows up there.</div>'
+      +'</div>';
   }
-  const titleDisp = mode==='need' ? 'Save Find-a-Club Search'
-    : mode==='player' ? 'Save Find-a-Player Search' : 'Save Loan Search';
+
+  const titleDisp = mode==='need' ? '🎯 Save Find-a-Club Search'
+    : mode==='player' ? '🔍 Save Find-a-Player Search' : '🔄 Save Loan Search';
   const hint = mode==='need'
-    ? 'Save this search with its current filters. You can then ☆ star target clubs. Link to a player mandate to surface these results in that mandate\'s profile.'
+    ? 'Saves current filters (league, position, MV range). You can then star target clubs in the shortlist.'
     : mode==='player'
-    ? 'Save this search with its current filters. You can then ☆ star individual players. Link to a club need to surface results in that club\'s profile.'
-    : 'Save this loan search with its current filters.';
-  const dlg = document.createElement('div');
-  dlg.className = 'dlg-overlay';
-  dlg.innerHTML = '<div class="dlg">'
-    +'<h3>'+titleDisp+'</h3>'
-    +'<p style="color:var(--text2);font-size:13px">'+hint+'</p>'
-    +'<input class="dlg-inp" type="text" id="cnf-_dlgName" placeholder="Search name…" value="'+existing.replace(/"/g,'&quot;')+'">'
+    ? 'Saves current filters. You can then star individual players in the shortlist.'
+    : 'Saves current filters for this loan search.';
+
+  // Remove any existing dialog
+  document.querySelector('.cnf-save-dlg-overlay')?.remove();
+
+  const overlay = document.createElement('div');
+  overlay.className = 'cnf-save-dlg-overlay';
+  overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.45);display:flex;align-items:center;justify-content:center;z-index:99999;padding:16px';
+  overlay.innerHTML =
+    '<div style="background:#fff;border-radius:14px;padding:24px;width:100%;max-width:420px;box-shadow:0 20px 60px rgba(0,0,0,0.25);font-family:inherit">'
+    +'<div style="font-size:17px;font-weight:700;color:#111827;margin-bottom:6px">'+titleDisp+'</div>'
+    +'<div style="font-size:13px;color:#6b7280;margin-bottom:18px">'+hint+'</div>'
+    +'<label style="'+LBL_STYLE+'">Search Name</label>'
+    +'<input type="text" id="cnf-_dlgName" placeholder="e.g. Dennis Geiger — Bundesliga CDM" style="'+INP_STYLE+'" value="'+existing.replace(/"/g,'&quot;')+'">'
     +linkHtml
-    +'<div class="dlg-btns">'
-    +'<button class="s-btn" onclick="this.closest(\'.dlg-overlay\').remove()">Cancel</button>'
-    +'<button class="s-btn primary" onclick="doSaveSearch()">Save</button>'
-    +'</div></div>';
-  dlg.addEventListener('click', e=>{ if(e.target===dlg) dlg.remove(); });
-  document.body.appendChild(dlg);
+    +'<div style="display:flex;gap:10px;margin-top:20px">'
+    +'<button onclick="this.closest(\'.cnf-save-dlg-overlay\').remove()" style="flex:1;padding:10px;border:1px solid #e5e7eb;border-radius:8px;background:#fff;color:#374151;font-size:14px;font-weight:500;cursor:pointer;font-family:inherit">Cancel</button>'
+    +'<button onclick="doSaveSearch()" style="flex:2;padding:10px;border:none;border-radius:8px;background:#1b3a6b;color:#fff;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit">Save Search</button>'
+    +'</div>'
+    +'</div>';
+  overlay.addEventListener('click', e=>{ if(e.target===overlay) overlay.remove(); });
+  document.body.appendChild(overlay);
   setTimeout(()=>{
     const el=document.getElementById('cnf-_dlgName'); if(el){el.focus();el.select();}
     if(existing && searches[existing]){
@@ -19913,7 +19967,7 @@ function doSaveSearch(){
   if(!name) return;
   const linkedMandate = (document.getElementById('cnf-_dlgMandate')?.value.trim()) || null;
   const linkedNeed    = (document.getElementById('cnf-_dlgNeed')?.value.trim())    || null;
-  document.querySelector('.dlg-overlay')?.remove();
+  document.querySelector('.cnf-save-dlg-overlay')?.remove();
   const existing = searches[name] || {};
   searches[name] = {
     mode: mode,
