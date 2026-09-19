@@ -1,18 +1,20 @@
 /**
  * firebase.ts — initialise Firebase once, export shared handles.
+ * Config values are loaded from environment variables (VITE_FIREBASE_*).
+ * Copy .env.example → .env.local and fill in your values.
  */
 import { initializeApp, getApps } from 'firebase/app'
 import { getDatabase }            from 'firebase/database'
 import { getAuth }                from 'firebase/auth'
 
 const firebaseConfig = {
-  apiKey:            'AIzaSyBFDsN4wr6wFY44I_iqKzJvH9KK3uCjHPo',
-  authDomain:        'efp-os.firebaseapp.com',
-  databaseURL:       'https://efp-os-default-rtdb.europe-west1.firebasedatabase.app',
-  projectId:         'efp-os',
-  storageBucket:     'efp-os.firebasestorage.app',
-  messagingSenderId: '218183702',
-  appId:             '1:218183702:web:b1ae91b3b9c95e1e68b7b4',
+  apiKey:            import.meta.env.VITE_FIREBASE_API_KEY,
+  authDomain:        import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
+  databaseURL:       import.meta.env.VITE_FIREBASE_DATABASE_URL,
+  projectId:         import.meta.env.VITE_FIREBASE_PROJECT_ID,
+  storageBucket:     import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
+  appId:             import.meta.env.VITE_FIREBASE_APP_ID,
 }
 
 const app = getApps().length ? getApps()[0] : initializeApp(firebaseConfig)
