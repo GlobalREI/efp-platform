@@ -18693,6 +18693,162 @@ window._regression = (function () {
 
 
 
+
+// ── EFP Player Autofill (powered by CNF data) ────────────────────────────────
+// Provides autocomplete on player/club inputs using the Club Finder dataset.
+// window.cnfLookup is exposed by the Club Finder IIFE (injected after this).
+(function () {
+  var _drop = null;
+  var _target = null; // currently focused input
+
+  function _drop_el() {
+    if (_drop) return _drop;
+    _drop = document.createElement('div');
+    _drop.id = '_efp-afl-drop';
+    _drop.style.cssText = 'position:fixed;z-index:99998;display:none;' +
+      'background:var(--surface2,#1e293b);border:1px solid var(--border,#334155);' +
+      'border-radius:8px;box-shadow:0 6px 24px rgba(0,0,0,.35);overflow:hidden;' +
+      'min-width:260px;max-width:420px;max-height:280px;overflow-y:auto';
+    document.body.appendChild(_drop);
+    document.addEventListener('click', function (e) {
+      if (_drop && !_drop.contains(e.target)) _drop.style.display = 'none';
+    }, true);
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape' && _drop) _drop.style.display = 'none';
+    });
+    return _drop;
+  }
+
+  function _pos(inp) {
+    var r = inp.getBoundingClientRect();
+    var d = _drop_el();
+    d.style.left  = r.left + 'px';
+    d.style.top   = (r.bottom + 4) + 'px';
+    d.style.width = Math.max(r.width, 280) + 'px';
+  }
+
+  function _item(html, onclick) {
+    return '<div style="padding:9px 13px;cursor:pointer;border-bottom:1px solid ' +
+      'var(--border,#334155);display:flex;justify-content:space-between;' +
+      'align-items:center;gap:8px;transition:background .12s" ' +
+      'onmouseover="this.style.background=\'var(--surface,#0f172a)\'" ' +
+      'onmouseout="this.style.background=\'\'" ' +
+      'onmousedown="event.preventDefault()" ' +
+      'onclick="' + onclick + '">' + html + '</div>';
+  }
+
+  function _showPlayers(inp) {
+    var lk = window.cnfLookup;
+    if (!lk) return;
+    var q = inp.value.trim();
+    if (q.length < 2) { _drop_el().style.display = 'none'; return; }
+    var results = lk.searchPlayers(q, 9);
+    if (!results.length) { _drop_el().style.display = 'none'; return; }
+    var d = _drop_el();
+    d.innerHTML = results.map(function (r) {
+      var name = r.name.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/"/g,'&quot;');
+      var pos  = r.pos.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/"/g,'&quot;');
+      var club = r.club.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/"/g,'&quot;');
+      var js = '_efpAfl.fill(event,' + JSON.stringify(r.name) + ',' +
+        JSON.stringify(r.pos) + ',' + JSON.stringify(r.club) + ',' + r.age + ',' + r.mv + ')';
+      return _item(
+        '<span style="font-weight:600;color:var(--text,#f1f5f9)">' + name + '</span>' +
+        '<span style="font-size:11px;color:var(--text3,#64748b);white-space:nowrap">' +
+          pos + ' · ' + club + '</span>',
+        js
+      );
+    }).join('');
+    _target = inp;
+    _pos(inp);
+    d.style.display = 'block';
+  }
+
+  function _showClubs(inp) {
+    var lk = window.cnfLookup;
+    if (!lk) return;
+    var q = inp.value.trim();
+    if (q.length < 2) { _drop_el().style.display = 'none'; return; }
+    var results = lk.searchClubs(q, 9);
+    if (!results.length) { _drop_el().style.display = 'none'; return; }
+    var d = _drop_el();
+    d.innerHTML = results.map(function (r) {
+      var name = r.clubName.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/"/g,'&quot;');
+      var lname = r.league.toUpperCase();
+      var js = '_efpAfl.fillClub(event,' + JSON.stringify(r.clubName) + ')';
+      return _item(
+        '<span style="font-weight:600;color:var(--text,#f1f5f9)">' + name + '</span>' +
+        '<span style="font-size:11px;color:var(--text3,#64748b)">' + lname + '</span>',
+        js
+      );
+    }).join('');
+    _target = inp;
+    _pos(inp);
+    d.style.display = 'block';
+  }
+
+  // Public API
+  window._efpAfl = {
+    fill: function (e, name, pos, club, age, mv) {
+      if (!_target) return;
+      var inp = _target;
+      inp.value = name;
+      inp.dispatchEvent(new Event('input'));
+      // Fill related fields (only if currently empty)
+      function setField(id, val) {
+        var el = document.getElementById(id);
+        if (el && !el.value) { el.value = val; el.dispatchEvent(new Event('input')); }
+      }
+      if (inp.id === 'apm-player') {
+        setField('apm-pos',  pos);
+        setField('apm-club', club);
+      } else if (inp.id === 'md-name') {
+        setField('md-pos',  pos);
+        setField('md-club', club);
+        setField('md-age',  age);
+        setField('md-val',  '€' + parseFloat(mv).toFixed(1) + 'M');
+        if (typeof _updateValLookupBtn === 'function') _updateValLookupBtn();
+      }
+      _drop_el().style.display = 'none';
+    },
+    fillClub: function (e, name) {
+      if (!_target) return;
+      _target.value = name;
+      _target.dispatchEvent(new Event('input'));
+      _drop_el().style.display = 'none';
+    }
+  };
+
+  function _attach() {
+    ['apm-player', 'md-name'].forEach(function (id) {
+      var el = document.getElementById(id);
+      if (!el || el._afl) return;
+      el._afl = 1;
+      el.autocomplete = 'off';
+      el.addEventListener('input', function () { _showPlayers(this); });
+      el.addEventListener('focus', function () { if (this.value.length >= 2) _showPlayers(this); });
+      el.addEventListener('blur',  function () { setTimeout(function(){if(_drop)_drop.style.display='none';},150); });
+    });
+    ['apm-club', 'md-club'].forEach(function (id) {
+      var el = document.getElementById(id);
+      if (!el || el._afl) return;
+      el._afl = 1;
+      el.autocomplete = 'off';
+      el.addEventListener('input', function () { _showClubs(this); });
+      el.addEventListener('focus', function () { if (this.value.length >= 2) _showClubs(this); });
+      el.addEventListener('blur',  function () { setTimeout(function(){if(_drop)_drop.style.display='none';},150); });
+    });
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', _attach);
+  } else {
+    _attach();
+  }
+  // Re-attach after modals might have been created
+  setTimeout(_attach, 600);
+  setTimeout(_attach, 1500);
+})();
+
 // ── Club Finder ↔ EFP Cross-linking Bridge ───────────────────────────────────
 
 /**
@@ -19864,6 +20020,63 @@ document.addEventListener('click', e => {
     }
     render();
   };
+
+  // ── Player Lookup Index (exposed for EFP autofill) ─────────────────────────
+  window.cnfLookup = (function () {
+    var playerIdx = {}; // normalized name → [{name, pos, club, league, mv, age}]
+    var clubIdx   = {}; // normalized name → [{clubName, league}]
+
+    Object.keys(LEAGUES).forEach(function (leagueKey) {
+      var leagueClubs = LEAGUES[leagueKey];
+      Object.keys(leagueClubs).forEach(function (clubName) {
+        var key = clubName.toLowerCase();
+        if (!clubIdx[key]) clubIdx[key] = [];
+        clubIdx[key].push({ clubName: clubName, league: leagueKey });
+
+        var players = leagueClubs[clubName];
+        players.split('~').forEach(function (p) {
+          var pts = p.split('|');
+          if (pts.length < 3) return;
+          var rec = {
+            name:   pts[0],
+            pos:    pts[1],
+            mv:     parseFloat(pts[2]) || 0,
+            age:    parseInt(pts[3])   || 0,
+            club:   clubName,
+            league: leagueKey
+          };
+          var pkey = pts[0].toLowerCase();
+          if (!playerIdx[pkey]) playerIdx[pkey] = [];
+          playerIdx[pkey].push(rec);
+        });
+      });
+    });
+
+    function search(idx, q, limit) {
+      limit = limit || 8;
+      var ql = q.toLowerCase().trim();
+      if (!ql || ql.length < 2) return [];
+      var results = [];
+      Object.keys(idx).forEach(function (k) {
+        if (k.indexOf(ql) !== -1) {
+          idx[k].forEach(function (r) { results.push(r); });
+        }
+      });
+      // starts-with first, then alpha
+      results.sort(function (a, b) {
+        var an = (a.name || a.clubName || '').toLowerCase();
+        var bn = (b.name || b.clubName || '').toLowerCase();
+        return (an.indexOf(ql) === 0 ? 0 : 1) - (bn.indexOf(ql) === 0 ? 0 : 1) || an.localeCompare(bn);
+      });
+      return results.slice(0, limit);
+    }
+
+    return {
+      searchPlayers: function (q, limit) { return search(playerIdx, q, limit); },
+      searchClubs:   function (q, limit) { return search(clubIdx,   q, limit); }
+    };
+  })();
+
 
   window.cnfOnView = cnfOnView;
 
