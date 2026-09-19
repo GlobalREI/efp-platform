@@ -1,0 +1,39 @@
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  border-radius: var(--r-full);
+  font-weight: 500;
+  line-height: 1;
+  white-space: nowrap;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text-2);
+  transition: background 0.1s, border-color 0.1s;
+}
+
+/* Sizes */
+.sm  { font-size: 11px; padding: 3px 8px; }
+.md  { font-size: 12px; padding: 4px 10px; }
+
+/* Variants */
+.player  { border-color: #BFDBFE; background: #EFF6FF; color: #1D4ED8; }
+.club    { border-color: #BBF7D0; background: #F0FDF4; color: #15803D; }
+.contact { border-color: #DDD6FE; background: #F5F3FF; color: #7C3AED; }
+
+/* Avatar / icon inside chip */
+.av {
+  width: 16px; height: 16px; border-radius: 50%;
+  background: var(--accent);
+  color: #fff;
+  font-size: 9px; font-weight: 700;
+  display: inline-flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+.player .av  { background: #2563EB; }
+.contact .av { background: #7C3AED; }
+.icon { font-size: 12px; line-height: 1; }
+
+/* Clickable state */
+.clickable { cursor: pointer; }
+.clickable:hover { filter: brightness(0.96); text-decoration: underline; }

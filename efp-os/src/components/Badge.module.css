@@ -1,0 +1,35 @@
+/* ─── Badge.module.css ─────────────────────────────────────────────────── */
+
+/* Shared base */
+.badge,
+.pill {
+  display: inline-flex;
+  align-items: center;
+  font-weight: 600;
+  line-height: 1;
+  white-space: nowrap;
+  border: 1px solid transparent;
+}
+
+/* ── Sizes ── */
+.sm { font-size: 10px; padding: 2px 6px; border-radius: var(--r-sm); }
+.md { font-size: 11px; padding: 3px 8px; border-radius: var(--r-md); }
+
+/* ══ Priority Badge ══════════════════════════════════════════════════════ */
+.badge { border-radius: var(--r-sm); letter-spacing: 0.02em; }
+
+.prioP1 { background: #FEF2F2; border-color: #FECACA; color: #B91C1C; }
+.prioP2 { background: #FFFBEB; border-color: #FDE68A; color: #92400E; }
+.prioP3 { background: #F8FAFC; border-color: #E2E8F0; color: #475569; }
+
+/* ══ Status Pill ═════════════════════════════════════════════════════════ */
+.pill { border-radius: var(--r-full); }
+
+.sent     { background: #EFF6FF; border-color: #BFDBFE; color: #1D4ED8; }
+.interest { background: #FFFBEB; border-color: #FDE68A; color: #92400E; }
+.offer    { background: #F0FDF4; border-color: #BBF7D0; color: #15803D; }
+.done     { background: #F0FDF4; border-color: #86EFAC; color: #166534; }
+.declined { background: #FEF2F2; border-color: #FECACA; color: #991B1B; }
+.open     { background: #F5F3FF; border-color: #DDD6FE; color: #6D28D9; }
+.archived { background: #F8FAFC; border-color: #E2E8F0; color: #94A3B8; }
+.default  { background: var(--surface-2); border-color: var(--border); color: var(--text-3); }
