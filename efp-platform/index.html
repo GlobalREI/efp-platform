@@ -7880,7 +7880,56 @@ let needsAdded      = [];   // {id,club,pos,ageMin,ageMax,budMin,budMax,prio,con
 let playerNotes     = {};   // {[playerName]: {status, notes}} — editable player profile notes
 let clubData        = {};   // {[clubName]: {league,country,flag,status,notes,linkedContacts:[{name,role}]}}
 let logsAdded       = [   // {id,type,notes,date,duration,outcome,contact,club,source}
-  // ── Beeper-synced interactions (last synced 2026-09-09) ──
+  // ── Beeper-synced interactions (last synced 2026-09-18) ──
+  // SEPTEMBER 18
+  { id:1789756109000, type:'whatsapp', contact:'Fynn Buggenthien', club:'', date:'2026-09-18',
+    notes:'Friday evening casual exchange with Fynn. Discussed which TV channel was showing football (Fynn on Sky Sport 1, Timo on DAZN). Multiple voice notes exchanged. Timo shared two images at 18:49 (portrait, likely player profile/stats) and 19:32 (landscape, likely match/overview stats); Fynn reacted with 🚀 to the second image.',
+    outcome:'Casual check-in; follow up with Fynn on what the shared images contained if relevant.', source:'beeper-sync' },
+  { id:1789744017000, type:'whatsapp', contact:'Rick Pattenden', club:'Nottingham Forest', date:'2026-09-18',
+    notes:'Timo followed up on the confirmed 22 Sept London meeting by suggesting a venue near Bank Station or Mayfair, proposing "190 House" as the meeting spot.',
+    outcome:'Venue to be confirmed by Rick; meeting set for 22 September afternoon in central London.', source:'beeper-sync' },
+  { id:1789722132000, type:'whatsapp', contact:'Gabor Ruhr', club:'Norwich City', date:'2026-09-18',
+    notes:'Timo messaged Gabor in German, hoping he had a good summer and proposing an in-person meeting in London next week, specifically suggesting Wednesday 23 September.',
+    outcome:'Awaiting Gabor\'s response on availability for Wed 23 Sept in London.', source:'beeper-sync' },
+  { id:1789718008000, type:'whatsapp', contact:'Gary Probert', club:'Liverpool', date:'2026-09-18',
+    notes:'Timo reached out to Gary asking if he is available next week for a coffee in London, citing proximity to Liverpool and wanting to meet in person.',
+    outcome:'Awaiting Gary\'s response on availability for next week in London.', source:'beeper-sync' },
+  // SEPTEMBER 17
+  { id:1789638585000, type:'whatsapp', contact:'Fynn Buggenthien', club:'', date:'2026-09-17',
+    notes:'Timo checked back in with Fynn after being AFK for 2 days (Sep 15–16). Despite his absence, Timo confirmed he had pushed the Al Wasl U22 CB deal forward anyway. No specific shortlist update shared in text; unclear whether the Sep 16 call with Fynn took place.',
+    outcome:'Follow up with Fynn on Al Wasl CB shortlist status; confirm whether the Sep 16 call happened and what the next steps are.', source:'beeper-sync' },
+  // SEPTEMBER 16
+  { id:1789549231000, type:'whatsapp', contact:'Alex Kroes', club:'LASK', date:'2026-09-16',
+    notes:'Brief follow-up exchange after the previous day\'s discussion about Manoël Verhaeghe and the Al Wasl CB search. Alex noted that the UAE U22 window is effectively over ("we don\'t have another one"), closing off that avenue. Timo mentioned he is leaving Barcelona at the end of the month with no firm plans yet and suggested catching up in person.',
+    outcome:'Arrange in-person meeting with Alex Kroes; Timo to follow up once his travel plans post-Barcelona are clearer.', source:'beeper-sync' },
+  // SEPTEMBER 15
+  { id:1789493367000, type:'whatsapp', contact:'Fynn Buggenthien', club:'', date:'2026-09-15',
+    notes:'All-day conversation between Timo and Fynn focused on finding a U22 centre-back for Al Wasl (UAE). Sofyane Benkheil forwarded the request: transfer budget $3–3.5m USD, salary $700k–1m USD, UAE window still open for U22 players. Fynn suggested Manoël Verhaeghe (18yr, Belgian/Congo, LASK) available under €3m and also mentioned "Bung Meng" at ~€4m. Timo sent an AI Scout PDF with player options under budget. Both agreed to review candidates and plan a call tomorrow to discuss the shortlist.',
+    outcome:'Call planned for tomorrow (Sep 16) to review U22 CB options for Al Wasl; Fynn to come with 2–3 names.', source:'beeper-sync' },
+  { id:1789486128000, type:'whatsapp', contact:'Alex Kroes', club:'LASK', date:'2026-09-15',
+    notes:'Timo asked Alex Kroes whether Manoël Verhaeghe (LASK, 18) would consider moving to the UAE/Saudi, noting the UAE transfer window is still open for U22 players. Timo shared the Al Wasl CB brief: transfer budget $3–3.5m, salary $700k–1m. Alex responded that it would be better to sell Verhaeghe in the next window or summer 2027 once he has accumulated playtime at LASK.',
+    outcome:'Alex prefers Verhaeghe stays at LASK through winter; explore alternative CB profiles for Al Wasl.', source:'beeper-sync' },
+  // SEPTEMBER 14
+  { id:1789408097000, type:'whatsapp', contact:'Rick Pattenden', club:'Nottingham Forest', date:'2026-09-14',
+    notes:'Timo reached out to Rick proposing a visit to the UK to discuss closer collaboration. Rick confirmed he is in central London on the 22nd and free all afternoon. Timo confirmed the meeting for September 22nd afternoon in central London.',
+    outcome:'In-person meeting confirmed for 22 September in central London to explore closer working relationship.', source:'beeper-sync' },
+  { id:1789406522000, type:'whatsapp', contact:'Fynn Buggenthien', club:'', date:'2026-09-14',
+    notes:'Active day of voice notes and text messages between Timo and Fynn. Fynn shared Transfermarkt profiles of Justin Lerma and Gaoussou Diakité as potential player candidates under discussion. Timo indicated he would be free from 19:00 for a call; further voice notes were exchanged in the evening. Additional view-once and voice messages suggest detailed player/deal discussions that could not be transcribed.',
+    outcome:'Timo and Fynn to follow up on Justin Lerma and Gaoussou Diakité player assessments; evening call completed.', source:'beeper-sync' },
+  { id:1789374637000, type:'whatsapp', contact:'Alex Kroes', club:'', date:'2026-09-14',
+    notes:'Timo shared an image with rough EFP first transfer window stats with Alex Kroes, noting promising results despite a late and unplanned start. Timo expressed eagerness to catch up in the coming days.',
+    outcome:'Schedule a proper catchup with Alex Kroes to review EFP window performance and plan next steps.', source:'beeper-sync' },
+  // SEPTEMBER 13
+  { id:1789291242000, type:'whatsapp', contact:'Fynn Buggenthien', club:'', date:'2026-09-13',
+    notes:'Morning catch-up between Timo and Fynn via voice notes and text. Discussed Bundesliga matchday results — Gladbach suffered a heavy loss, Freiburg won amid a controversial yellow-red card. Timo indicated he has something new for a player (referencing an earlier opportunity). Fynn shared a post-match clip of Vitesse player Valon Zumberi after a narrow defeat.',
+    outcome:'Follow up on player opportunity Timo referenced; Fynn to review.', source:'beeper-sync' },
+  // SEPTEMBER 11
+  { id:1789245422000, type:'whatsapp', contact:'Fynn Buggenthien', club:'Al-Ettifaq', date:'2026-09-11',
+    notes:'Internal EFP discussion about the Al-Ettifaq striker search; Timo shared an AI Scout Search PDF for Al-Ettifaq and discussed the brief (U22, 4–6m transfer, 1–1.5m salary, window open until 20 Sep). Timo also shared the latest platform update cnf-v18.html and the new EFP branding/site totalsportshub.io with chairman contact details.',
+    outcome:'Fynn to call Timo when back at PC to review AI scout results and cnf-v18 platform update.', source:'beeper-sync' },
+  { id:1789218234000, type:'whatsapp', contact:'Romeo Castelen', club:'Al-Ettifaq', date:'2026-09-11',
+    notes:'Timo forwarded urgent details of a striker need at Al-Ettifaq (Saudi Arabia): U22 profile required, transfer fee 4–6m, salary 1–1.5m net, window open until 20 September. Club described as desperate having missed two other striker targets.',
+    outcome:'Romeo said he will look into it — follow up needed to get his suggestions.', source:'beeper-sync' },
   // SEPTEMBER 9
   { id:1788968988000, type:'whatsapp', contact:'Fynn Buggenthien', club:'Pafos FC', date:'2026-09-09',
     notes:'Timo shared a screenshot showing that Roman, the owner of Pafos FC, had read his WhatsApp message and apparently responded positively. Timo confirmed to Fynn that Roman is the owner of Pafos. Fynn acknowledged with "Ah okay cool".',
