@@ -8,6 +8,7 @@ import { useNavigate }  from 'react-router-dom'
 import { ref, onValue, off } from 'firebase/database'
 import { db }           from '../data/firebase'
 import { PageHeader }   from '../components/PageHeader'
+import { AddContactForm } from './AddContactForm'
 import styles from './ContactList.module.css'
 
 interface Contact {
@@ -40,6 +41,7 @@ export function ContactList() {
   const [loading,  setLoading]  = useState(true)
   const [search,   setSearch]   = useState('')
   const [role,     setRole]     = useState('all')
+  const [addOpen,  setAddOpen]  = useState(false)
 
   useEffect(() => {
     const r = ref(db, 'contacts')
@@ -90,11 +92,13 @@ export function ContactList() {
   }
 
   return (
+    <>
     <div className={styles.page}>
       <PageHeader
         title="Contacts"
         sub={`${contacts.length} contact${contacts.length !== 1 ? 's' : ''}`}
         search={{ value: search, onChange: setSearch, placeholder: 'Search contacts, clubs…' }}
+        actions={<button onClick={() => setAddOpen(true)} style={{padding:'7px 14px',background:'var(--brand)',color:'#fff',border:'none',borderRadius:'var(--radius-md)',fontSize:'13px',fontWeight:600,cursor:'pointer'}}>+ New contact</button>}
         filters={filters}
       />
 
@@ -148,5 +152,7 @@ export function ContactList() {
         </table>
       )}
     </div>
+    <AddContactForm open={addOpen} onClose={() => setAddOpen(false)} />
+  </>
   )
 }

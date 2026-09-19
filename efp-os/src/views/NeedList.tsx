@@ -11,6 +11,7 @@ import { ref, onValue, off } from 'firebase/database'
 import { db } from '../data/firebase'
 import { PageHeader } from '../components/PageHeader'
 import { StatusPill } from '../components/Badge'
+import { AddNeedForm } from './AddNeedForm'
 import styles from './NeedList.module.css'
 
 interface Need {
@@ -49,6 +50,7 @@ export function NeedList() {
   const [search,      setSearch]      = useState('')
   const [filter,      setFilter]      = useState('active')   // active | archived | all
   const [sortBy,      setSortBy]      = useState('club')
+  const [addOpen,   setAddOpen]   = useState(false)
 
   useEffect(() => {
     const r = ref(db, 'needs')
@@ -116,6 +118,7 @@ export function NeedList() {
   }
 
   return (
+    <>
     <div className={styles.page}>
       <PageHeader
         title="Club Needs"
@@ -183,5 +186,7 @@ export function NeedList() {
         </div>
       )}
     </div>
+    <AddNeedForm open={addOpen} onClose={() => setAddOpen(false)} />
+  </>
   )
 }

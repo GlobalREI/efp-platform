@@ -17,6 +17,7 @@ import { ref, onValue, off } from 'firebase/database'
 import { db }           from '../data/firebase'
 import { PageHeader }   from '../components/PageHeader'
 import { PriorityBadge, StatusPill } from '../components/Badge'
+import { AddMandateForm } from './AddMandateForm'
 import styles from './PlayerList.module.css'
 
 /* ── Types ─────────────────────────────────────────────────────────────── */
@@ -56,6 +57,7 @@ export function PlayerList() {
   const [window,    setWindow]    = useState('all')
   const [showArchived, setShowArchived] = useState(false)
   const [sort,      setSort]      = useState<'priority' | 'name' | 'recent'>('priority')
+  const [addOpen,   setAddOpen]   = useState(false)
 
   /* ── Firebase ── */
   useEffect(() => {
@@ -171,12 +173,14 @@ export function PlayerList() {
   }
 
   return (
+    <>
     <div className={styles.page}>
       <PageHeader
         title="Mandates"
         sub={`${activeCount} active${archivedCount ? ` · ${archivedCount} archived` : ''}`}
         search={{ value: search, onChange: setSearch, placeholder: 'Search by name, club, position…' }}
         filters={filters}
+        actions={<button onClick={() => setAddOpen(true)} style={{padding:"7px 14px",background:"var(--brand)",color:"#fff",border:"none",borderRadius:"var(--radius-md)",fontSize:"13px",fontWeight:600,cursor:"pointer"}}>+ New mandate</button>}
       />
 
       {rows.length === 0 ? (
@@ -239,5 +243,7 @@ export function PlayerList() {
         </table>
       )}
     </div>
+    <AddMandateForm open={addOpen} onClose={() => setAddOpen(false)} />
+  </>
   )
 }
