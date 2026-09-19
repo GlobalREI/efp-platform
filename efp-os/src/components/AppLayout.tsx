@@ -8,7 +8,7 @@ import styles from './AppLayout.module.css'
 import {
   IconDashboard, IconMandates, IconClubs, IconContacts,
   IconNeeds, IconPitches, IconScout, IconActivities,
-  IconSettings, IconBell, IconSearch
+  IconTasks, IconSettings, IconBell, IconSearch
 } from './Icons'
 
 // ── Nav structure with sections ───────────────────────────────────────────────
@@ -16,35 +16,35 @@ const NAV = [
   {
     section: 'Overview',
     items: [
-      { to: '/',       label: 'Dashboard',   Icon: IconDashboard },
+      { to: '/',       label: 'Dashboard',       Icon: IconDashboard },
     ],
   },
   {
     section: 'Players',
     items: [
-      { to: '/mandates', label: 'Players',      Icon: IconMandates },
-      { to: '/scout',    label: 'AI Matches',   Icon: IconScout    },
+      { to: '/mandates', label: 'Player Mandates', Icon: IconMandates },
+      { to: '/scout',    label: 'AI Matches',       Icon: IconScout    },
     ],
   },
   {
     section: 'CRM',
     items: [
-      { to: '/clubs',    label: 'Clubs',        Icon: IconClubs    },
-      { to: '/contacts', label: 'Contacts',     Icon: IconContacts },
-      { to: '/needs',    label: 'Club Needs',   Icon: IconNeeds    },
+      { to: '/clubs',    label: 'Clubs',            Icon: IconClubs    },
+      { to: '/contacts', label: 'Contacts',         Icon: IconContacts },
+      { to: '/needs',    label: 'Club Needs',       Icon: IconNeeds    },
     ],
   },
   {
     section: 'Pipeline',
     items: [
-      { to: '/pitches',  label: 'Pitches',      Icon: IconPitches     },
+      { to: '/pitches',  label: 'Player Pitches',   Icon: IconPitches  },
     ],
   },
   {
     section: 'Workspace',
     items: [
-      { to: '/tasks',      label: 'Tasks',      Icon: IconActivities  },
-      { to: '/activities', label: 'Activity',   Icon: IconActivities  },
+      { to: '/tasks',      label: 'Tasks',          Icon: IconTasks       },
+      { to: '/activities', label: 'Activity Log',   Icon: IconActivities  },
     ],
   },
 ]
