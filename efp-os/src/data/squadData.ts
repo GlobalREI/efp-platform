@@ -297,8 +297,10 @@ export function searchLocalPlayers(opts: {
   limit?: number
 }): LocalPlayer[] {
   const { name, leagueNames, position, ageMin, ageMax, mvMin, mvMax, limit = 500 } = opts
-  const nameQ  = name?.trim().toLowerCase() ?? ''
-  const posQ   = position?.trim().toLowerCase() ?? ''
+  const nameQ   = name?.trim().toLowerCase() ?? ''
+  const posCode = position?.trim().toUpperCase() ?? ''  // e.g. 'GK', 'CB'
+  // Full TM position strings for this short code (raw data uses full names)
+  const posFullNames: string[] = posCode ? (POS_MAP[posCode] ?? [posCode]) : []
 
   // Build set of league codes from selected display names
   let leagueCodes: Set<string> | null = null
@@ -328,8 +330,13 @@ export function searchLocalPlayers(opts: {
       for (const p of parsePlayers(playerStr)) {
         // Name filter (substring, optional)
         if (nameQ && !p.name.toLowerCase().includes(nameQ)) continue
-        // Position filter (exact short-code match, optional)
-        if (posQ && p.pos.toLowerCase() !== posQ) continue
+        // Position filter: raw data uses full TM names (e.g. 'Goalkeeper'), so
+        // compare against POS_MAP expansion of the short code
+        if (posFullNames.length > 0) {
+          const rawPos = p.pos.toLowerCase()
+          const matches = posFullNames.some(fn => rawPos.includes(fn.toLowerCase()))
+          if (!matches) continue
+        }
         // Age filter
         if (ageMin && (p.age === 0 || p.age < ageMin)) continue
         if (ageMax && p.age > ageMax) continue
@@ -344,10 +351,12 @@ export function searchLocalPlayers(opts: {
             : `€${Math.round(p.mv * 1000)}K`
           : '—'
 
+        // Return short code as position so filterTmPlayers (which does
+        // position.includes(filterPos)) can still match downstream
         results.push({
           id: `local|${leagueCode}|${clubName}|${p.name}`,
           name: p.name,
-          position: p.pos,
+          position: posCode || p.pos,   // short code if filtered, else raw full name
           age: p.age > 0 ? String(p.age) : '',
           nationality: '',
           club: clubName,
