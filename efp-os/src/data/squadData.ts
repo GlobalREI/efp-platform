@@ -137,3 +137,132 @@ export function getSquadContext(
     buySignal,
   }
 }
+
+// ── CNF club-info helpers (added for EFP OS integration) ─────────────────────
+
+/** League metadata keyed by RAW_LEAGUES code */
+export const LEAGUE_INFO: Record<string, { name: string; country: string; flag: string }> = {
+  bl:  { name: 'Bundesliga',         country: 'Germany',         flag: '🇩🇪' },
+  tbl: { name: '2. Bundesliga',      country: 'Germany',         flag: '🇩🇪' },
+  pl:  { name: 'Premier League',     country: 'England',         flag: '🏴󠁧󠁢󠁥󠁮󠁧󠁿' },
+  er:  { name: 'Eredivisie',         country: 'Netherlands',     flag: '🇳🇱' },
+  sw:  { name: 'Championship',       country: 'England',         flag: '🏴󠁧󠁢󠁥󠁮󠁧󠁿' },
+  abl: { name: 'Austrian Bundesliga',country: 'Austria',         flag: '🇦🇹' },
+  ch:  { name: 'Super League',       country: 'Switzerland',     flag: '🇨🇭' },
+  swe: { name: 'Allsvenskan',        country: 'Sweden',          flag: '🇸🇪' },
+  den: { name: 'Superliga',          country: 'Denmark',         flag: '🇩🇰' },
+  nor: { name: 'Eliteserien',        country: 'Norway',          flag: '🇳🇴' },
+  pol: { name: 'Ekstraklasa',        country: 'Poland',          flag: '🇵🇱' },
+  sco: { name: 'Premiership',        country: 'Scotland',        flag: '🏴󠁧󠁢󠁳󠁣󠁴󠁿' },
+  cro: { name: 'HNL',               country: 'Croatia',         flag: '🇭🇷' },
+  por: { name: 'Primeira Liga',      country: 'Portugal',        flag: '🇵🇹' },
+  gre: { name: 'Super League',       country: 'Greece',          flag: '🇬🇷' },
+  cze: { name: 'First League',       country: 'Czech Republic',  flag: '🇨🇿' },
+  l1:  { name: 'Ligue 1',            country: 'France',          flag: '🇫🇷' },
+  lla: { name: 'La Liga',            country: 'Spain',           flag: '🇪🇸' },
+  sa:  { name: 'Serie A',            country: 'Italy',           flag: '🇮🇹' },
+  bel: { name: 'Pro League',         country: 'Belgium',         flag: '🇧🇪' },
+}
+
+interface CnfClubEntry {
+  name: string
+  league: string
+  country: string
+  flag: string
+}
+
+/** Flat lookup: lowercase club name → club with league/country info */
+const CNF_CLUB_LOOKUP = new Map<string, CnfClubEntry>()
+for (const [leagueCode, clubs] of Object.entries(RAW_LEAGUES)) {
+  const meta = LEAGUE_INFO[leagueCode]
+  if (!meta) continue
+  for (const clubName of Object.keys(clubs)) {
+    CNF_CLUB_LOOKUP.set(clubName.toLowerCase(), {
+      name: clubName,
+      league: meta.name,
+      country: meta.country,
+      flag: meta.flag,
+    })
+  }
+}
+
+/**
+ * Return league/country info for a club from the CNF dataset.
+ * Uses the same fuzzy matching as findClub().
+ */
+export function getCnfClubInfo(query: string): CnfClubEntry | null {
+  if (!query) return null
+  const q = query.trim().toLowerCase()
+  // 1. Exact
+  const exact = CNF_CLUB_LOOKUP.get(q)
+  if (exact) return exact
+  // 2. Normalized exact
+  const qn = normalize(q)
+  for (const [key, val] of CNF_CLUB_LOOKUP) {
+    if (normalize(key) === qn) return val
+  }
+  // 3. Substring
+  for (const [key, val] of CNF_CLUB_LOOKUP) {
+    if (key.length >= 4 && q.includes(key)) return val
+    if (q.length >= 4 && key.includes(q)) return val
+  }
+  // 4. Normalized substring
+  for (const [key, val] of CNF_CLUB_LOOKUP) {
+    const kn = normalize(key)
+    if (kn.length >= 4 && qn.includes(kn)) return val
+    if (qn.length >= 4 && kn.includes(qn)) return val
+  }
+  return null
+}
+
+/**
+ * Search CNF clubs by prefix/substring — used for autocomplete in Add forms.
+ * Returns up to `limit` results sorted by name.
+ */
+export function searchCnfClubs(query: string, limit = 8): CnfClubEntry[] {
+  if (!query || query.trim().length < 2) return []
+  const q = normalize(query.trim())
+  const results: CnfClubEntry[] = []
+  for (const [key, val] of CNF_CLUB_LOOKUP) {
+    if (normalize(key).includes(q)) {
+      results.push(val)
+      if (results.length >= limit) break
+    }
+  }
+  return results.sort((a, b) => a.name.localeCompare(b.name))
+}
+
+/**
+ * Search players across all CNF squads by name substring.
+ * Returns up to `limit` matches with their club name and position.
+ */
+export function searchCnfPlayers(
+  query: string,
+  limit = 8,
+): Array<{ name: string; pos: string; club: string; league: string; country: string }> {
+  if (!query || query.trim().length < 3) return []
+  const q = normalize(query.trim())
+  const results: Array<{ name: string; pos: string; club: string; league: string; country: string }> = []
+  for (const [leagueCode, clubs] of Object.entries(RAW_LEAGUES)) {
+    const meta = LEAGUE_INFO[leagueCode]
+    if (!meta) continue
+    for (const [clubName, playerStr] of Object.entries(clubs)) {
+      for (const p of parsePlayers(playerStr)) {
+        if (normalize(p.name).includes(q)) {
+          results.push({ name: p.name, pos: p.pos, club: clubName, league: meta.name, country: meta.country })
+          if (results.length >= limit) return results
+        }
+      }
+    }
+  }
+  return results
+}
+
+/** Get the full squad for a club from the CNF dataset. */
+export function getCnfClubSquad(clubName: string): Array<SquadPlayer & { pos: string }> | null {
+  const matched = findClub(clubName)
+  if (!matched) return null
+  const entry = CLUB_LOOKUP.get(matched.toLowerCase())
+  if (!entry) return null
+  return parsePlayers(entry.str)
+}

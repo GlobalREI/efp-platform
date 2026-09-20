@@ -70,6 +70,26 @@ interface FbLinkedClub {
 
 const PRIO_LABEL: Record<number, string> = { 1: 'P1', 2: 'P2', 3: 'P3' }
 
+const POSITIONS     = ['GK','CB','RB','RWB','LB','LWB','CDM','CM','CAM','RW','LW','CF','ST','SS']
+const WINDOWS       = ['Summer 2026','Winter 2027','Summer 2027','Winter 2028','Summer 2028']
+const MANDATE_TYPES = ['Exclusive','Co-mandate','Non-exclusive','Advisory']
+const FEET          = ['Right','Left','Both']
+const NATIONALITIES = [
+  'Afghan','Albanian','Algerian','Andorran','Angolan','Argentine','Armenian','Australian',
+  'Austrian','Azerbaijani','Belgian','Belarusian','Bosnian','Brazilian','Bulgarian',
+  'Cameroonian','Canadian','Chilean','Chinese','Colombian','Congolese','Croatian',
+  'Czech','Danish','Dominican','Dutch','Ecuadorian','Egyptian','English','Estonian',
+  'Finnish','French','Gambian','Georgian','German','Ghanaian','Greek','Guinean',
+  'Hungarian','Icelander','Ivorian','Irish','Israeli','Italian','Jamaican','Japanese',
+  'Kosovan','Latvian','Lebanese','Liberian','Lithuanian','Macedonian','Malian',
+  'Maltese','Mexican','Moldovan','Montenegrin','Moroccan','Namibian','Nigerian',
+  'Norwegian','Paraguayan','Polish','Portuguese','Romanian','Russian','Rwandan',
+  'Salvadoran','Scottish','Senegalese','Serbian','Slovakian','Slovenian',
+  'South African','South Korean','Spanish','Swedish','Swiss','Togolese',
+  'Tunisian','Turkish','Ugandan','Ukrainian','Uruguayan','Venezuelan','Welsh',
+  'Zambian','Zimbabwean',
+]
+
 export function PlayerDetail() {
   const { id }   = useParams<{ id: string }>()
   const nav      = useNavigate()
@@ -244,30 +264,155 @@ export function PlayerDetail() {
     >
       {/* ── Player Details ── */}
       <Card title="Player Details" titleIcon="⚽">
-        <FieldGrid>
-          <Field label="Full Name"    value={mandate.name} />
-          <Field label="Position"     value={position || '—'} />
-          <Field label="Age"          value={mandate.age || '—'} />
-          <Field label="Height"       value={mandate.height || '—'} />
-          <Field label="Nationality"  value={mandate.nationality || '—'} />
-          <Field label="Preferred Foot" value={mandate.foot || '—'} />
-          <Field label="Current Club" value={mandate.club || '—'} />
-          <Field label="Market Value" value={mandate.value || '—'} />
-          <Field label="Contract Exp" value={mandate.contract || '—'} />
-          <Field label="Mandate Type" value={mandate.type || '—'} />
-        </FieldGrid>
+        {editMode ? (
+          <div style={{ padding: '14px 18px', display: 'flex', flexDirection: 'column', gap: 12 }}>
+            <div className={styles.editRow}>
+              <label className={styles.editLabel}>Full Name</label>
+              <input className={styles.editInput} value={draft.name ?? mandate.name}
+                onChange={e => setDraft(d => ({ ...d, name: e.target.value }))} />
+            </div>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+              <div className={styles.editRow}>
+                <label className={styles.editLabel}>Position</label>
+                <select className={styles.editSelect} value={draft.pos ?? mandate.pos ?? ''}
+                  onChange={e => setDraft(d => ({ ...d, pos: e.target.value }))}>
+                  <option value="">—</option>
+                  {POSITIONS.map(p => <option key={p} value={p}>{p}</option>)}
+                </select>
+              </div>
+              <div className={styles.editRow}>
+                <label className={styles.editLabel}>Secondary Pos</label>
+                <select className={styles.editSelect} value={draft.pos2 ?? mandate.pos2 ?? ''}
+                  onChange={e => setDraft(d => ({ ...d, pos2: e.target.value }))}>
+                  <option value="">—</option>
+                  {POSITIONS.map(p => <option key={p} value={p}>{p}</option>)}
+                </select>
+              </div>
+            </div>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+              <div className={styles.editRow}>
+                <label className={styles.editLabel}>Age</label>
+                <input className={styles.editInput} type="number" min="15" max="45"
+                  value={draft.age ?? mandate.age ?? ''}
+                  onChange={e => setDraft(d => ({ ...d, age: e.target.value }))} />
+              </div>
+              <div className={styles.editRow}>
+                <label className={styles.editLabel}>Height (cm)</label>
+                <input className={styles.editInput} type="number" min="150" max="220"
+                  value={draft.height ?? mandate.height ?? ''}
+                  onChange={e => setDraft(d => ({ ...d, height: e.target.value }))} />
+              </div>
+            </div>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+              <div className={styles.editRow}>
+                <label className={styles.editLabel}>Nationality</label>
+                <select className={styles.editSelect} value={draft.nationality ?? mandate.nationality ?? ''}
+                  onChange={e => setDraft(d => ({ ...d, nationality: e.target.value }))}>
+                  <option value="">—</option>
+                  {NATIONALITIES.map(n => <option key={n} value={n}>{n}</option>)}
+                </select>
+              </div>
+              <div className={styles.editRow}>
+                <label className={styles.editLabel}>Preferred Foot</label>
+                <select className={styles.editSelect} value={draft.foot ?? mandate.foot ?? ''}
+                  onChange={e => setDraft(d => ({ ...d, foot: e.target.value }))}>
+                  <option value="">—</option>
+                  {FEET.map(f => <option key={f} value={f}>{f}</option>)}
+                </select>
+              </div>
+            </div>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+              <div className={styles.editRow}>
+                <label className={styles.editLabel}>Current Club</label>
+                <input className={styles.editInput} value={draft.club ?? mandate.club ?? ''}
+                  onChange={e => setDraft(d => ({ ...d, club: e.target.value }))}
+                  placeholder="Club name" />
+              </div>
+              <div className={styles.editRow}>
+                <label className={styles.editLabel}>Market Value</label>
+                <input className={styles.editInput} value={draft.value ?? mandate.value ?? ''}
+                  onChange={e => setDraft(d => ({ ...d, value: e.target.value }))}
+                  placeholder="€4M" />
+              </div>
+            </div>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+              <div className={styles.editRow}>
+                <label className={styles.editLabel}>Contract Expires</label>
+                <input className={styles.editInput} value={draft.contract ?? mandate.contract ?? ''}
+                  onChange={e => setDraft(d => ({ ...d, contract: e.target.value }))}
+                  placeholder="Jun 2026" />
+              </div>
+              <div className={styles.editRow}>
+                <label className={styles.editLabel}>Mandate Type</label>
+                <select className={styles.editSelect} value={draft.type ?? mandate.type ?? ''}
+                  onChange={e => setDraft(d => ({ ...d, type: e.target.value }))}>
+                  <option value="">—</option>
+                  {MANDATE_TYPES.map(t => <option key={t} value={t}>{t}</option>)}
+                </select>
+              </div>
+            </div>
+          </div>
+        ) : (
+          <FieldGrid>
+            <Field label="Full Name"    value={mandate.name} />
+            <Field label="Position"     value={position || '—'} />
+            <Field label="Age"          value={mandate.age || '—'} />
+            <Field label="Height"       value={mandate.height || '—'} />
+            <Field label="Nationality"  value={mandate.nationality || '—'} />
+            <Field label="Preferred Foot" value={mandate.foot || '—'} />
+            <Field label="Current Club" value={mandate.club || '—'} />
+            <Field label="Market Value" value={mandate.value || '—'} />
+            <Field label="Contract Exp" value={mandate.contract || '—'} />
+            <Field label="Mandate Type" value={mandate.type || '—'} />
+          </FieldGrid>
+        )}
       </Card>
 
       {/* ── Deal & Financials ── */}
       <Card title="Deal & Financials" titleIcon="💰">
-        <FieldGrid>
-          <Field label="Transfer Window" value={mandate.transfer_window || '—'} />
-          <Field label="Deal Type"       value={notes.dealType || '—'} />
-          <Field label="Expected Price"  value={mandate.expectedPrice || '—'} />
-          <Field label="Salary (p/m)"    value={mandate.salary || '—'} />
-          <Field label="Source / Via"    value={mandate.contact || '—'} />
-          <Field label="Status"          value={status} />
-        </FieldGrid>
+        {editMode ? (
+          <div style={{ padding: '14px 18px', display: 'flex', flexDirection: 'column', gap: 12 }}>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+              <div className={styles.editRow}>
+                <label className={styles.editLabel}>Transfer Window</label>
+                <select className={styles.editSelect} value={draft.transfer_window ?? mandate.transfer_window ?? ''}
+                  onChange={e => setDraft(d => ({ ...d, transfer_window: e.target.value }))}>
+                  <option value="">—</option>
+                  {WINDOWS.map(w => <option key={w} value={w}>{w}</option>)}
+                </select>
+              </div>
+              <div className={styles.editRow}>
+                <label className={styles.editLabel}>Expected Price</label>
+                <input className={styles.editInput} value={draft.expectedPrice ?? mandate.expectedPrice ?? ''}
+                  onChange={e => setDraft(d => ({ ...d, expectedPrice: e.target.value }))}
+                  placeholder="€2.5M" />
+              </div>
+            </div>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+              <div className={styles.editRow}>
+                <label className={styles.editLabel}>Salary (p/m)</label>
+                <input className={styles.editInput} value={draft.salary ?? mandate.salary ?? ''}
+                  onChange={e => setDraft(d => ({ ...d, salary: e.target.value }))}
+                  placeholder="€80K" />
+              </div>
+              <div className={styles.editRow}>
+                <label className={styles.editLabel}>Source / Via</label>
+                <input className={styles.editInput} value={draft.contact ?? mandate.contact ?? ''}
+                  onChange={e => setDraft(d => ({ ...d, contact: e.target.value }))}
+                  placeholder="Contact name" />
+              </div>
+            </div>
+          </div>
+        ) : (
+          <FieldGrid>
+            <Field label="Transfer Window" value={mandate.transfer_window || '—'} />
+            <Field label="Deal Type"       value={notes.dealType || '—'} />
+            <Field label="Expected Price"  value={mandate.expectedPrice || '—'} />
+            <Field label="Salary (p/m)"    value={mandate.salary || '—'} />
+            <Field label="Source / Via"    value={mandate.contact || '—'} />
+            <Field label="Status"          value={status} />
+          </FieldGrid>
+        )}
       </Card>
 
       {/* ── Internal Notes ── */}

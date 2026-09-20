@@ -70,7 +70,8 @@ interface Need {
   notes?: string
 }
 
-const WINDOWS = ['Summer 2025','Winter 2026','Summer 2026','Winter 2027','Summer 2027','General']
+const WINDOWS  = ['Summer 2025','Winter 2026','Summer 2026','Winter 2027','Summer 2027','General']
+const STATUSES = ['Active Client','In Talks','Interested','Pending','Closed','Not Started']
 
 export function ClubDetail() {
   const { id }  = useParams<{ id: string }>()
@@ -231,13 +232,74 @@ export function ClubDetail() {
     >
       {/* ── Club Info ── */}
       <Card title="Club Info" titleIcon="🏟">
-        <FieldGrid>
-          <Field label="Club Name"  value={club.name} />
-          <Field label="League"     value={club.league  || '—'} />
-          <Field label="Country"    value={club.country || '—'} />
-          <Field label="Flag"       value={club.flag    || '—'} />
-          <Field label="Status"     value={status} />
-        </FieldGrid>
+        {editMode ? (
+          <div style={{ padding: '14px 18px', display: 'flex', flexDirection: 'column', gap: 12 }}>
+            <div className={styles.editRow}>
+              <label className={styles.editLabel}>Club Name</label>
+              <input
+                className={styles.editInput}
+                value={draft.name ?? club.name}
+                onChange={e => setDraft(d => ({ ...d, name: e.target.value }))}
+              />
+            </div>
+            <div className={styles.editRow}>
+              <label className={styles.editLabel}>League</label>
+              <input
+                className={styles.editInput}
+                value={draft.league ?? club.league ?? ''}
+                onChange={e => setDraft(d => ({ ...d, league: e.target.value }))}
+                placeholder="e.g. Bundesliga"
+              />
+            </div>
+            <div className={styles.editRow}>
+              <label className={styles.editLabel}>Country</label>
+              <input
+                className={styles.editInput}
+                value={draft.country ?? club.country ?? ''}
+                onChange={e => setDraft(d => ({ ...d, country: e.target.value }))}
+                placeholder="e.g. Germany"
+              />
+            </div>
+            <div className={styles.editRow}>
+              <label className={styles.editLabel}>Flag</label>
+              <input
+                className={styles.editInput}
+                value={draft.flag ?? club.flag ?? ''}
+                onChange={e => setDraft(d => ({ ...d, flag: e.target.value }))}
+                placeholder="🇩🇪"
+                style={{ width: 80 }}
+              />
+            </div>
+            <div className={styles.editRow}>
+              <label className={styles.editLabel}>Status</label>
+              <select
+                className={styles.editSelect}
+                value={draft.status ?? club.status ?? ''}
+                onChange={e => setDraft(d => ({ ...d, status: e.target.value }))}
+              >
+                {STATUSES.map(s => <option key={s} value={s}>{s}</option>)}
+              </select>
+            </div>
+            <div className={styles.editRow}>
+              <label className={styles.editLabel}>General Notes</label>
+              <textarea
+                className={styles.editTextarea}
+                value={draft.notes ?? club.notes ?? ''}
+                onChange={e => setDraft(d => ({ ...d, notes: e.target.value }))}
+                rows={3}
+                placeholder="General notes about this club…"
+              />
+            </div>
+          </div>
+        ) : (
+          <FieldGrid>
+            <Field label="Club Name"  value={club.name} />
+            <Field label="League"     value={club.league  || '—'} />
+            <Field label="Country"    value={club.country || '—'} />
+            <Field label="Flag"       value={club.flag    || '—'} />
+            <Field label="Status"     value={status} />
+          </FieldGrid>
+        )}
       </Card>
 
       {/* ── Notes by Window ── */}

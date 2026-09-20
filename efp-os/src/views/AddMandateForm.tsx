@@ -12,11 +12,28 @@ import {
   ContactSearchField, type ContactResult,
   MoneyInput,
 } from '../components/FormFields'
+import { getCnfClubInfo, searchCnfPlayers } from '../data/squadData'
 
 const POSITIONS    = ['GK','CB','RB','RWB','LB','LWB','CDM','CM','CAM','RW','LW','CF','ST','SS']
 const WINDOWS      = ['Summer 2026','Winter 2027','Summer 2027','Winter 2028','Summer 2028']
 const MANDATE_TYPES = ['Exclusive','Co-mandate','Non-exclusive','Advisory']
 const FEET         = ['Right','Left','Both']
+
+const NATIONALITIES = [
+  'Afghan','Albanian','Algerian','Andorran','Angolan','Argentine','Armenian','Australian',
+  'Austrian','Azerbaijani','Belgian','Belarusian','Bosnian','Brazilian','Bulgarian',
+  'Cameroonian','Canadian','Chilean','Chinese','Colombian','Congolese','Croatian',
+  'Czech','Danish','Dominican','Dutch','Ecuadorian','Egyptian','English','Estonian',
+  'Finnish','French','Gambian','Georgian','German','Ghanaian','Greek','Guinean',
+  'Hungarian','Icelander','Ivorian','Irish','Israeli','Italian','Jamaican','Japanese',
+  'Kosovan','Latvian','Lebanese','Liberian','Lithuanian','Macedonian','Malian',
+  'Maltese','Mexican','Moldovan','Montenegrin','Moroccan','Namibian','Nigerian',
+  'Norwegian','Paraguayan','Polish','Portuguese','Romanian','Russian','Rwandan',
+  'Salvadoran','Scottish','Senegalese','Serbian','Slovakian','Slovenian',
+  'South African','South Korean','Spanish','Swedish','Swiss','Togolese',
+  'Tunisian','Turkish','Ugandan','Ukrainian','Uruguayan','Venezuelan','Welsh',
+  'Zambian','Zimbabwean',
+]
 
 interface Props {
   open: boolean
@@ -54,6 +71,10 @@ export function AddMandateForm({ open, onClose, onSaved }: Props) {
   const [notes,  setNotes]  = useState('')
   const [saving, setSaving] = useState(false)
   const [error,  setError]  = useState('')
+
+  // CNF hints
+  const [cnfPlayerHint, setCnfPlayerHint] = useState<{ pos: string; club: string } | null>(null)
+  const [cnfClubHint,   setCnfClubHint]   = useState<{ league: string; country: string; flag: string } | null>(null)
 
   const reset = () => {
     setName(''); setPos(''); setPos2(''); setAge(''); setHeight(''); setNat(''); setFoot('Right')
@@ -113,9 +134,24 @@ export function AddMandateForm({ open, onClose, onSaved }: Props) {
           <input
             className={s.fieldInput}
             value={name}
-            onChange={e => setName(e.target.value)}
+            onChange={e => {
+              setName(e.target.value)
+              // CNF player lookup
+              const hits = searchCnfPlayers(e.target.value, 1)
+              if (hits.length > 0) {
+                setCnfPlayerHint({ pos: hits[0].pos, club: hits[0].club })
+                if (!pos) setPos(hits[0].pos)
+              } else {
+                setCnfPlayerHint(null)
+              }
+            }}
             placeholder="Full name"
           />
+          {cnfPlayerHint && (
+            <p style={{ fontSize: 'var(--text-xs)', color: 'var(--accent)', marginTop: 4 }}>
+              📋 Found in CNF data · {cnfPlayerHint.pos} at {cnfPlayerHint.club} — fields pre-filled
+            </p>
+          )}
         </div>
 
         <div className={s.fieldRow}>
@@ -161,12 +197,10 @@ export function AddMandateForm({ open, onClose, onSaved }: Props) {
         <div className={s.fieldRow}>
           <div className={s.field}>
             <label className={s.fieldLabel}>Nationality</label>
-            <input
-              className={s.fieldInput}
-              value={nat}
-              onChange={e => setNat(e.target.value)}
-              placeholder="e.g. Dutch, EU passport"
-            />
+            <select className={s.fieldSelect} value={nat} onChange={e => setNat(e.target.value)}>
+              <option value="">Select…</option>
+              {NATIONALITIES.map(n => <option key={n} value={n}>{n}</option>)}
+            </select>
           </div>
           <div className={s.field}>
             <label className={s.fieldLabel}>Preferred Foot</label>
@@ -182,14 +216,28 @@ export function AddMandateForm({ open, onClose, onSaved }: Props) {
         <ClubSearchField
           label="Current Club"
           value={clubName}
-          onChange={setClubName}
-          onSelect={(c: ClubResult) => { setClubName(c.name); setClubId(c.id) }}
+          onChange={v => {
+            setClubName(v)
+            const info = getCnfClubInfo(v)
+            setCnfClubHint(info)
+          }}
+          onSelect={(c: ClubResult) => {
+            setClubName(c.name)
+            setClubId(c.id)
+            const info = getCnfClubInfo(c.name)
+            setCnfClubHint(info)
+          }}
           placeholder="e.g. LASK"
         />
 
         {clubId && (
           <p style={{ fontSize: 'var(--text-xs)', color: 'var(--text-muted)', marginTop: -8, marginBottom: 8 }}>
             ✓ Linked to club record
+          </p>
+        )}
+        {cnfClubHint && !clubId && (
+          <p style={{ fontSize: 'var(--text-xs)', color: 'var(--accent)', marginTop: -8, marginBottom: 8 }}>
+            {cnfClubHint.flag} CNF: {cnfClubHint.league} · {cnfClubHint.country}
           </p>
         )}
 
