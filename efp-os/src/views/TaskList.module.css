@@ -207,3 +207,92 @@
   border-radius: var(--radius-full);
   padding: 2px 8px;
 }
+
+/* ─── Add task bar ─── */
+.addTaskBtn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: var(--space-3);
+  padding: 7px 14px;
+  background: none;
+  border: 1.5px dashed var(--border);
+  border-radius: var(--radius-md);
+  color: var(--text-muted);
+  font-size: var(--text-sm);
+  cursor: pointer;
+  transition: border-color 0.12s, color 0.12s;
+  width: 100%;
+}
+.addTaskBtn:hover {
+  border-color: var(--brand);
+  color: var(--brand);
+}
+
+.addBar {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin-bottom: var(--space-3);
+  padding: 8px 10px;
+  background: var(--surface-1);
+  border: 1px solid var(--brand);
+  border-radius: var(--radius-md);
+}
+
+.addInput {
+  flex: 1;
+  min-width: 0;
+  height: 32px;
+  padding: 0 10px;
+  background: var(--surface-0);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text-primary);
+  font-size: var(--text-sm);
+  outline: none;
+}
+.addInput:focus { border-color: var(--brand); }
+
+.addSel {
+  height: 32px;
+  padding: 0 8px;
+  background: var(--surface-0);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text-primary);
+  font-size: var(--text-sm);
+  cursor: pointer;
+  outline: none;
+  flex-shrink: 0;
+}
+.addSel:focus { border-color: var(--brand); }
+
+.addConfirmBtn {
+  height: 32px;
+  padding: 0 14px;
+  background: var(--brand);
+  color: #fff;
+  border: none;
+  border-radius: var(--radius-sm);
+  font-size: var(--text-sm);
+  font-weight: 600;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: opacity 0.12s;
+}
+.addConfirmBtn:hover { opacity: 0.88; }
+
+.addCancelBtn {
+  height: 32px;
+  padding: 0 12px;
+  background: none;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text-muted);
+  font-size: var(--text-sm);
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: border-color 0.12s, color 0.12s;
+}
+.addCancelBtn:hover { border-color: var(--text-secondary); color: var(--text-secondary); }

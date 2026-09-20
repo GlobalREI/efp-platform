@@ -29,7 +29,7 @@ import {
   type TmClub,
 } from '../data/tmApi'
 import { useNavigate } from 'react-router-dom'
-import { getSquadContext, type SquadContext } from '../data/squadData'
+import { getSquadContext, searchLocalPlayers, type SquadContext } from '../data/squadData'
 import styles from './TmScoutView.module.css'
 
 /* ── Constants ─────────────────────────────────────────────────────────── */
@@ -515,21 +515,33 @@ export function TmScoutView() {
 
   /* ── TM Search ── */
   const runSearch = useCallback(async () => {
-    if (!query.trim()) return
+    // Club tab still requires a name; player/loan can run on filters alone
+    if (tab === 'club' && !query.trim()) return
     setSearching(true); setTmError(null); setTmResults([]); setSearched(true)
     setOpenSaveId(null); setSelectedLinkId(''); setLinkSearch('')
     try {
       if (tab === 'club') {
         setTmResults(await searchTmClubs(query))
       } else {
-        setTmResults(await searchTmPlayers(query))
+        // Use embedded CNF dataset — no proxy required
+        const results = searchLocalPlayers({
+          name: query.trim() || undefined,
+          leagueNames: filterLeagues.length > 0 ? filterLeagues : undefined,
+          position: filterPos || undefined,
+          ageMin:  filterAgeMin  ? parseInt(filterAgeMin)   : undefined,
+          ageMax:  filterAgeMax  ? parseInt(filterAgeMax)   : undefined,
+          mvMin:   filterMvMin   ? parseFloat(filterMvMin)  : undefined,
+          mvMax:   filterMvMax   ? parseFloat(filterMvMax)  : undefined,
+          limit: tab === 'loan' ? 500 : 500,
+        })
+        setTmResults(results)
       }
     } catch (e) {
       setTmError(e instanceof Error ? e.message : 'Unknown error')
     } finally {
       setSearching(false)
     }
-  }, [query, tab])
+  }, [query, tab, filterLeagues, filterPos, filterAgeMin, filterAgeMax, filterMvMin, filterMvMax])
 
   const onKey = (e: React.KeyboardEvent) => { if (e.key === 'Enter') runSearch() }
 
@@ -750,13 +762,13 @@ export function TmScoutView() {
             onKeyDown={onKey}
             placeholder={
               tab === 'club' ? 'Search club name on Transfermarkt…'
-              : tab === 'player' ? 'Search player name on Transfermarkt…'
-              : 'Search loan player on Transfermarkt…'
+              : tab === 'player' ? 'Filter by name (optional)…'
+              : 'Filter loan player by name (optional)…'
             }
           />
-          <button className={styles.searchBtn} onClick={runSearch} disabled={searching || !query.trim()}>
+          <button className={styles.searchBtn} onClick={runSearch} disabled={searching || (tab === 'club' && !query.trim())}>
             {searching ? <Spinner white /> : <SearchIcon size={14} />}
-            {searching ? 'Searching…' : 'Search TM'}
+            {searching ? 'Searching…' : tab === 'club' ? 'Search TM' : 'Search'}
           </button>
         </div>
 

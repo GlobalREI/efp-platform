@@ -6,7 +6,7 @@
  * bucket: 'today' | 'week' | 'later' | 'someday'
  */
 import { useEffect, useState, useMemo } from 'react'
-import { ref, onValue, off, set } from 'firebase/database'
+import { ref, onValue, off, set, push } from 'firebase/database'
 import { db } from '../data/firebase'
 import { PageHeader } from '../components/PageHeader'
 import styles from './TaskList.module.css'
@@ -47,6 +47,12 @@ export function TaskList() {
   const [filter,      setFilter]      = useState('open')      // open | done | all
   const [activeBucket, setActiveBucket] = useState('today')
 
+  /* Add task form */
+  const [newText,   setNewText]   = useState('')
+  const [newPrio,   setNewPrio]   = useState<'h' | 'm' | 'l'>('m')
+  const [newBucket, setNewBucket] = useState<string>('today')
+  const [adding,    setAdding]    = useState(false)
+
   useEffect(() => {
     const r = ref(db, 'allTasks')
     const h = (snap: any) => {
@@ -67,6 +73,23 @@ export function TaskList() {
       t.id === task.id ? { ...t, done: !t.done } : t
     )
     setTasks(updated)
+    await set(ref(db, 'allTasks'), updated)
+  }
+
+  async function addTask() {
+    const text = newText.trim()
+    if (!text) return
+    const newTask: Task = {
+      id: Date.now(),
+      text,
+      prio: newPrio,
+      bucket: newBucket,
+      done: false,
+      createdAt: new Date().toISOString().split('T')[0],
+    }
+    const updated = [...tasks, newTask]
+    setTasks(updated)
+    setNewText('')
     await set(ref(db, 'allTasks'), updated)
   }
 
@@ -142,6 +165,38 @@ export function TaskList() {
           All
         </button>
       </div>
+
+      {/* ── Add task bar ── */}
+      {adding ? (
+        <div className={styles.addBar}>
+          <input
+            className={styles.addInput}
+            autoFocus
+            type="text"
+            placeholder="Task description…"
+            value={newText}
+            onChange={e => setNewText(e.target.value)}
+            onKeyDown={e => { if (e.key === 'Enter') { addTask(); setAdding(false) } if (e.key === 'Escape') { setAdding(false); setNewText('') } }}
+          />
+          <select className={styles.addSel} value={newPrio} onChange={e => setNewPrio(e.target.value as 'h' | 'm' | 'l')}>
+            <option value="h">High</option>
+            <option value="m">Medium</option>
+            <option value="l">Low</option>
+          </select>
+          <select className={styles.addSel} value={newBucket} onChange={e => setNewBucket(e.target.value)}>
+            <option value="today">Today</option>
+            <option value="week">This Week</option>
+            <option value="later">Later</option>
+            <option value="someday">Someday</option>
+          </select>
+          <button className={styles.addConfirmBtn} onClick={() => { addTask(); setAdding(false) }}>Add</button>
+          <button className={styles.addCancelBtn} onClick={() => { setAdding(false); setNewText('') }}>Cancel</button>
+        </div>
+      ) : (
+        <button className={styles.addTaskBtn} onClick={() => { setAdding(true); setNewBucket(activeBucket === 'all' ? 'today' : activeBucket) }}>
+          + Add Task
+        </button>
+      )}
 
       {/* Task list */}
       {rows.length === 0 ? (

@@ -266,3 +266,101 @@ export function getCnfClubSquad(clubName: string): Array<SquadPlayer & { pos: st
   if (!entry) return null
   return parsePlayers(entry.str)
 }
+
+/* ── Local player search (no proxy required) ─────────────────────────────
+   Returns TmPlayer-compatible objects from the embedded CNF dataset.
+   Supports filter-only search: all params are optional.
+   ─────────────────────────────────────────────────────────────────────── */
+export interface LocalPlayer {
+  id: string
+  name: string
+  position: string
+  age: string
+  nationality: string
+  club: string
+  marketValue: string
+  profileUrl: string
+  imageUrl: string
+  leagueName: string
+  leagueCode: string
+  country: string
+}
+
+export function searchLocalPlayers(opts: {
+  name?: string
+  leagueNames?: string[]
+  position?: string
+  ageMin?: number
+  ageMax?: number
+  mvMin?: number
+  mvMax?: number
+  limit?: number
+}): LocalPlayer[] {
+  const { name, leagueNames, position, ageMin, ageMax, mvMin, mvMax, limit = 500 } = opts
+  const nameQ  = name?.trim().toLowerCase() ?? ''
+  const posQ   = position?.trim().toLowerCase() ?? ''
+
+  // Build set of league codes from selected display names
+  let leagueCodes: Set<string> | null = null
+  if (leagueNames && leagueNames.length > 0) {
+    leagueCodes = new Set<string>()
+    for (const [code, info] of Object.entries(LEAGUE_INFO)) {
+      const infoName = info.name.toLowerCase()
+      if (leagueNames.some(ln => {
+        const l = ln.toLowerCase()
+        return infoName === l || infoName.includes(l) || l.includes(infoName)
+      })) {
+        leagueCodes.add(code)
+      }
+    }
+    // If no known league matched, return empty quickly
+    if (leagueCodes.size === 0) return []
+  }
+
+  const results: LocalPlayer[] = []
+
+  for (const [leagueCode, clubs] of Object.entries(RAW_LEAGUES)) {
+    if (leagueCodes && !leagueCodes.has(leagueCode)) continue
+    const meta = LEAGUE_INFO[leagueCode]
+    if (!meta) continue
+
+    for (const [clubName, playerStr] of Object.entries(clubs)) {
+      for (const p of parsePlayers(playerStr)) {
+        // Name filter (substring, optional)
+        if (nameQ && !p.name.toLowerCase().includes(nameQ)) continue
+        // Position filter (exact short-code match, optional)
+        if (posQ && p.pos.toLowerCase() !== posQ) continue
+        // Age filter
+        if (ageMin && (p.age === 0 || p.age < ageMin)) continue
+        if (ageMax && p.age > ageMax) continue
+        // Market value filter (mv is stored in millions)
+        if (mvMin && (p.mv === 0 || p.mv < mvMin)) continue
+        if (mvMax && p.mv > mvMax) continue
+
+        // Format market value as "€2.5M" / "€500K"
+        const mvStr = p.mv > 0
+          ? p.mv >= 1
+            ? `€${p.mv % 1 === 0 ? p.mv : p.mv.toFixed(1)}M`
+            : `€${Math.round(p.mv * 1000)}K`
+          : '—'
+
+        results.push({
+          id: `local|${leagueCode}|${clubName}|${p.name}`,
+          name: p.name,
+          position: p.pos,
+          age: p.age > 0 ? String(p.age) : '',
+          nationality: '',
+          club: clubName,
+          marketValue: mvStr,
+          profileUrl: '',
+          imageUrl: '',
+          leagueName: meta.name,
+          leagueCode,
+          country: meta.country,
+        })
+        if (results.length >= limit) return results
+      }
+    }
+  }
+  return results
+}
