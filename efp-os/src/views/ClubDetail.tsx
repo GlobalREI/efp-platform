@@ -1,13 +1,13 @@
 /**
- * ClubDetail — full club profile page
+ * ClubDetail — club profile hub
  *
- * Reads: /clubs/<id>     — club data (name, league, country, flag, status, windowNotes, linkedContacts)
- *        /mandates        — to find linked mandates (players at this club)
- *        /needs           — to find needs at this club
+ * Reads: /clubs/<id>   — club data
+ *        /mandates     — players EFP represents + players scouted for this club
+ *        /needs        — all buying/loan requirements for this club
  *
  * Layout: PageShell (hero · main col · sticky rail)
- *  Main:  Club Info · Notes by Window · Club Needs
- *  Rail:  Linked Contacts · Quick Stats
+ *  Main:  Club Info · Notes by Window · Requirements · Players We Represent · Scouted via TM Scout
+ *  Rail:  Contacts · Quick Stats
  */
 import { useEffect, useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
@@ -44,13 +44,30 @@ interface Club {
 }
 
 interface Mandate {
-  id: string; name: string; pos?: string; club?: string
-  statusText?: string; archived?: boolean; linked_club_key?: string
+  id: string
+  name: string
+  pos?: string
+  pos2?: string
+  club?: string
+  value?: string
+  contract?: string
+  type?: string
+  statusText?: string
+  archived?: boolean
+  linked_club_key?: string
 }
 
 interface Need {
-  id: string; club: string; positions?: string[]; pos?: string
-  budget?: string; status?: string
+  id: string
+  club: string
+  positions?: string[]
+  pos?: string
+  budget?: string
+  status?: string
+  dealType?: string
+  window?: string
+  urgency?: string
+  notes?: string
 }
 
 const WINDOWS = ['Summer 2025','Winter 2026','Summer 2026','Winter 2027','Summer 2027','General']
@@ -81,17 +98,14 @@ export function ClubDetail() {
     }
     onValue(cRef, cHandler)
 
-    // Load mandates at this club
     const mRef = ref(db, 'mandates')
     const mHandler = (snap: any) => {
       if (!snap.exists()) return setMandates([])
       const all: Mandate[] = Object.entries(snap.val()).map(([mid, v]: [string, any]) => ({ id: mid, ...v }))
-      // Will filter once club name is known
       setMandates(all)
     }
     onValue(mRef, mHandler)
 
-    // Load club needs
     const nRef = ref(db, 'needs')
     const nHandler = (snap: any) => {
       if (!snap.exists()) return setNeeds([])
@@ -134,19 +148,28 @@ export function ClubDetail() {
     )
   }
 
-  const linkedMandates = mandates.filter(m => (m.club?.toLowerCase() === club.name?.toLowerCase() || m.linked_club_key === id) && !m.archived)
-  const linkedNeeds    = needs.filter(n => n.club?.toLowerCase() === club.name?.toLowerCase())
-  const status = club.status || 'Not Started'
+  // Derived data
+  const clubNeeds = needs.filter(n => n.club?.toLowerCase() === club.name?.toLowerCase())
 
-  // Window notes: find windows that have content
+  // Players EFP represents at this club (selling mandates)
+  const representedPlayers = mandates.filter(
+    m => m.club?.toLowerCase() === club.name?.toLowerCase() && !m.archived
+  )
+
+  // Players scouted via TM Scout specifically for this club
+  const scoutedPlayers = mandates.filter(
+    m => m.linked_club_key === id && !m.archived
+  )
+
+  const status = club.status || 'Not Started'
   const winNotes = club.windowNotes || {}
   const windowsWithContent = WINDOWS.filter(w => winNotes[w]?.trim())
 
   const chips = [
     club.league              && `🏆 ${club.league}`,
     club.country             && `${club.flag || '🌍'} ${club.country}`,
-    linkedMandates.length    && `⚽ ${linkedMandates.length} mandate${linkedMandates.length !== 1 ? 's' : ''}`,
-    linkedNeeds.length       && `🎯 ${linkedNeeds.length} need${linkedNeeds.length !== 1 ? 's' : ''}`,
+    clubNeeds.length         && `🎯 ${clubNeeds.length} requirement${clubNeeds.length !== 1 ? 's' : ''}`,
+    representedPlayers.length && `⚽ ${representedPlayers.length} mandate${representedPlayers.length !== 1 ? 's' : ''}`,
   ].filter(Boolean) as string[]
 
   const badges = <StatusPill status={status} size="sm" />
@@ -163,7 +186,6 @@ export function ClubDetail() {
   /* ── Rail ── */
   const rail = (
     <>
-      {/* Linked Contacts */}
       <Card title="Contacts" titleIcon="👤">
         {!club.linkedContacts?.length
           ? <RailEmpty message="No contacts linked" />
@@ -178,14 +200,14 @@ export function ClubDetail() {
         }
       </Card>
 
-      {/* Quick Stats */}
       <Card title="Quick Info" titleIcon="ℹ️">
         {[
-            ['League',   club.league  || '—'],
-            ['Country',  club.country || '—'],
-            ['Status',   status],
-            ['Mandates', String(linkedMandates.length)],
-            ['Needs',    String(linkedNeeds.length)],
+            ['League',       club.league  || '—'],
+            ['Country',      club.country || '—'],
+            ['Status',       status],
+            ['Requirements', String(clubNeeds.length)],
+            ['Mandates',     String(representedPlayers.length)],
+            ['Scouted',      String(scoutedPlayers.length)],
           ].map(([label, val]) => (
             <div key={label} className={styles.infoRow}>
               <span className={styles.infoLabel}>{label}</span>
@@ -218,7 +240,7 @@ export function ClubDetail() {
         </FieldGrid>
       </Card>
 
-      {/* ── Window Notes ── */}
+      {/* ── Notes by Window ── */}
       {(windowsWithContent.length > 0 || club.notes) && (
         <Card title="Notes by Window" titleIcon="📝">
           <div className={styles.winTabs}>
@@ -241,52 +263,95 @@ export function ClubDetail() {
         </Card>
       )}
 
-      {/* ── Active Mandates at this Club ── */}
-      {linkedMandates.length > 0 && (
-        <Card title="Mandates" titleIcon="⚽">
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, padding: '14px 18px' }}>
-            {linkedMandates.map(m => (
-              <PlayerChip key={m.id} name={m.name} id={m.id} size="md" />
-            ))}
-          </div>
-        </Card>
-      )}
-
-      {/* ── Players Scouted for this Club (from TM Scout) ── */}
-      {linkedMandates.some(m => m.linked_club_key === id) && (
-        <Card title="Scouted via TM Scout" titleIcon="🔍">
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, padding: '14px 18px' }}>
-            {linkedMandates.filter(m => m.linked_club_key === id).map(m => (
-              <PlayerChip key={m.id} name={m.name} id={m.id} size="md" />
-            ))}
-          </div>
-        </Card>
-      )}
-
-      {/* ── Club Needs ── */}
-      {linkedNeeds.length > 0 && (
-        <Card title="Club Needs" titleIcon="🎯">
-          {linkedNeeds.map(n => {
-              const pos = Array.isArray(n.positions) ? n.positions.join(', ') : (n.pos || '—')
+      {/* ── Requirements (buying / loan needs) ── */}
+      <Card
+        title={`Requirements${clubNeeds.length ? ` (${clubNeeds.length})` : ''}`}
+        titleIcon="🎯"
+        headerRight={
+          <button className={styles.addBtn} onClick={() => nav('/needs/new')}>+ Add</button>
+        }
+      >
+        {clubNeeds.length === 0 ? (
+          <div className={styles.emptySection}>No requirements added yet.</div>
+        ) : (
+          <>
+            {/* Header row */}
+            <div className={styles.reqHeader}>
+              <span>Position</span>
+              <span>Deal Type</span>
+              <span>Budget</span>
+              <span>Window</span>
+              <span>Status</span>
+            </div>
+            {clubNeeds.map(n => {
+              const pos = Array.isArray(n.positions) ? n.positions.join(' / ') : (n.pos || '—')
               return (
                 <div
                   key={n.id}
-                  className={styles.needRow}
+                  className={styles.reqRow}
                   onClick={() => nav(`/needs/${n.id}`)}
                 >
-                  <span style={{ fontSize: 20 }}>🎯</span>
-                  <div className={styles.needPos}>
-                    {pos}
-                    {n.budget && <div className={styles.needBudget}>Budget: {n.budget}</div>}
-                  </div>
-                  {n.status && <StatusPill status={n.status} size="sm" />}
+                  <span className={styles.reqPos}>{pos}</span>
+                  <span className={styles.reqCell}>{n.dealType || '—'}</span>
+                  <span className={styles.reqCell}>{n.budget || '—'}</span>
+                  <span className={styles.reqCell}>{n.window || '—'}</span>
+                  <span className={styles.reqCell}>
+                    {n.status ? <StatusPill status={n.status} size="sm" /> : '—'}
+                  </span>
                 </div>
               )
             })}
+          </>
+        )}
+      </Card>
+
+      {/* ── Players We Represent at this Club ── */}
+      <Card
+        title={`Players We Represent${representedPlayers.length ? ` (${representedPlayers.length})` : ''}`}
+        titleIcon="⚽"
+      >
+        {representedPlayers.length === 0 ? (
+          <div className={styles.emptySection}>No mandates at this club.</div>
+        ) : (
+          representedPlayers.map(m => {
+            const pos = [m.pos, m.pos2].filter(Boolean).join(' / ')
+            return (
+              <div
+                key={m.id}
+                className={styles.mandateRow}
+                onClick={() => nav(`/mandates/${m.id}`)}
+              >
+                <div className={styles.mandateAvatar}>
+                  {m.name.split(' ').map((w: string) => w[0]).join('').slice(0, 2).toUpperCase()}
+                </div>
+                <div className={styles.mandateInfo}>
+                  <span className={styles.mandateName}>{m.name}</span>
+                  {pos && <span className={styles.mandateMeta}>{pos}</span>}
+                </div>
+                <div className={styles.mandateTags}>
+                  {m.type && <span className={styles.typeTag}>{m.type}</span>}
+                  {m.value && <span className={styles.valueTag}>{m.value}</span>}
+                  {m.contract && <span className={styles.contractTag}>Exp: {m.contract}</span>}
+                </div>
+                {m.statusText && <StatusPill status={m.statusText} size="sm" />}
+              </div>
+            )
+          })
+        )}
+      </Card>
+
+      {/* ── Scouted Players (from TM Scout) ── */}
+      {scoutedPlayers.length > 0 && (
+        <Card title={`Scouted via TM Scout (${scoutedPlayers.length})`} titleIcon="🔍">
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, padding: '14px 18px' }}>
+            {scoutedPlayers.map(m => (
+              <PlayerChip key={m.id} name={m.name} id={m.id} size="md" />
+            ))}
+          </div>
         </Card>
       )}
 
-      {/* ── Transfermarkt Data (saved from TM Scout) ── */}
+      {/* ── Transfermarkt Data ── */}
       {club.tm_id && (
         <Card title="Transfermarkt Data" titleIcon="🌐">
           <FieldGrid>

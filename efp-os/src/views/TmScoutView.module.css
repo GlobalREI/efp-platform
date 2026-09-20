@@ -697,3 +697,30 @@
 .savePanelConfirm:hover {
   opacity: .88;
 }
+
+/* ── Demo section ── */
+.demoWrap {
+  margin: 0 0 2px 0;
+}
+.demoBanner {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  background: var(--amber-dim, #FFFBEB);
+  border-left: 3px solid var(--amber, #F59E0B);
+  font-size: 12px;
+  color: var(--fg-muted);
+}
+.demoBadge {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 7px;
+  border-radius: 4px;
+  background: var(--amber, #F59E0B);
+  color: #fff;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  flex-shrink: 0;
+}

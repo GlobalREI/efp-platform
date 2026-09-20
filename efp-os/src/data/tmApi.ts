@@ -84,6 +84,18 @@ export function parseTmValue(val: string): number | null {
   return n > 100 ? n / 1_000_000 : n
 }
 
+/** Fetch agent / agency name for a player by TM ID (uses the per-player detail endpoint) */
+export async function fetchTmPlayerAgent(id: string): Promise<string> {
+  try {
+    const res = await fetch(`${BASE}/player/${id}`)
+    if (!res.ok) return ''
+    const data = await res.json()
+    return (data.player?.current_agent as string) || ''
+  } catch {
+    return ''
+  }
+}
+
 /** Format millions as "€4.5M" */
 export function formatTmValue(millions: number | null): string {
   if (millions === null) return '—'
