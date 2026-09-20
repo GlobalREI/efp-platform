@@ -24,10 +24,12 @@ import {
   searchTmClubs,
   filterTmPlayers,
   parseTmValue,
+  fetchTmPlayerAgent,
   type TmPlayer,
   type TmClub,
 } from '../data/tmApi'
 import { useNavigate } from 'react-router-dom'
+import { getSquadContext, type SquadContext } from '../data/squadData'
 import styles from './TmScoutView.module.css'
 
 /* ── Constants ─────────────────────────────────────────────────────────── */
@@ -264,6 +266,77 @@ function RangeFilter({ label, min, max, onMin, onMax, placeholder = ['Min', 'Max
   )
 }
 
+/* ── Squad Depth display ────────────────────────────────────────────────── */
+function fmv(m: number): string {
+  if (m <= 0) return '—'
+  return m >= 1 ? `€${m % 1 === 0 ? m : m.toFixed(1)}M` : `€${Math.round(m * 1000)}K`
+}
+
+function SquadDepthContent({ ctx, playerMv, colSpan }: {
+  ctx: SquadContext
+  playerMv?: number | null
+  colSpan: number
+}) {
+  const ratio = playerMv && ctx.posAvgMv > 0 ? playerMv / ctx.posAvgMv : null
+  return (
+    <tr>
+      <td colSpan={colSpan} style={{ padding: 0, background: 'var(--surface-2)', borderBottom: '1px solid var(--border)' }}>
+        <div style={{ padding: '10px 16px', display: 'flex', flexDirection: 'column', gap: 6 }}>
+          {/* Header */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+            <span style={{ fontSize: 12, fontWeight: 700, color: 'var(--text)' }}>
+              {ctx.depth}× at {ctx.matchedClub}
+            </span>
+            <span style={{ fontSize: 11, color: 'var(--text-3)' }}>
+              pos avg {fmv(ctx.posAvgMv)} · squad avg {fmv(ctx.squadAvgMv)}
+            </span>
+            {ratio !== null && (
+              <span style={{ fontSize: 11, color: 'var(--text-3)' }}>
+                · this player {fmv(playerMv!)} ({Math.round(ratio * 100)}% of pos avg)
+              </span>
+            )}
+            {ctx.sellSignal && (
+              <span style={{
+                fontSize: 10, fontWeight: 700, color: '#ef4444',
+                background: 'rgba(239,68,68,0.1)', borderRadius: 4, padding: '1px 6px',
+              }}>🔴 Sell signal</span>
+            )}
+            {ctx.buySignal && (
+              <span style={{
+                fontSize: 10, fontWeight: 700, color: '#22c55e',
+                background: 'rgba(34,197,94,0.1)', borderRadius: 4, padding: '1px 6px',
+              }}>🟢 Buy signal</span>
+            )}
+            {ctx.depth === 0 && (
+              <span style={{ fontSize: 11, color: 'var(--text-3)' }}>No CNF data at this position</span>
+            )}
+          </div>
+          {/* Player chips */}
+          {ctx.posPlayers.length > 0 && (
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4 }}>
+              {ctx.posPlayers.map((p, idx) => (
+                <span key={idx} style={{
+                  display: 'inline-flex', alignItems: 'center', gap: 4,
+                  padding: '2px 8px', borderRadius: 12,
+                  background: 'var(--surface)', border: '1px solid var(--border)',
+                  fontSize: 11, color: 'var(--text-2)',
+                }}>
+                  <span style={{ fontWeight: 600, color: 'var(--text)' }}>{p.name}</span>
+                  <span style={{ color: 'var(--accent)', fontWeight: 700 }}>{fmv(p.mv)}</span>
+                  <span style={{ color: 'var(--text-3)' }}>{p.age}y</span>
+                  {p.joined >= 2025 && (
+                    <span title="Recent signing" style={{ color: 'var(--amber, #f59e0b)', fontSize: 9 }}>★new</span>
+                  )}
+                </span>
+              ))}
+            </div>
+          )}
+        </div>
+      </td>
+    </tr>
+  )
+}
+
 /* ── Save Panel ─────────────────────────────────────────────────────────── */
 interface SavePanelItem { id: string; name: string; sub?: string }
 
@@ -368,6 +441,28 @@ export function TmScoutView() {
   const [selectedLinkId, setSelectedLinkId] = useState<string>('')
   const [linkSearch,    setLinkSearch]    = useState<string>('')
 
+  /* Agent enrichment — lazy-loaded per player after search */
+  const [agentMap,     setAgentMap]     = useState<Record<string, string>>({})
+  const [agentLoading, setAgentLoading] = useState(false)
+  const [filterAgent,  setFilterAgent]  = useState('')
+  const [expandedSquad, setExpandedSquad] = useState<Record<string, boolean>>({})
+
+  /* ── Lazy-load agent names after player/loan search ── */
+  useEffect(() => {
+    if (tab === 'club' || tmResults.length === 0) return
+    setAgentMap({})
+    setAgentLoading(true)
+    const players = tmResults as TmPlayer[]
+    let cancelled = false
+    Promise.all(
+      players.map(async p => {
+        const agent = await fetchTmPlayerAgent(p.id)
+        if (!cancelled) setAgentMap(prev => ({ ...prev, [p.id]: agent }))
+      })
+    ).finally(() => { if (!cancelled) setAgentLoading(false) })
+    return () => { cancelled = true }
+  }, [tmResults, tab])
+
   /* ── Load Firebase ── */
   const loadFirebase = useCallback(async () => {
     try {
@@ -414,6 +509,7 @@ export function TmScoutView() {
     setFilterLeagues([]); setFilterPos('')
     setFilterAgeMin(''); setFilterAgeMax(''); setFilterMvMin(''); setFilterMvMax('')
     setOpenSaveId(null); setSelectedLinkId(''); setLinkSearch('')
+    setAgentMap({}); setFilterAgent(''); setExpandedSquad({})
     if (tab === 'loan') setTimeout(() => setFilterAgeMax('24'), 0)
   }, [tab])
 
@@ -468,6 +564,11 @@ export function TmScoutView() {
       mvMin:    filterMvMin  ? parseFloat(filterMvMin) : undefined,
       mvMax:    filterMvMax  ? parseFloat(filterMvMax) : undefined,
     })
+
+    if (filterAgent.trim()) {
+      const fa = filterAgent.toLowerCase()
+      players = players.filter(p => (agentMap[p.id] || '').toLowerCase().includes(fa))
+    }
 
     if (filterLeagues.length > 0) {
       players = players.filter(player => {
@@ -554,6 +655,46 @@ export function TmScoutView() {
     }
   }
 
+  /* ── Demo rows (always visible — no proxy needed) ── */
+  const DEMO_CLUB: TmClub = {
+    id: '__demo_club__',
+    name: 'FC Example United',
+    league: 'Bundesliga',
+    country: 'Germany',
+    logoUrl: '',
+    squadSize: '26',
+    avgAge: '25.2',
+    marketValue: '€180m',
+    profileUrl: '',
+  }
+  const DEMO_PLAYER: TmPlayer = {
+    id: '__demo_player__',
+    name: 'Demo Player (ST)',
+    position: 'ST',
+    age: '24',
+    nationality: 'German',
+    club: 'FC Example United',
+    marketValue: '€8m',
+    imageUrl: '',
+    profileUrl: '',
+  }
+  const DEMO_LOAN: TmPlayer = {
+    id: '__demo_loan__',
+    name: 'Demo Loan Player (LW)',
+    position: 'LW',
+    age: '21',
+    nationality: 'Spanish',
+    club: 'Example FC B',
+    marketValue: '€3m',
+    imageUrl: '',
+    profileUrl: '',
+  }
+
+  /* ── Squad depth toggle ── */
+  function toggleSquad(id: string) {
+    setExpandedSquad(prev => ({ ...prev, [id]: !prev[id] }))
+  }
+
   /* ── Link options ── */
   const mandateOptions: SavePanelItem[] = mandates
     .filter(m => !m.archived && m.name)
@@ -638,6 +779,16 @@ export function TmScoutView() {
               <FilterSelect label="Position" value={filterPos} onChange={setFilterPos} options={POSITIONS} placeholder="All positions" />
               <RangeFilter label="Age" min={filterAgeMin} max={filterAgeMax} onMin={setFilterAgeMin} onMax={setFilterAgeMax} />
               <RangeFilter label="MV (€M)" min={filterMvMin} max={filterMvMax} onMin={setFilterMvMin} onMax={setFilterMvMax} />
+              <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                <span style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-2)', whiteSpace: 'nowrap' }}>Agency</span>
+                <input
+                  type="text"
+                  value={filterAgent}
+                  onChange={e => setFilterAgent(e.target.value)}
+                  placeholder="e.g. Stellar…"
+                  style={{ height: 30, padding: '0 8px', border: '1px solid var(--border)', borderRadius: 'var(--r-md)', background: 'var(--surface)', color: 'var(--text)', fontSize: 12, width: 120 }}
+                />
+              </div>
             </>
           )}
         </div>
@@ -712,6 +863,9 @@ export function TmScoutView() {
                 const saved   = savedMap[club.id]
                 const isOpen  = openSaveId === club.id
                 const isSaving = savingId === club.id
+                const squadKey = `club-${club.id}`
+                const squadOpen = expandedSquad[squadKey]
+                const clubCtx = filterPos ? getSquadContext(club.name, filterPos) : null
                 return (
                   <Fragment key={club.id || i}>
                     <tr className={`${styles.tr} ${isOpen ? styles.trOpen : ''}`}>
@@ -733,10 +887,25 @@ export function TmScoutView() {
                       <td className={`${styles.td} ${styles.tdNum}`}><ScoreBadge score={score} /></td>
                       <td className={styles.td}>
                         <div className={styles.rowActions}>
+                          {clubCtx && (
+                            <button
+                              onClick={() => toggleSquad(squadKey)}
+                              style={{
+                                fontSize: 11, fontWeight: 600, padding: '2px 7px', height: 26,
+                                borderRadius: 'var(--r-md)', cursor: 'pointer',
+                                background: squadOpen ? 'var(--accent-dim)' : 'var(--surface-2)',
+                                color: squadOpen ? 'var(--accent)' : 'var(--text-2)',
+                                border: '1px solid var(--border)',
+                              }}
+                              title={`${filterPos} depth at this club`}
+                            >
+                              {squadOpen ? '▲' : '▼'} {filterPos} ({clubCtx.depth})
+                            </button>
+                          )}
                           {club.profileUrl && (
                             <a href={club.profileUrl} target="_blank" rel="noopener noreferrer"
                               className={styles.tmLink} title="View on Transfermarkt">
-                              <ExternalLinkIcon size={13} />
+                              TM ↗
                             </a>
                           )}
                           {saved ? (
@@ -756,6 +925,9 @@ export function TmScoutView() {
                         </div>
                       </td>
                     </tr>
+                    {squadOpen && clubCtx && (
+                      <SquadDepthContent ctx={clubCtx} colSpan={7} />
+                    )}
                     {isOpen && (
                       <tr className={styles.savePanelRow}>
                         <td colSpan={7} className={styles.savePanelCell}>
@@ -799,6 +971,7 @@ export function TmScoutView() {
                 <th className={styles.th}>Current Club</th>
                 <th className={`${styles.th} ${styles.thNum}`}>Market Value</th>
                 <th className={`${styles.th} ${styles.thNum}`} title="Active club needs this player fits">Needs Match</th>
+                <th className={styles.th}>Agent / Agency</th>
                 <th className={styles.th}></th>
               </tr>
             </thead>
@@ -808,6 +981,11 @@ export function TmScoutView() {
                 const saved    = savedMap[player.id]
                 const isOpen   = openSaveId === player.id
                 const isSaving = savingId === player.id
+                const squadOpen = expandedSquad[player.id]
+                const playerMv = parseTmValue(player.marketValue)
+                const playerCtx = player.club && player.position
+                  ? getSquadContext(player.club, player.position, playerMv)
+                  : null
                 return (
                   <Fragment key={player.id || i}>
                     <tr className={`${styles.tr} ${isOpen ? styles.trOpen : ''}`}>
@@ -824,15 +1002,48 @@ export function TmScoutView() {
                       </td>
                       <td className={`${styles.td} ${styles.tdNum}`}><span className={styles.num}>{player.age || '—'}</span></td>
                       <td className={styles.td}><span className={styles.meta}>{player.nationality || '—'}</span></td>
-                      <td className={styles.td}><span className={styles.meta}>{player.club || '—'}</span></td>
+                      <td className={styles.td}>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                          <span className={styles.meta}>{player.club || '—'}</span>
+                          {playerCtx && (
+                            <span style={{ fontSize: 10, color: 'var(--text-3)' }}>
+                              {playerCtx.depth}× {player.position}
+                              {playerCtx.sellSignal ? ' 🔴' : playerCtx.buySignal ? ' 🟢' : ''}
+                            </span>
+                          )}
+                        </div>
+                      </td>
                       <td className={`${styles.td} ${styles.tdNum}`}><span className={styles.mv}>{player.marketValue || '—'}</span></td>
                       <td className={`${styles.td} ${styles.tdNum}`}><MatchBadge count={matches} /></td>
                       <td className={styles.td}>
+                        <span className={styles.meta} style={{ maxWidth: 130, display: 'block', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}
+                          title={agentMap[player.id] || ''}>
+                          {agentMap[player.id] === undefined
+                            ? (agentLoading ? '…' : '—')
+                            : agentMap[player.id] || '—'}
+                        </span>
+                      </td>
+                      <td className={styles.td}>
                         <div className={styles.rowActions}>
+                          {playerCtx && (
+                            <button
+                              onClick={() => toggleSquad(player.id)}
+                              style={{
+                                fontSize: 11, fontWeight: 600, padding: '2px 7px', height: 26,
+                                borderRadius: 'var(--r-md)', cursor: 'pointer',
+                                background: squadOpen ? 'var(--accent-dim)' : 'var(--surface-2)',
+                                color: squadOpen ? 'var(--accent)' : 'var(--text-2)',
+                                border: '1px solid var(--border)',
+                              }}
+                              title="Squad depth at current club"
+                            >
+                              {squadOpen ? '▲' : '▼'} Depth
+                            </button>
+                          )}
                           {player.profileUrl && (
                             <a href={player.profileUrl} target="_blank" rel="noopener noreferrer"
                               className={styles.tmLink} title="View on Transfermarkt">
-                              <ExternalLinkIcon size={13} />
+                              TM ↗
                             </a>
                           )}
                           {saved ? (
@@ -852,9 +1063,12 @@ export function TmScoutView() {
                         </div>
                       </td>
                     </tr>
+                    {squadOpen && playerCtx && (
+                      <SquadDepthContent ctx={playerCtx} playerMv={playerMv} colSpan={9} />
+                    )}
                     {isOpen && (
                       <tr className={styles.savePanelRow}>
-                        <td colSpan={8} className={styles.savePanelCell}>
+                        <td colSpan={9} className={styles.savePanelCell}>
                           <SavePanel
                             title={`Save "${player.name}" to CRM${tab === 'loan' ? ' (Loan)' : ''}`}
                             listLabel="Link to a club in CRM — which club needs this player?"
@@ -887,6 +1101,182 @@ export function TmScoutView() {
         </div>
       )}
 
+      {/* ── Demo section — always visible to test save panel ── */}
+      {tab === 'club' && (() => {
+        const club = DEMO_CLUB
+        const score = needScore(club, needs, filterPos)
+        const isOpen = openSaveId === club.id
+        const isSaving = savingId === club.id
+        return (
+          <div className={styles.demoWrap}>
+            <div className={styles.demoBanner}>
+              <span className={styles.demoBadge}>DEMO</span>
+              Example row — click <strong>+ Save</strong> to try the save panel (no proxy needed)
+            </div>
+            <div className={styles.tableWrap}>
+              <table className={styles.table}>
+                <thead>
+                  <tr>
+                    <th className={styles.th}>Club</th>
+                    <th className={styles.th}>League / Country</th>
+                    <th className={`${styles.th} ${styles.thNum}`}>Squad</th>
+                    <th className={`${styles.th} ${styles.thNum}`}>Avg Age</th>
+                    <th className={`${styles.th} ${styles.thNum}`}>Market Value</th>
+                    <th className={`${styles.th} ${styles.thNum}`}>Need Score</th>
+                    <th className={styles.th}></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <Fragment key={club.id}>
+                    <tr className={`${styles.tr} ${isOpen ? styles.trOpen : ''}`}>
+                      <td className={styles.td}>
+                        <div className={styles.entityCell}>
+                          <Avatar imageUrl="" name={club.name} size={24} />
+                          <span className={styles.entityName}>{club.name}</span>
+                        </div>
+                      </td>
+                      <td className={styles.td}>
+                        <div className={styles.metaStack}>
+                          <span className={styles.meta}>{club.league}</span>
+                          <span className={styles.metaSub}>{club.country}</span>
+                        </div>
+                      </td>
+                      <td className={`${styles.td} ${styles.tdNum}`}><span className={styles.num}>{club.squadSize}</span></td>
+                      <td className={`${styles.td} ${styles.tdNum}`}><span className={styles.num}>{club.avgAge}</span></td>
+                      <td className={`${styles.td} ${styles.tdNum}`}><span className={styles.mv}>{club.marketValue}</span></td>
+                      <td className={`${styles.td} ${styles.tdNum}`}><ScoreBadge score={score} /></td>
+                      <td className={styles.td}>
+                        <div className={styles.rowActions}>
+                          <button
+                            className={`${styles.saveBtn} ${isOpen ? styles.saveBtnOpen : ''}`}
+                            onClick={() => openPanel(club.id)}
+                            disabled={!!isSaving}
+                          >
+                            {isSaving ? <Spinner /> : null}
+                            {isSaving ? 'Saving…' : isOpen ? '▲ Close' : '+ Save'}
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                    {isOpen && (
+                      <tr className={styles.savePanelRow}>
+                        <td colSpan={7} className={styles.savePanelCell}>
+                          <SavePanel
+                            title={`Save "${club.name}" to CRM`}
+                            listLabel="Link to a player mandate — which player are you scouting this club for?"
+                            items={mandateOptions}
+                            onSelect={setSelectedLinkId}
+                            selectedId={selectedLinkId}
+                            linkSearch={linkSearch}
+                            onSearchChange={setLinkSearch}
+                            onCancel={closePanel}
+                            saving={!!isSaving}
+                            onConfirm={() => {
+                              const linked = mandates.find(m => m.id === selectedLinkId)
+                              saveClub(club, linked?.id, linked?.name)
+                              closePanel()
+                            }}
+                          />
+                        </td>
+                      </tr>
+                    )}
+                  </Fragment>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )
+      })()}
+
+      {(tab === 'player' || tab === 'loan') && (() => {
+        const player = tab === 'loan' ? DEMO_LOAN : DEMO_PLAYER
+        const matches = mandateMatchCount(player, needs)
+        const isOpen = openSaveId === player.id
+        const isSaving = savingId === player.id
+        return (
+          <div className={styles.demoWrap}>
+            <div className={styles.demoBanner}>
+              <span className={styles.demoBadge}>DEMO</span>
+              Example row — click <strong>+ Save</strong> to try the save panel (no proxy needed)
+            </div>
+            <div className={styles.tableWrap}>
+              <table className={styles.table}>
+                <thead>
+                  <tr>
+                    <th className={styles.th}>Player</th>
+                    <th className={styles.th}>Position</th>
+                    <th className={`${styles.th} ${styles.thNum}`}>Age</th>
+                    <th className={styles.th}>Nationality</th>
+                    <th className={styles.th}>Current Club</th>
+                    <th className={`${styles.th} ${styles.thNum}`}>Market Value</th>
+                    <th className={`${styles.th} ${styles.thNum}`}>Needs Match</th>
+                    <th className={styles.th}>Agent / Agency</th>
+                    <th className={styles.th}></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <Fragment key={player.id}>
+                    <tr className={`${styles.tr} ${isOpen ? styles.trOpen : ''}`}>
+                      <td className={styles.td}>
+                        <div className={styles.entityCell}>
+                          <Avatar imageUrl="" name={player.name} size={28} round />
+                          <span className={styles.entityName}>{player.name}</span>
+                        </div>
+                      </td>
+                      <td className={styles.td}>
+                        <span className={styles.posBadge}>{player.position}</span>
+                      </td>
+                      <td className={`${styles.td} ${styles.tdNum}`}><span className={styles.num}>{player.age}</span></td>
+                      <td className={styles.td}><span className={styles.meta}>{player.nationality}</span></td>
+                      <td className={styles.td}><span className={styles.meta}>{player.club}</span></td>
+                      <td className={`${styles.td} ${styles.tdNum}`}><span className={styles.mv}>{player.marketValue}</span></td>
+                      <td className={`${styles.td} ${styles.tdNum}`}><MatchBadge count={matches} /></td>
+                      <td className={styles.td}>
+                        <span className={styles.meta}>—</span>
+                      </td>
+                      <td className={styles.td}>
+                        <div className={styles.rowActions}>
+                          <button
+                            className={`${styles.saveBtn} ${isOpen ? styles.saveBtnOpen : ''}`}
+                            onClick={() => openPanel(player.id)}
+                            disabled={!!isSaving}
+                          >
+                            {isSaving ? <Spinner /> : null}
+                            {isSaving ? 'Saving…' : isOpen ? '▲ Close' : '+ Save'}
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                    {isOpen && (
+                      <tr className={styles.savePanelRow}>
+                        <td colSpan={9} className={styles.savePanelCell}>
+                          <SavePanel
+                            title={`Save "${player.name}" to CRM${tab === 'loan' ? ' (Loan)' : ''}`}
+                            listLabel="Link to a club in CRM — which club needs this player?"
+                            items={clubOptions}
+                            onSelect={setSelectedLinkId}
+                            selectedId={selectedLinkId}
+                            linkSearch={linkSearch}
+                            onSearchChange={setLinkSearch}
+                            onCancel={closePanel}
+                            saving={!!isSaving}
+                            onConfirm={() => {
+                              const linked = fbClubs.find(c => c.id === selectedLinkId)
+                              savePlayer(player, linked?.id, linked?.name)
+                              closePanel()
+                            }}
+                          />
+                        </td>
+                      </tr>
+                    )}
+                  </Fragment>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )
+      })()}
+
       {/* ── Pre-search prompt ── */}
       {!tmError && !searched && !searching && (
         <div className={styles.promptCard}>
@@ -914,13 +1304,6 @@ function SearchIcon({ size = 14 }: { size?: number }) {
   return (
     <svg width={size} height={size} viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round">
       <circle cx="7" cy="7" r="4.5"/><line x1="10.5" y1="10.5" x2="14" y2="14"/>
-    </svg>
-  )
-}
-function ExternalLinkIcon({ size = 13 }: { size?: number }) {
-  return (
-    <svg width={size} height={size} viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={1.6} strokeLinecap="round" strokeLinejoin="round">
-      <path d="M7 3H3a1 1 0 0 0-1 1v9a1 1 0 0 0 1 1h9a1 1 0 0 0 1-1V9"/><path d="M10 2h4v4"/><line x1="14" y1="2" x2="7" y2="9"/>
     </svg>
   )
 }
