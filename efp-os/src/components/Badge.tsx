@@ -13,9 +13,9 @@ interface PriorityBadgeProps {
 }
 
 const PRIO_LABELS: Record<string, string> = {
-  P1: '🔴 P1 Focus',
-  P2: '🟡 P2 Active',
-  P3: '⚪ P3 Watch',
+  P1: 'P1',
+  P2: 'P2',
+  P3: 'P3',
 }
 
 export function PriorityBadge({ priority, size = 'md' }: PriorityBadgeProps) {

@@ -148,3 +148,12 @@ export function IconTmScout({ size = 15, className }: IconProps) {
     </svg>
   )
 }
+
+export function IconWatchlist({ size = 15, className }: IconProps) {
+  return (
+    <svg {...d(size)} className={className}>
+      <path d="M1 8s2.5-5 7-5 7 5 7 5-2.5 5-7 5-7-5-7-5z"/>
+      <circle cx="8" cy="8" r="2"/>
+    </svg>
+  )
+}

@@ -1,0 +1,2298 @@
+[
+  {
+    "name": "Bayern Munich",
+    "league": "Bundesliga",
+    "country": "Germany",
+    "flag": "\ud83c\udde9\ud83c\uddea",
+    "status": "Not Started"
+  },
+  {
+    "name": "Borussia Dortmund",
+    "league": "Bundesliga",
+    "country": "Germany",
+    "flag": "\ud83c\udde9\ud83c\uddea",
+    "status": "Not Started"
+  },
+  {
+    "name": "RB Leipzig",
+    "league": "Bundesliga",
+    "country": "Germany",
+    "flag": "\ud83c\udde9\ud83c\uddea",
+    "status": "Not Started"
+  },
+  {
+    "name": "Bayer 04 Leverkusen",
+    "league": "Bundesliga",
+    "country": "Germany",
+    "flag": "\ud83c\udde9\ud83c\uddea",
+    "status": "Not Started"
+  },
+  {
+    "name": "VfB Stuttgart",
+    "league": "Bundesliga",
+    "country": "Germany",
+    "flag": "\ud83c\udde9\ud83c\uddea",
+    "status": "Not Started"
+  },
+  {
+    "name": "Eintracht Frankfurt",
+    "league": "Bundesliga",
+    "country": "Germany",
+    "flag": "\ud83c\udde9\ud83c\uddea",
+    "status": "Not Started"
+  },
+  {
+    "name": "TSG 1899 Hoffenheim",
+    "league": "Bundesliga",
+    "country": "Germany",
+    "flag": "\ud83c\udde9\ud83c\uddea",
+    "status": "Not Started"
+  },
+  {
+    "name": "SC Freiburg",
+    "league": "Bundesliga",
+    "country": "Germany",
+    "flag": "\ud83c\udde9\ud83c\uddea",
+    "status": "Not Started"
+  },
+  {
+    "name": "1.FSV Mainz 05",
+    "league": "Bundesliga",
+    "country": "Germany",
+    "flag": "\ud83c\udde9\ud83c\uddea",
+    "status": "Not Started"
+  },
+  {
+    "name": "FC Augsburg",
+    "league": "Bundesliga",
+    "country": "Germany",
+    "flag": "\ud83c\udde9\ud83c\uddea",
+    "status": "Not Started"
+  },
+  {
+    "name": "1.FC K\u00f6ln",
+    "league": "Bundesliga",
+    "country": "Germany",
+    "flag": "\ud83c\udde9\ud83c\uddea",
+    "status": "Not Started"
+  },
+  {
+    "name": "Borussia M\u00f6nchengladbach",
+    "league": "Bundesliga",
+    "country": "Germany",
+    "flag": "\ud83c\udde9\ud83c\uddea",
+    "status": "Not Started"
+  },
+  {
+    "name": "1.FC Union Berlin",
+    "league": "Bundesliga",
+    "country": "Germany",
+    "flag": "\ud83c\udde9\ud83c\uddea",
+    "status": "Not Started"
+  },
+  {
+    "name": "SV Werder Bremen",
+    "league": "Bundesliga",
+    "country": "Germany",
+    "flag": "\ud83c\udde9\ud83c\uddea",
+    "status": "Not Started"
+  },
+  {
+    "name": "Hamburger SV",
+    "league": "Bundesliga",
+    "country": "Germany",
+    "flag": "\ud83c\udde9\ud83c\uddea",
+    "status": "Not Started"
+  },
+  {
+    "name": "FC Schalke 04",
+    "league": "Bundesliga",
+    "country": "Germany",
+    "flag": "\ud83c\udde9\ud83c\uddea",
+    "status": "Not Started"
+  },
+  {
+    "name": "SV 07 Elversberg",
+    "league": "Bundesliga",
+    "country": "Germany",
+    "flag": "\ud83c\udde9\ud83c\uddea",
+    "status": "Not Started"
+  },
+  {
+    "name": "SC Paderborn 07",
+    "league": "Bundesliga",
+    "country": "Germany",
+    "flag": "\ud83c\udde9\ud83c\uddea",
+    "status": "Not Started"
+  },
+  {
+    "name": "VfL Wolfsburg",
+    "league": "2. Bundesliga",
+    "country": "Germany",
+    "flag": "\ud83c\udde9\ud83c\uddea",
+    "status": "Not Started"
+  },
+  {
+    "name": "FC St. Pauli",
+    "league": "2. Bundesliga",
+    "country": "Germany",
+    "flag": "\ud83c\udde9\ud83c\uddea",
+    "status": "Not Started"
+  },
+  {
+    "name": "1.FC Nuremberg",
+    "league": "2. Bundesliga",
+    "country": "Germany",
+    "flag": "\ud83c\udde9\ud83c\uddea",
+    "status": "Not Started"
+  },
+  {
+    "name": "1.FC Kaiserslautern",
+    "league": "2. Bundesliga",
+    "country": "Germany",
+    "flag": "\ud83c\udde9\ud83c\uddea",
+    "status": "Not Started"
+  },
+  {
+    "name": "Holstein Kiel",
+    "league": "2. Bundesliga",
+    "country": "Germany",
+    "flag": "\ud83c\udde9\ud83c\uddea",
+    "status": "Not Started"
+  },
+  {
+    "name": "Hannover 96",
+    "league": "2. Bundesliga",
+    "country": "Germany",
+    "flag": "\ud83c\udde9\ud83c\uddea",
+    "status": "Not Started"
+  },
+  {
+    "name": "Karlsruher SC",
+    "league": "2. Bundesliga",
+    "country": "Germany",
+    "flag": "\ud83c\udde9\ud83c\uddea",
+    "status": "Not Started"
+  },
+  {
+    "name": "1.FC Heidenheim 1846",
+    "league": "2. Bundesliga",
+    "country": "Germany",
+    "flag": "\ud83c\udde9\ud83c\uddea",
+    "status": "Not Started"
+  },
+  {
+    "name": "1.FC Magdeburg",
+    "league": "2. Bundesliga",
+    "country": "Germany",
+    "flag": "\ud83c\udde9\ud83c\uddea",
+    "status": "Not Started"
+  },
+  {
+    "name": "Hertha BSC",
+    "league": "2. Bundesliga",
+    "country": "Germany",
+    "flag": "\ud83c\udde9\ud83c\uddea",
+    "status": "Not Started"
+  },
+  {
+    "name": "SV Darmstadt 98",
+    "league": "2. Bundesliga",
+    "country": "Germany",
+    "flag": "\ud83c\udde9\ud83c\uddea",
+    "status": "Not Started"
+  },
+  {
+    "name": "Eintracht Braunschweig",
+    "league": "2. Bundesliga",
+    "country": "Germany",
+    "flag": "\ud83c\udde9\ud83c\uddea",
+    "status": "Not Started"
+  },
+  {
+    "name": "SpVgg Greuther F\u00fcrth",
+    "league": "2. Bundesliga",
+    "country": "Germany",
+    "flag": "\ud83c\udde9\ud83c\uddea",
+    "status": "Not Started"
+  },
+  {
+    "name": "SG Dynamo Dresden",
+    "league": "2. Bundesliga",
+    "country": "Germany",
+    "flag": "\ud83c\udde9\ud83c\uddea",
+    "status": "Not Started"
+  },
+  {
+    "name": "VfL Bochum",
+    "league": "2. Bundesliga",
+    "country": "Germany",
+    "flag": "\ud83c\udde9\ud83c\uddea",
+    "status": "Not Started"
+  },
+  {
+    "name": "Arminia Bielefeld",
+    "league": "2. Bundesliga",
+    "country": "Germany",
+    "flag": "\ud83c\udde9\ud83c\uddea",
+    "status": "Not Started"
+  },
+  {
+    "name": "FC Energie Cottbus",
+    "league": "2. Bundesliga",
+    "country": "Germany",
+    "flag": "\ud83c\udde9\ud83c\uddea",
+    "status": "Not Started"
+  },
+  {
+    "name": "VfL Osnabr\u00fcck",
+    "league": "2. Bundesliga",
+    "country": "Germany",
+    "flag": "\ud83c\udde9\ud83c\uddea",
+    "status": "Not Started"
+  },
+  {
+    "name": "Arsenal FC",
+    "league": "Premier League",
+    "country": "England",
+    "flag": "\ud83c\udff4\udb40\udc67\udb40\udc62\udb40\udc65\udb40\udc6e\udb40\udc67\udb40\udc7f",
+    "status": "Not Started"
+  },
+  {
+    "name": "Manchester City",
+    "league": "Premier League",
+    "country": "England",
+    "flag": "\ud83c\udff4\udb40\udc67\udb40\udc62\udb40\udc65\udb40\udc6e\udb40\udc67\udb40\udc7f",
+    "status": "Not Started"
+  },
+  {
+    "name": "Chelsea FC",
+    "league": "Premier League",
+    "country": "England",
+    "flag": "\ud83c\udff4\udb40\udc67\udb40\udc62\udb40\udc65\udb40\udc6e\udb40\udc67\udb40\udc7f",
+    "status": "Not Started"
+  },
+  {
+    "name": "Liverpool FC",
+    "league": "Premier League",
+    "country": "England",
+    "flag": "\ud83c\udff4\udb40\udc67\udb40\udc62\udb40\udc65\udb40\udc6e\udb40\udc67\udb40\udc7f",
+    "status": "Not Started"
+  },
+  {
+    "name": "Manchester United",
+    "league": "Premier League",
+    "country": "England",
+    "flag": "\ud83c\udff4\udb40\udc67\udb40\udc62\udb40\udc65\udb40\udc6e\udb40\udc67\udb40\udc7f",
+    "status": "Not Started"
+  },
+  {
+    "name": "Tottenham Hotspur",
+    "league": "Premier League",
+    "country": "England",
+    "flag": "\ud83c\udff4\udb40\udc67\udb40\udc62\udb40\udc65\udb40\udc6e\udb40\udc67\udb40\udc7f",
+    "status": "Not Started"
+  },
+  {
+    "name": "Newcastle United",
+    "league": "Premier League",
+    "country": "England",
+    "flag": "\ud83c\udff4\udb40\udc67\udb40\udc62\udb40\udc65\udb40\udc6e\udb40\udc67\udb40\udc7f",
+    "status": "Not Started"
+  },
+  {
+    "name": "Brighton & Hove Albion",
+    "league": "Premier League",
+    "country": "England",
+    "flag": "\ud83c\udff4\udb40\udc67\udb40\udc62\udb40\udc65\udb40\udc6e\udb40\udc67\udb40\udc7f",
+    "status": "Not Started"
+  },
+  {
+    "name": "Brentford FC",
+    "league": "Premier League",
+    "country": "England",
+    "flag": "\ud83c\udff4\udb40\udc67\udb40\udc62\udb40\udc65\udb40\udc6e\udb40\udc67\udb40\udc7f",
+    "status": "Not Started"
+  },
+  {
+    "name": "Aston Villa",
+    "league": "Premier League",
+    "country": "England",
+    "flag": "\ud83c\udff4\udb40\udc67\udb40\udc62\udb40\udc65\udb40\udc6e\udb40\udc67\udb40\udc7f",
+    "status": "Not Started"
+  },
+  {
+    "name": "AFC Bournemouth",
+    "league": "Premier League",
+    "country": "England",
+    "flag": "\ud83c\udff4\udb40\udc67\udb40\udc62\udb40\udc65\udb40\udc6e\udb40\udc67\udb40\udc7f",
+    "status": "Not Started"
+  },
+  {
+    "name": "Crystal Palace",
+    "league": "Premier League",
+    "country": "England",
+    "flag": "\ud83c\udff4\udb40\udc67\udb40\udc62\udb40\udc65\udb40\udc6e\udb40\udc67\udb40\udc7f",
+    "status": "Not Started"
+  },
+  {
+    "name": "Nottingham Forest",
+    "league": "Premier League",
+    "country": "England",
+    "flag": "\ud83c\udff4\udb40\udc67\udb40\udc62\udb40\udc65\udb40\udc6e\udb40\udc67\udb40\udc7f",
+    "status": "Not Started"
+  },
+  {
+    "name": "Everton FC",
+    "league": "Premier League",
+    "country": "England",
+    "flag": "\ud83c\udff4\udb40\udc67\udb40\udc62\udb40\udc65\udb40\udc6e\udb40\udc67\udb40\udc7f",
+    "status": "Not Started"
+  },
+  {
+    "name": "Leeds United",
+    "league": "Premier League",
+    "country": "England",
+    "flag": "\ud83c\udff4\udb40\udc67\udb40\udc62\udb40\udc65\udb40\udc6e\udb40\udc67\udb40\udc7f",
+    "status": "Not Started"
+  },
+  {
+    "name": "Sunderland AFC",
+    "league": "Premier League",
+    "country": "England",
+    "flag": "\ud83c\udff4\udb40\udc67\udb40\udc62\udb40\udc65\udb40\udc6e\udb40\udc67\udb40\udc7f",
+    "status": "Not Started"
+  },
+  {
+    "name": "Fulham FC",
+    "league": "Premier League",
+    "country": "England",
+    "flag": "\ud83c\udff4\udb40\udc67\udb40\udc62\udb40\udc65\udb40\udc6e\udb40\udc67\udb40\udc7f",
+    "status": "Not Started"
+  },
+  {
+    "name": "Ipswich Town",
+    "league": "Premier League",
+    "country": "England",
+    "flag": "\ud83c\udff4\udb40\udc67\udb40\udc62\udb40\udc65\udb40\udc6e\udb40\udc67\udb40\udc7f",
+    "status": "Not Started"
+  },
+  {
+    "name": "Coventry City",
+    "league": "Premier League",
+    "country": "England",
+    "flag": "\ud83c\udff4\udb40\udc67\udb40\udc62\udb40\udc65\udb40\udc6e\udb40\udc67\udb40\udc7f",
+    "status": "Not Started"
+  },
+  {
+    "name": "Hull City",
+    "league": "Premier League",
+    "country": "England",
+    "flag": "\ud83c\udff4\udb40\udc67\udb40\udc62\udb40\udc65\udb40\udc6e\udb40\udc67\udb40\udc7f",
+    "status": "Not Started"
+  },
+  {
+    "name": "PSV Eindhoven",
+    "league": "Eredivisie",
+    "country": "Netherlands",
+    "flag": "\ud83c\uddf3\ud83c\uddf1",
+    "status": "Not Started"
+  },
+  {
+    "name": "Feyenoord Rotterdam",
+    "league": "Eredivisie",
+    "country": "Netherlands",
+    "flag": "\ud83c\uddf3\ud83c\uddf1",
+    "status": "Not Started"
+  },
+  {
+    "name": "Ajax Amsterdam",
+    "league": "Eredivisie",
+    "country": "Netherlands",
+    "flag": "\ud83c\uddf3\ud83c\uddf1",
+    "status": "Not Started"
+  },
+  {
+    "name": "AZ Alkmaar",
+    "league": "Eredivisie",
+    "country": "Netherlands",
+    "flag": "\ud83c\uddf3\ud83c\uddf1",
+    "status": "Not Started"
+  },
+  {
+    "name": "FC Twente Enschede",
+    "league": "Eredivisie",
+    "country": "Netherlands",
+    "flag": "\ud83c\uddf3\ud83c\uddf1",
+    "status": "Not Started"
+  },
+  {
+    "name": "FC Utrecht",
+    "league": "Eredivisie",
+    "country": "Netherlands",
+    "flag": "\ud83c\uddf3\ud83c\uddf1",
+    "status": "Not Started"
+  },
+  {
+    "name": "SC Heerenveen",
+    "league": "Eredivisie",
+    "country": "Netherlands",
+    "flag": "\ud83c\uddf3\ud83c\uddf1",
+    "status": "Not Started"
+  },
+  {
+    "name": "NEC Nijmegen",
+    "league": "Eredivisie",
+    "country": "Netherlands",
+    "flag": "\ud83c\uddf3\ud83c\uddf1",
+    "status": "Not Started"
+  },
+  {
+    "name": "FC Groningen",
+    "league": "Eredivisie",
+    "country": "Netherlands",
+    "flag": "\ud83c\uddf3\ud83c\uddf1",
+    "status": "Not Started"
+  },
+  {
+    "name": "Sparta Rotterdam",
+    "league": "Eredivisie",
+    "country": "Netherlands",
+    "flag": "\ud83c\uddf3\ud83c\uddf1",
+    "status": "Not Started"
+  },
+  {
+    "name": "PEC Zwolle",
+    "league": "Eredivisie",
+    "country": "Netherlands",
+    "flag": "\ud83c\uddf3\ud83c\uddf1",
+    "status": "Not Started"
+  },
+  {
+    "name": "Go Ahead Eagles",
+    "league": "Eredivisie",
+    "country": "Netherlands",
+    "flag": "\ud83c\uddf3\ud83c\uddf1",
+    "status": "Not Started"
+  },
+  {
+    "name": "Excelsior Rotterdam",
+    "league": "Eredivisie",
+    "country": "Netherlands",
+    "flag": "\ud83c\uddf3\ud83c\uddf1",
+    "status": "Not Started"
+  },
+  {
+    "name": "ADO Den Haag",
+    "league": "Eredivisie",
+    "country": "Netherlands",
+    "flag": "\ud83c\uddf3\ud83c\uddf1",
+    "status": "Not Started"
+  },
+  {
+    "name": "Fortuna Sittard",
+    "league": "Eredivisie",
+    "country": "Netherlands",
+    "flag": "\ud83c\uddf3\ud83c\uddf1",
+    "status": "Not Started"
+  },
+  {
+    "name": "Willem II Tilburg",
+    "league": "Eredivisie",
+    "country": "Netherlands",
+    "flag": "\ud83c\uddf3\ud83c\uddf1",
+    "status": "Not Started"
+  },
+  {
+    "name": "SC Cambuur Leeuwarden",
+    "league": "Eredivisie",
+    "country": "Netherlands",
+    "flag": "\ud83c\uddf3\ud83c\uddf1",
+    "status": "Not Started"
+  },
+  {
+    "name": "SC Telstar",
+    "league": "Eredivisie",
+    "country": "Netherlands",
+    "flag": "\ud83c\uddf3\ud83c\uddf1",
+    "status": "Not Started"
+  },
+  {
+    "name": "BSC Young Boys",
+    "league": "Swiss Super League",
+    "country": "Switzerland",
+    "flag": "\ud83c\udde8\ud83c\udded",
+    "status": "Not Started"
+  },
+  {
+    "name": "FC Basel 1893",
+    "league": "Swiss Super League",
+    "country": "Switzerland",
+    "flag": "\ud83c\udde8\ud83c\udded",
+    "status": "Not Started"
+  },
+  {
+    "name": "FC Lugano",
+    "league": "Swiss Super League",
+    "country": "Switzerland",
+    "flag": "\ud83c\udde8\ud83c\udded",
+    "status": "Not Started"
+  },
+  {
+    "name": "FC Lausanne-Sport",
+    "league": "Swiss Super League",
+    "country": "Switzerland",
+    "flag": "\ud83c\udde8\ud83c\udded",
+    "status": "Not Started"
+  },
+  {
+    "name": "FC St. Gallen 1879",
+    "league": "Swiss Super League",
+    "country": "Switzerland",
+    "flag": "\ud83c\udde8\ud83c\udded",
+    "status": "Not Started"
+  },
+  {
+    "name": "FC Sion",
+    "league": "Swiss Super League",
+    "country": "Switzerland",
+    "flag": "\ud83c\udde8\ud83c\udded",
+    "status": "Not Started"
+  },
+  {
+    "name": "FC Luzern",
+    "league": "Swiss Super League",
+    "country": "Switzerland",
+    "flag": "\ud83c\udde8\ud83c\udded",
+    "status": "Not Started"
+  },
+  {
+    "name": "Servette FC",
+    "league": "Swiss Super League",
+    "country": "Switzerland",
+    "flag": "\ud83c\udde8\ud83c\udded",
+    "status": "Not Started"
+  },
+  {
+    "name": "FC Thun",
+    "league": "Swiss Super League",
+    "country": "Switzerland",
+    "flag": "\ud83c\udde8\ud83c\udded",
+    "status": "Not Started"
+  },
+  {
+    "name": "Grasshopper Club Zurich",
+    "league": "Swiss Super League",
+    "country": "Switzerland",
+    "flag": "\ud83c\udde8\ud83c\udded",
+    "status": "Not Started"
+  },
+  {
+    "name": "FC Z\u00fcrich",
+    "league": "Swiss Super League",
+    "country": "Switzerland",
+    "flag": "\ud83c\udde8\ud83c\udded",
+    "status": "Not Started"
+  },
+  {
+    "name": "FC Vaduz",
+    "league": "Swiss Super League",
+    "country": "Switzerland",
+    "flag": "\ud83c\udde8\ud83c\udded",
+    "status": "Not Started"
+  },
+  {
+    "name": "Red Bull Salzburg",
+    "league": "Austrian Bundesliga",
+    "country": "Austria",
+    "flag": "\ud83c\udde6\ud83c\uddf9",
+    "status": "Not Started"
+  },
+  {
+    "name": "SK Sturm Graz",
+    "league": "Austrian Bundesliga",
+    "country": "Austria",
+    "flag": "\ud83c\udde6\ud83c\uddf9",
+    "status": "Not Started"
+  },
+  {
+    "name": "LASK",
+    "league": "Austrian Bundesliga",
+    "country": "Austria",
+    "flag": "\ud83c\udde6\ud83c\uddf9",
+    "status": "Not Started"
+  },
+  {
+    "name": "Rapid Vienna",
+    "league": "Austrian Bundesliga",
+    "country": "Austria",
+    "flag": "\ud83c\udde6\ud83c\uddf9",
+    "status": "Not Started"
+  },
+  {
+    "name": "Austria Vienna",
+    "league": "Austrian Bundesliga",
+    "country": "Austria",
+    "flag": "\ud83c\udde6\ud83c\uddf9",
+    "status": "Not Started"
+  },
+  {
+    "name": "Wolfsberger AC",
+    "league": "Austrian Bundesliga",
+    "country": "Austria",
+    "flag": "\ud83c\udde6\ud83c\uddf9",
+    "status": "Not Started"
+  },
+  {
+    "name": "TSV Hartberg",
+    "league": "Austrian Bundesliga",
+    "country": "Austria",
+    "flag": "\ud83c\udde6\ud83c\uddf9",
+    "status": "Not Started"
+  },
+  {
+    "name": "SCR Altach",
+    "league": "Austrian Bundesliga",
+    "country": "Austria",
+    "flag": "\ud83c\udde6\ud83c\uddf9",
+    "status": "Not Started"
+  },
+  {
+    "name": "Grazer AK 1902",
+    "league": "Austrian Bundesliga",
+    "country": "Austria",
+    "flag": "\ud83c\udde6\ud83c\uddf9",
+    "status": "Not Started"
+  },
+  {
+    "name": "WSG Tirol",
+    "league": "Austrian Bundesliga",
+    "country": "Austria",
+    "flag": "\ud83c\udde6\ud83c\uddf9",
+    "status": "Not Started"
+  },
+  {
+    "name": "SV Ried",
+    "league": "Austrian Bundesliga",
+    "country": "Austria",
+    "flag": "\ud83c\udde6\ud83c\uddf9",
+    "status": "Not Started"
+  },
+  {
+    "name": "SC Austria Lustenau",
+    "league": "Austrian Bundesliga",
+    "country": "Austria",
+    "flag": "\ud83c\udde6\ud83c\uddf9",
+    "status": "Not Started"
+  },
+  {
+    "name": "West Ham United",
+    "league": "Championship",
+    "country": "England",
+    "flag": "\ud83c\udff4\udb40\udc67\udb40\udc62\udb40\udc65\udb40\udc6e\udb40\udc67\udb40\udc7f",
+    "status": "Not Started"
+  },
+  {
+    "name": "Wolverhampton Wanderers",
+    "league": "Championship",
+    "country": "England",
+    "flag": "\ud83c\udff4\udb40\udc67\udb40\udc62\udb40\udc65\udb40\udc6e\udb40\udc67\udb40\udc7f",
+    "status": "Not Started"
+  },
+  {
+    "name": "Southampton FC",
+    "league": "Championship",
+    "country": "England",
+    "flag": "\ud83c\udff4\udb40\udc67\udb40\udc62\udb40\udc65\udb40\udc6e\udb40\udc67\udb40\udc7f",
+    "status": "Not Started"
+  },
+  {
+    "name": "Middlesbrough FC",
+    "league": "Championship",
+    "country": "England",
+    "flag": "\ud83c\udff4\udb40\udc67\udb40\udc62\udb40\udc65\udb40\udc6e\udb40\udc67\udb40\udc7f",
+    "status": "Not Started"
+  },
+  {
+    "name": "Burnley FC",
+    "league": "Championship",
+    "country": "England",
+    "flag": "\ud83c\udff4\udb40\udc67\udb40\udc62\udb40\udc65\udb40\udc6e\udb40\udc67\udb40\udc7f",
+    "status": "Not Started"
+  },
+  {
+    "name": "Norwich City",
+    "league": "Championship",
+    "country": "England",
+    "flag": "\ud83c\udff4\udb40\udc67\udb40\udc62\udb40\udc65\udb40\udc6e\udb40\udc67\udb40\udc7f",
+    "status": "Not Started"
+  },
+  {
+    "name": "Sheffield United",
+    "league": "Championship",
+    "country": "England",
+    "flag": "\ud83c\udff4\udb40\udc67\udb40\udc62\udb40\udc65\udb40\udc6e\udb40\udc67\udb40\udc7f",
+    "status": "Not Started"
+  },
+  {
+    "name": "Birmingham City",
+    "league": "Championship",
+    "country": "England",
+    "flag": "\ud83c\udff4\udb40\udc67\udb40\udc62\udb40\udc65\udb40\udc6e\udb40\udc67\udb40\udc7f",
+    "status": "Not Started"
+  },
+  {
+    "name": "Stoke City",
+    "league": "Championship",
+    "country": "England",
+    "flag": "\ud83c\udff4\udb40\udc67\udb40\udc62\udb40\udc65\udb40\udc6e\udb40\udc67\udb40\udc7f",
+    "status": "Not Started"
+  },
+  {
+    "name": "Swansea City",
+    "league": "Championship",
+    "country": "England",
+    "flag": "\ud83c\udff4\udb40\udc67\udb40\udc62\udb40\udc65\udb40\udc6e\udb40\udc67\udb40\udc7f",
+    "status": "Not Started"
+  },
+  {
+    "name": "Millwall FC",
+    "league": "Championship",
+    "country": "England",
+    "flag": "\ud83c\udff4\udb40\udc67\udb40\udc62\udb40\udc65\udb40\udc6e\udb40\udc67\udb40\udc7f",
+    "status": "Not Started"
+  },
+  {
+    "name": "Wrexham AFC",
+    "league": "Championship",
+    "country": "England",
+    "flag": "\ud83c\udff4\udb40\udc67\udb40\udc62\udb40\udc65\udb40\udc6e\udb40\udc67\udb40\udc7f",
+    "status": "Not Started"
+  },
+  {
+    "name": "Watford FC",
+    "league": "Championship",
+    "country": "England",
+    "flag": "\ud83c\udff4\udb40\udc67\udb40\udc62\udb40\udc65\udb40\udc6e\udb40\udc67\udb40\udc7f",
+    "status": "Not Started"
+  },
+  {
+    "name": "Queens Park Rangers",
+    "league": "Championship",
+    "country": "England",
+    "flag": "\ud83c\udff4\udb40\udc67\udb40\udc62\udb40\udc65\udb40\udc6e\udb40\udc67\udb40\udc7f",
+    "status": "Not Started"
+  },
+  {
+    "name": "Bristol City",
+    "league": "Championship",
+    "country": "England",
+    "flag": "\ud83c\udff4\udb40\udc67\udb40\udc62\udb40\udc65\udb40\udc6e\udb40\udc67\udb40\udc7f",
+    "status": "Not Started"
+  },
+  {
+    "name": "Derby County",
+    "league": "Championship",
+    "country": "England",
+    "flag": "\ud83c\udff4\udb40\udc67\udb40\udc62\udb40\udc65\udb40\udc6e\udb40\udc67\udb40\udc7f",
+    "status": "Not Started"
+  },
+  {
+    "name": "West Bromwich Albion",
+    "league": "Championship",
+    "country": "England",
+    "flag": "\ud83c\udff4\udb40\udc67\udb40\udc62\udb40\udc65\udb40\udc6e\udb40\udc67\udb40\udc7f",
+    "status": "Not Started"
+  },
+  {
+    "name": "Preston North End",
+    "league": "Championship",
+    "country": "England",
+    "flag": "\ud83c\udff4\udb40\udc67\udb40\udc62\udb40\udc65\udb40\udc6e\udb40\udc67\udb40\udc7f",
+    "status": "Not Started"
+  },
+  {
+    "name": "Charlton Athletic",
+    "league": "Championship",
+    "country": "England",
+    "flag": "\ud83c\udff4\udb40\udc67\udb40\udc62\udb40\udc65\udb40\udc6e\udb40\udc67\udb40\udc7f",
+    "status": "Not Started"
+  },
+  {
+    "name": "Blackburn Rovers",
+    "league": "Championship",
+    "country": "England",
+    "flag": "\ud83c\udff4\udb40\udc67\udb40\udc62\udb40\udc65\udb40\udc6e\udb40\udc67\udb40\udc7f",
+    "status": "Not Started"
+  },
+  {
+    "name": "Portsmouth FC",
+    "league": "Championship",
+    "country": "England",
+    "flag": "\ud83c\udff4\udb40\udc67\udb40\udc62\udb40\udc65\udb40\udc6e\udb40\udc67\udb40\udc7f",
+    "status": "Not Started"
+  },
+  {
+    "name": "Cardiff City",
+    "league": "Championship",
+    "country": "England",
+    "flag": "\ud83c\udff4\udb40\udc67\udb40\udc62\udb40\udc65\udb40\udc6e\udb40\udc67\udb40\udc7f",
+    "status": "Not Started"
+  },
+  {
+    "name": "Bolton Wanderers",
+    "league": "Championship",
+    "country": "England",
+    "flag": "\ud83c\udff4\udb40\udc67\udb40\udc62\udb40\udc65\udb40\udc6e\udb40\udc67\udb40\udc7f",
+    "status": "Not Started"
+  },
+  {
+    "name": "Lincoln City",
+    "league": "Championship",
+    "country": "England",
+    "flag": "\ud83c\udff4\udb40\udc67\udb40\udc62\udb40\udc65\udb40\udc6e\udb40\udc67\udb40\udc7f",
+    "status": "Not Started"
+  },
+  {
+    "name": "Malm\u00f6 FF",
+    "league": "Allsvenskan",
+    "country": "Sweden",
+    "flag": "\ud83c\uddf8\ud83c\uddea",
+    "status": "Not Started"
+  },
+  {
+    "name": "Hammarby IF",
+    "league": "Allsvenskan",
+    "country": "Sweden",
+    "flag": "\ud83c\uddf8\ud83c\uddea",
+    "status": "Not Started"
+  },
+  {
+    "name": "Djurg\u00e5rdens IF",
+    "league": "Allsvenskan",
+    "country": "Sweden",
+    "flag": "\ud83c\uddf8\ud83c\uddea",
+    "status": "Not Started"
+  },
+  {
+    "name": "AIK",
+    "league": "Allsvenskan",
+    "country": "Sweden",
+    "flag": "\ud83c\uddf8\ud83c\uddea",
+    "status": "Not Started"
+  },
+  {
+    "name": "IK Sirius",
+    "league": "Allsvenskan",
+    "country": "Sweden",
+    "flag": "\ud83c\uddf8\ud83c\uddea",
+    "status": "Not Started"
+  },
+  {
+    "name": "IFK G\u00f6teborg",
+    "league": "Allsvenskan",
+    "country": "Sweden",
+    "flag": "\ud83c\uddf8\ud83c\uddea",
+    "status": "Not Started"
+  },
+  {
+    "name": "Mj\u00e4llby AIF",
+    "league": "Allsvenskan",
+    "country": "Sweden",
+    "flag": "\ud83c\uddf8\ud83c\uddea",
+    "status": "Not Started"
+  },
+  {
+    "name": "BK H\u00e4cken",
+    "league": "Allsvenskan",
+    "country": "Sweden",
+    "flag": "\ud83c\uddf8\ud83c\uddea",
+    "status": "Not Started"
+  },
+  {
+    "name": "IF Elfsborg",
+    "league": "Allsvenskan",
+    "country": "Sweden",
+    "flag": "\ud83c\uddf8\ud83c\uddea",
+    "status": "Not Started"
+  },
+  {
+    "name": "GAIS",
+    "league": "Allsvenskan",
+    "country": "Sweden",
+    "flag": "\ud83c\uddf8\ud83c\uddea",
+    "status": "Not Started"
+  },
+  {
+    "name": "Kalmar FF",
+    "league": "Allsvenskan",
+    "country": "Sweden",
+    "flag": "\ud83c\uddf8\ud83c\uddea",
+    "status": "Not Started"
+  },
+  {
+    "name": "V\u00e4ster\u00e5s SK",
+    "league": "Allsvenskan",
+    "country": "Sweden",
+    "flag": "\ud83c\uddf8\ud83c\uddea",
+    "status": "Not Started"
+  },
+  {
+    "name": "IF Brommapojkarna",
+    "league": "Allsvenskan",
+    "country": "Sweden",
+    "flag": "\ud83c\uddf8\ud83c\uddea",
+    "status": "Not Started"
+  },
+  {
+    "name": "Halmstads BK",
+    "league": "Allsvenskan",
+    "country": "Sweden",
+    "flag": "\ud83c\uddf8\ud83c\uddea",
+    "status": "Not Started"
+  },
+  {
+    "name": "\u00d6rgryte IS",
+    "league": "Allsvenskan",
+    "country": "Sweden",
+    "flag": "\ud83c\uddf8\ud83c\uddea",
+    "status": "Not Started"
+  },
+  {
+    "name": "Degerfors IF",
+    "league": "Allsvenskan",
+    "country": "Sweden",
+    "flag": "\ud83c\uddf8\ud83c\uddea",
+    "status": "Not Started"
+  },
+  {
+    "name": "FC Midtjylland",
+    "league": "Superliga",
+    "country": "Denmark",
+    "flag": "\ud83c\udde9\ud83c\uddf0",
+    "status": "Not Started"
+  },
+  {
+    "name": "FC Copenhagen",
+    "league": "Superliga",
+    "country": "Denmark",
+    "flag": "\ud83c\udde9\ud83c\uddf0",
+    "status": "Not Started"
+  },
+  {
+    "name": "Br\u00f6ndby IF",
+    "league": "Superliga",
+    "country": "Denmark",
+    "flag": "\ud83c\udde9\ud83c\uddf0",
+    "status": "Not Started"
+  },
+  {
+    "name": "Aarhus GF",
+    "league": "Superliga",
+    "country": "Denmark",
+    "flag": "\ud83c\udde9\ud83c\uddf0",
+    "status": "Not Started"
+  },
+  {
+    "name": "FC Nordsjaelland",
+    "league": "Superliga",
+    "country": "Denmark",
+    "flag": "\ud83c\udde9\ud83c\uddf0",
+    "status": "Not Started"
+  },
+  {
+    "name": "Odense Boldklub",
+    "league": "Superliga",
+    "country": "Denmark",
+    "flag": "\ud83c\udde9\ud83c\uddf0",
+    "status": "Not Started"
+  },
+  {
+    "name": "Randers FC",
+    "league": "Superliga",
+    "country": "Denmark",
+    "flag": "\ud83c\udde9\ud83c\uddf0",
+    "status": "Not Started"
+  },
+  {
+    "name": "Viborg FF",
+    "league": "Superliga",
+    "country": "Denmark",
+    "flag": "\ud83c\udde9\ud83c\uddf0",
+    "status": "Not Started"
+  },
+  {
+    "name": "Silkeborg IF",
+    "league": "Superliga",
+    "country": "Denmark",
+    "flag": "\ud83c\udde9\ud83c\uddf0",
+    "status": "Not Started"
+  },
+  {
+    "name": "Lyngby Boldklub",
+    "league": "Superliga",
+    "country": "Denmark",
+    "flag": "\ud83c\udde9\ud83c\uddf0",
+    "status": "Not Started"
+  },
+  {
+    "name": "S\u00f6nderjyske Fodbold",
+    "league": "Superliga",
+    "country": "Denmark",
+    "flag": "\ud83c\udde9\ud83c\uddf0",
+    "status": "Not Started"
+  },
+  {
+    "name": "AC Horsens",
+    "league": "Superliga",
+    "country": "Denmark",
+    "flag": "\ud83c\udde9\ud83c\uddf0",
+    "status": "Not Started"
+  },
+  {
+    "name": "FK Bod\u00f8/Glimt",
+    "league": "Eliteserien",
+    "country": "Norway",
+    "flag": "\ud83c\uddf3\ud83c\uddf4",
+    "status": "Not Started"
+  },
+  {
+    "name": "Viking FK",
+    "league": "Eliteserien",
+    "country": "Norway",
+    "flag": "\ud83c\uddf3\ud83c\uddf4",
+    "status": "Not Started"
+  },
+  {
+    "name": "SK Brann",
+    "league": "Eliteserien",
+    "country": "Norway",
+    "flag": "\ud83c\uddf3\ud83c\uddf4",
+    "status": "Not Started"
+  },
+  {
+    "name": "Molde FK",
+    "league": "Eliteserien",
+    "country": "Norway",
+    "flag": "\ud83c\uddf3\ud83c\uddf4",
+    "status": "Not Started"
+  },
+  {
+    "name": "Troms\u00f8 IL",
+    "league": "Eliteserien",
+    "country": "Norway",
+    "flag": "\ud83c\uddf3\ud83c\uddf4",
+    "status": "Not Started"
+  },
+  {
+    "name": "Rosenborg BK",
+    "league": "Eliteserien",
+    "country": "Norway",
+    "flag": "\ud83c\uddf3\ud83c\uddf4",
+    "status": "Not Started"
+  },
+  {
+    "name": "Fredrikstad FK",
+    "league": "Eliteserien",
+    "country": "Norway",
+    "flag": "\ud83c\uddf3\ud83c\uddf4",
+    "status": "Not Started"
+  },
+  {
+    "name": "Sarpsborg 08 FF",
+    "league": "Eliteserien",
+    "country": "Norway",
+    "flag": "\ud83c\uddf3\ud83c\uddf4",
+    "status": "Not Started"
+  },
+  {
+    "name": "V\u00e5lerenga Fotball",
+    "league": "Eliteserien",
+    "country": "Norway",
+    "flag": "\ud83c\uddf3\ud83c\uddf4",
+    "status": "Not Started"
+  },
+  {
+    "name": "Lillestr\u00f8m SK",
+    "league": "Eliteserien",
+    "country": "Norway",
+    "flag": "\ud83c\uddf3\ud83c\uddf4",
+    "status": "Not Started"
+  },
+  {
+    "name": "Kristiansund BK",
+    "league": "Eliteserien",
+    "country": "Norway",
+    "flag": "\ud83c\uddf3\ud83c\uddf4",
+    "status": "Not Started"
+  },
+  {
+    "name": "Sandefjord Fotball",
+    "league": "Eliteserien",
+    "country": "Norway",
+    "flag": "\ud83c\uddf3\ud83c\uddf4",
+    "status": "Not Started"
+  },
+  {
+    "name": "Hamarkameratene",
+    "league": "Eliteserien",
+    "country": "Norway",
+    "flag": "\ud83c\uddf3\ud83c\uddf4",
+    "status": "Not Started"
+  },
+  {
+    "name": "Aalesunds FK",
+    "league": "Eliteserien",
+    "country": "Norway",
+    "flag": "\ud83c\uddf3\ud83c\uddf4",
+    "status": "Not Started"
+  },
+  {
+    "name": "KFUM Oslo",
+    "league": "Eliteserien",
+    "country": "Norway",
+    "flag": "\ud83c\uddf3\ud83c\uddf4",
+    "status": "Not Started"
+  },
+  {
+    "name": "IK Start",
+    "league": "Eliteserien",
+    "country": "Norway",
+    "flag": "\ud83c\uddf3\ud83c\uddf4",
+    "status": "Not Started"
+  },
+  {
+    "name": "Jagiellonia Bialystok",
+    "league": "Ekstraklasa",
+    "country": "Poland",
+    "flag": "\ud83c\uddf5\ud83c\uddf1",
+    "status": "Not Started"
+  },
+  {
+    "name": "Lech Poznan",
+    "league": "Ekstraklasa",
+    "country": "Poland",
+    "flag": "\ud83c\uddf5\ud83c\uddf1",
+    "status": "Not Started"
+  },
+  {
+    "name": "Rak\u00f3w Cz\u0119stochowa",
+    "league": "Ekstraklasa",
+    "country": "Poland",
+    "flag": "\ud83c\uddf5\ud83c\uddf1",
+    "status": "Not Started"
+  },
+  {
+    "name": "Legia Warszawa",
+    "league": "Ekstraklasa",
+    "country": "Poland",
+    "flag": "\ud83c\uddf5\ud83c\uddf1",
+    "status": "Not Started"
+  },
+  {
+    "name": "Widzew Lodz",
+    "league": "Ekstraklasa",
+    "country": "Poland",
+    "flag": "\ud83c\uddf5\ud83c\uddf1",
+    "status": "Not Started"
+  },
+  {
+    "name": "Cracovia",
+    "league": "Ekstraklasa",
+    "country": "Poland",
+    "flag": "\ud83c\uddf5\ud83c\uddf1",
+    "status": "Not Started"
+  },
+  {
+    "name": "G\u00f3rnik Zabrze",
+    "league": "Ekstraklasa",
+    "country": "Poland",
+    "flag": "\ud83c\uddf5\ud83c\uddf1",
+    "status": "Not Started"
+  },
+  {
+    "name": "Pogon Szczecin",
+    "league": "Ekstraklasa",
+    "country": "Poland",
+    "flag": "\ud83c\uddf5\ud83c\uddf1",
+    "status": "Not Started"
+  },
+  {
+    "name": "Lechia Gdansk",
+    "league": "Ekstraklasa",
+    "country": "Poland",
+    "flag": "\ud83c\uddf5\ud83c\uddf1",
+    "status": "Not Started"
+  },
+  {
+    "name": "Zaglebie Lubin",
+    "league": "Ekstraklasa",
+    "country": "Poland",
+    "flag": "\ud83c\uddf5\ud83c\uddf1",
+    "status": "Not Started"
+  },
+  {
+    "name": "Wisla Plock",
+    "league": "Ekstraklasa",
+    "country": "Poland",
+    "flag": "\ud83c\uddf5\ud83c\uddf1",
+    "status": "Not Started"
+  },
+  {
+    "name": "Motor Lublin",
+    "league": "Ekstraklasa",
+    "country": "Poland",
+    "flag": "\ud83c\uddf5\ud83c\uddf1",
+    "status": "Not Started"
+  },
+  {
+    "name": "Radomiak Radom",
+    "league": "Ekstraklasa",
+    "country": "Poland",
+    "flag": "\ud83c\uddf5\ud83c\uddf1",
+    "status": "Not Started"
+  },
+  {
+    "name": "Korona Kielce",
+    "league": "Ekstraklasa",
+    "country": "Poland",
+    "flag": "\ud83c\uddf5\ud83c\uddf1",
+    "status": "Not Started"
+  },
+  {
+    "name": "Piast Gliwice",
+    "league": "Ekstraklasa",
+    "country": "Poland",
+    "flag": "\ud83c\uddf5\ud83c\uddf1",
+    "status": "Not Started"
+  },
+  {
+    "name": "GKS Katowice",
+    "league": "Ekstraklasa",
+    "country": "Poland",
+    "flag": "\ud83c\uddf5\ud83c\uddf1",
+    "status": "Not Started"
+  },
+  {
+    "name": "Arka Gdynia",
+    "league": "Ekstraklasa",
+    "country": "Poland",
+    "flag": "\ud83c\uddf5\ud83c\uddf1",
+    "status": "Not Started"
+  },
+  {
+    "name": "Bruk-Bet Termalica Nieciecza",
+    "league": "Ekstraklasa",
+    "country": "Poland",
+    "flag": "\ud83c\uddf5\ud83c\uddf1",
+    "status": "Not Started"
+  },
+  {
+    "name": "Rangers FC",
+    "league": "Scottish Prem.",
+    "country": "Scotland",
+    "flag": "\ud83c\udff4\udb40\udc67\udb40\udc62\udb40\udc73\udb40\udc63\udb40\udc74\udb40\udc7f",
+    "status": "Not Started"
+  },
+  {
+    "name": "Celtic FC",
+    "league": "Scottish Prem.",
+    "country": "Scotland",
+    "flag": "\ud83c\udff4\udb40\udc67\udb40\udc62\udb40\udc73\udb40\udc63\udb40\udc74\udb40\udc7f",
+    "status": "Not Started"
+  },
+  {
+    "name": "Heart of Midlothian FC",
+    "league": "Scottish Prem.",
+    "country": "Scotland",
+    "flag": "\ud83c\udff4\udb40\udc67\udb40\udc62\udb40\udc73\udb40\udc63\udb40\udc74\udb40\udc7f",
+    "status": "Not Started"
+  },
+  {
+    "name": "Hibernian FC",
+    "league": "Scottish Prem.",
+    "country": "Scotland",
+    "flag": "\ud83c\udff4\udb40\udc67\udb40\udc62\udb40\udc73\udb40\udc63\udb40\udc74\udb40\udc7f",
+    "status": "Not Started"
+  },
+  {
+    "name": "Motherwell FC",
+    "league": "Scottish Prem.",
+    "country": "Scotland",
+    "flag": "\ud83c\udff4\udb40\udc67\udb40\udc62\udb40\udc73\udb40\udc63\udb40\udc74\udb40\udc7f",
+    "status": "Not Started"
+  },
+  {
+    "name": "Aberdeen FC",
+    "league": "Scottish Prem.",
+    "country": "Scotland",
+    "flag": "\ud83c\udff4\udb40\udc67\udb40\udc62\udb40\udc73\udb40\udc63\udb40\udc74\udb40\udc7f",
+    "status": "Not Started"
+  },
+  {
+    "name": "Dundee United FC",
+    "league": "Scottish Prem.",
+    "country": "Scotland",
+    "flag": "\ud83c\udff4\udb40\udc67\udb40\udc62\udb40\udc73\udb40\udc63\udb40\udc74\udb40\udc7f",
+    "status": "Not Started"
+  },
+  {
+    "name": "St. Mirren FC",
+    "league": "Scottish Prem.",
+    "country": "Scotland",
+    "flag": "\ud83c\udff4\udb40\udc67\udb40\udc62\udb40\udc73\udb40\udc63\udb40\udc74\udb40\udc7f",
+    "status": "Not Started"
+  },
+  {
+    "name": "Dundee FC",
+    "league": "Scottish Prem.",
+    "country": "Scotland",
+    "flag": "\ud83c\udff4\udb40\udc67\udb40\udc62\udb40\udc73\udb40\udc63\udb40\udc74\udb40\udc7f",
+    "status": "Not Started"
+  },
+  {
+    "name": "Kilmarnock FC",
+    "league": "Scottish Prem.",
+    "country": "Scotland",
+    "flag": "\ud83c\udff4\udb40\udc67\udb40\udc62\udb40\udc73\udb40\udc63\udb40\udc74\udb40\udc7f",
+    "status": "Not Started"
+  },
+  {
+    "name": "Falkirk FC",
+    "league": "Scottish Prem.",
+    "country": "Scotland",
+    "flag": "\ud83c\udff4\udb40\udc67\udb40\udc62\udb40\udc73\udb40\udc63\udb40\udc74\udb40\udc7f",
+    "status": "Not Started"
+  },
+  {
+    "name": "St. Johnstone FC",
+    "league": "Scottish Prem.",
+    "country": "Scotland",
+    "flag": "\ud83c\udff4\udb40\udc67\udb40\udc62\udb40\udc73\udb40\udc63\udb40\udc74\udb40\udc7f",
+    "status": "Not Started"
+  },
+  {
+    "name": "GNK Dinamo Zagreb",
+    "league": "HNL",
+    "country": "Croatia",
+    "flag": "\ud83c\udded\ud83c\uddf7",
+    "status": "Not Started"
+  },
+  {
+    "name": "HNK Rijeka",
+    "league": "HNL",
+    "country": "Croatia",
+    "flag": "\ud83c\udded\ud83c\uddf7",
+    "status": "Not Started"
+  },
+  {
+    "name": "HNK Hajduk Split",
+    "league": "HNL",
+    "country": "Croatia",
+    "flag": "\ud83c\udded\ud83c\uddf7",
+    "status": "Not Started"
+  },
+  {
+    "name": "NK Osijek",
+    "league": "HNL",
+    "country": "Croatia",
+    "flag": "\ud83c\udded\ud83c\uddf7",
+    "status": "Not Started"
+  },
+  {
+    "name": "NK Istra 1961",
+    "league": "HNL",
+    "country": "Croatia",
+    "flag": "\ud83c\udded\ud83c\uddf7",
+    "status": "Not Started"
+  },
+  {
+    "name": "NK Varazdin",
+    "league": "HNL",
+    "country": "Croatia",
+    "flag": "\ud83c\udded\ud83c\uddf7",
+    "status": "Not Started"
+  },
+  {
+    "name": "NK Lokomotiva Zagreb",
+    "league": "HNL",
+    "country": "Croatia",
+    "flag": "\ud83c\udded\ud83c\uddf7",
+    "status": "Not Started"
+  },
+  {
+    "name": "HNK Gorica",
+    "league": "HNL",
+    "country": "Croatia",
+    "flag": "\ud83c\udded\ud83c\uddf7",
+    "status": "Not Started"
+  },
+  {
+    "name": "Slaven Belupo Koprivnica",
+    "league": "HNL",
+    "country": "Croatia",
+    "flag": "\ud83c\udded\ud83c\uddf7",
+    "status": "Not Started"
+  },
+  {
+    "name": "NK Rudes",
+    "league": "HNL",
+    "country": "Croatia",
+    "flag": "\ud83c\udded\ud83c\uddf7",
+    "status": "Not Started"
+  },
+  {
+    "name": "FC Porto",
+    "league": "Primeira Liga",
+    "country": "Portugal",
+    "flag": "\ud83c\uddf5\ud83c\uddf9",
+    "status": "Not Started"
+  },
+  {
+    "name": "Sporting CP",
+    "league": "Primeira Liga",
+    "country": "Portugal",
+    "flag": "\ud83c\uddf5\ud83c\uddf9",
+    "status": "Not Started"
+  },
+  {
+    "name": "SL Benfica",
+    "league": "Primeira Liga",
+    "country": "Portugal",
+    "flag": "\ud83c\uddf5\ud83c\uddf9",
+    "status": "Not Started"
+  },
+  {
+    "name": "SC Braga",
+    "league": "Primeira Liga",
+    "country": "Portugal",
+    "flag": "\ud83c\uddf5\ud83c\uddf9",
+    "status": "Not Started"
+  },
+  {
+    "name": "FC Famalic\u00e3o",
+    "league": "Primeira Liga",
+    "country": "Portugal",
+    "flag": "\ud83c\uddf5\ud83c\uddf9",
+    "status": "Not Started"
+  },
+  {
+    "name": "Vit\u00f3ria Guimar\u00e3es SC",
+    "league": "Primeira Liga",
+    "country": "Portugal",
+    "flag": "\ud83c\uddf5\ud83c\uddf9",
+    "status": "Not Started"
+  },
+  {
+    "name": "GD Estoril Praia",
+    "league": "Primeira Liga",
+    "country": "Portugal",
+    "flag": "\ud83c\uddf5\ud83c\uddf9",
+    "status": "Not Started"
+  },
+  {
+    "name": "FC Alverca",
+    "league": "Primeira Liga",
+    "country": "Portugal",
+    "flag": "\ud83c\uddf5\ud83c\uddf9",
+    "status": "Not Started"
+  },
+  {
+    "name": "Rio Ave FC",
+    "league": "Primeira Liga",
+    "country": "Portugal",
+    "flag": "\ud83c\uddf5\ud83c\uddf9",
+    "status": "Not Started"
+  },
+  {
+    "name": "Gil Vicente FC",
+    "league": "Primeira Liga",
+    "country": "Portugal",
+    "flag": "\ud83c\uddf5\ud83c\uddf9",
+    "status": "Not Started"
+  },
+  {
+    "name": "Casa Pia AC",
+    "league": "Primeira Liga",
+    "country": "Portugal",
+    "flag": "\ud83c\uddf5\ud83c\uddf9",
+    "status": "Not Started"
+  },
+  {
+    "name": "FC Arouca",
+    "league": "Primeira Liga",
+    "country": "Portugal",
+    "flag": "\ud83c\uddf5\ud83c\uddf9",
+    "status": "Not Started"
+  },
+  {
+    "name": "CD Santa Clara",
+    "league": "Primeira Liga",
+    "country": "Portugal",
+    "flag": "\ud83c\uddf5\ud83c\uddf9",
+    "status": "Not Started"
+  },
+  {
+    "name": "Moreirense FC",
+    "league": "Primeira Liga",
+    "country": "Portugal",
+    "flag": "\ud83c\uddf5\ud83c\uddf9",
+    "status": "Not Started"
+  },
+  {
+    "name": "CF Estrela Amadora",
+    "league": "Primeira Liga",
+    "country": "Portugal",
+    "flag": "\ud83c\uddf5\ud83c\uddf9",
+    "status": "Not Started"
+  },
+  {
+    "name": "CD Nacional",
+    "league": "Primeira Liga",
+    "country": "Portugal",
+    "flag": "\ud83c\uddf5\ud83c\uddf9",
+    "status": "Not Started"
+  },
+  {
+    "name": "Acad\u00e9mico Viseu FC",
+    "league": "Primeira Liga",
+    "country": "Portugal",
+    "flag": "\ud83c\uddf5\ud83c\uddf9",
+    "status": "Not Started"
+  },
+  {
+    "name": "CS Mar\u00edtimo",
+    "league": "Primeira Liga",
+    "country": "Portugal",
+    "flag": "\ud83c\uddf5\ud83c\uddf9",
+    "status": "Not Started"
+  },
+  {
+    "name": "Olympiacos Piraeus",
+    "league": "Super League Greece",
+    "country": "Greece",
+    "flag": "\ud83c\uddec\ud83c\uddf7",
+    "status": "Not Started"
+  },
+  {
+    "name": "Panathinaikos",
+    "league": "Super League Greece",
+    "country": "Greece",
+    "flag": "\ud83c\uddec\ud83c\uddf7",
+    "status": "Not Started"
+  },
+  {
+    "name": "AEK Athens",
+    "league": "Super League Greece",
+    "country": "Greece",
+    "flag": "\ud83c\uddec\ud83c\uddf7",
+    "status": "Not Started"
+  },
+  {
+    "name": "PAOK Thessaloniki",
+    "league": "Super League Greece",
+    "country": "Greece",
+    "flag": "\ud83c\uddec\ud83c\uddf7",
+    "status": "Not Started"
+  },
+  {
+    "name": "Aris Thessaloniki",
+    "league": "Super League Greece",
+    "country": "Greece",
+    "flag": "\ud83c\uddec\ud83c\uddf7",
+    "status": "Not Started"
+  },
+  {
+    "name": "OFI Crete",
+    "league": "Super League Greece",
+    "country": "Greece",
+    "flag": "\ud83c\uddec\ud83c\uddf7",
+    "status": "Not Started"
+  },
+  {
+    "name": "Levadiakos",
+    "league": "Super League Greece",
+    "country": "Greece",
+    "flag": "\ud83c\uddec\ud83c\uddf7",
+    "status": "Not Started"
+  },
+  {
+    "name": "Panetolikos",
+    "league": "Super League Greece",
+    "country": "Greece",
+    "flag": "\ud83c\uddec\ud83c\uddf7",
+    "status": "Not Started"
+  },
+  {
+    "name": "Asteras Aktor",
+    "league": "Super League Greece",
+    "country": "Greece",
+    "flag": "\ud83c\uddec\ud83c\uddf7",
+    "status": "Not Started"
+  },
+  {
+    "name": "Kalamata FC",
+    "league": "Super League Greece",
+    "country": "Greece",
+    "flag": "\ud83c\uddec\ud83c\uddf7",
+    "status": "Not Started"
+  },
+  {
+    "name": "Atromitos Athens",
+    "league": "Super League Greece",
+    "country": "Greece",
+    "flag": "\ud83c\uddec\ud83c\uddf7",
+    "status": "Not Started"
+  },
+  {
+    "name": "Iraklis Thessaloniki",
+    "league": "Super League Greece",
+    "country": "Greece",
+    "flag": "\ud83c\uddec\ud83c\uddf7",
+    "status": "Not Started"
+  },
+  {
+    "name": "AE Kifisia",
+    "league": "Super League Greece",
+    "country": "Greece",
+    "flag": "\ud83c\uddec\ud83c\uddf7",
+    "status": "Not Started"
+  },
+  {
+    "name": "Volos FC",
+    "league": "Super League Greece",
+    "country": "Greece",
+    "flag": "\ud83c\uddec\ud83c\uddf7",
+    "status": "Not Started"
+  },
+  {
+    "name": "SK Slavia Prague",
+    "league": "Czech First League",
+    "country": "Czech Rep.",
+    "flag": "\ud83c\udde8\ud83c\uddff",
+    "status": "Not Started"
+  },
+  {
+    "name": "AC Sparta Prague",
+    "league": "Czech First League",
+    "country": "Czech Rep.",
+    "flag": "\ud83c\udde8\ud83c\uddff",
+    "status": "Not Started"
+  },
+  {
+    "name": "FC Viktoria Plzen",
+    "league": "Czech First League",
+    "country": "Czech Rep.",
+    "flag": "\ud83c\udde8\ud83c\uddff",
+    "status": "Not Started"
+  },
+  {
+    "name": "SK Sigma Olomouc",
+    "league": "Czech First League",
+    "country": "Czech Rep.",
+    "flag": "\ud83c\udde8\ud83c\uddff",
+    "status": "Not Started"
+  },
+  {
+    "name": "FC Slovan Liberec",
+    "league": "Czech First League",
+    "country": "Czech Rep.",
+    "flag": "\ud83c\udde8\ud83c\uddff",
+    "status": "Not Started"
+  },
+  {
+    "name": "FC Banik Ostrava",
+    "league": "Czech First League",
+    "country": "Czech Rep.",
+    "flag": "\ud83c\udde8\ud83c\uddff",
+    "status": "Not Started"
+  },
+  {
+    "name": "FK Jablonec",
+    "league": "Czech First League",
+    "country": "Czech Rep.",
+    "flag": "\ud83c\udde8\ud83c\uddff",
+    "status": "Not Started"
+  },
+  {
+    "name": "FC Hradec Kralove",
+    "league": "Czech First League",
+    "country": "Czech Rep.",
+    "flag": "\ud83c\udde8\ud83c\uddff",
+    "status": "Not Started"
+  },
+  {
+    "name": "FK Pardubice",
+    "league": "Czech First League",
+    "country": "Czech Rep.",
+    "flag": "\ud83c\udde8\ud83c\uddff",
+    "status": "Not Started"
+  },
+  {
+    "name": "FK Mlada Boleslav",
+    "league": "Czech First League",
+    "country": "Czech Rep.",
+    "flag": "\ud83c\udde8\ud83c\uddff",
+    "status": "Not Started"
+  },
+  {
+    "name": "FC Zbrojovka Brno",
+    "league": "Czech First League",
+    "country": "Czech Rep.",
+    "flag": "\ud83c\udde8\ud83c\uddff",
+    "status": "Not Started"
+  },
+  {
+    "name": "SK Artis Brno",
+    "league": "Czech First League",
+    "country": "Czech Rep.",
+    "flag": "\ud83c\udde8\ud83c\uddff",
+    "status": "Not Started"
+  },
+  {
+    "name": "FK Teplice",
+    "league": "Czech First League",
+    "country": "Czech Rep.",
+    "flag": "\ud83c\udde8\ud83c\uddff",
+    "status": "Not Started"
+  },
+  {
+    "name": "1.FC Slovacko",
+    "league": "Czech First League",
+    "country": "Czech Rep.",
+    "flag": "\ud83c\udde8\ud83c\uddff",
+    "status": "Not Started"
+  },
+  {
+    "name": "Bohemians Prague 1905",
+    "league": "Czech First League",
+    "country": "Czech Rep.",
+    "flag": "\ud83c\udde8\ud83c\uddff",
+    "status": "Not Started"
+  },
+  {
+    "name": "FC Zlin",
+    "league": "Czech First League",
+    "country": "Czech Rep.",
+    "flag": "\ud83c\udde8\ud83c\uddff",
+    "status": "Not Started"
+  },
+  {
+    "name": "Paris Saint-Germain",
+    "league": "Ligue 1",
+    "country": "France",
+    "flag": "\ud83c\uddeb\ud83c\uddf7",
+    "status": "Not Started"
+  },
+  {
+    "name": "Olympique Marseille",
+    "league": "Ligue 1",
+    "country": "France",
+    "flag": "\ud83c\uddeb\ud83c\uddf7",
+    "status": "Not Started"
+  },
+  {
+    "name": "AS Monaco",
+    "league": "Ligue 1",
+    "country": "France",
+    "flag": "\ud83c\uddeb\ud83c\uddf7",
+    "status": "Not Started"
+  },
+  {
+    "name": "OGC Nice",
+    "league": "Ligue 1",
+    "country": "France",
+    "flag": "\ud83c\uddeb\ud83c\uddf7",
+    "status": "Not Started"
+  },
+  {
+    "name": "Olympique Lyon",
+    "league": "Ligue 1",
+    "country": "France",
+    "flag": "\ud83c\uddeb\ud83c\uddf7",
+    "status": "Not Started"
+  },
+  {
+    "name": "RC Lens",
+    "league": "Ligue 1",
+    "country": "France",
+    "flag": "\ud83c\uddeb\ud83c\uddf7",
+    "status": "Not Started"
+  },
+  {
+    "name": "Stade Rennais FC",
+    "league": "Ligue 1",
+    "country": "France",
+    "flag": "\ud83c\uddeb\ud83c\uddf7",
+    "status": "Not Started"
+  },
+  {
+    "name": "Lille OSC",
+    "league": "Ligue 1",
+    "country": "France",
+    "flag": "\ud83c\uddeb\ud83c\uddf7",
+    "status": "Not Started"
+  },
+  {
+    "name": "RC Strasbourg",
+    "league": "Ligue 1",
+    "country": "France",
+    "flag": "\ud83c\uddeb\ud83c\uddf7",
+    "status": "Not Started"
+  },
+  {
+    "name": "Stade de Reims",
+    "league": "Ligue 1",
+    "country": "France",
+    "flag": "\ud83c\uddeb\ud83c\uddf7",
+    "status": "Not Started"
+  },
+  {
+    "name": "Toulouse FC",
+    "league": "Ligue 1",
+    "country": "France",
+    "flag": "\ud83c\uddeb\ud83c\uddf7",
+    "status": "Not Started"
+  },
+  {
+    "name": "Montpellier HSC",
+    "league": "Ligue 1",
+    "country": "France",
+    "flag": "\ud83c\uddeb\ud83c\uddf7",
+    "status": "Not Started"
+  },
+  {
+    "name": "FC Nantes",
+    "league": "Ligue 1",
+    "country": "France",
+    "flag": "\ud83c\uddeb\ud83c\uddf7",
+    "status": "Not Started"
+  },
+  {
+    "name": "Stade Brestois 29",
+    "league": "Ligue 1",
+    "country": "France",
+    "flag": "\ud83c\uddeb\ud83c\uddf7",
+    "status": "Not Started"
+  },
+  {
+    "name": "Le Havre AC",
+    "league": "Ligue 1",
+    "country": "France",
+    "flag": "\ud83c\uddeb\ud83c\uddf7",
+    "status": "Not Started"
+  },
+  {
+    "name": "Angers SCO",
+    "league": "Ligue 1",
+    "country": "France",
+    "flag": "\ud83c\uddeb\ud83c\uddf7",
+    "status": "Not Started"
+  },
+  {
+    "name": "AS Saint-\u00c9tienne",
+    "league": "Ligue 1",
+    "country": "France",
+    "flag": "\ud83c\uddeb\ud83c\uddf7",
+    "status": "Not Started"
+  },
+  {
+    "name": "AJ Auxerre",
+    "league": "Ligue 1",
+    "country": "France",
+    "flag": "\ud83c\uddeb\ud83c\uddf7",
+    "status": "Not Started"
+  },
+  {
+    "name": "Real Madrid CF",
+    "league": "La Liga",
+    "country": "Spain",
+    "flag": "\ud83c\uddea\ud83c\uddf8",
+    "status": "Not Started"
+  },
+  {
+    "name": "FC Barcelona",
+    "league": "La Liga",
+    "country": "Spain",
+    "flag": "\ud83c\uddea\ud83c\uddf8",
+    "status": "Not Started"
+  },
+  {
+    "name": "Atl\u00e9tico Madrid",
+    "league": "La Liga",
+    "country": "Spain",
+    "flag": "\ud83c\uddea\ud83c\uddf8",
+    "status": "Not Started"
+  },
+  {
+    "name": "Athletic Bilbao",
+    "league": "La Liga",
+    "country": "Spain",
+    "flag": "\ud83c\uddea\ud83c\uddf8",
+    "status": "Not Started"
+  },
+  {
+    "name": "Villarreal CF",
+    "league": "La Liga",
+    "country": "Spain",
+    "flag": "\ud83c\uddea\ud83c\uddf8",
+    "status": "Not Started"
+  },
+  {
+    "name": "Real Sociedad",
+    "league": "La Liga",
+    "country": "Spain",
+    "flag": "\ud83c\uddea\ud83c\uddf8",
+    "status": "Not Started"
+  },
+  {
+    "name": "Real Betis",
+    "league": "La Liga",
+    "country": "Spain",
+    "flag": "\ud83c\uddea\ud83c\uddf8",
+    "status": "Not Started"
+  },
+  {
+    "name": "Girona FC",
+    "league": "La Liga",
+    "country": "Spain",
+    "flag": "\ud83c\uddea\ud83c\uddf8",
+    "status": "Not Started"
+  },
+  {
+    "name": "RC Celta Vigo",
+    "league": "La Liga",
+    "country": "Spain",
+    "flag": "\ud83c\uddea\ud83c\uddf8",
+    "status": "Not Started"
+  },
+  {
+    "name": "Deportivo Alav\u00e9s",
+    "league": "La Liga",
+    "country": "Spain",
+    "flag": "\ud83c\uddea\ud83c\uddf8",
+    "status": "Not Started"
+  },
+  {
+    "name": "Rayo Vallecano",
+    "league": "La Liga",
+    "country": "Spain",
+    "flag": "\ud83c\uddea\ud83c\uddf8",
+    "status": "Not Started"
+  },
+  {
+    "name": "Getafe CF",
+    "league": "La Liga",
+    "country": "Spain",
+    "flag": "\ud83c\uddea\ud83c\uddf8",
+    "status": "Not Started"
+  },
+  {
+    "name": "CA Osasuna",
+    "league": "La Liga",
+    "country": "Spain",
+    "flag": "\ud83c\uddea\ud83c\uddf8",
+    "status": "Not Started"
+  },
+  {
+    "name": "RCD Mallorca",
+    "league": "La Liga",
+    "country": "Spain",
+    "flag": "\ud83c\uddea\ud83c\uddf8",
+    "status": "Not Started"
+  },
+  {
+    "name": "Sevilla FC",
+    "league": "La Liga",
+    "country": "Spain",
+    "flag": "\ud83c\uddea\ud83c\uddf8",
+    "status": "Not Started"
+  },
+  {
+    "name": "UD Las Palmas",
+    "league": "La Liga",
+    "country": "Spain",
+    "flag": "\ud83c\uddea\ud83c\uddf8",
+    "status": "Not Started"
+  },
+  {
+    "name": "CD Legan\u00e9s",
+    "league": "La Liga",
+    "country": "Spain",
+    "flag": "\ud83c\uddea\ud83c\uddf8",
+    "status": "Not Started"
+  },
+  {
+    "name": "Valencia CF",
+    "league": "La Liga",
+    "country": "Spain",
+    "flag": "\ud83c\uddea\ud83c\uddf8",
+    "status": "Not Started"
+  },
+  {
+    "name": "RCD Espanyol",
+    "league": "La Liga",
+    "country": "Spain",
+    "flag": "\ud83c\uddea\ud83c\uddf8",
+    "status": "Not Started"
+  },
+  {
+    "name": "Real Valladolid CF",
+    "league": "La Liga",
+    "country": "Spain",
+    "flag": "\ud83c\uddea\ud83c\uddf8",
+    "status": "Not Started"
+  },
+  {
+    "name": "Inter Milan",
+    "league": "Serie A",
+    "country": "Italy",
+    "flag": "\ud83c\uddee\ud83c\uddf9",
+    "status": "Not Started"
+  },
+  {
+    "name": "AC Milan",
+    "league": "Serie A",
+    "country": "Italy",
+    "flag": "\ud83c\uddee\ud83c\uddf9",
+    "status": "Not Started"
+  },
+  {
+    "name": "Juventus FC",
+    "league": "Serie A",
+    "country": "Italy",
+    "flag": "\ud83c\uddee\ud83c\uddf9",
+    "status": "Not Started"
+  },
+  {
+    "name": "AS Roma",
+    "league": "Serie A",
+    "country": "Italy",
+    "flag": "\ud83c\uddee\ud83c\uddf9",
+    "status": "Not Started"
+  },
+  {
+    "name": "SS Lazio",
+    "league": "Serie A",
+    "country": "Italy",
+    "flag": "\ud83c\uddee\ud83c\uddf9",
+    "status": "Not Started"
+  },
+  {
+    "name": "Atalanta BC",
+    "league": "Serie A",
+    "country": "Italy",
+    "flag": "\ud83c\uddee\ud83c\uddf9",
+    "status": "Not Started"
+  },
+  {
+    "name": "SSC Napoli",
+    "league": "Serie A",
+    "country": "Italy",
+    "flag": "\ud83c\uddee\ud83c\uddf9",
+    "status": "Not Started"
+  },
+  {
+    "name": "ACF Fiorentina",
+    "league": "Serie A",
+    "country": "Italy",
+    "flag": "\ud83c\uddee\ud83c\uddf9",
+    "status": "Not Started"
+  },
+  {
+    "name": "Bologna FC",
+    "league": "Serie A",
+    "country": "Italy",
+    "flag": "\ud83c\uddee\ud83c\uddf9",
+    "status": "Not Started"
+  },
+  {
+    "name": "Torino FC",
+    "league": "Serie A",
+    "country": "Italy",
+    "flag": "\ud83c\uddee\ud83c\uddf9",
+    "status": "Not Started"
+  },
+  {
+    "name": "Udinese Calcio",
+    "league": "Serie A",
+    "country": "Italy",
+    "flag": "\ud83c\uddee\ud83c\uddf9",
+    "status": "Not Started"
+  },
+  {
+    "name": "Cagliari Calcio",
+    "league": "Serie A",
+    "country": "Italy",
+    "flag": "\ud83c\uddee\ud83c\uddf9",
+    "status": "Not Started"
+  },
+  {
+    "name": "US Lecce",
+    "league": "Serie A",
+    "country": "Italy",
+    "flag": "\ud83c\uddee\ud83c\uddf9",
+    "status": "Not Started"
+  },
+  {
+    "name": "Hellas Verona",
+    "league": "Serie A",
+    "country": "Italy",
+    "flag": "\ud83c\uddee\ud83c\uddf9",
+    "status": "Not Started"
+  },
+  {
+    "name": "Empoli FC",
+    "league": "Serie A",
+    "country": "Italy",
+    "flag": "\ud83c\uddee\ud83c\uddf9",
+    "status": "Not Started"
+  },
+  {
+    "name": "Parma Calcio",
+    "league": "Serie A",
+    "country": "Italy",
+    "flag": "\ud83c\uddee\ud83c\uddf9",
+    "status": "Not Started"
+  },
+  {
+    "name": "Genoa CFC",
+    "league": "Serie A",
+    "country": "Italy",
+    "flag": "\ud83c\uddee\ud83c\uddf9",
+    "status": "Not Started"
+  },
+  {
+    "name": "Como 1907",
+    "league": "Serie A",
+    "country": "Italy",
+    "flag": "\ud83c\uddee\ud83c\uddf9",
+    "status": "Not Started"
+  },
+  {
+    "name": "Venezia FC",
+    "league": "Serie A",
+    "country": "Italy",
+    "flag": "\ud83c\uddee\ud83c\uddf9",
+    "status": "Not Started"
+  },
+  {
+    "name": "AC Monza",
+    "league": "Serie A",
+    "country": "Italy",
+    "flag": "\ud83c\uddee\ud83c\uddf9",
+    "status": "Not Started"
+  },
+  {
+    "name": "Club Brugge KV",
+    "league": "Jupiler Pro League",
+    "country": "Belgium",
+    "flag": "\ud83c\udde7\ud83c\uddea",
+    "status": "Not Started"
+  },
+  {
+    "name": "KRC Genk",
+    "league": "Jupiler Pro League",
+    "country": "Belgium",
+    "flag": "\ud83c\udde7\ud83c\uddea",
+    "status": "Not Started"
+  },
+  {
+    "name": "Royale Union Saint-Gilloise",
+    "league": "Jupiler Pro League",
+    "country": "Belgium",
+    "flag": "\ud83c\udde7\ud83c\uddea",
+    "status": "Not Started"
+  },
+  {
+    "name": "RSC Anderlecht",
+    "league": "Jupiler Pro League",
+    "country": "Belgium",
+    "flag": "\ud83c\udde7\ud83c\uddea",
+    "status": "Not Started"
+  },
+  {
+    "name": "Royal Antwerp FC",
+    "league": "Jupiler Pro League",
+    "country": "Belgium",
+    "flag": "\ud83c\udde7\ud83c\uddea",
+    "status": "Not Started"
+  },
+  {
+    "name": "KAA Gent",
+    "league": "Jupiler Pro League",
+    "country": "Belgium",
+    "flag": "\ud83c\udde7\ud83c\uddea",
+    "status": "Not Started"
+  },
+  {
+    "name": "KVC Westerlo",
+    "league": "Jupiler Pro League",
+    "country": "Belgium",
+    "flag": "\ud83c\udde7\ud83c\uddea",
+    "status": "Not Started"
+  },
+  {
+    "name": "VV St. Truiden",
+    "league": "Jupiler Pro League",
+    "country": "Belgium",
+    "flag": "\ud83c\udde7\ud83c\uddea",
+    "status": "Not Started"
+  },
+  {
+    "name": "KV Mechelen",
+    "league": "Jupiler Pro League",
+    "country": "Belgium",
+    "flag": "\ud83c\udde7\ud83c\uddea",
+    "status": "Not Started"
+  },
+  {
+    "name": "Standard Li\u00e8ge",
+    "league": "Jupiler Pro League",
+    "country": "Belgium",
+    "flag": "\ud83c\udde7\ud83c\uddea",
+    "status": "Not Started"
+  },
+  {
+    "name": "Sporting Charleroi",
+    "league": "Jupiler Pro League",
+    "country": "Belgium",
+    "flag": "\ud83c\udde7\ud83c\uddea",
+    "status": "Not Started"
+  },
+  {
+    "name": "Cercle Brugge",
+    "league": "Jupiler Pro League",
+    "country": "Belgium",
+    "flag": "\ud83c\udde7\ud83c\uddea",
+    "status": "Not Started"
+  },
+  {
+    "name": "Oud-Heverlee Leuven",
+    "league": "Jupiler Pro League",
+    "country": "Belgium",
+    "flag": "\ud83c\udde7\ud83c\uddea",
+    "status": "Not Started"
+  },
+  {
+    "name": "SV Zulte Waregem",
+    "league": "Jupiler Pro League",
+    "country": "Belgium",
+    "flag": "\ud83c\udde7\ud83c\uddea",
+    "status": "Not Started"
+  },
+  {
+    "name": "FCV Dender EH",
+    "league": "Jupiler Pro League",
+    "country": "Belgium",
+    "flag": "\ud83c\udde7\ud83c\uddea",
+    "status": "Not Started"
+  },
+  {
+    "name": "RAAL La Louvi\u00e8re",
+    "league": "Jupiler Pro League",
+    "country": "Belgium",
+    "flag": "\ud83c\udde7\ud83c\uddea",
+    "status": "Not Started"
+  }
+]

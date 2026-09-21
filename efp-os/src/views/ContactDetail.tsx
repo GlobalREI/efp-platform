@@ -16,6 +16,7 @@ import {
 } from '../components/PageShell'
 import { StatusPill } from '../components/Badge'
 import { Button } from '../components/Button'
+import { ClubSearchField, type ClubResult } from '../components/FormFields'
 import styles from './ContactDetail.module.css'
 
 /* ── Types ── */
@@ -23,6 +24,7 @@ interface Contact {
   name: string
   role?: string
   club?: string
+  club_id?: string
   email?: string
   phone?: string
   wa?: string
@@ -206,7 +208,21 @@ export function ContactDetail() {
 
       {/* Quick facts */}
       <Card title="Info">
-        {data?.club  && <div className={styles.infoRow}><span className={styles.infoLabel}>Club</span><span>{data.club}</span></div>}
+        {data?.club  && (
+          <div className={styles.infoRow}>
+            <span className={styles.infoLabel}>Club</span>
+            {data.club_id
+              ? <button
+                  type="button"
+                  style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer', color: 'var(--accent)', fontSize: 'inherit' }}
+                  onClick={() => nav(`/clubs/${data?.club_id}`)}
+                >
+                  {data.club} →
+                </button>
+              : <span>{data.club}</span>
+            }
+          </div>
+        )}
         {data?.role  && <div className={styles.infoRow}><span className={styles.infoLabel}>Role</span><span>{data.role}</span></div>}
         {data?.stage && <div className={styles.infoRow}><span className={styles.infoLabel}>Stage</span><StatusPill status={data.stage} /></div>}
         {linked.length > 0 && <div className={styles.infoRow}><span className={styles.infoLabel}>Mandates</span><span>{linked.length}</span></div>}
@@ -230,13 +246,22 @@ export function ContactDetail() {
       ].filter(Boolean)}
       badges={data?.stage ? <StatusPill status={data.stage} /> : undefined}
       rail={rail}
-      editMode={editMode}
-      onEditToggle={on => { if (on) startEdit(); else cancelEdit() }}
       actions={editMode ? (
-        <Button variant="primary" size="sm" onClick={saveEdit} disabled={saving}>
-          {saving ? 'Saving…' : 'Save'}
-        </Button>
-      ) : undefined}
+        <>
+          <button
+            style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '6px 12px',
+                     fontSize: 'var(--text-sm)', color: 'var(--text-muted)' }}
+            onClick={cancelEdit}
+          >
+            Cancel
+          </button>
+          <Button variant="primary" size="sm" onClick={saveEdit} disabled={saving}>
+            {saving ? 'Saving…' : 'Save'}
+          </Button>
+        </>
+      ) : (
+        <Button variant="secondary" size="sm" onClick={startEdit}>✏ Edit</Button>
+      )}
     >
       {/* ── Contact Info ── */}
       <Card title="Contact Info" titleIcon="📋">
@@ -245,7 +270,17 @@ export function ContactDetail() {
             <>
               <Field label="Name"  value={<input className={styles.editInput} value={draft?.name  || ''} onChange={e => patch('name',  e.target.value)} />} />
               <Field label="Role"  value={<input className={styles.editInput} value={draft?.role  || ''} onChange={e => patch('role',  e.target.value)} />} />
-              <Field label="Club"  value={<input className={styles.editInput} value={draft?.club  || ''} onChange={e => patch('club',  e.target.value)} />} />
+              <div style={{ gridColumn: 'span 1', position: 'relative' }}>
+                <ClubSearchField
+                  label="Club"
+                  value={draft?.club || ''}
+                  onChange={val => patch('club', val)}
+                  onSelect={(c: ClubResult) => {
+                    setDraft(d => d ? { ...d, club: c.name, club_id: c.id || d.club_id } : d)
+                  }}
+                  placeholder="Type to search clubs…"
+                />
+              </div>
               <Field label="Stage" value={<input className={styles.editInput} value={draft?.stage || ''} onChange={e => patch('stage', e.target.value)} />} />
               <Field label="Email" value={<input className={styles.editInput} value={draft?.email || ''} onChange={e => patch('email', e.target.value)} />} full />
               <Field label="Phone" value={<input className={styles.editInput} value={draft?.phone || ''} onChange={e => patch('phone', e.target.value)} />} />
@@ -255,7 +290,18 @@ export function ContactDetail() {
           ) : (
             <>
               <Field label="Role"   value={data?.role} />
-              <Field label="Club"   value={data?.club} />
+              <Field label="Club"   value={
+                data?.club_id
+                  ? <button
+                      type="button"
+                      className={styles.link}
+                      style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer', textAlign: 'left' }}
+                      onClick={() => nav(`/clubs/${data?.club_id}`)}
+                    >
+                      {data?.club} →
+                    </button>
+                  : data?.club
+              } />
               <Field label="Stage"  value={data?.stage ? <StatusPill status={data.stage} /> : undefined} />
               <Field label="Status" value={data?.status} />
               <Field label="Email"  value={data?.email

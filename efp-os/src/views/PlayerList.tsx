@@ -224,10 +224,7 @@ export function PlayerList() {
                   onClick={() => nav(`/mandates/${m.id}`)}
                 >
                   <td className={styles.tdPrio}>
-                    {prio
-                      ? <PriorityBadge priority={prio} size="sm" />
-                      : <span className={styles.dot} data-dot={m.dotClass || 'dot-amber'} />
-                    }
+                    {prio && <PriorityBadge priority={prio} size="sm" />}
                   </td>
                   <td className={styles.tdName}>
                     <span className={styles.playerName}>{m.name}</span>

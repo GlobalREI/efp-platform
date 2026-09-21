@@ -2,9 +2,9 @@ import React from 'react'
 /**
  * ClubList — all club profiles
  *
- * Reads: /clubs  →  { [id]: { name, league, country, flag, status, linkedContacts[], ... } }
+ * Reads: /clubs  →  { [id]: { name, league, country, flag, status, ... } }
  *
- * Features: search · league filter · status filter · click → /clubs/:id
+ * Features: search · league filter · status filter · list / grid toggle · click → /clubs/:id
  */
 import { useEffect, useState, useMemo } from 'react'
 import { useNavigate }  from 'react-router-dom'
@@ -30,7 +30,7 @@ const STATUS_COLOR: Record<string, string> = {
   'Building':        '#3B82F6',
   'Needs Attention': '#F59E0B',
   'Needs Follow-up': '#F59E0B',
-  'Not Started':     '#CBD5E1',
+  'Not Started':     '#64748B',
 }
 
 export function ClubList() {
@@ -47,6 +47,7 @@ export function ClubList() {
   const [search,  setSearch]  = useState('')
   const [league,  setLeague]  = useState('all')
   const [status,  setStatus]  = useState('all')
+  const [viewMode, setViewMode] = useState<'list' | 'grid'>('list')
 
   useEffect(() => {
     const r = ref(db, 'clubs')
@@ -93,6 +94,22 @@ export function ClubList() {
         <option value="all">All Statuses</option>
         {statuses.map(s => <option key={s} value={s}>{s}</option>)}
       </select>
+      <div className={styles.viewToggle}>
+        <button
+          className={`${styles.toggleBtn} ${viewMode === 'list' ? styles.toggleActive : ''}`}
+          onClick={() => setViewMode('list')}
+          title="List view"
+        >
+          ☰
+        </button>
+        <button
+          className={`${styles.toggleBtn} ${viewMode === 'grid' ? styles.toggleActive : ''}`}
+          onClick={() => setViewMode('grid')}
+          title="Grid view"
+        >
+          ⊞
+        </button>
+      </div>
     </div>
   )
 
@@ -101,7 +118,7 @@ export function ClubList() {
       <div className={styles.page}>
         <PageHeader title="Clubs" sub="Loading…" />
         <div className={styles.skeletonWrap}>
-          {[...Array(8)].map((_, i) => <div key={i} className={styles.skeleton} />)}
+          {[...Array(12)].map((_, i) => <div key={i} className={styles.skeleton} />)}
         </div>
       </div>
     )
@@ -111,7 +128,7 @@ export function ClubList() {
     <div className={styles.page}>
       <PageHeader
         title="Clubs"
-        sub={`${clubs.length} club${clubs.length !== 1 ? 's' : ''}`}
+        sub={`${rows.length} of ${clubs.length} club${clubs.length !== 1 ? 's' : ''}`}
         search={{ value: search, onChange: setSearch, placeholder: 'Search clubs, leagues…' }}
         filters={filters}
       />
@@ -120,7 +137,55 @@ export function ClubList() {
         <div className={styles.empty}>
           {search || league !== 'all' || status !== 'all'
             ? 'No clubs match the current filters.'
-            : 'No clubs yet — add one from the main platform.'}
+            : 'No clubs yet.'}
+        </div>
+      ) : viewMode === 'list' ? (
+        <div className={styles.listWrap}>
+          <table className={styles.table}>
+            <thead>
+              <tr>
+                <th className={styles.th}></th>
+                <th className={styles.th}>Club</th>
+                <th className={styles.th}>League</th>
+                <th className={styles.th}>Country</th>
+                <th className={styles.th}>Status</th>
+                <th className={styles.th}></th>
+              </tr>
+            </thead>
+            <tbody>
+              {rows.map(c => {
+                const color = STATUS_COLOR[c.status || ''] || '#CBD5E1'
+                return (
+                  <tr key={c.id} className={styles.row} onClick={() => nav(`/clubs/${c.id}`)}>
+                    <td className={styles.td} style={{ width: 36, textAlign: 'center' }}>
+                      <span className={styles.flagSm}>{c.flag || ''}</span>
+                    </td>
+                    <td className={styles.td}>
+                      <span className={styles.rowName}>{c.name}</span>
+                    </td>
+                    <td className={styles.td}>
+                      <span className={styles.rowSub}>{c.league || '—'}</span>
+                    </td>
+                    <td className={styles.td}>
+                      <span className={styles.rowSub}>{c.country || '—'}</span>
+                    </td>
+                    <td className={styles.td}>
+                      <span className={styles.statusPill} style={{ color, borderColor: color + '40', background: color + '15' }}>
+                        {c.status || '—'}
+                      </span>
+                    </td>
+                    <td className={styles.td} style={{ width: 32, textAlign: 'right' }}>
+                      <button
+                        className={styles.deleteBtn}
+                        onClick={e => deleteClub(e, c.id, c.name)}
+                        title="Delete club"
+                      >×</button>
+                    </td>
+                  </tr>
+                )
+              })}
+            </tbody>
+          </table>
         </div>
       ) : (
         <div className={styles.grid}>

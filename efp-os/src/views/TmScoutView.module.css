@@ -724,3 +724,27 @@
   letter-spacing: 0.06em;
   flex-shrink: 0;
 }
+
+/* ── Watchlist star button ── */
+.watchBtn {
+  width: 28px; height: 28px;
+  border-radius: var(--r-sm);
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--text-3);
+  font-size: 16px; line-height: 1;
+  cursor: pointer;
+  display: inline-flex; align-items: center; justify-content: center;
+  transition: background 0.12s, border-color 0.12s, color 0.12s;
+  flex-shrink: 0;
+}
+.watchBtn:hover {
+  background: #fbbf2415;
+  border-color: #fbbf2460;
+  color: #fbbf24;
+}
+.watchBtnActive {
+  background: #fbbf2415;
+  border-color: #fbbf2460;
+  color: #fbbf24;
+}

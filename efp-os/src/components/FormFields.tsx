@@ -135,7 +135,20 @@ export function ClubSearchField({
         const clubs: ClubResult[] = []
         const ql = q.toLowerCase()
 
-        // 1) clubs from /needs
+        // 1) pipeline clubs from /clubs (authoritative — carry Firebase id for linking)
+        const clubsSnap = await get(ref(db, 'clubs'))
+        if (clubsSnap.exists()) {
+          clubsSnap.forEach(child => {
+            const c = child.val()
+            const name: string = c.name || ''
+            if (name && name.toLowerCase().includes(ql) && !seen.has(name.toLowerCase())) {
+              seen.add(name.toLowerCase())
+              clubs.push({ id: child.key!, name, league: c.league || undefined })
+            }
+          })
+        }
+
+        // 2) clubs from /needs (catches clubs not yet in pipeline)
         const needsSnap = await get(ref(db, 'needs'))
         if (needsSnap.exists()) {
           needsSnap.forEach(child => {
@@ -148,7 +161,7 @@ export function ClubSearchField({
           })
         }
 
-        // 2) org names from /contacts
+        // 3) org names from /contacts
         const ctSnap = await get(ref(db, 'contacts'))
         if (ctSnap.exists()) {
           ctSnap.forEach(child => {

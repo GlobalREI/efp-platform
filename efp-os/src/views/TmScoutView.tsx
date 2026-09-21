@@ -16,7 +16,7 @@
  * League filter supports multi-select on ALL tabs.
  */
 import { Fragment, useEffect, useRef, useState, useCallback } from 'react'
-import { ref, get, push, set } from 'firebase/database'
+import { ref, get, push, set, onValue, off, remove } from 'firebase/database'
 import { db } from '../data/firebase'
 import { PageHeader } from '../components/PageHeader'
 import {
@@ -461,6 +461,44 @@ export function TmScoutView() {
   const [filterAgeMax,  setFilterAgeMax]  = useState('')
   const [filterMvMin,   setFilterMvMin]   = useState('')
   const [filterMvMax,   setFilterMvMax]   = useState('')
+
+  /* Watchlist: tmId → firebase key */
+  const [watchlistMap, setWatchlistMap] = useState<Record<string, string>>({})
+
+  useEffect(() => {
+    const r = ref(db, 'watchlist')
+    const handler = (snap: any) => {
+      if (!snap.exists()) { setWatchlistMap({}); return }
+      const map: Record<string, string> = {}
+      Object.entries(snap.val()).forEach(([key, v]: [string, any]) => {
+        if (v?.tmId) map[v.tmId] = key
+      })
+      setWatchlistMap(map)
+    }
+    onValue(r, handler)
+    return () => off(r, 'value', handler)
+  }, [])
+
+  async function toggleWatchlist(player: TmPlayer) {
+    const existing = watchlistMap[player.id]
+    if (existing) {
+      await remove(ref(db, `watchlist/${existing}`))
+    } else {
+      const newRef = ref(db, 'watchlist/' + Date.now())
+      await set(newRef, {
+        name:          player.name,
+        pos:           player.position || '',
+        age:           player.age      || '',
+        nationality:   player.nationality || '',
+        club:          player.club     || '',
+        marketValue:   player.marketValue || '',
+        tmId:          player.id,
+        tmProfileUrl:  player.profileUrl || '',
+        tmImageUrl:    player.imageUrl  || '',
+        addedAt:       Date.now(),
+      })
+    }
+  }
 
   /* Save: tmId → { firebaseKey, type } for "View Profile" button */
   const [savedMap,  setSavedMap]  = useState<Record<string, { key: string; type: 'club' | 'mandate' }>>({})
@@ -1231,6 +1269,13 @@ export function TmScoutView() {
                               {squadOpen ? '▲' : '▼'} Depth
                             </button>
                           )}
+                          <button
+                            className={`${styles.watchBtn} ${watchlistMap[player.id] ? styles.watchBtnActive : ''}`}
+                            onClick={e => { e.stopPropagation(); toggleWatchlist(player) }}
+                            title={watchlistMap[player.id] ? 'Remove from Watchlist' : 'Add to Watchlist'}
+                          >
+                            {watchlistMap[player.id] ? '★' : '☆'}
+                          </button>
                           {player.profileUrl && (
                             <a href={player.profileUrl} target="_blank" rel="noopener noreferrer"
                               className={styles.tmLink} title="View on Transfermarkt">

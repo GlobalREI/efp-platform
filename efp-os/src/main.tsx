@@ -21,7 +21,9 @@ const PitchDetail   = lazy(() => import('./views/PitchDetail').then(m => ({ defa
 const TaskList      = lazy(() => import('./views/TaskList').then(m => ({ default: m.TaskList })))
 const SearchResults = lazy(() => import('./views/SearchResults').then(m => ({ default: m.SearchResults })))
 const ScoutView      = lazy(() => import('./views/ScoutView').then(m => ({ default: m.ScoutView })))
-const TmScoutView   = lazy(() => import('./views/TmScoutView').then(m => ({ default: m.TmScoutView })))
+const TmScoutView      = lazy(() => import('./views/TmScoutView').then(m => ({ default: m.TmScoutView })))
+const WatchList        = lazy(() => import('./views/WatchList').then(m => ({ default: m.WatchList })))
+const WatchlistDetail  = lazy(() => import('./views/WatchlistDetail').then(m => ({ default: m.WatchlistDetail })))
 const ActivitiesView = lazy(() => import('./views/ActivitiesView').then(m => ({ default: m.ActivitiesView })))
 const SettingsView   = lazy(() => import('./views/SettingsView').then(m => ({ default: m.SettingsView })))
 
@@ -44,6 +46,8 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
             <Route path="mandates/:id" element={<PlayerDetail />} />
             <Route path="scout"        element={<ScoutView />} />
             <Route path="tm-scout"    element={<TmScoutView />} />
+            <Route path="watchlist"     element={<WatchList />} />
+            <Route path="watchlist/:id" element={<WatchlistDetail />} />
             <Route path="activities"   element={<ActivitiesView />} />
             <Route path="settings"     element={<SettingsView />} />
             <Route path="clubs"        element={<ClubList />} />

@@ -8,7 +8,7 @@ import styles from './AppLayout.module.css'
 import {
   IconDashboard, IconMandates, IconClubs, IconContacts,
   IconNeeds, IconPitches, IconScout, IconActivities,
-  IconTasks, IconSettings, IconBell, IconSearch, IconTmScout
+  IconTasks, IconSettings, IconBell, IconSearch, IconTmScout, IconWatchlist
 } from './Icons'
 
 // ── Nav structure with sections ───────────────────────────────────────────────
@@ -23,6 +23,7 @@ const NAV = [
     section: 'Players',
     items: [
       { to: '/mandates', label: 'Player Mandates', Icon: IconMandates },
+      { to: '/watchlist', label: 'Watchlist',        Icon: IconWatchlist },
       { to: '/scout',    label: 'AI Matches',       Icon: IconScout    },
       { to: '/tm-scout',  label: 'TM Scout',          Icon: IconTmScout  },
     ],

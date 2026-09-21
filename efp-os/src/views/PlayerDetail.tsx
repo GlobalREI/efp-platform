@@ -6,7 +6,7 @@
  */
 import { useEffect, useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { ref, onValue, off, set } from 'firebase/database'
+import { ref, onValue, off, set, update } from 'firebase/database'
 import { db } from '../data/firebase'
 import {
   PageShell, Card, FieldGrid, Field, RailItem, RailEmpty,
@@ -100,6 +100,7 @@ export function PlayerDetail() {
   const [loading, setLoading]   = useState(true)
   const [editMode, setEditMode] = useState(false)
   const [draft,   setDraft]     = useState<Partial<Mandate>>({})
+  const [draftPriority, setDraftPriority] = useState<number | null>(null)
 
   useEffect(() => {
     if (!id) return
@@ -158,11 +159,25 @@ export function PlayerDetail() {
     }
   }, [id])
 
+  function enterEditMode() {
+    setDraft(mandate ? { ...mandate } : {})
+    setDraftPriority(notes.priority ?? null)
+    setEditMode(true)
+  }
+
   async function handleSave() {
     if (!id || !mandate) return
     const updated = { ...mandate, ...draft }
     await set(ref(db, `mandates/${id}`), updated)
+    // Save priority in playerNotes
+    const noteKey = encodeURIComponent(mandate.name)
+    const updatedNotes: PlayerNotes = { ...notes }
+    if (draftPriority) updatedNotes.priority = draftPriority
+    else delete updatedNotes.priority
+    const notesPayload = Object.keys(updatedNotes).length > 0 ? updatedNotes : null
+    await set(ref(db, `playerNotes/${noteKey}`), notesPayload)
     setMandate(updated)
+    setNotes(updatedNotes)
     setEditMode(false)
   }
 
@@ -214,7 +229,7 @@ export function PlayerDetail() {
       <Button size="sm" variant="primary" onClick={handleSave}>Save Changes</Button>
     </>
   ) : (
-    <Button size="sm" variant="secondary" onClick={() => setEditMode(true)}>✏ Edit</Button>
+    <Button size="sm" variant="secondary" onClick={enterEditMode}>✏ Edit</Button>
   )
 
   /* ── Rail ── */
@@ -402,6 +417,16 @@ export function PlayerDetail() {
                   placeholder="Contact name" />
               </div>
             </div>
+            <div className={styles.editRow}>
+              <label className={styles.editLabel}>Priority</label>
+              <select className={styles.editSelect} value={draftPriority ?? ''}
+                onChange={e => setDraftPriority(e.target.value ? Number(e.target.value) : null)}>
+                <option value="">None</option>
+                <option value="1">P1 — Priority 1</option>
+                <option value="2">P2 — Priority 2</option>
+                <option value="3">P3 — Priority 3</option>
+              </select>
+            </div>
           </div>
         ) : (
           <FieldGrid>
@@ -410,6 +435,7 @@ export function PlayerDetail() {
             <Field label="Expected Price"  value={mandate.expectedPrice || '—'} />
             <Field label="Salary (p/m)"    value={mandate.salary || '—'} />
             <Field label="Source / Via"    value={mandate.contact || '—'} />
+            <Field label="Priority"        value={prio ? `P${prio}` : '—'} />
             <Field label="Status"          value={status} />
           </FieldGrid>
         )}

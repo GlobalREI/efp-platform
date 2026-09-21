@@ -84,6 +84,7 @@ export function ClubDetail() {
   const [editMode,  setEditMode]  = useState(false)
   const [draft,     setDraft]     = useState<Partial<Club>>({})
   const [activeWin, setActiveWin] = useState('Winter 2027')
+  const [linkedContacts, setLinkedContacts] = useState<{ id: string; name: string; role?: string }[]>([])
 
   useEffect(() => {
     if (!id) return
@@ -115,10 +116,25 @@ export function ClubDetail() {
     }
     onValue(nRef, nHandler)
 
+    const ctRef = ref(db, 'contacts')
+    const ctHandler = (snap: any) => {
+      if (!snap.exists()) return setLinkedContacts([])
+      const rows: { id: string; name: string; role?: string }[] = []
+      snap.forEach((child: any) => {
+        const c = child.val()
+        if (c.club_id === id) {
+          rows.push({ id: child.key!, name: c.name, role: c.role || undefined })
+        }
+      })
+      setLinkedContacts(rows)
+    }
+    onValue(ctRef, ctHandler)
+
     return () => {
       off(cRef, 'value', cHandler)
       off(mRef, 'value', mHandler)
       off(nRef, 'value', nHandler)
+      off(ctRef, 'value', ctHandler)
     }
   }, [id])
 
@@ -188,14 +204,15 @@ export function ClubDetail() {
   const rail = (
     <>
       <Card title="Contacts" titleIcon="👤">
-        {!club.linkedContacts?.length
+        {linkedContacts.length === 0
           ? <RailEmpty message="No contacts linked" />
-          : club.linkedContacts.map((c, i) => (
+          : linkedContacts.map(c => (
               <RailItem
-                key={i}
+                key={c.id}
                 initials={c.name.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase()}
                 name={c.name}
                 sub={c.role || ''}
+                onClick={() => nav(`/contacts/${c.id}`)}
               />
             ))
         }
