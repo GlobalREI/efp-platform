@@ -61,6 +61,19 @@ interface FbClub {
   linked_mandate_key?: string; linked_mandate_name?: string
 }
 
+/* ── FbNeedClub — result of a Firebase-based buyer-club search ─────────── */
+interface FbNeedClub {
+  id: string          // fbClub.id or club name as key
+  name: string
+  league: string
+  country: string
+  activeNeeds: FbNeed[]
+  budMin: number
+  budMax: number
+  needScore: number
+  fbClubId?: string   // Firebase CRM club id (for "View Profile" button)
+}
+
 /* ── Scoring ────────────────────────────────────────────────────────────── */
 function needScore(club: TmClub, needs: FbNeed[], filterPos: string): number {
   const name = club.name.toLowerCase()
@@ -84,6 +97,23 @@ function needScore(club: TmClub, needs: FbNeed[], filterPos: string): number {
     (directNeeds.length - posDirectNeeds.length) * 20 +
     leagueMatchNeeds.length * 10
   )
+}
+
+/* Format a budget range as "€6–12M" */
+function budgetLabel(min: number, max: number): string {
+  const fmt = (n: number) => n >= 1 ? `${n % 1 === 0 ? n : n.toFixed(1)}M` : `${Math.round(n * 1000)}K`
+  if (!min && !max) return '—'
+  if (!min) return `up to €${fmt(max)}`
+  if (!max || max >= 999) return `€${fmt(min)}+`
+  return `€${fmt(min)} – €${fmt(max)}`
+}
+
+/* Budget fit: 1.0 = exact, 0 = out of range */
+function budgetFit(mv: number | null, budMin: number, budMax: number): number {
+  if (mv === null || mv === 0) return 0.5
+  if (mv >= budMin && mv <= budMax) return 1.0
+  if (mv < budMin) return Math.max(0, 1 - (budMin - mv) / budMin)
+  return Math.max(0, 1 - (mv - budMax) / budMax)
 }
 
 function mandateMatchCount(player: TmPlayer, needs: FbNeed[]): number {
@@ -422,6 +452,7 @@ export function TmScoutView() {
   const [searching, setSearching] = useState(false)
   const [tmError,   setTmError]   = useState<string | null>(null)
   const [searched,  setSearched]  = useState(false)
+  const [fbNeedClubs, setFbNeedClubs] = useState<FbNeedClub[]>([])
 
   /* Filters — multi-select leagues + other criteria */
   const [filterLeagues, setFilterLeagues] = useState<string[]>([])
@@ -509,18 +540,82 @@ export function TmScoutView() {
     setFilterAgeMin(''); setFilterAgeMax(''); setFilterMvMin(''); setFilterMvMax('')
     setOpenSaveId(null); setSelectedLinkId(''); setLinkSearch('')
     setAgentMap({}); setFilterAgent(''); setExpandedSquad({})
+    setFbNeedClubs([])
     if (tab === 'loan') setTimeout(() => setFilterAgeMax('24'), 0)
   }, [tab])
 
   /* ── TM Search ── */
   const runSearch = useCallback(async () => {
-    // Club tab still requires a name; player/loan can run on filters alone
-    if (tab === 'club' && !query.trim()) return
-    setSearching(true); setTmError(null); setTmResults([]); setSearched(true)
+    // Club tab: name optional (search Firebase needs by profile if no name)
+    if (tab === 'club' && !query.trim() && !filterPos && !filterMvMin && !filterMvMax) return
+    setSearching(true); setTmError(null); setTmResults([]); setFbNeedClubs([]); setSearched(true)
     setOpenSaveId(null); setSelectedLinkId(''); setLinkSearch('')
     try {
       if (tab === 'club') {
-        setTmResults(await searchTmClubs(query))
+        if (query.trim()) {
+          // TM name search — find this specific club
+          setTmResults(await searchTmClubs(query))
+        } else {
+          // Firebase needs search — find clubs that want this player profile
+          const posFilter = filterPos.toLowerCase()
+          const mvMin = filterMvMin ? parseFloat(filterMvMin) : null
+          const mvMax = filterMvMax ? parseFloat(filterMvMax) : null
+
+          // Group matching needs by club name
+          const clubMap = new Map<string, { needs: FbNeed[]; budMins: number[]; budMaxs: number[] }>()
+
+          for (const need of needs) {
+            const clubName = (need.club || need.club_name || '').trim()
+            if (!clubName) continue
+
+            // Position match
+            if (posFilter) {
+              const needPos = [...(need.positions ?? []), need.pos ?? ''].map(p => p.toLowerCase())
+              if (!needPos.some(p => p.includes(posFilter) || posFilter.includes(p))) continue
+            }
+
+            // Budget vs player MV overlap
+            const bMin = parseFloat(String(need.budMin ?? 0)) || 0
+            const bMax = parseFloat(String(need.budMax ?? 999)) || 999
+            if (mvMin !== null && mvMin > bMax * 1.6) continue
+            if (mvMax !== null && mvMax < bMin * 0.5) continue
+
+            if (!clubMap.has(clubName)) clubMap.set(clubName, { needs: [], budMins: [], budMaxs: [] })
+            const entry = clubMap.get(clubName)!
+            entry.needs.push(need)
+            entry.budMins.push(bMin)
+            entry.budMaxs.push(bMax)
+          }
+
+          // Build FbNeedClub[]
+          const results: FbNeedClub[] = []
+          for (const [name, { needs: cn, budMins, budMaxs }] of clubMap) {
+            // Try to find this club in CRM
+            const fbClub = fbClubs.find(c => {
+              const a = (c.name || '').toLowerCase()
+              const b = name.toLowerCase()
+              return a === b || a.includes(b) || b.includes(a)
+            })
+            const league = fbClub?.league || cn[0]?.league || ''
+            const country = fbClub?.country || ''
+
+            // League filter
+            if (filterLeagues.length > 0 && league) {
+              if (!filterLeagues.some(l => leagueMatches(league, l))) continue
+            }
+
+            const bMin = Math.min(...budMins)
+            const bMax = Math.max(...budMaxs)
+            const midMv = mvMin !== null && mvMax !== null ? (mvMin + mvMax) / 2 : mvMin ?? mvMax ?? null
+            const fit = budgetFit(midMv, bMin, bMax)
+            const score = Math.round(cn.length * 40 + fit * 60)
+
+            results.push({ id: fbClub?.id || name, name, league, country, activeNeeds: cn, budMin: bMin, budMax: bMax, needScore: score, fbClubId: fbClub?.id })
+          }
+
+          results.sort((a, b) => b.needScore - a.needScore)
+          setFbNeedClubs(results)
+        }
       } else {
         // Use embedded CNF dataset — no proxy required
         const results = searchLocalPlayers({
@@ -540,7 +635,7 @@ export function TmScoutView() {
     } finally {
       setSearching(false)
     }
-  }, [query, tab, filterLeagues, filterPos, filterAgeMin, filterAgeMax, filterMvMin, filterMvMax])
+  }, [query, tab, filterLeagues, filterPos, filterAgeMin, filterAgeMax, filterMvMin, filterMvMax, needs, fbClubs])
 
   const onKey = (e: React.KeyboardEvent) => { if (e.key === 'Enter') runSearch() }
 
@@ -760,14 +855,18 @@ export function TmScoutView() {
             onChange={e => setQuery(e.target.value)}
             onKeyDown={onKey}
             placeholder={
-              tab === 'club' ? 'Search club name on Transfermarkt…'
+              tab === 'club' ? 'Club name (optional — set profile below to find buyers)…'
               : tab === 'player' ? 'Filter by name (optional)…'
               : 'Filter loan player by name (optional)…'
             }
           />
-          <button className={styles.searchBtn} onClick={runSearch} disabled={searching || (tab === 'club' && !query.trim())}>
+          <button className={styles.searchBtn} onClick={runSearch}
+            disabled={searching || (tab === 'club' && !query.trim() && !filterPos && !filterMvMin && !filterMvMax)}>
             {searching ? <Spinner white /> : <SearchIcon size={14} />}
-            {searching ? 'Searching…' : tab === 'club' ? 'Search TM' : 'Search'}
+            {searching ? 'Searching…'
+              : tab === 'club' && query.trim() ? 'Search TM'
+              : tab === 'club' ? 'Find Buyers'
+              : 'Search'}
           </button>
         </div>
 
@@ -830,22 +929,103 @@ export function TmScoutView() {
             <div className={styles.errorTitle}>TM Proxy Unavailable</div>
             <div className={styles.errorMsg}>{tmError}</div>
             <div className={styles.errorHint}>
-              Run <code>npm run dev</code> in the <code>efp-ops</code> folder (port 3000) to enable Transfermarkt search.
+              TM club name search requires a working Netlify deployment. "Find Buyers" (no name) uses your Firebase needs data and always works.
             </div>
           </div>
         </div>
       )}
 
       {/* No results */}
-      {!tmError && searched && !searching && displayResults.length === 0 && (
+      {!tmError && searched && !searching && displayResults.length === 0 && fbNeedClubs.length === 0 && (
         <div className={styles.empty}>
-          {filterLeagues.length > 0
-            ? `No results in selected league${filterLeagues.length > 1 ? 's' : ''} — try different leagues or clear the filter.`
-            : 'No results found — try a different search term.'}
+          {tab === 'club' && !query.trim()
+            ? filterPos
+              ? `No clubs in your active needs match a ${filterPos}${filterMvMin || filterMvMax ? ` at that MV range` : ''}.`
+              : 'Set a position (and optionally MV range) then click Find Buyers to see potential buyer clubs.'
+            : filterLeagues.length > 0
+              ? `No results in selected league${filterLeagues.length > 1 ? 's' : ''} — try different leagues or clear the filter.`
+              : 'No results found — try a different search term.'}
         </div>
       )}
 
-      {/* ── Club results ── */}
+      {/* ── Club results — Firebase needs mode (no TM name search) ── */}
+      {tab === 'club' && !tmError && fbNeedClubs.length > 0 && tmResults.length === 0 && (
+        <div className={styles.tableWrap}>
+          <div className={styles.contextBar}>
+            <strong>{fbNeedClubs.length} potential buyer{fbNeedClubs.length !== 1 ? 's' : ''}</strong> from your active needs
+            {filterPos ? <> · need a <strong>{filterPos}</strong></> : null}
+            {(filterMvMin || filterMvMax) ? <> · player MV €{filterMvMin||'0'}–{filterMvMax||'∞'}M</> : null}
+          </div>
+          <table className={styles.table}>
+            <thead>
+              <tr>
+                <th className={styles.th}>Club</th>
+                <th className={styles.th}>League</th>
+                <th className={styles.th}>Open Need(s)</th>
+                <th className={`${styles.th} ${styles.thNum}`}>Budget</th>
+                <th className={`${styles.th} ${styles.thNum}`}>Fit</th>
+                <th className={styles.th}></th>
+              </tr>
+            </thead>
+            <tbody>
+              {fbNeedClubs.map((club) => {
+                const mvMid = filterMvMin && filterMvMax
+                  ? (parseFloat(filterMvMin) + parseFloat(filterMvMax)) / 2
+                  : filterMvMin ? parseFloat(filterMvMin) : filterMvMax ? parseFloat(filterMvMax) : null
+                const fit = budgetFit(mvMid, club.budMin, club.budMax)
+                const fitPct = Math.round(fit * 100)
+                const fitColor = fit >= 0.8 ? 'var(--accent)' : fit >= 0.5 ? '#d97706' : 'var(--text-3)'
+                // Collect unique position tags from all needs
+                const allPos = Array.from(new Set(
+                  club.activeNeeds.flatMap(n => [...(n.positions ?? []), n.pos ?? ''].filter(Boolean))
+                ))
+                return (
+                  <tr key={club.id} className={styles.tr}>
+                    <td className={styles.td}>
+                      <div className={styles.entityCell}>
+                        <Avatar imageUrl="" name={club.name} size={24} />
+                        <span className={styles.entityName}>{club.name}</span>
+                      </div>
+                    </td>
+                    <td className={styles.td}>
+                      <span className={styles.meta}>{club.league || '—'}</span>
+                    </td>
+                    <td className={styles.td}>
+                      <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap' }}>
+                        {allPos.map(p => (
+                          <span key={p} className={styles.posBadge} style={{ fontSize: 10 }}>{p}</span>
+                        ))}
+                        {allPos.length === 0 && <span className={styles.meta}>—</span>}
+                      </div>
+                    </td>
+                    <td className={`${styles.td} ${styles.tdNum}`}>
+                      <span className={styles.meta} style={{ fontSize: 11 }}>
+                        {budgetLabel(club.budMin, club.budMax)}
+                      </span>
+                    </td>
+                    <td className={`${styles.td} ${styles.tdNum}`}>
+                      {mvMid !== null
+                        ? <span style={{ fontSize: 12, fontWeight: 700, color: fitColor }}>{fitPct}%</span>
+                        : <span className={styles.meta}>—</span>}
+                    </td>
+                    <td className={styles.td}>
+                      <div className={styles.rowActions}>
+                        {club.fbClubId ? (
+                          <button className={styles.savedBtn} onClick={() => nav(`/clubs/${club.fbClubId}`)}>
+                            View Profile
+                          </button>
+                        ) : null}
+                      </div>
+                    </td>
+                  </tr>
+                )
+              })}
+            </tbody>
+          </table>
+        </div>
+      )}
+
+      {/* ── Club results — TM name search ── */}
       {tab === 'club' && !tmError && displayResults.length > 0 && (
         <div className={styles.tableWrap}>
           {filterPos && (
