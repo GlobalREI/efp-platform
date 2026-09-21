@@ -20,7 +20,6 @@ import { ref, get, push, set } from 'firebase/database'
 import { db } from '../data/firebase'
 import { PageHeader } from '../components/PageHeader'
 import {
-  searchTmPlayers,
   searchTmClubs,
   filterTmPlayers,
   parseTmValue,
@@ -415,7 +414,7 @@ export function TmScoutView() {
   const [fbClubs,   setFbClubs]   = useState<FbClub[]>([])
   const [fbLoading, setFbLoading] = useState(true)
   const [lastSync,  setLastSync]  = useState<Date | null>(null)
-  const refreshTimer = useRef<ReturnType<typeof setInterval>>()
+  const refreshTimer = useRef<ReturnType<typeof setInterval> | undefined>(undefined)
 
   /* TM search */
   const [query,     setQuery]     = useState('')

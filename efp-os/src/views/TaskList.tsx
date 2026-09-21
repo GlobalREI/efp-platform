@@ -6,7 +6,7 @@
  * bucket: 'today' | 'week' | 'later' | 'someday'
  */
 import { useEffect, useState, useMemo } from 'react'
-import { ref, onValue, off, set, push } from 'firebase/database'
+import { ref, onValue, off, set } from 'firebase/database'
 import { db } from '../data/firebase'
 import { PageHeader } from '../components/PageHeader'
 import styles from './TaskList.module.css'

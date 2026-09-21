@@ -1,3 +1,4 @@
+import React from 'react'
 /**
  * ClubList — all club profiles
  *
@@ -7,7 +8,7 @@
  */
 import { useEffect, useState, useMemo } from 'react'
 import { useNavigate }  from 'react-router-dom'
-import { ref, onValue, off } from 'firebase/database'
+import { ref, onValue, off, remove } from 'firebase/database'
 import { db }           from '../data/firebase'
 import { PageHeader }   from '../components/PageHeader'
 import styles from './ClubList.module.css'
@@ -34,6 +35,12 @@ const STATUS_COLOR: Record<string, string> = {
 
 export function ClubList() {
   const nav = useNavigate()
+
+  async function deleteClub(e: React.MouseEvent, id: string, name: string) {
+    e.stopPropagation()
+    if (!confirm(`Delete "${name}"? This cannot be undone.`)) return
+    await remove(ref(db, `clubs/${id}`))
+  }
 
   const [clubs,   setClubs]   = useState<Club[]>([])
   const [loading, setLoading] = useState(true)
@@ -139,6 +146,11 @@ export function ClubList() {
                   <div className={styles.dot} style={{ background: color }} title={c.status} />
                 </div>
                 <div className={styles.cardBottom}>
+                  <button
+                    className={styles.deleteBtn}
+                    onClick={e => deleteClub(e, c.id, c.name)}
+                    title="Delete club"
+                  >×</button>
                   <span className={styles.country}>{c.country || ''}</span>
                   {contacts > 0 && (
                     <span className={styles.contactCount}>

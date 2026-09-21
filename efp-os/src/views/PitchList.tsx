@@ -1,3 +1,4 @@
+import React from 'react'
 /**
  * PitchList — Kanban-style pipeline of all pitches
  *
@@ -8,7 +9,7 @@
  */
 import { useEffect, useState, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { ref, onValue, off } from 'firebase/database'
+import { ref, onValue, off, remove } from 'firebase/database'
 import { db } from '../data/firebase'
 import { PageHeader } from '../components/PageHeader'
 import styles from './PitchList.module.css'
@@ -38,6 +39,12 @@ const COLUMNS: { key: string; label: string; color: string }[] = [
 
 export function PitchList() {
   const nav = useNavigate()
+
+  async function deletePitch(e: React.MouseEvent, id: string | number, player: string) {
+    e.stopPropagation()
+    if (!confirm(`Delete pitch for "${player}"? This cannot be undone.`)) return
+    await remove(ref(db, `pitches/${id}`))
+  }
 
   const [pitches, setPitches] = useState<Pitch[]>([])
   const [loading, setLoading] = useState(true)
@@ -153,6 +160,11 @@ export function PitchList() {
                         {p.pos && <div className={styles.cardPos}>{p.pos}</div>}
                         {p.note && <div className={styles.cardNote}>{p.note}</div>}
                         {p.pdfName && <div className={styles.cardPdf}>📎 {p.pdfName}</div>}
+                        <button
+                          className={styles.deleteBtn}
+                          onClick={e => deletePitch(e, p.id, p.player || 'Unknown')}
+                          title="Delete pitch"
+                        >×</button>
                       </div>
                     ))
                   )}

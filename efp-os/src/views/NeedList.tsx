@@ -1,3 +1,4 @@
+import React from 'react'
 /**
  * NeedList — all club needs (requirements)
  *
@@ -7,7 +8,7 @@
  */
 import { useEffect, useState, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { ref, onValue, off } from 'firebase/database'
+import { ref, onValue, off, remove } from 'firebase/database'
 import { db } from '../data/firebase'
 import { PageHeader } from '../components/PageHeader'
 import { StatusPill } from '../components/Badge'
@@ -44,6 +45,12 @@ const URGENCY_COLOR: Record<string, string> = {
 
 export function NeedList() {
   const nav = useNavigate()
+
+  async function deleteNeed(e: React.MouseEvent, id: string, club: string) {
+    e.stopPropagation()
+    if (!confirm(`Delete need for "${club}"? This cannot be undone.`)) return
+    await remove(ref(db, `needs/${id}`))
+  }
 
   const [needs,       setNeeds]       = useState<Need[]>([])
   const [loading,     setLoading]     = useState(true)
@@ -154,6 +161,7 @@ export function NeedList() {
                     </div>
                   </div>
                   <span className={styles.urgencyDot} style={{ background: dot }} title={n.urgency || 'open'} />
+                  <button className={styles.deleteBtn} onClick={e => deleteNeed(e, n.id, n.club || '')} title="Delete need">×</button>
                 </div>
 
                 <div className={styles.positions}>

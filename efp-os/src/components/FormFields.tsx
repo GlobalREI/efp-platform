@@ -123,7 +123,7 @@ export function ClubSearchField({
   required,
 }: ClubSearchFieldProps) {
   const [results, setResults] = useState<ClubResult[]>([])
-  const debounce = useRef<ReturnType<typeof setTimeout>>()
+  const debounce = useRef<ReturnType<typeof setTimeout> | undefined>(undefined)
 
   const search = (q: string) => {
     onChange(q)
@@ -234,7 +234,7 @@ export function PlayerSearchField({
   required,
 }: PlayerSearchFieldProps) {
   const [results, setResults] = useState<PlayerResult[]>([])
-  const debounce = useRef<ReturnType<typeof setTimeout>>()
+  const debounce = useRef<ReturnType<typeof setTimeout> | undefined>(undefined)
 
   const search = (q: string) => {
     onChange(q)
@@ -330,7 +330,7 @@ export function ContactSearchField({
   required,
 }: ContactSearchFieldProps) {
   const [results, setResults] = useState<ContactResult[]>([])
-  const debounce = useRef<ReturnType<typeof setTimeout>>()
+  const debounce = useRef<ReturnType<typeof setTimeout> | undefined>(undefined)
 
   const search = (q: string) => {
     onChange(q)

@@ -1,3 +1,4 @@
+import React from 'react'
 /**
  * MandateList (PlayerList) — all active and archived transfer mandates
  *
@@ -13,7 +14,7 @@
  */
 import { useEffect, useState, useMemo } from 'react'
 import { useNavigate }  from 'react-router-dom'
-import { ref, onValue, off } from 'firebase/database'
+import { ref, onValue, off, remove } from 'firebase/database'
 import { db }           from '../data/firebase'
 import { PageHeader }   from '../components/PageHeader'
 import { PriorityBadge, StatusPill } from '../components/Badge'
@@ -48,6 +49,12 @@ const PRIO_MAP: Record<number, 'P1' | 'P2' | 'P3'> = { 1: 'P1', 2: 'P2', 3: 'P3'
 /* ── Component ──────────────────────────────────────────────────────────── */
 export function PlayerList() {
   const nav = useNavigate()
+
+  async function deleteMandate(e: React.MouseEvent, id: string, name: string) {
+    e.stopPropagation()
+    if (!confirm(`Remove mandate for "${name}"? This cannot be undone.`)) return
+    await remove(ref(db, `mandates/${id}`))
+  }
 
   const [mandates,  setMandates]  = useState<Mandate[]>([])
   const [notes,     setNotes]     = useState<Record<string, PlayerNote>>({})
@@ -200,6 +207,7 @@ export function PlayerList() {
               <th className={styles.thAge}>Age</th>
               <th className={styles.thWindow}>Window</th>
               <th className={styles.thStatus}>Status</th>
+              <th style={{width:'36px'}}></th>
             </tr>
           </thead>
           <tbody>
@@ -235,6 +243,9 @@ export function PlayerList() {
                   </td>
                   <td className={styles.tdStatus}>
                     <StatusPill status={m.archived ? 'Archived' : status} size="sm" />
+                  </td>
+                  <td>
+                    <button className={styles.deleteBtn} onClick={e => deleteMandate(e, m.id, m.name)} title="Delete mandate">×</button>
                   </td>
                 </tr>
               )

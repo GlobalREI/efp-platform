@@ -1,3 +1,4 @@
+import React from 'react'
 /**
  * ContactList — all contacts
  *
@@ -5,7 +6,7 @@
  */
 import { useEffect, useState, useMemo } from 'react'
 import { useNavigate }  from 'react-router-dom'
-import { ref, onValue, off } from 'firebase/database'
+import { ref, onValue, off, remove } from 'firebase/database'
 import { db }           from '../data/firebase'
 import { PageHeader }   from '../components/PageHeader'
 import { AddContactForm } from './AddContactForm'
@@ -36,6 +37,12 @@ const ROLE_ICON: Record<string, string> = {
 
 export function ContactList() {
   const nav = useNavigate()
+
+  async function deleteContact(e: React.MouseEvent, id: string, name: string) {
+    e.stopPropagation()
+    if (!confirm(`Delete "${name}"? This cannot be undone.`)) return
+    await remove(ref(db, `contacts/${id}`))
+  }
 
   const [contacts, setContacts] = useState<Contact[]>([])
   const [loading,  setLoading]  = useState(true)
@@ -144,6 +151,9 @@ export function ContactList() {
                   </td>
                   <td className={styles.tdStage}>
                     {c.stage && <span className={styles.stagePill}>{c.stage}</span>}
+                  </td>
+                  <td className={styles.tdDel}>
+                    <button className={styles.deleteBtn} onClick={e => deleteContact(e, c.id, c.name)} title="Delete contact">×</button>
                   </td>
                 </tr>
               )

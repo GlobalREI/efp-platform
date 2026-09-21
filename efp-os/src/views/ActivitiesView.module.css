@@ -1,0 +1,313 @@
+/* ActivitiesView — Communication Log */
+
+.page {
+  padding: 24px;
+  max-width: 1100px;
+}
+
+/* ── Log button ── */
+.logBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 34px;
+  padding: 0 16px;
+  margin-bottom: 16px;
+  background: var(--brand);
+  color: #fff;
+  border: none;
+  border-radius: var(--radius-md);
+  font-size: var(--text-sm);
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.12s;
+}
+.logBtn:hover { opacity: 0.88; }
+
+/* ── Log Form ── */
+.logForm {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 20px;
+  margin-bottom: 20px;
+}
+
+.logFormHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+.logFormTitle {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+.closeBtn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--text-muted);
+  font-size: 16px;
+  line-height: 1;
+  padding: 2px 6px;
+  border-radius: var(--radius-sm);
+  transition: color 0.12s;
+}
+.closeBtn:hover { color: var(--text-primary); }
+
+.formErr {
+  background: var(--red-dim);
+  border: 1px solid rgba(239,68,68,0.2);
+  border-radius: var(--radius-sm);
+  color: var(--red);
+  font-size: var(--text-sm);
+  padding: 8px 12px;
+  margin-bottom: 12px;
+}
+
+.formGrid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+}
+
+.formField {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.span2 { grid-column: span 2; }
+.span4 { grid-column: span 4; }
+
+.formLabel {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.req { color: var(--red); }
+
+.formInput,
+.formSel {
+  height: 34px;
+  padding: 0 10px;
+  background: var(--surface-0);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text-primary);
+  font-size: var(--text-sm);
+  outline: none;
+  width: 100%;
+}
+.formInput:focus,
+.formSel:focus { border-color: var(--brand); }
+
+.formTextarea {
+  padding: 8px 10px;
+  background: var(--surface-0);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text-primary);
+  font-size: var(--text-sm);
+  outline: none;
+  resize: vertical;
+  width: 100%;
+  font-family: inherit;
+  line-height: 1.5;
+}
+.formTextarea:focus { border-color: var(--brand); }
+
+.checkRow {
+  flex-direction: row;
+  align-items: center;
+  gap: 8px;
+  padding-top: 16px;
+}
+.checkbox { width: 14px; height: 14px; cursor: pointer; accent-color: var(--brand); flex-shrink: 0; }
+.checkLabel { font-size: var(--text-sm); color: var(--text-secondary); cursor: pointer; }
+
+.formActions {
+  display: flex;
+  gap: 8px;
+  margin-top: 16px;
+}
+.saveBtn {
+  height: 34px;
+  padding: 0 20px;
+  background: var(--brand);
+  color: #fff;
+  border: none;
+  border-radius: var(--radius-sm);
+  font-size: var(--text-sm);
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.12s;
+}
+.saveBtn:hover:not(:disabled) { opacity: 0.88; }
+.saveBtn:disabled { opacity: 0.5; cursor: not-allowed; }
+.cancelBtn {
+  height: 34px;
+  padding: 0 14px;
+  background: none;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text-muted);
+  font-size: var(--text-sm);
+  cursor: pointer;
+}
+.cancelBtn:hover { border-color: var(--text-secondary); color: var(--text-secondary); }
+
+/* ── Filters ── */
+.filterRow {
+  display: flex;
+  gap: 8px;
+}
+.filterSel {
+  height: 32px;
+  padding: 0 8px;
+  background: var(--surface-0);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text-primary);
+  font-size: var(--text-sm);
+  cursor: pointer;
+  outline: none;
+}
+.filterSel:focus { border-color: var(--brand); }
+
+/* ── Comm list ── */
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.commRow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: border-color 0.12s, background 0.12s;
+  flex-wrap: wrap;
+  position: relative;
+}
+.commRow:hover { border-color: var(--border-2); background: var(--surface-2); }
+.commRowOpen { border-color: var(--brand); }
+
+.dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.commDate {
+  font-size: 11px;
+  font-family: 'JetBrains Mono', monospace;
+  color: var(--text-muted);
+  flex-shrink: 0;
+  min-width: 80px;
+}
+
+.typePill {
+  font-size: 10px;
+  font-weight: 600;
+  padding: 2px 7px;
+  border-radius: var(--r-full);
+  flex-shrink: 0;
+}
+
+.agent {
+  font-size: var(--text-sm);
+  font-weight: 600;
+  color: var(--text-secondary);
+  flex-shrink: 0;
+}
+
+.commClub {
+  font-size: var(--text-sm);
+  font-weight: 600;
+  color: var(--text-primary);
+}
+.commSub {
+  font-size: var(--text-sm);
+  color: var(--text-muted);
+}
+.playerTag {
+  font-size: 10px;
+  background: var(--accent-dim);
+  color: var(--brand);
+  border-radius: var(--r-full);
+  padding: 2px 7px;
+  font-weight: 600;
+}
+
+.spacer { flex: 1; }
+
+.purposeTag {
+  font-size: 10px;
+  color: var(--text-muted);
+  max-width: 160px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.interestPill {
+  font-size: 10px;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: var(--r-full);
+  flex-shrink: 0;
+}
+
+.chevron {
+  font-size: 9px;
+  color: var(--text-muted);
+  flex-shrink: 0;
+}
+
+/* Expanded detail */
+.commDetail {
+  width: 100%;
+  margin-top: 8px;
+  padding-top: 10px;
+  border-top: 1px solid var(--border);
+}
+.notesText {
+  font-size: var(--text-sm);
+  color: var(--text-secondary);
+  line-height: 1.6;
+  white-space: pre-wrap;
+  margin: 0 0 8px;
+}
+.followUpChip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 11px;
+  color: var(--amber);
+  background: var(--amber-dim);
+  border-radius: var(--r-full);
+  padding: 3px 10px;
+}
+
+/* ── Empty ── */
+.empty {
+  padding: 48px 0;
+  text-align: center;
+  color: var(--text-muted);
+  font-size: var(--text-sm);
+}
+
+@media (max-width: 700px) {
+  .formGrid { grid-template-columns: 1fr 1fr; }
+  .span4 { grid-column: span 2; }
+}

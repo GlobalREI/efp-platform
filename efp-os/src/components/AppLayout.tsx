@@ -45,7 +45,7 @@ const NAV = [
     section: 'Workspace',
     items: [
       { to: '/tasks',      label: 'Tasks',          Icon: IconTasks       },
-      { to: '/activities', label: 'Activity Log',   Icon: IconActivities  },
+      { to: '/activities', label: 'Comm Log',   Icon: IconActivities  },
     ],
   },
 ]
