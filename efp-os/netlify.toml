@@ -1,0 +1,34 @@
+[build]
+  command = "npm run build"
+  publish = "dist"
+
+[functions]
+  directory = "netlify/functions"
+  node_bundler = "esbuild"
+
+# Redirect TM API routes to Netlify functions
+# More-specific paths must come first
+
+[[redirects]]
+  from = "/api/transfermarkt/club-search"
+  to = "/.netlify/functions/transfermarkt-club-search"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/api/transfermarkt/player/:id"
+  to = "/.netlify/functions/transfermarkt-player?id=:id"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/api/transfermarkt"
+  to = "/.netlify/functions/transfermarkt"
+  status = 200
+  force = true
+
+# SPA fallback — must be last
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200

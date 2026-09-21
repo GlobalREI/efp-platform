@@ -1,9 +1,10 @@
 /**
  * tmApi — Transfermarkt API helpers
  *
- * All calls route through /api/transfermarkt, which Vite proxies to
- * the efp-ops dev server (localhost:3000) in development.
- * In production these will be Netlify Functions at /.netlify/functions/.
+ * All calls route through /api/transfermarkt.
+
+ * In production: Netlify Functions (via redirects in netlify.toml).
+ * In development: run `netlify dev` — it starts Vite + functions together.
  */
 
 export interface TmPlayer {
@@ -36,7 +37,7 @@ const BASE = '/api/transfermarkt'
 export async function searchTmPlayers(query: string): Promise<TmPlayer[]> {
   if (!query || query.length < 2) return []
   const res = await fetch(`${BASE}?q=${encodeURIComponent(query)}`)
-  if (!res.ok) throw new Error(`TM player search failed (${res.status}). Is efp-ops running on :3000?`)
+  if (!res.ok) throw new Error(`TM player search failed (${res.status})`)
   const data = await res.json()
   if (data.error) throw new Error(data.error)
   return (data.results ?? []) as TmPlayer[]
@@ -46,7 +47,7 @@ export async function searchTmPlayers(query: string): Promise<TmPlayer[]> {
 export async function searchTmClubs(query: string): Promise<TmClub[]> {
   if (!query || query.length < 2) return []
   const res = await fetch(`${BASE}/club-search?q=${encodeURIComponent(query)}`)
-  if (!res.ok) throw new Error(`TM club search failed (${res.status}). Is efp-ops running on :3000?`)
+  if (!res.ok) throw new Error(`TM club search failed (${res.status})`)
   const data = await res.json()
   if (data.error) throw new Error(data.error)
   return (data.clubs ?? []) as TmClub[]
