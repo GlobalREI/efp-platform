@@ -35,8 +35,8 @@ export function WatchList() {
 
   async function deleteEntry(e: React.MouseEvent, id: string, name: string) {
     e.stopPropagation()
-    if (!confirm(\`Remove "\${name}" from watchlist?\`)) return
-    await remove(ref(db, \`watchlist/\${id}\`))
+    if (!confirm(`Remove "${name}" from watchlist?`)) return
+    await remove(ref(db, `watchlist/${id}`))
   }
 
   useEffect(() => {
@@ -85,7 +85,7 @@ export function WatchList() {
     <div className={styles.page}>
       <PageHeader
         title="Watchlist"
-        sub={\`\${rows.length} of \${entries.length} player\${entries.length !== 1 ? 's' : '' }\`}
+        sub={`${rows.length} of ${entries.length} player${entries.length !== 1 ? 's' : '' }`}
         search={{ value: search, onChange: setSearch, placeholder: 'Search name, position, club…' }}
       />
 
@@ -100,10 +100,10 @@ export function WatchList() {
           <table className={styles.table}>
             <thead>
               <tr>
-                <th className={\`\${styles.th} \${styles.thSort}\`} onClick={() => handleSort('name')}>
+                <th className={`${styles.th} ${styles.thSort}`} onClick={() => handleSort('name')}>
                   Player {sortBy === 'name' ? (sortDir === 'asc' ? '↑' : '↓') : <span className={styles.sortHint}>↕</span>}
                 </th>
-                <th className={\`\${styles.th} \${styles.thSort}\`} onClick={() => handleSort('pos')}>
+                <th className={`${styles.th} ${styles.thSort}`} onClick={() => handleSort('pos')}>
                   Pos {sortBy === 'pos' ? (sortDir === 'asc' ? '↑' : '↓') : <span className={styles.sortHint}>↕</span>}
                 </th>
                 <th className={styles.th}>Age</th>
@@ -115,7 +115,7 @@ export function WatchList() {
             </thead>
             <tbody>
               {rows.map(e => (
-                <tr key={e.id} className={styles.row} onClick={() => nav(\`/watchlist/\${e.id}\`)}>
+                <tr key={e.id} className={styles.row} onClick={() => nav(`/watchlist/${e.id}`)}>
                   <td className={styles.td}>
                     <span className={styles.rowName}>{e.name}</span>
                     {e.nationality && <span className={styles.rowSub}>{e.nationality}</span>}
