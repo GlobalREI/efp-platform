@@ -28,7 +28,7 @@ import {
   type TmClub,
 } from '../data/tmApi'
 import { useNavigate } from 'react-router-dom'
-import { getSquadContext, searchLocalPlayers, type SquadContext } from '../data/squadData'
+import { getSquadContext, searchLocalClubs, searchLocalPlayers, type LocalClub, type SquadContext } from '../data/squadData'
 import styles from './TmScoutView.module.css'
 
 /* ── Constants ─────────────────────────────────────────────────────────── */
