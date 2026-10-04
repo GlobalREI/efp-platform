@@ -72,6 +72,7 @@ interface FbNeedClub {
   budMax: number
   needScore: number
   fbClubId?: string   // Firebase CRM club id (for "View Profile" button)
+  localData?: { posDepth: number; posAvgMv: number; squadAvgMv: number; buySignal: boolean }
 }
 
 /* ── Scoring ────────────────────────────────────────────────────────────── */
@@ -594,65 +595,54 @@ export function TmScoutView() {
           // TM name search — find this specific club
           setTmResults(await searchTmClubs(query))
         } else {
-          // Firebase needs search — find clubs that want this player profile
-          const posFilter = filterPos.toLowerCase()
-          const mvMin = filterMvMin ? parseFloat(filterMvMin) : null
-          const mvMax = filterMvMax ? parseFloat(filterMvMax) : null
+          // Local squad analysis — find clubs with positional gaps (no network needed)
+          const mvMinF = filterMvMin ? parseFloat(filterMvMin) : undefined
+          const mvMaxF = filterMvMax ? parseFloat(filterMvMax) : undefined
 
-          // Group matching needs by club name
-          const clubMap = new Map<string, { needs: FbNeed[]; budMins: number[]; budMaxs: number[] }>()
+          const lcResults = searchLocalClubs({
+            position:    filterPos || undefined,
+            mvMin:       mvMinF,
+            mvMax:       mvMaxF,
+            leagueNames: filterLeagues.length > 0 ? filterLeagues : undefined,
+            limit:       300,
+          })
 
+          // Cross-ref with any Firebase needs for bonus scoring
+          const fbNeedMap = new Map<string, FbNeed[]>()
           for (const need of needs) {
-            const clubName = (need.club || need.club_name || '').trim()
-            if (!clubName) continue
-
-            // Position match
-            if (posFilter) {
-              const needPos = [...(need.positions ?? []), need.pos ?? ''].map(p => p.toLowerCase())
-              if (!needPos.some(p => p.includes(posFilter) || posFilter.includes(p))) continue
-            }
-
-            // Budget vs player MV overlap
-            const bMin = parseFloat(String(need.budMin ?? 0)) || 0
-            const bMax = parseFloat(String(need.budMax ?? 999)) || 999
-            if (mvMin !== null && mvMin > bMax * 1.6) continue
-            if (mvMax !== null && mvMax < bMin * 0.5) continue
-
-            if (!clubMap.has(clubName)) clubMap.set(clubName, { needs: [], budMins: [], budMaxs: [] })
-            const entry = clubMap.get(clubName)!
-            entry.needs.push(need)
-            entry.budMins.push(bMin)
-            entry.budMaxs.push(bMax)
+            const cn = (need.club || (need as any).club_name || '').trim().toLowerCase()
+            if (!cn) continue
+            if (!fbNeedMap.has(cn)) fbNeedMap.set(cn, [])
+            fbNeedMap.get(cn)!.push(need)
           }
 
-          // Build FbNeedClub[]
-          const results: FbNeedClub[] = []
-          for (const [name, { needs: cn, budMins, budMaxs }] of clubMap) {
-            // Try to find this club in CRM
-            const fbClub = fbClubs.find(c => {
-              const a = (c.name || '').toLowerCase()
-              const b = name.toLowerCase()
+          const mapped: FbNeedClub[] = lcResults.map(lc => {
+            const fbNeeds = fbNeedMap.get(lc.name.toLowerCase()) ?? []
+            const fbClub  = fbClubs.find(c => {
+              const a = (c.name || '').toLowerCase(), b = lc.name.toLowerCase()
               return a === b || a.includes(b) || b.includes(a)
             })
-            const league = fbClub?.league || cn[0]?.league || ''
-            const country = fbClub?.country || ''
-
-            // League filter
-            if (filterLeagues.length > 0 && league) {
-              if (!filterLeagues.some(l => leagueMatches(league, l))) continue
+            const squadAvg = lc.avgMv
+            return {
+              id:          lc.id,
+              name:        lc.name,
+              league:      lc.league,
+              country:     lc.country,
+              activeNeeds: fbNeeds,
+              budMin:      Math.round(squadAvg * 0.15 * 10) / 10,
+              budMax:      Math.round(squadAvg * 2.0  * 10) / 10,
+              needScore:   lc.buyScore + fbNeeds.length * 20,
+              fbClubId:    fbClub?.id,
+              localData: {
+                posDepth:   lc.posDepth,
+                posAvgMv:   lc.posAvgMv,
+                squadAvgMv: lc.avgMv,
+                buySignal:  lc.buySignal,
+              },
             }
+          })
 
-            const bMin = Math.min(...budMins)
-            const bMax = Math.max(...budMaxs)
-            const midMv = mvMin !== null && mvMax !== null ? (mvMin + mvMax) / 2 : mvMin ?? mvMax ?? null
-            const fit = budgetFit(midMv, bMin, bMax)
-            const score = Math.round(cn.length * 40 + fit * 60)
-
-            results.push({ id: fbClub?.id || name, name, league, country, activeNeeds: cn, budMin: bMin, budMax: bMax, needScore: score, fbClubId: fbClub?.id })
-          }
-
-          results.sort((a, b) => b.needScore - a.needScore)
-          setFbNeedClubs(results)
+          setFbNeedClubs(mapped)
         }
       } else {
         // Use embedded CNF dataset — no proxy required
@@ -967,7 +957,7 @@ export function TmScoutView() {
             <div className={styles.errorTitle}>TM Proxy Unavailable</div>
             <div className={styles.errorMsg}>{tmError}</div>
             <div className={styles.errorHint}>
-              TM club name search requires a working Netlify deployment. "Find Buyers" (no name) uses your Firebase needs data and always works.
+              Type a club name to search Transfermarkt directly (requires Netlify deployment). Leave blank and click "Find Buyers" to scan the built-in squad dataset for potential buyers — this always works.
             </div>
           </div>
         </div>
@@ -978,8 +968,8 @@ export function TmScoutView() {
         <div className={styles.empty}>
           {tab === 'club' && !query.trim()
             ? filterPos
-              ? `No clubs in your active needs match a ${filterPos}${filterMvMin || filterMvMax ? ` at that MV range` : ''}.`
-              : 'Set a position (and optionally MV range) then click Find Buyers to see potential buyer clubs.'
+              ? `No clubs found for ${filterPos || 'that profile'}${filterMvMin || filterMvMax ? ' at that MV range' : ''} — try different leagues or a wider MV range.`
+              : 'Set a position (and optionally MV range) then click Find Buyers to scan the squad dataset for potential buyer clubs.'
             : filterLeagues.length > 0
               ? `No results in selected league${filterLeagues.length > 1 ? 's' : ''} — try different leagues or clear the filter.`
               : 'No results found — try a different search term.'}
@@ -1029,11 +1019,21 @@ export function TmScoutView() {
                       <span className={styles.meta}>{club.league || '—'}</span>
                     </td>
                     <td className={styles.td}>
-                      <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap' }}>
-                        {allPos.map(p => (
-                          <span key={p} className={styles.posBadge} style={{ fontSize: 10 }}>{p}</span>
-                        ))}
-                        {allPos.length === 0 && <span className={styles.meta}>—</span>}
+                      <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap', alignItems: 'center' }}>
+                        {allPos.length > 0
+                          ? allPos.map(p => (
+                              <span key={p} className={styles.posBadge} style={{ fontSize: 10 }}>{p}</span>
+                            ))
+                          : club.localData
+                            ? <span className={styles.meta} style={{ fontSize: 11 }}>
+                                {club.localData.posDepth === 0
+                                  ? <span style={{ color: 'var(--accent)', fontWeight: 600 }}>None</span>
+                                  : club.localData.posDepth === 1
+                                    ? <span style={{ color: '#d97706', fontWeight: 600 }}>1 — thin</span>
+                                    : `${club.localData.posDepth} players`}
+                              </span>
+                            : <span className={styles.meta}>—</span>
+                        }
                       </div>
                     </td>
                     <td className={`${styles.td} ${styles.tdNum}`}>

@@ -373,3 +373,119 @@ export function searchLocalPlayers(opts: {
   }
   return results
 }
+
+
+export interface LocalClub {
+  id: string
+  name: string
+  league: string
+  country: string
+  leagueCode: string
+  squadSize: number
+  avgMv: number       // squad average MV in millions
+  avgAge: number
+  posDepth: number    // players at requested position
+  posAvgMv: number    // avg MV at that position
+  buySignal: boolean
+  buyScore: number    // 0-100
+}
+
+/**
+ * Search the embedded club dataset for clubs that could be buyers.
+ * Ranks clubs by positional gap + affordability — no network needed.
+ */
+export function searchLocalClubs(opts: {
+  position?: string
+  mvMin?: number
+  mvMax?: number
+  leagueNames?: string[]
+  limit?: number
+}): LocalClub[] {
+  const { position, mvMin, mvMax, leagueNames, limit = 300 } = opts
+  const posCode      = position?.trim().toUpperCase() ?? ''
+  const posFullNames = posCode ? (POS_MAP[posCode] ?? [posCode]) : []
+  const midMv        = mvMin != null && mvMax != null
+    ? (mvMin + mvMax) / 2
+    : mvMin ?? mvMax ?? null
+
+  let leagueCodes: Set<string> | null = null
+  if (leagueNames && leagueNames.length > 0) {
+    leagueCodes = new Set<string>()
+    for (const [code, info] of Object.entries(LEAGUE_INFO)) {
+      const n = info.name.toLowerCase()
+      if (leagueNames.some(ln => {
+        const l = ln.toLowerCase()
+        return n === l || n.includes(l) || l.includes(n)
+      })) leagueCodes!.add(code)
+    }
+    if (leagueCodes.size === 0) return []
+  }
+
+  const results: LocalClub[] = []
+
+  for (const [leagueCode, clubs] of Object.entries(RAW_LEAGUES)) {
+    if (leagueCodes && !leagueCodes.has(leagueCode)) continue
+    const meta = LEAGUE_INFO[leagueCode]
+    if (!meta) continue
+
+    for (const [clubName, playerStr] of Object.entries(clubs)) {
+      const allPlayers = parsePlayers(playerStr)
+      if (!allPlayers.length) continue
+
+      const posPlayers = posCode
+        ? allPlayers.filter(p =>
+            posFullNames.some(fn => p.pos.toLowerCase().includes(fn.toLowerCase()))
+          )
+        : []
+
+      const allMvs     = allPlayers.filter(p => p.mv  > 0).map(p => p.mv)
+      const posMvs     = posPlayers.filter(p => p.mv  > 0).map(p => p.mv)
+      const allAges    = allPlayers.filter(p => p.age > 0).map(p => p.age)
+      const squadAvgMv = avg(allMvs)
+      const posAvgMv   = avg(posMvs)
+      const avgAgeVal  = avg(allAges)
+
+      // Skip clubs where player MV is clearly out of range
+      if (midMv !== null && squadAvgMv > 0) {
+        const ratio = midMv / squadAvgMv
+        if (ratio > 8 || ratio < 0.04) continue
+      }
+
+      const buySignal = posCode
+        ? (posPlayers.length <= 1 ||
+           (squadAvgMv > 0 && posAvgMv > 0 && posAvgMv < squadAvgMv * 0.65))
+        : false
+
+      let buyScore = 0
+      if (posCode) {
+        if (posPlayers.length === 0)       buyScore += 60
+        else if (posPlayers.length === 1)  buyScore += 40
+        else if (buySignal)                buyScore += 25
+        if (squadAvgMv > 0 && posAvgMv > 0 && posAvgMv < squadAvgMv * 0.5) buyScore += 15
+      }
+      if (midMv !== null && squadAvgMv > 0) {
+        const r = midMv / squadAvgMv
+        if (r >= 0.3 && r <= 2.0) buyScore += 25
+        else if (r >= 0.1)        buyScore += 10
+      }
+
+      results.push({
+        id: `${leagueCode}|${clubName}`,
+        name: clubName,
+        league: meta.name,
+        country: meta.country,
+        leagueCode,
+        squadSize: allPlayers.length,
+        avgMv: Math.round(squadAvgMv * 10) / 10,
+        avgAge: Math.round(avgAgeVal * 10) / 10,
+        posDepth: posPlayers.length,
+        posAvgMv: Math.round(posAvgMv * 10) / 10,
+        buySignal,
+        buyScore,
+      })
+    }
+  }
+
+  results.sort((a, b) => b.buyScore - a.buyScore || a.posDepth - b.posDepth)
+  return results.slice(0, limit)
+}
